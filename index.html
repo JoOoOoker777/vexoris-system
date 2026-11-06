@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VEXORIS System | المنظومة المؤسسية المتقدمة</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+      // منع وميض الثيم
+      if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+      }
+    </script>
+    <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-grid-pattern selection:bg-sky-500 selection:text-slate-950">
+
+    <div class="app-container flex flex-col min-h-screen">
+        
+        <!-- Unified Navbar -->
+        <header class="custom-card sticky top-0 z-50 px-8 py-4 my-4 rounded-2xl flex items-center justify-between border">
+            <div class="flex items-center gap-3">
+                <div class="w-3.5 h-3.5 rounded-full bg-sky-500 shadow-md shadow-sky-500/50 animate-pulse"></div>
+                <a href="index.html" class="text-xl font-black tracking-wider bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent">VEXORIS</a>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
+                    <a href="index.html" class="text-sky-500 transition-colors">الرئيسية</a>
+                    <a href="about.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">عن النظام</a>
+                    <a href="contact.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">تواصل معنا</a>
+                    <a href="courses.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">دورات تدريبية</a>
+                    <a href="feedback.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">رأيك يهمنا</a>
+                </nav>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleTheme()" class="btn btn-ghost btn-circle btn-sm text-sky-500 border border-sky-500/30 hover:bg-sky-500/10" title="تبديل الثيم">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                    </button>
+                    <a href="login.html" class="btn btn-sm bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold border-none px-5 shadow-md shadow-sky-500/20">تسجيل الدخول</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow py-12">
+            <div class="max-w-4xl mx-auto text-center mb-16">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full custom-card text-xs font-bold text-sky-500 mb-6 border border-sky-500/30">
+                    <span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span>
+                    <span>الجيل الثاني من منظومة التدقيق الطبي المؤسسي</span>
+                </div>
+
+                <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
+                    هندسة الأداء الذكي <br/>بمعايير <span class="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 bg-clip-text text-transparent">الاحترافية العالمية</span>
+                </h1>
+
+                <p class="text-base sm:text-lg opacity-80 max-w-2xl mx-auto leading-relaxed">
+                    منظومة متكاملة لإدارة السجلات الطبية، فصل تخصصات التخدير عن الجراحة بدقة، وإصدار المستندات والتقارير بأختام شفافة أوتوماتيكية.
+                </p>
+            </div>
+
+            <!-- Cards Grid (بدون أزرار كما طلبت) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-right mb-12">
+                <div class="custom-card p-6 rounded-2xl">
+                    <div class="w-12 h-12 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-500 font-bold text-lg mb-4 border border-sky-500/20">01</div>
+                    <h3 class="text-lg font-bold mb-2">لوحة التحكم الرئيسية</h3>
+                    <p class="text-sm opacity-75 leading-relaxed">إدارة الإحصائيات العامة، متابعة العمليات، وتوزيع الأقسام بكفاءة فائقة.</p>
+                </div>
+                <div class="custom-card p-6 rounded-2xl">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 font-bold text-lg mb-4 border border-blue-500/20">02</div>
+                    <h3 class="text-lg font-bold mb-2">التدقيق الطبي والفصل</h3>
+                    <p class="text-sm opacity-75 leading-relaxed">فصل دقيق لأطباء التخدير عن الجراحة العامة لضمان مطابقة التقارير.</p>
+                </div>
+                <div class="custom-card p-6 rounded-2xl">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 font-bold text-lg mb-4 border border-indigo-500/20">03</div>
+                    <h3 class="text-lg font-bold mb-2">التقارير والطباعة A4</h3>
+                    <p class="text-sm opacity-75 leading-relaxed">تصدير مستندات مطبوعة خالية من الفراغات مع ختم شفاف 40% يغطي كامل الصفحة.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="custom-card py-6 mb-4 rounded-2xl text-center text-xs opacity-75 border">
+            <p class="mono-font">VEXORIS Enterprise Architecture © 2026 - All Rights Reserved</p>
+        </footer>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        }
+    </script>
+</body>
+</html>

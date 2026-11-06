@@ -1,0 +1,11 @@
+{
+    "name": "vexoris-system",
+    "version": "1.0.0",
+    "description": "VEXORIS System - Enterprise Medical & Administrative Architecture",
+    "main": "index.html",
+    "scripts": {
+      "start": "npx serve ."
+    },
+    "dependencies": {},
+    "devDependencies": {}
+  }
