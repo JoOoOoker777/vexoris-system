@@ -3,9 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VEXORIS System</title>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <title>VEXORIS System | الرئيسية</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = { darkMode: 'class' };
@@ -13,122 +21,750 @@
           document.documentElement.classList.remove('dark');
       }
     </script>
-    <link rel="stylesheet" href="assets/css/main.css">
-</head>
-<body class="min-h-screen flex flex-col justify-between bg-grid-pattern selection:bg-sky-500 selection:text-slate-950">
 
-    <!-- App Container Fixed at 80% Width -->
-    <div class="app-container flex flex-col min-h-screen justify-between">
-        
-        <!-- Unified Navbar Header -->
-        <header class="custom-card sticky top-0 z-50 px-8 py-3 my-3 rounded-2xl flex items-center justify-between border">
-            <!-- Brand Logo & Subtitle -->
+    <style>
+        /* ================= TOKENS ================= */
+        :root {
+            --bg: #04070f;
+            --card-bg: rgba(15, 23, 42, 0.55);
+            --card-bg-strong: rgba(15, 23, 42, 0.75);
+            --card-border: rgba(148, 163, 184, 0.12);
+            --card-border-hover: rgba(14, 165, 233, 0.45);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #0ea5e9;
+            --accent-2: #6366f1;
+            --accent-3: #8b5cf6;
+            --glow: rgba(14, 165, 233, 0.15);
+        }
+        html:not(.dark) {
+            --bg: #f5f8fc;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-bg-strong: rgba(255, 255, 255, 1);
+            --card-border: rgba(148, 163, 184, 0.28);
+            --card-border-hover: rgba(14, 165, 233, 0.6);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --glow: rgba(14, 165, 233, 0.12);
+        }
+
+        * { -webkit-tap-highlight-color: transparent; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Tajawal', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            transition: background 0.4s ease, color 0.4s ease;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ================= AURORA ================= */
+        .aurora-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 55% 50% at 15% 15%, rgba(14, 165, 233, 0.20) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 20%, rgba(99, 102, 241, 0.16) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 55% at 50% 100%, rgba(139, 92, 246, 0.14) 0%, transparent 65%);
+        }
+        html:not(.dark) .aurora-bg {
+            background:
+                radial-gradient(ellipse 55% 50% at 15% 15%, rgba(14, 165, 233, 0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 20%, rgba(99, 102, 241, 0.09) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 55% at 50% 100%, rgba(139, 92, 246, 0.08) 0%, transparent 65%);
+        }
+
+        .grid-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+        }
+        html:not(.dark) .grid-overlay {
+            background-image:
+                linear-gradient(to right, rgba(15, 23, 42, 0.055) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(15, 23, 42, 0.055) 1px, transparent 1px);
+        }
+
+        /* ================= SCROLL PROGRESS ================= */
+        .scroll-progress {
+            position: fixed;
+            top: 0; right: 0;
+            height: 2px;
+            width: 0%;
+            z-index: 100;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.6);
+            transition: width 0.1s linear;
+        }
+
+        /* ================= NAVBAR ================= */
+        .nav-shell {
+            position: sticky;
+            top: 12px;
+            z-index: 50;
+            margin: 12px auto 0;
+            max-width: 1200px;
+            padding: 0 16px;
+        }
+        .nav-inner {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .logo-dot {
+            position: relative;
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18), 0 0 20px rgba(14, 165, 233, 0.7);
+            flex-shrink: 0;
+        }
+        .logo-dot::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            border: 1px solid rgba(14, 165, 233, 0.5);
+            animation: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes ping {
+            0% { transform: scale(1); opacity: 0.9; }
+            100% { transform: scale(2.4); opacity: 0; }
+        }
+
+        .brand-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 40%, #6366f1 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-link {
+            position: relative;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            padding: 6px 2px;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover { color: var(--accent); }
+        .nav-link.active {
+            color: var(--accent);
+            font-weight: 800;
+        }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; right: 0; left: 0;
+            height: 2px;
+            border-radius: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .icon-btn {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            background: transparent;
+            color: var(--accent);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .icon-btn:hover {
+            background: rgba(14, 165, 233, 0.1);
+            border-color: rgba(14, 165, 233, 0.4);
+            transform: rotate(15deg);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+            color: #fff;
+            border: none;
+            padding: 9px 22px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(14, 165, 233, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(99, 102, 241, 0.45);
+        }
+
+        .btn-ghost {
+            padding: 9px 20px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+        .btn-ghost:hover {
+            border-color: rgba(14, 165, 233, 0.45);
+            background: rgba(14, 165, 233, 0.06);
+            color: var(--accent);
+        }
+
+        /* ================= LAYOUT ================= */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 80px);
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            padding: 40px 0;
+        }
+
+        /* ================= HERO ================= */
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+            align-items: center;
+            width: 100%;
+        }
+        @media (min-width: 1024px) {
+            .hero-grid { grid-template-columns: 1.4fr 1fr; gap: 48px; }
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: rgba(14, 165, 233, 0.08);
+            border: 1px solid rgba(14, 165, 233, 0.28);
+            color: var(--accent);
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            margin-bottom: 24px;
+            backdrop-filter: blur(8px);
+        }
+        .hero-badge .pulse-dot {
+            position: relative;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+            flex-shrink: 0;
+        }
+        .hero-badge .pulse-dot::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 1px solid var(--accent);
+            animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 4.5vw, 3.4rem);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            margin-bottom: 24px;
+        }
+        .hero h1 .grad {
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 35%, #6366f1 70%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% 200%;
+            animation: gradShift 6s ease infinite;
+        }
+        @keyframes gradShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-desc {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            line-height: 1.9;
+            margin-bottom: 32px;
+            max-width: 640px;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 36px;
+        }
+        .hero-actions .btn-primary,
+        .hero-actions .btn-ghost {
+            padding: 12px 26px;
+            font-size: 0.85rem;
+        }
+
+        /* Trust strip */
+        .trust-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--card-border);
+        }
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .trust-item .num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, #22d3ee, #6366f1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .trust-item .lbl {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+        .trust-divider {
+            width: 1px;
+            height: 28px;
+            background: var(--card-border);
+            align-self: center;
+        }
+
+        /* ================= MODULES PANEL ================= */
+        .modules-panel {
+            position: relative;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 26px 24px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        .modules-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #0ea5e9, #6366f1, transparent);
+            opacity: 0.8;
+        }
+        .modules-panel:hover {
+            border-color: rgba(14, 165, 233, 0.32);
+            box-shadow: 0 30px 60px -30px rgba(14, 165, 233, 0.35);
+        }
+
+        .panel-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .panel-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(99, 102, 241, 0.15));
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        .panel-title {
+            font-size: 0.92rem;
+            font-weight: 900;
+            color: var(--text-primary);
+        }
+        .panel-sub {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .module-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .module-item + .module-item {
+            margin-top: 6px;
+        }
+        .module-item::before {
+            content: '';
+            position: absolute;
+            right: 0; top: 0; bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #0ea5e9, #6366f1);
+            border-radius: 3px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .module-item:hover {
+            background: rgba(14, 165, 233, 0.06);
+            transform: translateX(-4px);
+        }
+        .module-item:hover::before {
+            opacity: 1;
+        }
+
+        .module-num {
+            width: 26px; height: 26px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(99, 102, 241, 0.15));
+            border: 1px solid rgba(14, 165, 233, 0.25);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 0.72rem;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        .module-item:hover .module-num {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            color: #fff;
+            border-color: transparent;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+        }
+        .module-text {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            transition: color 0.3s ease;
+        }
+        .module-item:hover .module-text {
+            color: var(--text-primary);
+        }
+
+        /* ================= FOOTER ================= */
+        .footer-shell {
+            max-width: 1200px;
+            margin: 0 auto 24px;
+            padding: 22px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            text-align: center;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .footer-brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.35em;
+            font-size: 0.75rem;
+            background: linear-gradient(135deg, #22d3ee, #6366f1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .footer-text {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .credit-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 0.7rem;
+        }
+        .credit-indigo { color: #a5b4fc; background: rgba(99, 102, 241, 0.12); }
+        .credit-teal { color: #5eead4; background: rgba(20, 184, 166, 0.12); }
+
+        /* ================= ANIMATIONS ================= */
+        [data-animate] {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        [data-animate].in-view {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+            html { scroll-behavior: auto; }
+            [data-animate] { opacity: 1; transform: none; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4));
+            border-radius: 10px;
+            border: 2px solid var(--bg);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--accent), var(--accent-2));
+        }
+
+        ::selection {
+            background: rgba(14, 165, 233, 0.35);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Scroll Progress -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Background Layers -->
+    <div class="aurora-bg"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- Navbar -->
+    <div class="nav-shell">
+        <header class="nav-inner">
             <div class="flex items-center gap-3">
-                <div class="w-3.5 h-3.5 rounded-full bg-sky-500 shadow-md shadow-sky-500/50 animate-pulse"></div>
+                <div class="logo-dot"></div>
                 <div>
-                    <a href="index.html" class="text-xl font-black tracking-widest bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 bg-clip-text text-transparent">VEXORIS</a>
-                    <p class="text-[10px] font-bold text-slate-400 tracking-tight">Medical Record & Auditing System</p>
+                    <a href="index.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
                 </div>
             </div>
-            
-            <!-- Center Navigation Links -->
-            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold tracking-wide">
-                <a href="index.html" class="text-sky-500 font-bold transition-colors">الرئيسية</a>
-                <a href="about.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">عن النظام</a>
-                <a href="contact.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">تواصل معنا</a>
-                <a href="courses.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">دورات تدريبية</a>
-                <a href="feedback.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">رأيك يهمنا</a>
+
+            <nav class="hidden md:flex items-center gap-7">
+                <a href="index.html" class="nav-link active">الرئيسية</a>
+                <a href="about.html" class="nav-link">عن النظام</a>
+                <a href="contact.html" class="nav-link">تواصل معنا</a>
+                <a href="courses.html" class="nav-link">دورات تدريبية</a>
+                <a href="feedback.html" class="nav-link">رأيك يهمنا</a>
             </nav>
 
-            <!-- Action Controls -->
-            <div class="flex items-center gap-3">
-                <button onclick="toggleTheme()" class="btn btn-ghost btn-circle btn-sm text-sky-500 border border-sky-500/30 hover:bg-sky-500/10" title="تبديل الثيم">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم" aria-label="تبديل الثيم">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
                 </button>
-                <a href="login.html" class="btn btn-sm bg-sky-500 hover:bg-sky-600 text-slate-950 font-extrabold border-none px-5 shadow-md shadow-sky-500/20">تسجيل الدخول</a>
+                <a href="login.html" class="btn-primary">تسجيل الدخول</a>
             </div>
         </header>
+    </div>
 
-        <!-- Main Landing Showcase with Balanced Grid -->
-        <main class="flex-grow flex items-center py-6 px-4">
-            <div class="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-                
-                <!-- القسم الأيمن: الترحيب والوصف المتناسق (8 أعمدة) -->
-                <div class="lg:col-span-8 flex flex-col items-start text-right">
-                    <!-- Badge Tag -->
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full custom-card text-xs font-black tracking-wider text-sky-500 mb-5 border border-sky-500/35 shadow-md">
-                        <span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span>
-                        <span>إدارة السجلات الطبية المركزي لمستشفي الجنزوري التخصصي</span>
+    <!-- Main -->
+    <div class="app-container">
+        <main>
+            <div class="hero-grid">
+
+                <!-- HERO CONTENT -->
+                <div class="hero" data-animate>
+                    <div class="hero-badge">
+                        <span class="pulse-dot"></span>
+                        إدارة السجلات الطبية المركزية — مستشفى الجنزوري التخصصي
                     </div>
 
-                    <!-- Main Display Title -->
-                    <h1 class="text-3xl sm:text-4xl font-black tracking-tight mb-5 leading-snug">
-                        نظام <span class="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 bg-clip-text text-transparent">VEXORIS</span> لإدارة السجلات الطبية
+                    <h1>
+                        نظام <span class="grad">VEXORIS</span><br>
+                        لإدارة السجلات الطبية
                     </h1>
 
-                    <!-- Professional System Overview Description -->
-                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-bold opacity-90">
-                        تم بناء نظام VEXORIS ليواكب أحدث التقنيات الإلكترونية كنظام ذكي مخصص لمراجعة وتدقيق جودة الملفات الطبية ونماذج الطوارئ، وتحليل مخرجات الأداء، وإنشاء الإحصائيات الاحترافية بما يضمن دقة التوثيق الطبي والحد من الثغرات الإدارية والإحصائية للوصول بالمنشأة الطبية إلى أعلى مستويات النزاهة والدقة والاحترافية والجودة وتصفية عيوب الإدخال البشري بشكل استباقي. كما تم إضافة أحدث معايير الامان والحماية القصوي للحفاظ علي سرية وآمان بيانات المرضي المتواجده بالنظام.
+                    <p class="hero-desc">
+                        منظومة ذكية متكاملة لمراجعة وتدقيق جودة الملفات الطبية ونماذج الطوارئ، وتحليل مخرجات الأداء، وإنشاء الإحصائيات الاحترافية بما يضمن دقة التوثيق الطبي والحد من الثغرات الإدارية والإحصائية — للوصول بالمنشأة الطبية إلى أعلى مستويات النزاهة والدقة والجودة، مع أعلى معايير الأمان وحماية خصوصية بيانات المرضى.
                     </p>
-                </div>
 
-                <!-- القسم الأيسر: الكارت الجانبي لأهم خمس وحدات (4 أعمدة) -->
-                <div class="lg:col-span-4">
-                    <div class="custom-card p-5 rounded-2xl border border-sky-500/30 shadow-xl">
-                        <h3 class="text-sm font-black text-sky-500 mb-4 pb-2 border-b border-slate-700/30 flex items-center gap-2">
-                            <i class="fa-solid fa-layer-group"></i> أهم وحدات النظام الرئيسية
-                        </h3>
-                        <ul class="space-y-2.5 text-xs font-bold">
-                            <li class="flex items-center gap-2 p-2 rounded-xl bg-sky-500/5 hover:bg-sky-500/10 transition-colors">
-                                <span class="w-5 h-5 rounded-lg bg-sky-500/20 text-sky-500 flex items-center justify-center font-black text-[10px]">1</span>
-                                <span>المراجعة الطبية لملفات المرضي</span>
-                            </li>
-                            <li class="flex items-center gap-2 p-2 rounded-xl bg-sky-500/5 hover:bg-sky-500/10 transition-colors">
-                                <span class="w-5 h-5 rounded-lg bg-sky-500/20 text-sky-500 flex items-center justify-center font-black text-[10px]">2</span>
-                                <span>المراجعة الطبية لشيتات الطوارئ</span>
-                            </li>
-                            <li class="flex items-center gap-2 p-2 rounded-xl bg-sky-500/5 hover:bg-sky-500/10 transition-colors">
-                                <span class="w-5 h-5 rounded-lg bg-sky-500/20 text-sky-500 flex items-center justify-center font-black text-[10px]">3</span>
-                                <span> تقارير الأداء والإحصائيات</span>
-                            </li>
-                            <li class="flex items-center gap-2 p-2 rounded-xl bg-sky-500/5 hover:bg-sky-500/10 transition-colors">
-                                <span class="w-5 h-5 rounded-lg bg-sky-500/20 text-sky-500 flex items-center justify-center font-black text-[10px]">4</span>
-                                <span>دورات تدريبية متخصصة</span>
-                            </li>
-                            <li class="flex items-center gap-2 p-2 rounded-xl bg-sky-500/5 hover:bg-sky-500/10 transition-colors">
-                                <span class="w-5 h-5 rounded-lg bg-sky-500/20 text-sky-500 flex items-center justify-center font-black text-[10px]">5</span>
-                                <span>وحدة مركزية مدمجة للامن المعلوماتي وحماية البيانات</span>
-                            </li>
-                        </ul>
+                    <div class="hero-actions">
+                        <a href="login.html" class="btn-primary">
+                            ابدأ الآن
+                            <i class="fa-solid fa-arrow-left" style="margin-inline-start: 8px;"></i>
+                        </a>
+                        <a href="about.html" class="btn-ghost">
+                            <i class="fa-solid fa-book-open"></i>
+                            دليل المنظومة
+                        </a>
+                    </div>
+
+                    <div class="trust-strip">
+                        <div class="trust-item">
+                            <span class="num">10+</span>
+                            <span class="lbl">وحدة تشغيلية<br>مدمجة</span>
+                        </div>
+                        <div class="trust-divider"></div>
+                        <div class="trust-item">
+                            <span class="num">100%</span>
+                            <span class="lbl">توثيق رقمي<br>آمن</span>
+                        </div>
+                        <div class="trust-divider"></div>
+                        <div class="trust-item">
+                            <span class="num">24/7</span>
+                            <span class="lbl">دعم فني<br>متواصل</span>
+                        </div>
                     </div>
                 </div>
+
+                <!-- MODULES PANEL -->
+                <aside data-animate style="transition-delay: 150ms;">
+                    <div class="modules-panel">
+                        <div class="panel-head">
+                            <div class="panel-icon"><i class="fa-solid fa-layer-group"></i></div>
+                            <div>
+                                <div class="panel-title">أهم وحدات النظام</div>
+                                <div class="panel-sub">Core System Modules</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="module-item">
+                                <span class="module-num">01</span>
+                                <span class="module-text">المراجعة الطبية لملفات المرضى</span>
+                            </div>
+                            <div class="module-item">
+                                <span class="module-num">02</span>
+                                <span class="module-text">المراجعة الطبية لشيتات الطوارئ</span>
+                            </div>
+                            <div class="module-item">
+                                <span class="module-num">03</span>
+                                <span class="module-text">تقارير الأداء والإحصائيات</span>
+                            </div>
+                            <div class="module-item">
+                                <span class="module-num">04</span>
+                                <span class="module-text">دورات تدريبية متخصصة</span>
+                            </div>
+                            <div class="module-item">
+                                <span class="module-num">05</span>
+                                <span class="module-text">وحدة أمن معلوماتي وحماية البيانات</span>
+                            </div>
+                        </div>
+
+                        <!-- Mini CTA -->
+                        <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--card-border);">
+                            <a href="about.html" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 10px; background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(99, 102, 241, 0.08)); border: 1px solid rgba(14, 165, 233, 0.2); text-decoration: none; transition: all 0.3s ease;" onmouseover="this.style.borderColor='rgba(14, 165, 233, 0.5)'" onmouseout="this.style.borderColor='rgba(14, 165, 233, 0.2)'">
+                                <span style="font-size: 0.75rem; font-weight: 800; color: var(--accent);">استكشف جميع الوحدات (10 وحدات)</span>
+                                <i class="fa-solid fa-arrow-left" style="color: var(--accent); font-size: 0.7rem;"></i>
+                            </a>
+                        </div>
+                    </div>
+                </aside>
 
             </div>
         </main>
 
-        <!-- Enterprise Footer (Compact & Optimized) -->
-        <footer class="glass-panel py-3 px-4 text-center rounded-2xl my-3 w-full border flex flex-col gap-1 justify-center items-center">
-            <div class="text-xs font-black tracking-[0.2em] uppercase text-primary dark:text-accent drop-shadow-sm font-sans">
-                Vexoris System
-            </div>
-            <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©
-            </div>
-            <div class="text-[10px] font-black text-slate-400 dark:text-slate-500">
-                تم برمجة النظام وتنفيذه بواسطة: 
-                <span class="text-indigo-600 dark:text-indigo-400 font-black mx-1 bg-indigo-50 dark:bg-indigo-950/40 px-1.5 py-0.5 rounded-md">أ/ نادية عادل</span> 
-                - 
-                <span class="text-teal-600 dark:text-teal-400 font-black mx-1 bg-teal-50 dark:bg-teal-950/40 px-1.5 py-0.5 rounded-md">أ/ خالد شوقي</span>
+        <!-- Footer -->
+        <footer class="footer-shell">
+            <div class="footer-brand">VEXORIS SYSTEM</div>
+            <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+            <div class="footer-text">
+                تم برمجة النظام وتنفيذه بواسطة
+                <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+                <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+                <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
             </div>
         </footer>
     </div>
 
     <script>
+        // Scroll Progress
+        const progress = document.getElementById('scrollProgress');
+        window.addEventListener('scroll', () => {
+            const h = document.documentElement.scrollHeight - window.innerHeight;
+            if (h > 0) progress.style.width = (window.scrollY / h) * 100 + '%';
+        }, { passive: true });
+
+        // Theme toggle
         function toggleTheme() {
             const html = document.documentElement;
             html.classList.toggle('dark');
             localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
         }
+
+        // Scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.05 });
+
+        document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
+
+        // Staggered module items entrance
+        document.querySelectorAll('.module-item').forEach((item, i) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateX(20px)';
+            setTimeout(() => {
+                item.style.transition = 'opacity 0.5s cubic-bezier(0.4,0,0.2,1), transform 0.5s cubic-bezier(0.4,0,0.2,1)';
+                item.style.opacity = '1';
+                item.style.transform = 'translateX(0)';
+            }, 300 + i * 80);
+        });
     </script>
 </body>
 </html>
