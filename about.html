@@ -1,49 +1,318 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" class="dark">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عن النظام | VEXORIS System</title>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عن النظام والدليل | VEXORIS System</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = { darkMode: 'class' };
-      if (localStorage.getItem('theme') === 'light') { document.documentElement.classList.remove('dark'); }
+      if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+      }
     </script>
     <link rel="stylesheet" href="assets/css/main.css">
 </head>
-<body class="min-h-screen flex flex-col justify-between bg-grid-pattern">
-    <div class="app-container flex flex-col min-h-screen">
+<body class="min-h-screen flex flex-col justify-between bg-grid-pattern selection:bg-sky-500 selection:text-slate-950">
+
+    <!-- App Container Fixed at 80% Width -->
+    <div class="app-container flex flex-col min-h-screen justify-between">
         
-        <!-- Unified Navbar -->
-        <header class="custom-card sticky top-0 z-50 px-8 py-4 my-4 rounded-2xl flex items-center justify-between border">
+        <!-- Unified Navbar Header -->
+        <header class="custom-card sticky top-0 z-50 px-8 py-3 my-3 rounded-2xl flex items-center justify-between border">
+            <!-- Brand Logo & Subtitle -->
             <div class="flex items-center gap-3">
                 <div class="w-3.5 h-3.5 rounded-full bg-sky-500 shadow-md shadow-sky-500/50 animate-pulse"></div>
-                <a href="index.html" class="text-xl font-black tracking-wider bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent">VEXORIS</a>
-            </div>
-            <div class="flex items-center gap-6">
-                <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
-                    <a href="index.html" class="hover:text-sky-500 transition-colors">الرئيسية</a>
-                    <a href="about.html" class="text-sky-500 transition-colors">عن النظام</a>
-                    <a href="contact.html" class="hover:text-sky-500 transition-colors">تواصل معنا</a>
-                    <a href="courses.html" class="hover:text-sky-500 transition-colors">دورات تدريبية</a>
-                    <a href="feedback.html" class="hover:text-sky-500 transition-colors">رأيك يهمنا</a>
-                </nav>
-                <div class="flex items-center gap-3">
-                    <button onclick="toggleTheme()" class="btn btn-ghost btn-circle btn-sm text-sky-500 border border-sky-500/30 hover:bg-sky-500/10"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg></button>
-                    <a href="login.html" class="btn btn-sm bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold border-none px-5 shadow-md shadow-sky-500/20">تسجيل الدخول</a>
+                <div>
+                    <a href="index.html" class="text-xl font-black tracking-widest bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 bg-clip-text text-transparent">VEXORIS</a>
+                    <p class="text-[10px] font-bold text-slate-400 tracking-tight">Medical Record & Auditing System</p>
                 </div>
+            </div>
+            
+            <!-- Center Navigation Links -->
+            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold tracking-wide">
+                <a href="index.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">Home</a>
+                <a href="about.html" class="text-sky-500 font-bold transition-colors">Targets</a>
+                <a href="contact.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">Contact</a>
+                <a href="courses.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">Training</a>
+                <a href="feedback.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">Complaint</a>
+            </nav>
+
+            <!-- Action Controls -->
+            <div class="flex items-center gap-3">
+                <button onclick="toggleTheme()" class="btn btn-ghost btn-circle btn-sm text-sky-500 border border-sky-500/30 hover:bg-sky-500/10" title="تبديل الثيم">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                </button>
+                <a href="login.html" class="btn btn-sm bg-sky-500 hover:bg-sky-600 text-slate-950 font-extrabold border-none px-5 shadow-md shadow-sky-500/20">تسجيل الدخول</a>
             </div>
         </header>
 
-        <main class="flex-grow py-12">
-            <div class="custom-card p-8 rounded-2xl">
-                <h1 class="text-2xl font-black mb-4 text-sky-500">عن منظومة VEXORIS System V2</h1>
-                <p class="opacity-80 leading-relaxed">نظام مؤسسي متطور وموحد لإدارة السجلات، التدقيق اللحظي، فصل أطباء التخدير عن الجراحة العامة، واستخراج التقارير الرسمية بأعلى معايير الجودة العالمية.</p>
+        <!-- Main Content -->
+        <main class="flex-grow py-8 px-4 space-y-8">
+            
+            <!-- Page Title -->
+            <div class="text-center mb-8">
+                <div class="inline-block px-6 py-2 rounded-full custom-card text-[10px] font-black tracking-widest uppercase text-sky-500 mb-4 border border-sky-500/30 shadow-sm">
+                    System Documentation & Directory
+                </div>
+                <h1 class="text-3xl md:text-4xl font-black tracking-tight">
+                    دليل ومعلومات منظومة <span class="bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-600">VEXORIS</span>
+                </h1>
             </div>
+
+            <!-- 1. رسالة إدارة السجلات الطبية -->
+            <div class="custom-card w-full rounded-[2rem] p-6 md:p-8 border-t-4 border-t-sky-500 shadow-lg">
+                <div class="flex items-center gap-4 mb-4 border-b border-slate-200/60 dark:border-slate-700/60 pb-3">
+                    <div class="w-12 h-12 rounded-2xl bg-sky-500/10 text-sky-500 flex items-center justify-center text-xl border border-sky-500/20">
+                        <i class="fa-solid fa-envelope-open-text"></i>
+                    </div>
+                    <h2 class="text-xl font-black">رسالة إدارة السجلات الطبية</h2>
+                </div>
+                <p class="text-slate-600 dark:text-slate-300 font-bold text-sm md:text-base leading-relaxed text-right">
+                    تلتزم إدارة السجلات الطبية بتقديم رؤية رقمية متكاملة تهدف إلى حوكمة وتدقيق البيانات الصحية داخل المنظومة الطبية بالكامل. تم بناء نظام VEXORIS ليواكب أحدث التقنيات الالكترونية كنظام ذكي مخصص لمراجعة وتدقيق جودة الملفات الطبية ونماذج الطوارئ، وتحليل مخرجات الأداء، وإنشاء الاحصائيات الاحترافية بما يضمن دقة التوثيق الطبي والحد من الثغرات الإدارية والإحصائية للوصول بالمنشأة الطبية إلى أعلى مستويات النزاهة والدقة والاحترافية والجودة وتصفية عيوب الإدخال البشري بشكل استباقي.
+                </p>
+            </div>
+
+            <!-- 2. الأهداف الإستراتيجية للمنظومة -->
+            <div class="custom-card w-full rounded-[2rem] p-6 md:p-8 border-t-4 border-t-indigo-500 shadow-lg">
+                <div class="flex items-center gap-4 mb-6 border-b border-slate-200/60 dark:border-slate-700/60 pb-3">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center text-xl border border-indigo-500/20">
+                        <i class="fa-solid fa-bullseye"></i>
+                    </div>
+                    <h2 class="text-xl font-black">الأهداف الإستراتيجية للمنظومة</h2>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-right font-bold text-slate-600 dark:text-slate-300">
+                    <div class="flex items-start gap-3 p-4 rounded-xl bg-white/40 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/50">
+                        <i class="fa-solid fa-circle-check text-sky-500 text-base mt-1 shrink-0"></i>
+                        <p class="text-xs md:text-sm">عمليات مراجعة وتدقيق السجلات والملفات الطبية الورقية وتحويلها إلكترونياً بنسبة 100%.</p>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 rounded-xl bg-white/40 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/50">
+                        <i class="fa-solid fa-circle-check text-sky-500 text-base mt-1 shrink-0"></i>
+                        <p class="text-xs md:text-sm">رصد الثغرات والأخطاء التوثيقية بشكل فوري وتحديد الموظفين والأقسام المتسببة لعلاجها والحد من تكرارها للوصول الى اعلي نسبة توثيق متطابق.</p>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 rounded-xl bg-white/40 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/50">
+                        <i class="fa-solid fa-circle-check text-sky-500 text-base mt-1 shrink-0"></i>
+                        <p class="text-xs md:text-sm">توليد تقارير إحصائية وتحليلات بيانية دقيقة تدعم متخذي القرار وإدارة جودة الملفات الطبية بالمستشفى.</p>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 rounded-xl bg-white/40 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/50">
+                        <i class="fa-solid fa-circle-check text-sky-500 text-base mt-1 shrink-0"></i>
+                        <p class="text-xs md:text-sm">الحفاظ على سلامة ونزاهة البيانات الإجمالية ومنع حدوث أي فجوات رقمية (Gaps) في حساب مؤشرات الأداء العالية.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. الأنظمة الرقمية وتفاصيل مخرجاتها (شبكة متناسقة) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+                
+                <!-- الأنظمة الرقمية الحالية -->
+                <div class="custom-card rounded-[2rem] p-6 border-r-4 border-r-sky-500 shadow-lg flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-3 mb-5 border-b border-slate-200 dark:border-slate-700 pb-3">
+                            <div class="text-lg text-sky-500"><i class="fa-solid fa-cubes"></i></div>
+                            <h3 class="text-lg font-black">الأنظمة الرقمية الحالية</h3>
+                        </div>
+                        
+                        <div class="space-y-3 text-right font-black text-xs md:text-sm text-slate-700 dark:text-slate-200">
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center justify-between">
+                                <span>1- نظام مراجعة الملفات الطبية</span>
+                                <i class="fa-solid fa-folder-medical text-sky-500"></i>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center justify-between">
+                                <span>2- نظام مراجعة نماذج الطوارئ</span>
+                                <i class="fa-solid fa-chart-line text-sky-500"></i>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center justify-between">
+                                <span>3- نظام مراجعة ملاحظات الاطباء والتمريض</span>
+                                <i class="fa-solid fa-kit-medical text-sky-500"></i>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center justify-between">
+                                <span>4- نظام تسجيل مؤشر الخروج</span>
+                                <i class="fa-solid fa-sitemap text-sky-500"></i>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center justify-between">
+                                <span>5- نظام احصائيات الملفات الطبية</span>
+                                <i class="fa-solid fa-chart-pie text-sky-500"></i>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center justify-between">
+                                <span>6- نظام إحصائيات الأقسام الطبية</span>
+                                <i class="fa-solid fa-hospital-user text-sky-500"></i>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center justify-between">
+                                <span>7- نظام إحصائيات الجودة</span>
+                                <i class="fa-solid fa-award text-sky-500"></i>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center justify-between">
+                                <span>8- نظام إحصائيات الطوارئ</span>
+                                <i class="fa-solid fa-truck-medical text-sky-500"></i>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center justify-between">
+                                <span>9- نظام تتبع سير العمل</span>
+                                <i class="fa-solid fa-route text-sky-500"></i>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center justify-between">
+                                <span>10- نظام الدورات التدريبية</span>
+                                <i class="fa-solid fa-graduation-cap text-sky-500"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تفاصيل ومخرجات الأنظمة -->
+                <div class="custom-card rounded-[2rem] p-6 border-l-4 border-l-indigo-500 shadow-lg flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-3 mb-5 border-b border-slate-200 dark:border-slate-700 pb-3">
+                            <div class="text-lg text-indigo-500"><i class="fa-solid fa-list-check"></i></div>
+                            <h3 class="text-lg font-black">تفاصيل ومخرجات الأنظمة</h3>
+                        </div>
+                        
+                        <div class="space-y-3 text-right font-bold text-slate-600 dark:text-slate-300">
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center text-xs leading-relaxed">
+                                نظام مراجعة شامل جميع النماذج الطبية الموجودة بالملف الطبي لمراجعتها طبقاً لتعليمات الجودة.
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center text-xs leading-relaxed">
+                                نظام مراجعة شامل جميع النماذج الطبية الموجودة بشيتات الطوارئ لمراجعتها طبقاً لتعليمات الجودة.
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center text-xs leading-relaxed">
+                                نظام مراجعة شامل جميع النماذج الطبية الموجودة بملاحظات الاطباء والتمريض لمراجعتها طبقاً لتعليمات الجودة.
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center text-xs leading-relaxed">
+                                نظام تسجيل جميع حالات الخروج بالمواعيد الخاصة بها لاستخراج احصائيات ومؤشرات الخروج طبقاً لاسباب التأخير والادارات المتسببة.
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center text-xs leading-relaxed">
+                                نظام متخصص في استخراج الاحصائيات العامة للنظام والتي تشمل احصائيات الاقسام والاطباء والتمريض والملفات والنماذج الطبية.
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center text-xs leading-relaxed">
+                                نظام متخصص في احصائيات الاقسام الطبية بطريقة احترافية تساعد رؤساء الاقسام علي متابعة المشاكل والحد من تكرارها.
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center text-xs leading-relaxed">
+                                نظام متخصص في استخراج احصائيات الجودة الخاصة بادارة الجودة لامكانية ابلاغ الاقسام والاطباء والتمريض بالمشاكل للحد من تكرارها.
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center text-xs leading-relaxed">
+                                نظام متخصص في احصائيات نماذج الطوارئ بطريقة احترافية تساعد في الوصول الى المشاكل الموجودة في التوثيق للوصول لاقصي دقة.
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center text-xs leading-relaxed">
+                                نظام خاص بإدارة النظام لمتابعة المستخدمين والتأكد من سير العمل واستخراج الاحصائيات الكاملة للملفات بشكل سلس واحترافي.
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-700/40 flex items-center text-xs leading-relaxed">
+                                نظام مخصص للعروض التوضيحية للدورات التدريبية الخاصة بسياسات السجلات الطبية للتمريض الجديد والأطباء.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 4. بيانات الاعتماد والدعم الفني للمنظومة -->
+            <div class="custom-card w-full rounded-[2rem] p-6 md:p-8 border-t-4 border-t-amber-500 shadow-lg">
+                <div class="flex items-center gap-4 mb-6 border-b border-slate-200/60 dark:border-slate-700/60 pb-3">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-xl border border-amber-500/20">
+                        <i class="fa-solid fa-address-card"></i>
+                    </div>
+                    <h2 class="text-xl font-black">بيانات الاعتماد والدعم الفني للمنظومة</h2>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-right">
+                    
+                    <!-- أ/ نادية عادل -->
+                    <div class="p-5 rounded-2xl bg-white/40 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60 shadow-sm flex flex-col justify-between space-y-3">
+                        <div>
+                            <span class="text-[10px] font-black text-slate-400 block mb-1 uppercase tracking-wide">إشراف وتدقيق المنظومة العامة</span>
+                            <strong class="text-lg font-black text-slate-800 dark:text-white block mb-1">
+                                أ/ نادية عادل <i class="fa-solid fa-venus text-pink-500 text-xs ms-1"></i>
+                            </strong>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 font-bold flex items-center gap-2 mb-3">
+                                <i class="fa-solid fa-user-gear text-sky-500 text-sm shrink-0"></i>
+                                <span>مدير إدارة السجلات الطبية والمطور الإداري للنظام</span>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-1.5 border-t border-slate-200/40 dark:border-slate-700/40 pt-3 text-xs text-slate-600 dark:text-slate-300 font-bold">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-phone text-slate-400 text-sm w-4 shrink-0"></i>
+                                <span>Phone: 01093810333 (8 AM - 3 PM)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-brands fa-whatsapp text-emerald-500 text-sm w-4 shrink-0"></i>
+                                <span>Whatsapp: 01093810333 (24/7)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-phone-volume text-amber-500 text-sm w-4 shrink-0"></i>
+                                <span>Internal: 6931</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-envelope text-sky-500 text-sm w-4 shrink-0"></i>
+                                <span class="font-sans text-[11px] select-all">Nadia@ganzourihospital.com</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- أ/ خالد شوقي -->
+                    <div class="p-5 rounded-2xl bg-white/40 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60 shadow-sm flex flex-col justify-between space-y-3">
+                        <div>
+                            <span class="text-[10px] font-black text-slate-400 block mb-1 uppercase tracking-wide">البرمجة وهندسة النظام الفنية</span>
+                            <strong class="text-lg font-black text-slate-800 dark:text-white block mb-1">
+                                أ/ خالد شوقي <i class="fa-solid fa-mars text-blue-500 text-xs ms-1"></i>
+                            </strong>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 font-bold flex items-center gap-2 mb-3">
+                                <i class="fa-solid fa-code text-indigo-500 text-sm shrink-0"></i>
+                                <span>المطور الفني للنظام واختباره وتطويره</span>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-1.5 border-t border-slate-200/40 dark:border-slate-700/40 pt-3 text-xs text-slate-600 dark:text-slate-300 font-bold">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-phone text-slate-400 text-sm w-4 shrink-0"></i>
+                                <span>Phone: 01024274411 - 01153341262</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-brands fa-whatsapp text-emerald-500 text-sm w-4 shrink-0"></i>
+                                <span>Whatsapp: 01024274411 (24/7)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-700/60 text-center text-[11px] font-black text-sky-500 tracking-wide">
+                    تم برمجة النظام والعمل عليه بمساعدة أدوات الذكاء الاصطناعي AI
+                </div>
+            </div>
+
+            <!-- Back to Home Button -->
+            <div class="pt-2 text-center">
+                <a href="index.html" class="btn btn-outline border-slate-300 text-slate-600 hover:bg-sky-500 hover:text-slate-950 hover:border-sky-500 dark:border-slate-600 dark:text-slate-300 px-8 py-3 rounded-full font-black inline-flex items-center gap-3 transition-all shadow-sm">
+                    العودة إلى الرئيسية <i class="fa-solid fa-house"></i>
+                </a>
+            </div>
+
         </main>
 
-        <footer class="custom-card py-6 mb-4 rounded-2xl text-center text-xs opacity-75 border"><p>VEXORIS © 2026</p></footer>
+        <!-- Enterprise Footer -->
+        <footer class="glass-panel py-3 px-4 text-center rounded-2xl my-3 w-full border flex flex-col gap-1 justify-center items-center">
+            <div class="text-xs font-black tracking-[0.2em] uppercase text-primary dark:text-accent drop-shadow-sm font-sans">
+                Vexoris System
+            </div>
+            <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©
+            </div>
+            <div class="text-[10px] font-black text-slate-400 dark:text-slate-500">
+                تم برمجة النظام وتنفيذه بواسطة: 
+                <span class="text-indigo-600 dark:text-indigo-400 font-black mx-1 bg-indigo-50 dark:bg-indigo-950/40 px-1.5 py-0.5 rounded-md">أ/ نادية عادل</span> 
+                - 
+                <span class="text-teal-600 dark:text-teal-400 font-black mx-1 bg-teal-50 dark:bg-teal-950/40 px-1.5 py-0.5 rounded-md">أ/ خالد شوقي</span>
+            </div>
+        </footer>
     </div>
-    <script>function toggleTheme() { document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); }</script>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        }
+    </script>
 </body>
 </html>
