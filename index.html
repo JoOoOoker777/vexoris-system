@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VEXORIS System | المنظومة المؤسسية المتقدمة</title>
+    <title>VEXORIS System</title>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -17,66 +17,76 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between bg-grid-pattern selection:bg-sky-500 selection:text-slate-950">
 
+    <!-- App Container Fixed at 80% Width -->
     <div class="app-container flex flex-col min-h-screen">
         
-        <!-- Unified Navbar -->
+        <!-- Unified Navbar Header -->
         <header class="custom-card sticky top-0 z-50 px-8 py-4 my-4 rounded-2xl flex items-center justify-between border">
+            <!-- Brand Logo & Subtitle -->
             <div class="flex items-center gap-3">
                 <div class="w-3.5 h-3.5 rounded-full bg-sky-500 shadow-md shadow-sky-500/50 animate-pulse"></div>
                 <div>
-                    <a href="index.html" class="text-xl font-black tracking-wider bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent">VEXORIS</a>
+                    <a href="index.html" class="text-xl font-black tracking-widest bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 bg-clip-text text-transparent">VEXORIS</a>
                     <p class="text-[10px] font-bold text-slate-400 tracking-tight">Medical Record & Auditing System</p>
                 </div>
             </div>
             
-            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
-                <a href="index.html" class="text-sky-500 transition-colors">الرئيسية</a>
-                <a href="about.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">عن النظام</a>
-                <a href="contact.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">تواصل معنا</a>
-                <a href="courses.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">دورات تدريبية</a>
-                <a href="feedback.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">رأيك يهمنا</a>
+            <!-- Center Navigation Links -->
+            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold tracking-wide">
+                <a href="index.html" class="text-sky-500 font-bold transition-colors">Home</a>
+                <a href="about.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">Targets</a>
+                <a href="contact.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">Contact</a>
+                <a href="courses.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">Training</a>
+                <a href="feedback.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">Complaint</a>
             </nav>
 
+            <!-- Action Controls -->
             <div class="flex items-center gap-3">
                 <button onclick="toggleTheme()" class="btn btn-ghost btn-circle btn-sm text-sky-500 border border-sky-500/30 hover:bg-sky-500/10" title="تبديل الثيم">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                 </button>
-                <a href="login.html" class="btn btn-sm bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold border-none px-5 shadow-md shadow-sky-500/20">تسجيل الدخول</a>
+                <a href="login.html" class="btn btn-sm bg-sky-500 hover:bg-sky-600 text-slate-950 font-extrabold border-none px-5 shadow-md shadow-sky-500/20">تسجيل الدخول</a>
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="flex-grow py-16 px-4">
-            <div class="max-w-4xl mx-auto text-center flex flex-col items-center">
+        <!-- Main Landing Showcase -->
+        <main class="flex-grow flex items-center justify-center py-12 px-4">
+            <div class="w-full text-center flex flex-col items-center">
                 
-                <!-- شارة ترحيبية قوية تعكس هيبة النظام -->
-                <div class="inline-flex items-center gap-2 px-6 py-2 rounded-full custom-card text-xs font-black tracking-widest text-sky-500 mb-8 border border-sky-500/35 shadow-lg">
+                <!-- Badge Tag -->
+                <div class="inline-flex items-center gap-2.5 px-6 py-2 rounded-full custom-card text-xs font-black tracking-widest text-sky-500 mb-8 border border-sky-500/35 shadow-lg">
                     <span class="w-2.5 h-2.5 rounded-full bg-sky-500 animate-ping"></span>
-                    <span>القمة المطلقة في هندسة التدقيق الطبي وإدارة السجلات المؤسسية</span>
+                    <span>إدارة السجلات الطبية المركزي لمستشفي الجنزوري التخصصي</span>
                 </div>
 
+                <!-- Main Display Title -->
                 <h1 class="text-4xl sm:text-6xl font-black tracking-tight mb-8 leading-tight">
-                    منظومة <span class="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 bg-clip-text text-transparent">VEXORIS</span> للتدقيق الذكي
+                    نظام <span class="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 bg-clip-text text-transparent">VEXORIS</span> لإدارة السجلات الطبية
                 </h1>
 
-                <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-3xl mx-auto mb-12 leading-relaxed font-bold opacity-90">
-                    تم بناء نظام VEXORIS ليواكب أحدث التقنيات الإلكترونية كنظام ذكي مخصص لمراجعة وتدقيق جودة الملفات الطبية ونماذج الطوارئ، وتحليل مخرجات الأداء، وإنشاء الإحصائيات الاحترافية بما يضمن دقة التوثيق الطبي والحد من الثغرات الإدارية والإحصائية للوصول بالمنشأة الطبية إلى أعلى مستويات النزاهة والدقة والاحترافية والجودة وتصفية عيوب الإدخال البشري بشكل استباقي.
+                <!-- Professional System Overview Description -->
+                <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed font-bold opacity-90">
+                    تم بناء نظام VEXORIS ليواكب أحدث التقنيات الإلكترونية كنظام ذكي مخصص لمراجعة وتدقيق جودة الملفات الطبية ونماذج الطوارئ، وتحليل مخرجات الأداء، وإنشاء الإحصائيات الاحترافية بما يضمن دقة التوثيق الطبي والحد من الثغرات الإدارية والإحصائية للوصول بالمنشأة الطبية إلى أعلى مستويات النزاهة والدقة والاحترافية والجودة وتصفية عيوب الإدخال البشري بشكل استباقي. كما تم إضافة أحدث معايير الامان والحماية القصوي للحفاظ علي سرية وآمان بيانات المرضي المتواجده بالنظام
                 </p>
-
-                <div>
-                    <a href="login.html" class="group relative px-12 py-5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 text-slate-950 font-black text-lg shadow-[0_15px_30px_-10px_rgba(14,165,233,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(14,165,233,0.7)] hover:-translate-y-1 transition-all duration-300 inline-flex items-center gap-3">
-                        <span>الدخول إلى لوحة التحكم</span>
-                        <i class="fa-solid fa-arrow-left group-hover:-translate-x-2 transition-transform"></i>
-                    </a>
-                </div>
 
             </div>
         </main>
 
-        <!-- Footer -->
-        <footer class="custom-card py-6 mb-4 rounded-2xl text-center text-xs opacity-75 border">
-            <p class="mono-font">VEXORIS Enterprise Architecture © 2026 - All Rights Reserved</p>
-        </footer>
+        <!-- Enterprise Footer -->
+       <footer class="glass-panel p-6 text-center rounded-t-3xl mt-6 w-full max-w-[80%] mx-auto border-b-0 flex flex-col gap-2.5 justify-center items-center">
+    <div class="text-base font-black tracking-[0.25em] uppercase text-primary dark:text-accent drop-shadow-sm font-sans transition-colors duration-300">
+      Vexoris System
+    </div>
+    <div class="text-xs font-bold text-slate-500 dark:text-slate-400 transition-colors duration-300">
+      جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©
+    </div>
+    <div class="text-[11px] font-black text-slate-400 dark:text-slate-500 transition-colors duration-300">
+      تم برمجة النظام وتنفيذه بواسطة: 
+      <span class="text-indigo-600 dark:text-indigo-400 font-black mx-1 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-md transition-colors duration-300">أ/ نادية عادل</span> 
+      - 
+      <span class="text-teal-600 dark:text-teal-400 font-black mx-1 bg-teal-50 dark:bg-teal-950/40 px-2 py-0.5 rounded-md transition-colors duration-300">أ/ خالد شوقي</span>
+    </div>
+  </footer>
     </div>
 
     <script>
