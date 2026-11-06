@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم | VEXORIS System</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-grid-pattern">
+
+    <!-- Topbar -->
+    <header class="custom-card px-8 py-4 flex items-center justify-between border-b">
+        <div class="flex items-center gap-4">
+            <span class="text-xl font-black text-sky-500">لوحة التحكم الرئيسية</span>
+            <span class="badge badge-info badge-outline text-xs">متصل بـ Supabase</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="audits.html" class="btn btn-sm btn-outline btn-info">التدقيق الطبي</a>
+            <a href="reports.html" class="btn btn-sm btn-outline btn-success">إصدار التقارير</a>
+            <a href="index.html" class="btn btn-sm btn-ghost text-red-400">خروج</a>
+        </div>
+    </header>
+
+    <!-- Content -->
+    <main class="flex-grow p-8 max-w-7xl mx-auto w-full">
+        <!-- Stats Row -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="custom-card p-6 rounded-2xl">
+                <p class="text-sm opacity-70 mb-1">إجمالي الملفات المفحوصة</p>
+                <h3 class="text-3xl font-black text-sky-500">1,428</h3>
+            </div>
+            <div class="custom-card p-6 rounded-2xl">
+                <p class="text-sm opacity-70 mb-1">أطباء تخدير العمليات</p>
+                <h3 class="text-3xl font-black text-blue-500">84</h3>
+            </div>
+            <div class="custom-card p-6 rounded-2xl">
+                <p class="text-sm opacity-70 mb-1">أطباء الجراحة العامة</p>
+                <h3 class="text-3xl font-black text-indigo-500">142</h3>
+            </div>
+            <div class="custom-card p-6 rounded-2xl">
+                <p class="text-sm opacity-70 mb-1">نسبة مطابقة التقارير</p>
+                <h3 class="text-3xl font-black text-emerald-500">99.4%</h3>
+            </div>
+        </div>
+
+        <!-- Quick Access Table Section -->
+        <div class="custom-card p-6 rounded-2xl">
+            <h2 class="text-lg font-bold mb-4">أحدث السجلات الطبية المعالجة</h2>
+            <div class="overflow-x-auto">
+                <table class="table table-zebra w-full">
+                    <thead>
+                        <tr>
+                            <th>رقم السجل</th>
+                            <th>قسم التخصص</th>
+                            <th>اسم الطبيب المسؤول</th>
+                            <th>الحالة</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#VEX-9821</td>
+                            <td><span class="badge badge-info">تخدير العمليات</span></td>
+                            <td>د. محمود الشافعي</td>
+                            <td><span class="text-emerald-500 font-bold">معتمد</span></td>
+                            <td><a href="reports.html" class="btn btn-xs btn-ghost text-sky-400">عرض التقرير</a></td>
+                        </tr>
+                        <tr>
+                            <td>#VEX-9822</td>
+                            <td><span class="badge badge-primary">الجراحة العامة</span></td>
+                            <td>د. أحمد الباز</td>
+                            <td><span class="text-amber-500 font-bold">قيد المراجعة</span></td>
+                            <td><a href="reports.html" class="btn btn-xs btn-ghost text-sky-400">عرض التقرير</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="custom-card py-4 text-center text-xs opacity-75 border-t">
+        <p>VEXORIS Dashboard Module © 2026</p>
+    </footer>
+</body>
+</html>
