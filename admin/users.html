@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المستخدمين | VEXORIS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+      if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg: #04070f; --card-bg: rgba(15, 23, 42, 0.55);
+            --card-border: rgba(148, 163, 184, 0.12);
+            --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+            --accent: #0ea5e9; --accent-2: #6366f1; --accent-3: #8b5cf6;
+        }
+        html:not(.dark) {
+            --bg: #f5f8fc; --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(148, 163, 184, 0.28);
+            --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #64748b;
+        }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', system-ui, sans-serif;
+            background: var(--bg); color: var(--text-primary);
+            min-height: 100vh; overflow-x: hidden;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.16) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.14) 0%, transparent 65%);
+        }
+        html:not(.dark) .aurora-bg {
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.07) 0%, transparent 65%);
+        }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+        }
+        .scroll-progress {
+            position: fixed; top: 0; right: 0; height: 2px; width: 0%; z-index: 100;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.6);
+            transition: width 0.1s linear;
+        }
+        .nav-shell { position: sticky; top: 12px; z-index: 50; margin: 12px auto 0; max-width: 1400px; padding: 0 16px; }
+        .nav-inner {
+            background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 18px; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .logo-dot {
+            position: relative; width: 12px; height: 12px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18), 0 0 20px rgba(14, 165, 233, 0.7);
+            flex-shrink: 0;
+        }
+        .logo-dot::before {
+            content: ''; position: absolute; inset: -3px; border-radius: 50%;
+            border: 1px solid rgba(14, 165, 233, 0.5);
+            animation: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes ping { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(2.4); opacity: 0; } }
+        .brand-text {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: 0.18em;
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 40%, #6366f1 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .nav-link {
+            position: relative; color: var(--text-secondary); font-weight: 600;
+            font-size: 0.875rem; padding: 6px 2px; transition: color 0.3s ease;
+            text-decoration: none;
+        }
+        .nav-link:hover { color: var(--accent); }
+        .icon-btn {
+            width: 36px; height: 36px; border-radius: 10px;
+            border: 1px solid var(--card-border); background: transparent; color: var(--accent);
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .icon-btn:hover {
+            background: rgba(14, 165, 233, 0.1);
+            border-color: rgba(14, 165, 233, 0.4);
+            transform: rotate(15deg);
+        }
+        .app-container { max-width: 1400px; margin: 0 auto; padding: 0 16px; }
+
+        /* Hero */
+        .page-hero {
+            margin-top: 32px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(99, 102, 241, 0.05) 50%, rgba(139, 92, 246, 0.08) 100%);
+            border: 1px solid rgba(14, 165, 233, 0.22);
+            border-radius: 24px; padding: 32px 36px;
+            position: relative; overflow: hidden;
+        }
+        .page-hero::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, #0ea5e9, #6366f1, transparent);
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 6px 14px; border-radius: 999px;
+            background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.3);
+            color: var(--accent); font-size: 0.7rem; font-weight: 800;
+            letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 12px;
+        }
+        .hero-badge .pulse-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent); box-shadow: 0 0 10px var(--accent);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+        .hero-title { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900; margin-bottom: 8px; }
+        .hero-title .grad {
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 35%, #6366f1 70%, #8b5cf6 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); line-height: 1.75; max-width: 720px; }
+
+        /* Stats */
+        .stats-row {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+            margin-top: 24px;
+        }
+        @media (min-width: 768px) { .stats-row { grid-template-columns: repeat(4, 1fr); } }
+        .stat-card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 16px; padding: 18px;
+            transition: all 0.3s ease;
+            position: relative; overflow: hidden;
+        }
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--stat-color), transparent);
+        }
+        .stat-card:hover { transform: translateY(-3px); border-color: var(--stat-color); box-shadow: 0 12px 24px -12px var(--stat-color); }
+        .stat-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: var(--stat-soft); border: 1px solid var(--stat-color);
+            color: var(--stat-color);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; margin-bottom: 12px;
+        }
+        .stat-num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.6rem; font-weight: 700; line-height: 1;
+            color: var(--stat-color);
+        }
+        .stat-label {
+            font-size: 0.72rem; font-weight: 700;
+            color: var(--text-muted); margin-top: 4px;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex; gap: 10px; margin-top: 24px;
+            flex-wrap: wrap; align-items: center;
+        }
+        .search-wrap {
+            flex: 1; min-width: 240px; position: relative;
+        }
+        .search-wrap input {
+            width: 100%; padding: 12px 42px 12px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 11px;
+            color: var(--text-primary);
+            font-size: 0.85rem; font-weight: 600; font-family: inherit;
+            transition: all 0.25s ease;
+        }
+        .search-wrap input:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+        }
+        .search-wrap i {
+            position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+            color: var(--text-muted); font-size: 0.85rem; pointer-events: none;
+        }
+        .filter-select {
+            padding: 12px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 11px;
+            color: var(--text-primary);
+            font-size: 0.82rem; font-weight: 700; font-family: inherit;
+            cursor: pointer; min-width: 180px;
+            transition: all 0.25s ease;
+        }
+        .filter-select:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+        }
+
+        /* Table */
+        .table-wrap {
+            margin-top: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .table-scroll { overflow-x: auto; }
+        table.users-table {
+            width: 100%; border-collapse: separate; border-spacing: 0; min-width: 900px;
+        }
+        table.users-table thead th {
+            background: rgba(148, 163, 184, 0.03);
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--card-border);
+            text-align: right;
+            font-size: 0.7rem; font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 0.05em; text-transform: uppercase;
+            white-space: nowrap;
+        }
+        table.users-table tbody td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--card-border);
+            font-size: 0.82rem; font-weight: 600;
+            color: var(--text-secondary);
+            vertical-align: middle;
+        }
+        table.users-table tbody tr { transition: background 0.15s ease; }
+        table.users-table tbody tr:hover { background: rgba(14, 165, 233, 0.03); }
+        table.users-table tbody tr:last-child td { border-bottom: none; }
+
+        .user-cell { display: flex; align-items: center; gap: 12px; }
+        .user-avatar-sm {
+            width: 38px; height: 38px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 0.8rem; color: #fff;
+            flex-shrink: 0; position: relative; overflow: hidden;
+        }
+        .user-avatar-sm::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+            background-size: 200% 100%;
+            animation: shine 4s infinite;
+        }
+        @keyframes shine { 0% { background-position: -200% 0; } 50%, 100% { background-position: 200% 0; } }
+        .user-cell-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .user-cell-name { font-size: 0.85rem; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
+        .user-cell-username { font-family: 'Space Grotesk', sans-serif; font-size: 0.68rem; font-weight: 600; color: var(--text-muted); direction: ltr; text-align: right; }
+
+        .role-select {
+            padding: 6px 28px 6px 10px;
+            border-radius: 7px;
+            border: 1px solid var(--role-color);
+            background: var(--role-soft);
+            color: var(--role-color);
+            font-family: inherit;
+            font-size: 0.72rem; font-weight: 800;
+            cursor: pointer;
+            appearance: none; -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: left 8px center;
+            background-size: 12px;
+            transition: all 0.2s ease;
+        }
+        .role-select:focus { outline: none; box-shadow: 0 0 0 3px var(--role-soft); }
+        .role-select:disabled { opacity: 0.5; cursor: not-allowed; }
+        .role-select option { background: #0f172a; color: #f1f5f9; }
+        html:not(.dark) .role-select option { background: #fff; color: #0f172a; }
+
+        /* Status toggle */
+        .status-toggle {
+            display: inline-flex; align-items: center; gap: 8px;
+            cursor: pointer; user-select: none;
+        }
+        .status-toggle input { display: none; }
+        .status-track {
+            width: 36px; height: 20px; border-radius: 999px;
+            background: rgba(148, 163, 184, 0.25);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .status-track::after {
+            content: '';
+            position: absolute; top: 2px; right: 2px;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: #fff;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .status-toggle input:checked + .status-track {
+            background: linear-gradient(135deg, #10b981, #0ea5e9);
+        }
+        .status-toggle input:checked + .status-track::after {
+            transform: translateX(-16px);
+        }
+        .status-text {
+            font-size: 0.72rem; font-weight: 800;
+            color: var(--text-muted);
+        }
+        .status-toggle input:checked ~ .status-text { color: #10b981; }
+
+        /* MFA badge */
+        .mfa-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 9px; border-radius: 6px;
+            font-size: 0.68rem; font-weight: 800;
+        }
+        .mfa-badge.yes { background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .mfa-badge.no { background: rgba(148, 163, 184, 0.12); color: var(--text-muted); border: 1px solid var(--card-border); }
+
+        /* Buttons */
+        .action-btn {
+            width: 32px; height: 32px; border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: transparent; color: var(--text-secondary);
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.75rem;
+        }
+        .action-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(14, 165, 233, 0.08); }
+        .action-btn.danger:hover { border-color: #f87171; color: #f87171; background: rgba(239, 68, 68, 0.08); }
+
+        /* Empty state */
+        .empty-state {
+            padding: 60px 20px; text-align: center;
+        }
+        .empty-state i { font-size: 2.5rem; color: var(--text-muted); margin-bottom: 12px; display: block; }
+        .empty-state h3 { font-size: 1rem; font-weight: 900; margin-bottom: 6px; }
+        .empty-state p { font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); }
+
+        /* Toast */
+        .toast {
+            position: fixed; top: 100px; left: 50%; transform: translateX(-50%) translateY(-20px);
+            padding: 14px 24px; border-radius: 12px;
+            font-weight: 700; font-size: 0.85rem;
+            z-index: 99998;
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.4);
+            backdrop-filter: blur(20px);
+            opacity: 0; pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+        .toast.success { background: rgba(16, 185, 129, 0.15); color: #5eead4; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .toast.error { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        /* Loading */
+        .loading-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .loading-screen.hide { opacity: 0; pointer-events: none; }
+
+        /* Footer */
+        .footer-shell {
+            max-width: 1400px; margin: 32px auto 24px; padding: 22px 20px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 20px; text-align: center;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        }
+        .footer-brand {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            letter-spacing: 0.35em; font-size: 0.75rem;
+            background: linear-gradient(135deg, #22d3ee, #6366f1);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .footer-text { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+        .credit-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-weight: 800; font-size: 0.7rem; }
+        .credit-indigo { color: #a5b4fc; background: rgba(99, 102, 241, 0.12); }
+        .credit-teal { color: #5eead4; background: rgba(20, 184, 166, 0.12); }
+        html:not(.dark) .credit-indigo { color: #4338ca; background: rgba(99, 102, 241, 0.16); }
+        html:not(.dark) .credit-teal { color: #0f766e; background: rgba(20, 184, 166, 0.16); }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4));
+            border-radius: 10px; border: 2px solid var(--bg);
+        }
+        ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
+    </style>
+    <link rel="stylesheet" href="../theme-overrides.css" />
+</head>
+<body>
+
+    <div class="loading-screen" id="loadingScreen">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري التحميل...</p>
+    </div>
+
+    <div class="scroll-progress" id="scrollProgress"></div>
+    <div class="aurora-bg"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="nav-shell">
+        <header class="nav-inner">
+            <div class="flex items-center gap-3">
+                <div class="logo-dot"></div>
+                <div>
+                    <a href="../dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
+                </div>
+            </div>
+            <nav class="hidden md:flex items-center gap-7">
+                <a href="../dashboard.html" class="nav-link">لوحة التحكم</a>
+                <a href="../about.html" class="nav-link">عن النظام</a>
+                <a href="../security.html" class="nav-link">درع VEXORIS</a>
+                <a href="../courses.html" class="nav-link">دورات تدريبية</a>
+                <a href="../feedback.html" class="nav-link">رأيك يهمنا</a>
+            </nav>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </button>
+                <a href="../dashboard.html" style="padding: 8px 16px; border-radius: 10px; background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    رجوع
+                </a>
+            </div>
+        </header>
+    </div>
+
+    <main class="app-container">
+        <section class="page-hero">
+            <div class="hero-badge">
+                <span class="pulse-dot"></span>
+                Admin Panel
+            </div>
+            <h1 class="hero-title">إدارة <span class="grad">المستخدمين</span></h1>
+            <p class="hero-desc">
+                تحكّم في حسابات المستخدمين وصلاحياتهم. يمكنك تعديل الدور، إيقاف/تفعيل الحساب، والاطلاع على حالة الأمان لكل مستخدم.
+            </p>
+        </section>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card" style="--stat-color: #0ea5e9; --stat-soft: rgba(14,165,233,0.12);">
+                <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                <div class="stat-num" id="statTotal">—</div>
+                <div class="stat-label">إجمالي المستخدمين</div>
+            </div>
+            <div class="stat-card" style="--stat-color: #10b981; --stat-soft: rgba(16,185,129,0.12);">
+                <div class="stat-icon"><i class="fa-solid fa-user-check"></i></div>
+                <div class="stat-num" id="statActive">—</div>
+                <div class="stat-label">حسابات نشطة</div>
+            </div>
+            <div class="stat-card" style="--stat-color: #f59e0b; --stat-soft: rgba(245,158,11,0.12);">
+                <div class="stat-icon"><i class="fa-solid fa-user-slash"></i></div>
+                <div class="stat-num" id="statInactive">—</div>
+                <div class="stat-label">حسابات موقوفة</div>
+            </div>
+            <div class="stat-card" style="--stat-color: #a855f7; --stat-soft: rgba(168,85,247,0.12);">
+                <div class="stat-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="stat-num" id="statMfa">—</div>
+                <div class="stat-label">مفعّلون MFA</div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="search-wrap">
+                <input type="text" id="searchInput" placeholder="ابحث بالاسم أو اسم المستخدم أو البريد..." />
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <select class="filter-select" id="roleFilter">
+                <option value="">جميع الأدوار</option>
+            </select>
+            <select class="filter-select" id="statusFilter">
+                <option value="">جميع الحالات</option>
+                <option value="active">نشط فقط</option>
+                <option value="inactive">موقوف فقط</option>
+            </select>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrap">
+            <div class="table-scroll">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>المستخدم</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>الدور</th>
+                            <th>MFA</th>
+                            <th>الحالة</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTbody">
+                        <tr><td colspan="6" style="text-align: center; padding: 40px;"><i class="fa-solid fa-circle-notch fa-spin"></i> جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer-shell">
+        <div class="footer-brand">VEXORIS SYSTEM</div>
+        <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+        <div class="footer-text">
+            تم برمجة النظام وتنفيذه بواسطة
+            <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+            <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+            <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+        </div>
+    </footer>
+
+    <div class="toast" id="toast"></div>
+
+    <script type="module">
+        import { supabase } from '../supabase-client.js';
+
+        const ROLE_META = {
+            super_admin: { name: 'مالك النظام', color: '#a855f7', soft: 'rgba(168,85,247,0.12)' },
+            admin:       { name: 'مدير إداري', color: '#0ea5e9', soft: 'rgba(14,165,233,0.12)' },
+            manager:     { name: 'مدير طبي', color: '#6366f1', soft: 'rgba(99,102,241,0.12)' },
+            auditor:     { name: 'مدقق جودة', color: '#f59e0b', soft: 'rgba(245,158,11,0.12)' },
+            senior:      { name: 'أخصائي أول', color: '#10b981', soft: 'rgba(16,185,129,0.12)' },
+            doctor:      { name: 'طبيب', color: '#14b8a6', soft: 'rgba(20,184,166,0.12)' },
+            viewer:      { name: 'مشاهد', color: '#94a3b8', soft: 'rgba(148,163,184,0.12)' },
+        };
+
+        let allUsers = [];
+        let currentUserRole = null;
+        let currentUserId = null;
+
+        window.toggleTheme = function() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        };
+
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            t.className = `toast ${type}`;
+            const icons = { success: 'fa-circle-check', error: 'fa-circle-xmark' };
+            t.innerHTML = `<i class="fa-solid ${icons[type]}"></i> ${msg}`;
+            requestAnimationFrame(() => t.classList.add('show'));
+            setTimeout(() => t.classList.remove('show'), 4000);
+        }
+
+        function getInitials(name) {
+            if (!name) return '?';
+            const parts = name.trim().split(/\s+/);
+            if (parts.length === 1) return parts[0].slice(0, 2);
+            return parts[0][0] + (parts[1]?.[0] || '');
+        }
+
+        // ============ LOAD USERS ============
+        async function loadUsers() {
+            // Get from profiles (has role, username, is_active) + join auth.users for email/mfa via RPC
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('id, username, role, email, is_active')
+                .order('username');
+
+            if (error) {
+                console.error('Load error:', error);
+                showToast('فشل تحميل المستخدمين: ' + error.message, 'error');
+                return;
+            }
+
+            // Fetch auth data via a helper RPC would be ideal, but for now get from getSession cache
+            // We'll merge with what we can see
+            allUsers = data.map(p => ({
+                id: p.id,
+                username: p.username,
+                role: p.role,
+                email: p.email,
+                is_active: p.is_active !== false,
+                display_name: p.username, // fallback
+                mfa_enabled: false, // will be populated below if we can fetch
+            }));
+
+            // Try to enrich with metadata via edge function (or skip)
+            // For now, use profiles data only
+
+            // Fetch MFA status - not accessible client-side, mark as unknown
+            // Skip for now
+
+            renderStats();
+            renderTable();
+        }
+
+        // ============ STATS ============
+        function renderStats() {
+            const total = allUsers.length;
+            const active = allUsers.filter(u => u.is_active).length;
+            const inactive = total - active;
+            // MFA - we can't easily check without admin API, show "—"
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statActive').textContent = active;
+            document.getElementById('statInactive').textContent = inactive;
+            document.getElementById('statMfa').textContent = '—';
+        }
+
+        // ============ TABLE ============
+        function renderTable() {
+            const search = document.getElementById('searchInput').value.trim().toLowerCase();
+            const roleFilter = document.getElementById('roleFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            let filtered = allUsers;
+
+            if (search) {
+                filtered = filtered.filter(u =>
+                    u.username.toLowerCase().includes(search) ||
+                    (u.email && u.email.toLowerCase().includes(search))
+                );
+            }
+            if (roleFilter) {
+                filtered = filtered.filter(u => u.role === roleFilter);
+            }
+            if (statusFilter === 'active') filtered = filtered.filter(u => u.is_active);
+            if (statusFilter === 'inactive') filtered = filtered.filter(u => !u.is_active);
+
+            const tbody = document.getElementById('usersTbody');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr><td colspan="6">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-users-slash"></i>
+                            <h3>لا يوجد مستخدمون مطابقون</h3>
+                            <p>جرّب تغيير كلمات البحث أو الفلاتر.</p>
+                        </div>
+                    </td></tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(u => {
+                const roleInfo = ROLE_META[u.role] || ROLE_META.viewer;
+                const initials = getInitials(u.username);
+                const isSelf = u.id === currentUserId;
+
+                return `
+                    <tr data-id="${u.id}">
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar-sm" style="background: linear-gradient(135deg, ${roleInfo.color}, ${roleInfo.color}cc);">${initials}</div>
+                                <div class="user-cell-info">
+                                    <div class="user-cell-name">${u.username}${isSelf ? ' <span style="font-size:0.6rem;color:var(--accent);">(أنت)</span>' : ''}</div>
+                                    <div class="user-cell-username">@${u.username}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="direction: ltr; text-align: right; font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem;">${u.email}</td>
+                        <td>
+                            <select class="role-select" data-uid="${u.id}" ${isSelf ? 'disabled' : ''}
+                                style="--role-color: ${roleInfo.color}; --role-soft: ${roleInfo.soft};">
+                                ${Object.entries(ROLE_META).map(([k, v]) =>
+                                    `<option value="${k}" ${k === u.role ? 'selected' : ''}>${v.name}</option>`
+                                ).join('')}
+                            </select>
+                        </td>
+                        <td>
+                            <span class="mfa-badge ${u.mfa_enabled ? 'yes' : 'no'}">
+                                <i class="fa-solid ${u.mfa_enabled ? 'fa-shield-check' : 'fa-shield'}"></i>
+                                ${u.mfa_enabled ? 'مفعّل' : 'غير مفعّل'}
+                            </span>
+                        </td>
+                        <td>
+                            <label class="status-toggle" ${isSelf ? 'style="opacity:0.4;cursor:not-allowed;"' : ''}>
+                                <input type="checkbox" ${u.is_active ? 'checked' : ''} data-uid="${u.id}" ${isSelf ? 'disabled' : ''}>
+                                <span class="status-track"></span>
+                                <span class="status-text">${u.is_active ? 'نشط' : 'موقوف'}</span>
+                            </label>
+                        </td>
+                        <td>
+                            <button class="action-btn danger" data-reset="${u.id}" title="إعادة تعيين كلمة المرور" ${isSelf ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>
+                                <i class="fa-solid fa-key"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Wire up role changes
+            tbody.querySelectorAll('.role-select').forEach(sel => {
+                sel.addEventListener('change', async () => {
+                    const uid = sel.dataset.uid;
+                    const newRole = sel.value;
+                    await updateUserRole(uid, newRole, sel);
+                });
+            });
+
+            // Wire up status toggles
+            tbody.querySelectorAll('.status-toggle input').forEach(input => {
+                input.addEventListener('change', async () => {
+                    const uid = input.dataset.uid;
+                    await toggleUserStatus(uid, input.checked, input);
+                });
+            });
+        }
+
+        // ============ UPDATE ROLE ============
+        async function updateUserRole(uid, newRole, selEl) {
+            // Cannot modify super_admin if you're not super_admin
+            const targetUser = allUsers.find(u => u.id === uid);
+            if (!targetUser) return;
+
+            if (targetUser.role === 'super_admin' && currentUserRole !== 'super_admin') {
+                showToast('لا يمكن تعديل مالك النظام إلا بواسطة مالك آخر', 'error');
+                selEl.value = targetUser.role;
+                return;
+            }
+
+            if (newRole === 'super_admin' && currentUserRole !== 'super_admin') {
+                showToast('لا يمكن تعيين مالك نظام إلا بواسطة مالك', 'error');
+                selEl.value = targetUser.role;
+                return;
+            }
+
+            const oldRole = targetUser.role;
+            selEl.disabled = true;
+
+            const { error } = await supabase
+                .from('profiles')
+                .update({ role: newRole })
+                .eq('id', uid);
+
+            selEl.disabled = false;
+
+            if (error) {
+                console.error('Update error:', error);
+                showToast('فشل تحديث الدور: ' + error.message, 'error');
+                selEl.value = oldRole;
+                return;
+            }
+
+            targetUser.role = newRole;
+            // Re-render table to update colors
+            renderTable();
+            renderStats();
+            showToast(`تم تحديث دور ${targetUser.username} إلى ${ROLE_META[newRole].name}`, 'success');
+        }
+
+        // ============ TOGGLE STATUS ============
+        async function toggleUserStatus(uid, isActive, inputEl) {
+            const targetUser = allUsers.find(u => u.id === uid);
+            if (!targetUser) return;
+
+            inputEl.disabled = true;
+
+            const { error } = await supabase
+                .from('profiles')
+                .update({ is_active: isActive })
+                .eq('id', uid);
+
+            inputEl.disabled = false;
+
+            if (error) {
+                console.error('Toggle error:', error);
+                showToast('فشل تغيير الحالة: ' + error.message, 'error');
+                inputEl.checked = !isActive;
+                return;
+            }
+
+            targetUser.is_active = isActive;
+            renderStats();
+            showToast(
+                isActive ? `تم تفعيل حساب ${targetUser.username}` : `تم إيقاف حساب ${targetUser.username}`,
+                'success'
+            );
+        }
+
+        // ============ INIT ============
+        (async () => {
+            // 1. Auth
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = '../login.html';
+                return;
+            }
+
+            currentUserId = session.user.id;
+
+            // 2. Role guard
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
+
+            if (!profile || !['super_admin', 'admin'].includes(profile.role)) {
+                alert('ليس لديك صلاحية الوصول لهذه الصفحة.');
+                window.location.href = '../dashboard.html';
+                return;
+            }
+
+            currentUserRole = profile.role;
+
+            // 3. Populate role filter
+            const roleFilter = document.getElementById('roleFilter');
+            Object.entries(ROLE_META).forEach(([k, v]) => {
+                const opt = document.createElement('option');
+                opt.value = k;
+                opt.textContent = v.name;
+                roleFilter.appendChild(opt);
+            });
+
+            // 4. Load users
+            await loadUsers();
+
+            // 5. Wire filters
+            document.getElementById('searchInput').addEventListener('input', renderTable);
+            document.getElementById('roleFilter').addEventListener('change', renderTable);
+            document.getElementById('statusFilter').addEventListener('change', renderTable);
+
+            // 6. Hide loading
+            document.getElementById('loadingScreen').classList.add('hide');
+        })();
+    </script>
+</body>
+</html>

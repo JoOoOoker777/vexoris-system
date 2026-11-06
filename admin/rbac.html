@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التحكم في صلاحيات الأدوار | VEXORIS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+      if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg: #04070f; --card-bg: rgba(15, 23, 42, 0.55);
+            --card-border: rgba(148, 163, 184, 0.12);
+            --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+            --accent: #0ea5e9; --accent-2: #6366f1; --accent-3: #8b5cf6;
+        }
+        html:not(.dark) {
+            --bg: #f5f8fc; --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(148, 163, 184, 0.28);
+            --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #64748b;
+        }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', system-ui, sans-serif;
+            background: var(--bg); color: var(--text-primary);
+            min-height: 100vh; overflow-x: hidden;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.16) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.14) 0%, transparent 65%);
+        }
+        html:not(.dark) .aurora-bg {
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.07) 0%, transparent 65%);
+        }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+        }
+        .scroll-progress {
+            position: fixed; top: 0; right: 0; height: 2px; width: 0%; z-index: 100;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.6);
+            transition: width 0.1s linear;
+        }
+        .nav-shell { position: sticky; top: 12px; z-index: 50; margin: 12px auto 0; max-width: 1400px; padding: 0 16px; }
+        .nav-inner {
+            background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 18px; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .logo-dot {
+            position: relative; width: 12px; height: 12px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18), 0 0 20px rgba(14, 165, 233, 0.7);
+            flex-shrink: 0;
+        }
+        .logo-dot::before {
+            content: ''; position: absolute; inset: -3px; border-radius: 50%;
+            border: 1px solid rgba(14, 165, 233, 0.5);
+            animation: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes ping { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(2.4); opacity: 0; } }
+        .brand-text {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: 0.18em;
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 40%, #6366f1 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .nav-link {
+            position: relative; color: var(--text-secondary); font-weight: 600;
+            font-size: 0.875rem; padding: 6px 2px; transition: color 0.3s ease;
+            text-decoration: none;
+        }
+        .nav-link:hover { color: var(--accent); }
+        .nav-link.active { color: var(--accent); font-weight: 800; }
+        .nav-link.active::after {
+            content: ''; position: absolute; bottom: -2px; right: 0; left: 0; height: 2px; border-radius: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+        .icon-btn {
+            width: 36px; height: 36px; border-radius: 10px;
+            border: 1px solid var(--card-border); background: transparent; color: var(--accent);
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .icon-btn:hover {
+            background: rgba(14, 165, 233, 0.1);
+            border-color: rgba(14, 165, 233, 0.4);
+            transform: rotate(15deg);
+        }
+        .app-container { max-width: 1400px; margin: 0 auto; padding: 0 16px; }
+
+        /* Hero */
+        .page-hero {
+            margin-top: 32px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(99, 102, 241, 0.05) 50%, rgba(139, 92, 246, 0.08) 100%);
+            border: 1px solid rgba(14, 165, 233, 0.22);
+            border-radius: 24px; padding: 32px 36px;
+            position: relative; overflow: hidden;
+        }
+        .page-hero::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, #0ea5e9, #6366f1, transparent);
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 6px 14px; border-radius: 999px;
+            background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.3);
+            color: var(--accent); font-size: 0.7rem; font-weight: 800;
+            letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 12px;
+        }
+        .hero-badge .pulse-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent); box-shadow: 0 0 10px var(--accent);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+        .hero-title { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900; margin-bottom: 8px; }
+        .hero-title .grad {
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 35%, #6366f1 70%, #8b5cf6 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); line-height: 1.75; max-width: 720px; }
+
+        /* Matrix */
+        .matrix-wrap {
+            margin-top: 24px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .matrix-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--card-border);
+            gap: 16px; flex-wrap: wrap;
+        }
+        .matrix-title { font-size: 1rem; font-weight: 900; }
+        .matrix-subtitle { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+        .matrix-actions { display: flex; gap: 8px; align-items: center; }
+        .btn-reset {
+            padding: 9px 16px; border-radius: 9px;
+            background: transparent; border: 1px solid var(--card-border);
+            color: var(--text-secondary); font-family: inherit;
+            font-weight: 700; font-size: 0.78rem; cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-reset:hover { border-color: #f87171; color: #f87171; }
+        .btn-save {
+            padding: 10px 22px; border-radius: 9px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+            color: #fff; border: none; font-family: inherit;
+            font-weight: 800; font-size: 0.82rem; cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 6px 18px -6px rgba(14, 165, 233, 0.5);
+        }
+        .btn-save:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 24px -6px rgba(99, 102, 241, 0.6); }
+        .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-save .changes-badge {
+            background: rgba(255,255,255,0.25);
+            padding: 1px 7px; border-radius: 5px;
+            font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem;
+        }
+
+        .matrix-scroll { overflow-x: auto; }
+
+        table.matrix {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            min-width: 1000px;
+        }
+        table.matrix thead th {
+            position: sticky; top: 0;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 14px 8px;
+            font-size: 0.7rem; font-weight: 800;
+            text-align: center;
+            color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.03em;
+            z-index: 2;
+        }
+        table.matrix thead th:first-child {
+            text-align: right; padding-right: 24px;
+            min-width: 240px;
+            position: sticky; right: 0;
+            background: var(--card-bg); backdrop-filter: blur(20px);
+            z-index: 3;
+        }
+        .role-header {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+        }
+        .role-header .role-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+        }
+        .role-header .role-name {
+            font-size: 0.68rem; font-weight: 800;
+        }
+
+        table.matrix tbody tr {
+            transition: background 0.15s ease;
+        }
+        table.matrix tbody tr:hover {
+            background: rgba(14, 165, 233, 0.03);
+        }
+        table.matrix tbody td {
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--card-border);
+            text-align: center;
+            vertical-align: middle;
+        }
+        table.matrix tbody td:first-child {
+            text-align: right; padding-right: 24px;
+            position: sticky; right: 0;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            z-index: 1;
+            border-left: 1px solid var(--card-border);
+        }
+
+        .app-cell {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .app-icon-sm {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: var(--app-soft); border: 1px solid var(--app-color);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--app-color); font-size: 0.75rem; flex-shrink: 0;
+        }
+        .app-info-sm { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+        .app-name-sm { font-size: 0.78rem; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
+        .app-cat-sm {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em;
+            color: var(--text-muted); text-transform: uppercase;
+        }
+
+        /* Checkbox */
+        .perm-checkbox {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 26px; height: 26px; border-radius: 7px;
+            background: rgba(148, 163, 184, 0.08);
+            border: 1.5px solid var(--card-border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .perm-checkbox:hover {
+            border-color: var(--accent);
+            transform: scale(1.08);
+        }
+        .perm-checkbox.checked {
+            background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+            border-color: transparent;
+        }
+        .perm-checkbox.checked::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: #fff;
+            font-size: 0.65rem;
+        }
+        .perm-checkbox.changed {
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+            border-color: #f59e0b;
+        }
+        .perm-checkbox.changed.checked {
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+        }
+        .perm-checkbox.locked {
+            cursor: not-allowed;
+            opacity: 0.4;
+        }
+
+        /* Sticky save bar */
+        .save-bar {
+            position: fixed; bottom: 24px; left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--card-bg);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 12px 20px;
+            display: flex; align-items: center; gap: 16px;
+            box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.4);
+            z-index: 90;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .save-bar.show { transform: translateX(-50%) translateY(0); }
+        .save-bar-info { font-size: 0.82rem; font-weight: 700; }
+        .save-bar-info strong { color: var(--accent); }
+
+        /* Toast */
+        .toast {
+            position: fixed; top: 100px; left: 50%; transform: translateX(-50%) translateY(-20px);
+            padding: 14px 24px; border-radius: 12px;
+            font-weight: 700; font-size: 0.85rem;
+            z-index: 99998;
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.4);
+            backdrop-filter: blur(20px);
+            opacity: 0; pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+        .toast.success { background: rgba(16, 185, 129, 0.15); color: #5eead4; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .toast.error { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .toast.warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+        /* Loading */
+        .loading-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .loading-screen.hide { opacity: 0; pointer-events: none; }
+
+        /* Footer */
+        .footer-shell {
+            max-width: 1400px; margin: 32px auto 24px; padding: 22px 20px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 20px; text-align: center;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        }
+        .footer-brand {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            letter-spacing: 0.35em; font-size: 0.75rem;
+            background: linear-gradient(135deg, #22d3ee, #6366f1);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .footer-text { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+        .credit-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-weight: 800; font-size: 0.7rem; }
+        .credit-indigo { color: #a5b4fc; background: rgba(99, 102, 241, 0.12); }
+        .credit-teal { color: #5eead4; background: rgba(20, 184, 166, 0.12); }
+        html:not(.dark) .credit-indigo { color: #4338ca; background: rgba(99, 102, 241, 0.16); }
+        html:not(.dark) .credit-teal { color: #0f766e; background: rgba(20, 184, 166, 0.16); }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4));
+            border-radius: 10px; border: 2px solid var(--bg);
+        }
+        ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
+    </style>
+    <link rel="stylesheet" href="../theme-overrides.css" />
+</head>
+<body>
+
+    <div class="loading-screen" id="loadingScreen">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري التحميل...</p>
+    </div>
+
+    <div class="scroll-progress" id="scrollProgress"></div>
+    <div class="aurora-bg"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="nav-shell">
+        <header class="nav-inner">
+            <div class="flex items-center gap-3">
+                <div class="logo-dot"></div>
+                <div>
+                    <a href="../dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
+                </div>
+            </div>
+            <nav class="hidden md:flex items-center gap-7">
+                <a href="../dashboard.html" class="nav-link">لوحة التحكم</a>
+                <a href="../about.html" class="nav-link">عن النظام</a>
+                <a href="../security.html" class="nav-link">درع VEXORIS</a>
+                <a href="../courses.html" class="nav-link">دورات تدريبية</a>
+                <a href="../feedback.html" class="nav-link">رأيك يهمنا</a>
+            </nav>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </button>
+                <a href="../dashboard.html" class="btn-back" style="padding: 8px 16px; border-radius: 10px; background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    رجوع
+                </a>
+            </div>
+        </header>
+    </div>
+
+    <main class="app-container">
+        <section class="page-hero">
+            <div class="hero-badge">
+                <span class="pulse-dot"></span>
+                Access Control
+            </div>
+            <h1 class="hero-title">التحكم في <span class="grad">صلاحيات الأدوار</span></h1>
+            <p class="hero-desc">
+                حدّد بدقة أي تطبيق يظهر لأي دور. التغييرات التي تحفظها هنا تُطبَّق فوراً على لوحة تحكم كل المستخدمين المرتبطين بذلك الدور. للتغيير: اضغط على المربع لتفعيله أو إلغاء تفعيله.
+            </p>
+        </section>
+
+        <section class="matrix-wrap">
+            <div class="matrix-header">
+                <div>
+                    <div class="matrix-title">مصفوفة الصلاحيات</div>
+                    <div class="matrix-subtitle">7 أدوار × 13 تطبيق</div>
+                </div>
+                <div class="matrix-actions">
+                    <button class="btn-reset" id="btnReset">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        إعادة تعيين
+                    </button>
+                </div>
+            </div>
+            <div class="matrix-scroll">
+                <table class="matrix" id="permMatrix">
+                    <thead id="matrixHead"></thead>
+                    <tbody id="matrixBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Floating Save Bar -->
+        <div class="save-bar" id="saveBar">
+            <div class="save-bar-info">
+                لديك <strong id="changesCount">0</strong> تغيير لم يُحفظ
+            </div>
+            <button class="btn-save" id="btnSave">
+                <i class="fa-solid fa-check"></i>
+                حفظ التغييرات
+            </button>
+        </div>
+    </main>
+
+    <footer class="footer-shell">
+        <div class="footer-brand">VEXORIS SYSTEM</div>
+        <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+        <div class="footer-text">
+            تم برمجة النظام وتنفيذه بواسطة
+            <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+            <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+            <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+        </div>
+    </footer>
+
+    <div class="toast" id="toast"></div>
+
+    <script type="module">
+        import { supabase } from '../supabase-client.js';
+
+        // ============================================
+        // CONFIG
+        // ============================================
+        const ROLES = [
+            { key: 'super_admin', name: 'مالك النظام', color: '#a855f7' },
+            { key: 'admin',       name: 'مدير إداري', color: '#0ea5e9' },
+            { key: 'manager',     name: 'مدير طبي', color: '#6366f1' },
+            { key: 'auditor',     name: 'مدقق جودة', color: '#f59e0b' },
+            { key: 'senior',      name: 'أخصائي أول', color: '#10b981' },
+            { key: 'doctor',      name: 'طبيب', color: '#14b8a6' },
+            { key: 'viewer',      name: 'مشاهد', color: '#94a3b8' },
+        ];
+
+        const APPS = [
+            { id: 'medical-audit',     name: 'مراجعة الملفات الطبية', icon: 'fa-folder-medical', color: '#0ea5e9', soft: 'rgba(14,165,233,0.12)', category: 'سريرية' },
+            { id: 'emergency-audit',   name: 'مراجعة الطوارئ',        icon: 'fa-truck-medical', color: '#f59e0b', soft: 'rgba(245,158,11,0.12)', category: 'سريرية' },
+            { id: 'doctor-notes',      name: 'ملاحظات الأطباء',        icon: 'fa-kit-medical', color: '#10b981', soft: 'rgba(16,185,129,0.12)', category: 'سريرية' },
+            { id: 'discharge',         name: 'مؤشر الخروج',            icon: 'fa-sitemap', color: '#8b5cf6', soft: 'rgba(139,92,246,0.12)', category: 'سريرية' },
+            { id: 'stats-files',       name: 'إحصائيات الملفات',       icon: 'fa-chart-pie', color: '#06b6d4', soft: 'rgba(6,182,212,0.12)', category: 'تحليلات' },
+            { id: 'stats-departments', name: 'إحصائيات الأقسام',       icon: 'fa-hospital-user', color: '#f43f5e', soft: 'rgba(244,63,94,0.12)', category: 'تحليلات' },
+            { id: 'stats-quality',     name: 'إحصائيات الجودة',        icon: 'fa-award', color: '#eab308', soft: 'rgba(234,179,8,0.12)', category: 'تحليلات' },
+            { id: 'stats-emergency',   name: 'إحصائيات الطوارئ',       icon: 'fa-chart-column', color: '#ef4444', soft: 'rgba(239,68,68,0.12)', category: 'تحليلات' },
+            { id: 'workflow',          name: 'تتبع سير العمل',         icon: 'fa-route', color: '#6366f1', soft: 'rgba(99,102,241,0.12)', category: 'تحليلات' },
+            { id: 'courses',           name: 'الدورات التدريبية',      icon: 'fa-graduation-cap', color: '#0ea5e9', soft: 'rgba(14,165,233,0.12)', category: 'إدارة' },
+            { id: 'admin-users',       name: 'إدارة المستخدمين',       icon: 'fa-users-gear', color: '#a855f7', soft: 'rgba(168,85,247,0.12)', category: 'إدارة' },
+            { id: 'role-permissions',  name: 'التحكم في صلاحيات الأدوار', icon: 'fa-user-lock', color: '#ec4899', soft: 'rgba(236,72,153,0.12)', category: 'إدارة' },
+            { id: 'admin-logs',        name: 'سجل التدقيق',            icon: 'fa-clipboard-list', color: '#64748b', soft: 'rgba(100,116,139,0.12)', category: 'إدارة' },
+        ];
+
+        // ============================================
+        // STATE
+        // ============================================
+        let originalPerms = {}; // { "role::app_id": boolean }
+        let currentPerms = {};  // { "role::app_id": boolean }
+        let currentUserRole = null;
+        let isSuperAdmin = false;
+
+        // ============================================
+        // HELPERS
+        // ============================================
+        function key(role, appId) { return `${role}::${appId}`; }
+
+        window.toggleTheme = function() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        };
+
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            t.className = `toast ${type}`;
+            const icons = { success: 'fa-circle-check', error: 'fa-circle-xmark', warning: 'fa-triangle-exclamation' };
+            t.innerHTML = `<i class="fa-solid ${icons[type]}"></i> ${msg}`;
+            requestAnimationFrame(() => t.classList.add('show'));
+            setTimeout(() => t.classList.remove('show'), 4000);
+        }
+
+        function getChangesCount() {
+            let n = 0;
+            for (const k in currentPerms) {
+                if (originalPerms[k] !== currentPerms[k]) n++;
+            }
+            return n;
+        }
+
+        function updateSaveBar() {
+            const n = getChangesCount();
+            document.getElementById('changesCount').textContent = n;
+            const bar = document.getElementById('saveBar');
+            if (n > 0) bar.classList.add('show');
+            else bar.classList.remove('show');
+        }
+
+        // ============================================
+        // RENDER MATRIX
+        // ============================================
+        function renderMatrix() {
+            // Head
+            const head = document.getElementById('matrixHead');
+            head.innerHTML = '<tr>' +
+                '<th><i class="fa-solid fa-layer-group" style="margin-inline-end: 8px;"></i>التطبيق</th>' +
+                ROLES.map(r => `
+                    <th>
+                        <div class="role-header">
+                            <div class="role-dot" style="background: ${r.color}; box-shadow: 0 0 8px ${r.color}80;"></div>
+                            <div class="role-name" style="color: ${r.color};">${r.name}</div>
+                        </div>
+                    </th>
+                `).join('') +
+                '</tr>';
+
+            // Body
+            const body = document.getElementById('matrixBody');
+            body.innerHTML = APPS.map(app => {
+                const cells = ROLES.map(role => {
+                    const k = key(role.key, app.id);
+                    const checked = currentPerms[k] ? 'checked' : '';
+                    // منع تعديل صف super_admin إذا أنت مش super_admin
+                    const locked = (role.key === 'super_admin' && !isSuperAdmin) ? 'locked' : '';
+                    return `
+                        <td>
+                            <div class="perm-checkbox ${checked} ${locked}" data-role="${role.key}" data-app="${app.id}"></div>
+                        </td>
+                    `;
+                }).join('');
+
+                return `
+                    <tr>
+                        <td>
+                            <div class="app-cell" style="--app-color: ${app.color}; --app-soft: ${app.soft};">
+                                <div class="app-icon-sm"><i class="fa-solid ${app.icon}"></i></div>
+                                <div class="app-info-sm">
+                                    <div class="app-name-sm">${app.name}</div>
+                                    <div class="app-cat-sm">${app.category}</div>
+                                </div>
+                            </div>
+                        </td>
+                        ${cells}
+                    </tr>
+                `;
+            }).join('');
+
+            // Wire up checkboxes
+            body.querySelectorAll('.perm-checkbox:not(.locked)').forEach(el => {
+                el.addEventListener('click', () => {
+                    const role = el.dataset.role;
+                    const appId = el.dataset.app;
+                    const k = key(role, appId);
+                    currentPerms[k] = !currentPerms[k];
+
+                    el.classList.toggle('checked', currentPerms[k]);
+                    el.classList.toggle('changed', currentPerms[k] !== originalPerms[k]);
+                    updateSaveBar();
+                });
+            });
+        }
+
+        // ============================================
+        // LOAD & SAVE
+        // ============================================
+        async function loadPermissions() {
+            const { data, error } = await supabase
+                .from('role_permissions')
+                .select('role, app_id, allowed');
+
+            if (error) {
+                console.error('Load error:', error);
+                showToast('فشل تحميل الصلاحيات: ' + error.message, 'error');
+                return false;
+            }
+
+            originalPerms = {};
+            currentPerms = {};
+            data.forEach(row => {
+                const k = key(row.role, row.app_id);
+                originalPerms[k] = row.allowed;
+                currentPerms[k] = row.allowed;
+            });
+            return true;
+        }
+
+        async function savePermissions() {
+            const btn = document.getElementById('btnSave');
+            const n = getChangesCount();
+            if (n === 0) return;
+
+            btn.disabled = true;
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحفظ...';
+
+            // Collect changes
+            const updates = [];
+            for (const k in currentPerms) {
+                if (originalPerms[k] !== currentPerms[k]) {
+                    const [role, appId] = k.split('::');
+                    updates.push({
+                        role,
+                        app_id: appId,
+                        allowed: currentPerms[k],
+                        updated_at: new Date().toISOString(),
+                    });
+                }
+            }
+
+            // Save each
+            const { error } = await supabase
+                .from('role_permissions')
+                .upsert(updates, { onConflict: 'role,app_id' });
+
+            btn.disabled = false;
+            btn.innerHTML = orig;
+
+            if (error) {
+                console.error('Save error:', error);
+                showToast('فشل الحفظ: ' + error.message, 'error');
+                return;
+            }
+
+            // Update originals
+            for (const k in currentPerms) {
+                originalPerms[k] = currentPerms[k];
+            }
+
+            // Clear "changed" styling
+            document.querySelectorAll('.perm-checkbox.changed').forEach(el => {
+                el.classList.remove('changed');
+            });
+            updateSaveBar();
+            showToast(`تم حفظ ${n} تغيير بنجاح`, 'success');
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        (async () => {
+            // 1. Auth guard
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = '../login.html';
+                return;
+            }
+
+            // 2. Role guard
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
+
+            if (!profile || !['super_admin', 'admin'].includes(profile.role)) {
+                alert('ليس لديك صلاحية الوصول لهذه الصفحة.');
+                window.location.href = '../dashboard.html';
+                return;
+            }
+
+            currentUserRole = profile.role;
+            isSuperAdmin = profile.role === 'super_admin';
+
+            // 3. Load perms
+            const ok = await loadPermissions();
+            if (!ok) {
+                document.getElementById('loadingScreen').classList.add('hide');
+                return;
+            }
+
+            // 4. Render
+            renderMatrix();
+            updateSaveBar();
+
+            // 5. Wire buttons
+            document.getElementById('btnSave').addEventListener('click', savePermissions);
+
+            document.getElementById('btnReset').addEventListener('click', () => {
+                if (getChangesCount() === 0) return;
+                if (!confirm('هل تريد إلغاء جميع التغييرات غير المحفوظة؟')) return;
+                currentPerms = { ...originalPerms };
+                renderMatrix();
+                updateSaveBar();
+                showToast('تم استعادة الحالة الأصلية', 'warning');
+            });
+
+            // 6. Hide loading
+            document.getElementById('loadingScreen').classList.add('hide');
+
+            // 7. Warn on navigate away with unsaved changes
+            window.addEventListener('beforeunload', (e) => {
+                if (getChangesCount() > 0) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "vexoris-import-users",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.119.0",
+    "bcryptjs": "^3.0.3",
+    "csv-parser": "^3.2.1",
+    "dotenv": "^18.0.9"
+  }
+}

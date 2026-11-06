@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفعيل المصادقة الثنائية | VEXORIS System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+      if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+      }
+    </script>
+    <style>
+        :root {
+            --bg: #04070f;
+            --card-bg: rgba(15, 23, 42, 0.55);
+            --card-border: rgba(148, 163, 184, 0.12);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #0ea5e9;
+            --input-bg: rgba(15, 23, 42, 0.5);
+        }
+        html:not(.dark) {
+            --bg: #f5f8fc;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(148, 163, 184, 0.28);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --input-bg: rgba(255, 255, 255, 0.9);
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: var(--bg); color: var(--text-primary);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            padding: 20px; margin: 0;
+        }
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -2;
+            background: radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.18) 0%, transparent 60%),
+                        radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.16) 0%, transparent 60%);
+        }
+        .setup-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 40px 32px;
+            max-width: 540px; width: 100%;
+            box-shadow: 0 30px 60px -30px rgba(14, 165, 233, 0.35);
+            position: relative; overflow: hidden;
+        }
+        .setup-card::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, #0ea5e9, #6366f1, transparent);
+        }
+        .setup-icon {
+            width: 64px; height: 64px; border-radius: 18px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(99, 102, 241, 0.15));
+            border: 1px solid rgba(14, 165, 233, 0.35);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); font-size: 1.5rem;
+            margin: 0 auto 16px;
+        }
+        
+        /* كروت الاختيار */
+        .method-card {
+            background: var(--input-bg); border: 2px solid var(--card-border);
+            border-radius: 16px; padding: 20px; cursor: pointer;
+            transition: all 0.3s; display: flex; align-items: center; gap: 16px;
+            margin-bottom: 12px;
+        }
+        .method-card:hover {
+            border-color: var(--accent); transform: translateY(-2px);
+        }
+        .method-card.active {
+            border-color: var(--accent); background: rgba(14, 165, 233, 0.05);
+            box-shadow: 0 10px 25px -10px rgba(14, 165, 233, 0.3);
+        }
+        .method-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: rgba(148, 163, 184, 0.1); color: var(--text-secondary);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; transition: all 0.3s;
+        }
+        .method-card.active .method-icon, .method-card:hover .method-icon {
+            background: var(--accent); color: white;
+        }
+        .method-title { font-weight: 800; font-size: 0.95rem; color: var(--text-primary); }
+        .method-desc { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+        
+        .form-input {
+            width: 100%; padding: 12px 16px;
+            background: var(--input-bg); border: 1px solid var(--card-border);
+            border-radius: 11px; color: var(--text-primary);
+            font-size: 0.9rem; font-weight: 600; font-family: inherit;
+            transition: all 0.25s ease;
+        }
+        .form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12); }
+        
+        /* تنسيق خاص لحقل الكود */
+        .otp-input {
+            text-align: center; letter-spacing: 8px; font-size: 24px; font-weight: 700;
+            font-family: 'Space Grotesk', monospace; padding: 14px;
+        }
+        
+        .btn-submit {
+            width: 100%; background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+            color: white; font-weight: 800; font-size: 0.9rem;
+            border: none; border-radius: 12px; padding: 14px;
+            cursor: pointer; transition: all 0.3s; margin-top: 20px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.5); }
+        .btn-submit:disabled { opacity: 0.7; transform: none; cursor: not-allowed; }
+        
+        .error-msg {
+            background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171; padding: 10px; border-radius: 8px;
+            font-size: 0.8rem; font-weight: 600; margin-bottom: 16px; text-align: center;
+            display: none;
+        }
+        .qr-container {
+            background: white; padding: 16px; border-radius: 16px;
+            display: inline-block; margin: 10px auto 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .qr-container img, .qr-container svg { display: block; width: 180px; height: 180px; }
+        
+        .resend-btn {
+            background: transparent; border: none; color: var(--text-muted);
+            font-size: 0.75rem; font-weight: 700; margin-top: 12px;
+            cursor: pointer; text-decoration: underline; width: 100%;
+        }
+        .resend-btn:disabled { opacity: 0.5; cursor: not-allowed; text-decoration: none; }
+
+        .back-btn {
+            position: absolute; top: 20px; right: 20px;
+            background: transparent; border: none; color: var(--text-muted);
+            font-size: 0.8rem; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .back-btn:hover { color: var(--accent); }
+    </style>
+    <link rel="stylesheet" href="./theme-overrides.css" />
+</head>
+<body>
+    <div class="aurora-bg"></div>
+
+    <div class="setup-card">
+        <!-- الخطوة 1: اختيار الطريقة -->
+        <div id="selectionStep">
+            <div class="setup-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+            <h1 class="text-2xl font-black text-center mb-2">تفعيل المصادقة الثنائية</h1>
+            <p class="text-sm font-semibold text-center mb-6" style="color: var(--text-secondary);">
+                خطوة إلزامية لحماية حسابك. اختر طريقة استلام كود التحقق.
+            </p>
+
+            <!-- اختيار تطبيق Google Authenticator -->
+            <div class="method-card" onclick="selectMethod('totp')" id="card-totp">
+                <div class="method-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <div>
+                    <div class="method-title">تطبيق Google Authenticator</div>
+                    <div class="method-desc">أسرع وأكثر أماناً (يعمل بدون إنترنت)</div>
+                </div>
+            </div>
+
+            <!-- اختيار البريد الإلكتروني -->
+            <div class="method-card" onclick="selectMethod('email')" id="card-email">
+                <div class="method-icon"><i class="fa-regular fa-envelope"></i></div>
+                <div>
+                    <div class="method-title">البريد الإلكتروني</div>
+                    <div class="method-desc">استلام كود مكون من 6 أرقام على بريدك</div>
+                </div>
+            </div>
+
+            <!-- خيار SMS (قريباً) -->
+            <div class="method-card" style="opacity: 0.5; cursor: not-allowed;" title="يتطلب ربط مزود خدمة SMS">
+                <div class="method-icon"><i class="fa-solid fa-comment-sms"></i></div>
+                <div>
+                    <div class="method-title">رسالة نصية (SMS)</div>
+                    <div class="method-desc">قريباً - قيد الإعداد</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- الخطوة 2: إعداد TOTP -->
+        <div id="totpStep" style="display: none;">
+            <button class="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-right"></i> رجوع</button>
+            
+            <h2 class="text-xl font-black text-center mb-2">Google Authenticator</h2>
+            <p class="text-xs font-bold text-center mb-4" style="color: var(--text-secondary);">
+                افتح التطبيق على هاتفك، اضغط على (+) واختر "Scan a QR code"، ثم امسح الكود أدناه.
+            </p>
+
+            <div class="error-msg" id="totpError">حدث خطأ.</div>
+
+            <div class="text-center">
+                <div class="qr-container" id="qrCodeContainer"></div>
+                <p class="text-xs font-bold mb-1" style="color: var(--text-muted);">أو أدخل هذا المفتاح يدوياً:</p>
+                <div style="font-family: monospace; font-size: 12px; color: var(--text-secondary); background: var(--input-bg); padding: 8px; border-radius: 8px; border: 1px dashed var(--card-border); word-break: break-all; margin-bottom: 16px;">
+                    <span id="secretText">...</span>
+                </div>
+            </div>
+
+            <label class="block text-sm font-bold mb-2 text-center">أدخل الكود المكون من 6 أرقام:</label>
+            <input type="text" id="totpCode" class="form-input otp-input" maxlength="6" placeholder="------" autocomplete="off" inputmode="numeric">
+            
+            <button class="btn-submit" id="totpBtn" onclick="verifyTOTP()">
+                <i class="fa-solid fa-check"></i> تأكيد وتفعيل
+            </button>
+        </div>
+
+        <!-- الخطوة 3: إعداد الإيميل -->
+        <div id="emailStep" style="display: none;">
+            <button class="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-right"></i> رجوع</button>
+
+            <h2 class="text-xl font-black text-center mb-2">البريد الإلكتروني</h2>
+            <p class="text-xs font-bold text-center mb-4" style="color: var(--text-secondary);">
+                أدخل بريدك الإلكتروني الشخصي. سيتم ربط هذا البريد بحسابك لاستلام أكواد التحقق.
+            </p>
+
+            <div class="error-msg" id="emailError">حدث خطأ.</div>
+
+            <!-- حقل إدخال البريد الشخصي -->
+            <div style="margin-bottom: 16px;">
+                <label class="block text-sm font-bold mb-2 text-right" style="color: var(--text-secondary);">بريدك الإلكتروني الشخصي <span style="color: #ef4444;">*</span></label>
+                <input type="email" id="personalEmailInput" class="form-input" placeholder="name@example.com" style="text-align: left; direction: ltr;" required>
+                <p class="text-xs mt-1" style="color: var(--text-muted);">تنبيه: سيتم استبدال البريد الافتراضي للحساب بهذا البريد.</p>
+            </div>
+
+            <div id="emailSendSection">
+                <button class="btn-submit" id="sendCodeBtn" onclick="sendEmailOTP()">
+                    <i class="fa-solid fa-paper-plane"></i> إرسال كود التحقق
+                </button>
+            </div>
+
+            <div id="emailVerifySection" style="display: none;">
+                <label class="block text-sm font-bold mb-2 text-center mt-4">أدخل الكود المكون من 6 أرقام:</label>
+                <input type="text" id="emailCode" class="form-input otp-input" maxlength="6" placeholder="------" autocomplete="off" inputmode="numeric">
+                
+                <button class="btn-submit" id="verifyEmailBtn" onclick="verifyEmailOTP()">
+                    <i class="fa-solid fa-check"></i> تأكيد وتفعيل
+                </button>
+
+                <button onclick="sendEmailOTP()" id="resendBtn" class="resend-btn">
+                    إعادة إرسال الكود
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-client.js';
+
+        let currentUser = null;
+        let factorId = '';
+        let chosenMethod = '';
+        let targetEmail = '';
+
+        // 1. التأكد من تسجيل الدخول وحالة المستخدم
+        (async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = './login.html';
+                return;
+            }
+            
+            currentUser = session.user;
+            const meta = currentUser.user_metadata || {};
+
+            // لو المستخدم مفعل MFA بالفعل، يروح للداشبورد
+            if (meta.mfa_method) {
+                window.location.href = './dashboard.html';
+                return;
+            }
+        })();
+
+        // 2. اختيار الطريقة
+        window.selectMethod = function(method) {
+            chosenMethod = method;
+            
+            document.getElementById('card-totp').classList.remove('active');
+            document.getElementById('card-email').classList.remove('active');
+            document.getElementById('card-' + method).classList.add('active');
+
+            document.getElementById('selectionStep').style.display = 'none';
+            
+            if (method === 'totp') {
+                document.getElementById('totpStep').style.display = 'block';
+                enrollTOTP();
+            } else {
+                document.getElementById('emailStep').style.display = 'block';
+            }
+        };
+
+        // دالة الرجوع
+        window.goBack = function() {
+            document.getElementById('selectionStep').style.display = 'block';
+            document.getElementById('totpStep').style.display = 'none';
+            document.getElementById('emailStep').style.display = 'none';
+            document.getElementById('card-totp').classList.remove('active');
+            document.getElementById('card-email').classList.remove('active');
+        };
+
+        // ================== TOTP (Google Authenticator) ==================
+        async function enrollTOTP() {
+            const { data, error } = await supabase.auth.mfa.enroll({
+                factorType: 'totp',
+                friendlyName: 'VEXORIS App'
+            });
+
+            if (error) {
+                document.getElementById('totpError').textContent = 'فشل التجهيز: ' + error.message;
+                document.getElementById('totpError').style.display = 'block';
+                return;
+            }
+
+            factorId = data.id;
+            document.getElementById('qrCodeContainer').innerHTML = data.totp.qr_code;
+            document.getElementById('secretText').textContent = data.totp.secret;
+        }
+
+        window.verifyTOTP = async function() {
+            const code = document.getElementById('totpCode').value.trim();
+            const btn = document.getElementById('totpBtn');
+            const errorBox = document.getElementById('totpError');
+
+            if (code.length !== 6 || isNaN(code)) {
+                errorBox.textContent = 'يرجى إدخال 6 أرقام صحيحة.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري التحقق...';
+            errorBox.style.display = 'none';
+
+            const { data: challenge, error: chErr } = await supabase.auth.mfa.challenge({ factorId });
+            if (chErr) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> تأكيد وتفعيل';
+                errorBox.textContent = 'خطأ: ' + chErr.message;
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            const { error: vErr } = await supabase.auth.mfa.verify({
+                factorId,
+                challengeId: challenge.id,
+                code: code
+            });
+
+            if (vErr) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> تأكيد وتفعيل';
+                errorBox.textContent = 'الكود غير صحيح. تأكد من الوقت في هاتفك.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            await saveMfaMethod('totp', btn);
+        };
+
+        // ================== Email OTP ==================
+        window.sendEmailOTP = async function() {
+            const btn = document.getElementById('sendCodeBtn');
+            const resendBtn = document.getElementById('resendBtn');
+            const errorBox = document.getElementById('emailError');
+            const personalEmailInput = document.getElementById('personalEmailInput');
+            
+            if (personalEmailInput && personalEmailInput.value) {
+                targetEmail = personalEmailInput.value.trim();
+            }
+
+            if (!targetEmail || !targetEmail.includes('@')) {
+                errorBox.textContent = 'يرجى إدخال بريد إلكتروني صحيح.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الإرسال...';
+            }
+            if (resendBtn) resendBtn.disabled = true;
+            errorBox.style.display = 'none';
+
+            const { error } = await supabase.auth.updateUser({ email: targetEmail });
+
+            if (error) {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> إرسال كود التحقق';
+                }
+                if (resendBtn) resendBtn.disabled = false;
+                errorBox.textContent = 'فشل الإرسال: ' + error.message;
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            document.getElementById('emailSendSection').style.display = 'none';
+            document.getElementById('emailVerifySection').style.display = 'block';
+            
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> إرسال كود التحقق';
+            }
+            
+            if (resendBtn) {
+                let timeLeft = 30;
+                resendBtn.textContent = `إعادة إرسال الكود (${timeLeft}s)`;
+                
+                const timer = setInterval(() => {
+                    timeLeft--;
+                    resendBtn.textContent = `إعادة إرسال الكود (${timeLeft}s)`;
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        resendBtn.disabled = false;
+                        resendBtn.textContent = 'إعادة إرسال الكود';
+                    }
+                }, 1000);
+            }
+        };
+
+        window.verifyEmailOTP = async function() {
+            const code = document.getElementById('emailCode').value.trim();
+            const btn = document.getElementById('verifyEmailBtn');
+            const errorBox = document.getElementById('emailError');
+
+            if (code.length !== 6 || isNaN(code)) {
+                errorBox.textContent = 'يرجى إدخال 6 أرقام صحيحة.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري التحقق...';
+            errorBox.style.display = 'none';
+
+            const { error } = await supabase.auth.verifyOtp({
+                email: targetEmail,
+                token: code,
+                type: 'email_change'
+            });
+
+            if (error) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> تأكيد وتفعيل';
+                errorBox.textContent = 'الكود غير صحيح أو انتهت صلاحيته.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            await saveMfaMethod('email', btn, targetEmail);
+        };
+
+        // ================== حفظ الطريقة وتحديث جدول profiles ==================
+        async function saveMfaMethod(method, btn, personalEmail = null) {
+            const updateData = { mfa_method: method };
+            
+            if (method === 'email' && personalEmail) {
+                updateData.mfa_email = personalEmail; // حفظ البريد الشخصي
+            }
+
+            // 1. تحديث بيانات الـ Auth
+            const { error } = await supabase.auth.updateUser({
+                data: updateData
+            });
+
+            if (error) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> تأكيد وتفعيل';
+                console.error(error);
+                alert('حدث خطأ في الحفظ. يرجى المحاولة مرة أخرى.');
+                return;
+            }
+
+            // 2. تحديث جدول profiles بالإيميل الجديد (المهم جداً)
+            if (method === 'email' && personalEmail) {
+                await supabase
+                    .from('profiles')
+                    .update({ email: personalEmail })
+                    .eq('id', currentUser.id);
+            }
+
+            // نجاح
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> تم التفعيل بنجاح!';
+            btn.style.background = '#10b981';
+            
+            setTimeout(() => {
+                window.location.href = './dashboard.html';
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
