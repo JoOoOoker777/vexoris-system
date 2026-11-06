@@ -18,10 +18,10 @@
 <body class="min-h-screen flex flex-col justify-between bg-grid-pattern selection:bg-sky-500 selection:text-slate-950">
 
     <!-- App Container Fixed at 80% Width -->
-    <div class="app-container flex flex-col min-h-screen">
+    <div class="app-container flex flex-col min-h-screen justify-between">
         
         <!-- Unified Navbar Header -->
-        <header class="custom-card sticky top-0 z-50 px-8 py-4 my-4 rounded-2xl flex items-center justify-between border">
+        <header class="custom-card sticky top-0 z-50 px-8 py-3 my-3 rounded-2xl flex items-center justify-between border">
             <!-- Brand Logo & Subtitle -->
             <div class="flex items-center gap-3">
                 <div class="w-3.5 h-3.5 rounded-full bg-sky-500 shadow-md shadow-sky-500/50 animate-pulse"></div>
@@ -33,11 +33,11 @@
             
             <!-- Center Navigation Links -->
             <nav class="hidden md:flex items-center gap-6 text-sm font-semibold tracking-wide">
-                <a href="index.html" class="text-sky-500 font-bold transition-colors">Home</a>
-                <a href="about.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">Targets</a>
-                <a href="contact.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">Contact</a>
-                <a href="courses.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">Training</a>
-                <a href="feedback.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">Complaint</a>
+                <a href="index.html" class="text-sky-500 font-bold transition-colors">الرئيسية</a>
+                <a href="about.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">عن النظام</a>
+                <a href="contact.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">تواصل معنا</a>
+                <a href="courses.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">دورات تدريبية</a>
+                <a href="feedback.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">رأيك يهمنا</a>
             </nav>
 
             <!-- Action Controls -->
@@ -49,44 +49,78 @@
             </div>
         </header>
 
-        <!-- Main Landing Showcase -->
-        <main class="flex-grow flex items-center justify-center py-12 px-4">
-            <div class="w-full text-center flex flex-col items-center">
+        <!-- Main Landing Showcase with Balanced Grid -->
+        <main class="flex-grow flex items-center py-6 px-4">
+            <div class="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                 
-                <!-- Badge Tag -->
-                <div class="inline-flex items-center gap-2.5 px-6 py-2 rounded-full custom-card text-xs font-black tracking-widest text-sky-500 mb-8 border border-sky-500/35 shadow-lg">
-                    <span class="w-2.5 h-2.5 rounded-full bg-sky-500 animate-ping"></span>
-                    <span>إدارة السجلات الطبية المركزي لمستشفي الجنزوري التخصصي</span>
+                <!-- القسم الأيمن: الترحيب والوصف المتناسق (8 أعمدة) -->
+                <div class="lg:col-span-8 flex flex-col items-start text-right">
+                    <!-- Badge Tag -->
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full custom-card text-xs font-black tracking-wider text-sky-500 mb-5 border border-sky-500/35 shadow-md">
+                        <span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span>
+                        <span>إدارة السجلات الطبية المركزي لمستشفي الجنزوري التخصصي</span>
+                    </div>
+
+                    <!-- Main Display Title -->
+                    <h1 class="text-3xl sm:text-4xl font-black tracking-tight mb-5 leading-snug">
+                        نظام <span class="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 bg-clip-text text-transparent">VEXORIS</span> لإدارة السجلات الطبية
+                    </h1>
+
+                    <!-- Professional System Overview Description -->
+                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-bold opacity-90">
+                        تم بناء نظام VEXORIS ليواكب أحدث التقنيات الإلكترونية كنظام ذكي مخصص لمراجعة وتدقيق جودة الملفات الطبية ونماذج الطوارئ، وتحليل مخرجات الأداء، وإنشاء الإحصائيات الاحترافية بما يضمن دقة التوثيق الطبي والحد من الثغرات الإدارية والإحصائية للوصول بالمنشأة الطبية إلى أعلى مستويات النزاهة والدقة والاحترافية والجودة وتصفية عيوب الإدخال البشري بشكل استباقي. كما تم إضافة أحدث معايير الامان والحماية القصوي للحفاظ علي سرية وآمان بيانات المرضي المتواجده بالنظام.
+                    </p>
                 </div>
 
-                <!-- Main Display Title -->
-                <h1 class="text-4xl sm:text-6xl font-black tracking-tight mb-8 leading-tight">
-                    نظام <span class="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 bg-clip-text text-transparent">VEXORIS</span> لإدارة السجلات الطبية
-                </h1>
-
-                <!-- Professional System Overview Description -->
-                <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed font-bold opacity-90">
-                    تم بناء نظام VEXORIS ليواكب أحدث التقنيات الإلكترونية كنظام ذكي مخصص لمراجعة وتدقيق جودة الملفات الطبية ونماذج الطوارئ، وتحليل مخرجات الأداء، وإنشاء الإحصائيات الاحترافية بما يضمن دقة التوثيق الطبي والحد من الثغرات الإدارية والإحصائية للوصول بالمنشأة الطبية إلى أعلى مستويات النزاهة والدقة والاحترافية والجودة وتصفية عيوب الإدخال البشري بشكل استباقي. كما تم إضافة أحدث معايير الامان والحماية القصوي للحفاظ علي سرية وآمان بيانات المرضي المتواجده بالنظام
-                </p>
+                <!-- القسم الأيسر: الكارت الجانبي لأهم خمس وحدات (4 أعمدة) -->
+                <div class="lg:col-span-4">
+                    <div class="custom-card p-5 rounded-2xl border border-sky-500/30 shadow-xl">
+                        <h3 class="text-sm font-black text-sky-500 mb-4 pb-2 border-b border-slate-700/30 flex items-center gap-2">
+                            <i class="fa-solid fa-layer-group"></i> أهم وحدات النظام الرئيسية
+                        </h3>
+                        <ul class="space-y-2.5 text-xs font-bold">
+                            <li class="flex items-center gap-2 p-2 rounded-xl bg-sky-500/5 hover:bg-sky-500/10 transition-colors">
+                                <span class="w-5 h-5 rounded-lg bg-sky-500/20 text-sky-500 flex items-center justify-center font-black text-[10px]">1</span>
+                                <span>المراجعة الطبية لملفات المرضي</span>
+                            </li>
+                            <li class="flex items-center gap-2 p-2 rounded-xl bg-sky-500/5 hover:bg-sky-500/10 transition-colors">
+                                <span class="w-5 h-5 rounded-lg bg-sky-500/20 text-sky-500 flex items-center justify-center font-black text-[10px]">2</span>
+                                <span>المراجعة الطبية لشيتات الطوارئ</span>
+                            </li>
+                            <li class="flex items-center gap-2 p-2 rounded-xl bg-sky-500/5 hover:bg-sky-500/10 transition-colors">
+                                <span class="w-5 h-5 rounded-lg bg-sky-500/20 text-sky-500 flex items-center justify-center font-black text-[10px]">3</span>
+                                <span> تقارير الأداء والإحصائيات</span>
+                            </li>
+                            <li class="flex items-center gap-2 p-2 rounded-xl bg-sky-500/5 hover:bg-sky-500/10 transition-colors">
+                                <span class="w-5 h-5 rounded-lg bg-sky-500/20 text-sky-500 flex items-center justify-center font-black text-[10px]">4</span>
+                                <span>دورات تدريبية متخصصة</span>
+                            </li>
+                            <li class="flex items-center gap-2 p-2 rounded-xl bg-sky-500/5 hover:bg-sky-500/10 transition-colors">
+                                <span class="w-5 h-5 rounded-lg bg-sky-500/20 text-sky-500 flex items-center justify-center font-black text-[10px]">5</span>
+                                <span>وحدة مركزية مدمجة للامن المعلوماتي وحماية البيانات</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 
             </div>
         </main>
 
-        <!-- Enterprise Footer -->
-       <footer class="glass-panel p-6 text-center rounded-t-3xl mt-6 w-full max-w-[80%] mx-auto border-b-0 flex flex-col gap-2.5 justify-center items-center">
-    <div class="text-base font-black tracking-[0.25em] uppercase text-primary dark:text-accent drop-shadow-sm font-sans transition-colors duration-300">
-      Vexoris System
-    </div>
-    <div class="text-xs font-bold text-slate-500 dark:text-slate-400 transition-colors duration-300">
-      جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©
-    </div>
-    <div class="text-[11px] font-black text-slate-400 dark:text-slate-500 transition-colors duration-300">
-      تم برمجة النظام وتنفيذه بواسطة: 
-      <span class="text-indigo-600 dark:text-indigo-400 font-black mx-1 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-md transition-colors duration-300">أ/ نادية عادل</span> 
-      - 
-      <span class="text-teal-600 dark:text-teal-400 font-black mx-1 bg-teal-50 dark:bg-teal-950/40 px-2 py-0.5 rounded-md transition-colors duration-300">أ/ خالد شوقي</span>
-    </div>
-  </footer>
+        <!-- Enterprise Footer (Compact & Optimized) -->
+        <footer class="glass-panel py-3 px-4 text-center rounded-2xl my-3 w-full border flex flex-col gap-1 justify-center items-center">
+            <div class="text-xs font-black tracking-[0.2em] uppercase text-primary dark:text-accent drop-shadow-sm font-sans">
+                Vexoris System
+            </div>
+            <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©
+            </div>
+            <div class="text-[10px] font-black text-slate-400 dark:text-slate-500">
+                تم برمجة النظام وتنفيذه بواسطة: 
+                <span class="text-indigo-600 dark:text-indigo-400 font-black mx-1 bg-indigo-50 dark:bg-indigo-950/40 px-1.5 py-0.5 rounded-md">أ/ نادية عادل</span> 
+                - 
+                <span class="text-teal-600 dark:text-teal-400 font-black mx-1 bg-teal-50 dark:bg-teal-950/40 px-1.5 py-0.5 rounded-md">أ/ خالد شوقي</span>
+            </div>
+        </footer>
     </div>
 
     <script>
