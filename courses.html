@@ -1,1 +1,1024 @@
 
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الدورات التدريبية | VEXORIS System</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+      if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg: #04070f;
+            --card-bg: rgba(15, 23, 42, 0.55);
+            --card-border: rgba(148, 163, 184, 0.12);
+            --card-border-hover: rgba(14, 165, 233, 0.45);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #0ea5e9;
+            --accent-2: #6366f1;
+            --accent-3: #8b5cf6;
+            --glow: rgba(14, 165, 233, 0.15);
+            --input-bg: rgba(15, 23, 42, 0.5);
+        }
+        html:not(.dark) {
+            --bg: #f5f8fc;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(148, 163, 184, 0.28);
+            --card-border-hover: rgba(14, 165, 233, 0.6);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --glow: rgba(14, 165, 233, 0.12);
+            --input-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Tajawal', system-ui, sans-serif;
+            background: var(--bg); color: var(--text-primary);
+            transition: background 0.4s ease, color 0.4s ease;
+            min-height: 100vh; overflow-x: hidden;
+        }
+
+        /* BG */
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.16) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.14) 0%, transparent 65%);
+        }
+        html:not(.dark) .aurora-bg {
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.07) 0%, transparent 65%);
+        }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+        }
+        html:not(.dark) .grid-overlay {
+            background-image:
+                linear-gradient(to right, rgba(15, 23, 42, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+        }
+
+        .scroll-progress {
+            position: fixed; top: 0; right: 0; height: 2px; width: 0%; z-index: 100;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.6);
+            transition: width 0.1s linear;
+        }
+
+        /* NAVBAR */
+        .nav-shell {
+            position: sticky; top: 12px; z-index: 50;
+            margin: 12px auto 0; max-width: 1200px; padding: 0 16px;
+        }
+        .nav-inner {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 18px; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .logo-dot {
+            position: relative; width: 12px; height: 12px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18), 0 0 20px rgba(14, 165, 233, 0.7);
+            flex-shrink: 0;
+        }
+        .logo-dot::before {
+            content: ''; position: absolute; inset: -3px; border-radius: 50%;
+            border: 1px solid rgba(14, 165, 233, 0.5);
+            animation: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes ping {
+            0% { transform: scale(1); opacity: 0.9; }
+            100% { transform: scale(2.4); opacity: 0; }
+        }
+        .brand-text {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: 0.18em;
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 40%, #6366f1 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .nav-link {
+            position: relative; color: var(--text-secondary); font-weight: 600;
+            font-size: 0.875rem; padding: 6px 2px; transition: color 0.3s ease;
+        }
+        .nav-link:hover { color: var(--accent); }
+        .nav-link.active { color: var(--accent); font-weight: 800; }
+        .nav-link.active::after {
+            content: ''; position: absolute; bottom: -2px; right: 0; left: 0; height: 2px; border-radius: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+        .icon-btn {
+            width: 36px; height: 36px; border-radius: 10px;
+            border: 1px solid var(--card-border); background: transparent; color: var(--accent);
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .icon-btn:hover {
+            background: rgba(14, 165, 233, 0.1);
+            border-color: rgba(14, 165, 233, 0.4);
+            transform: rotate(15deg);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+            color: #fff; border: none; padding: 10px 22px; border-radius: 10px;
+            font-weight: 800; font-size: 0.8rem; cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(14, 165, 233, 0.3);
+            text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(99, 102, 241, 0.45); }
+
+        /* CONTAINER */
+        .app-container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+        /* HERO */
+        .hero-split {
+            display: grid; grid-template-columns: 1fr;
+            gap: 32px; align-items: center;
+            padding: 40px 0 24px;
+        }
+        @media (min-width: 900px) {
+            .hero-split { grid-template-columns: 1.35fr 1fr; gap: 48px; padding: 48px 0 32px; }
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 7px 18px; border-radius: 999px;
+            background: rgba(14, 165, 233, 0.08);
+            border: 1px solid rgba(14, 165, 233, 0.25);
+            color: var(--accent); font-size: 0.7rem; font-weight: 800;
+            letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 18px;
+        }
+        .hero-badge .pulse-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent); box-shadow: 0 0 10px var(--accent);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+        .hero-title {
+            font-size: clamp(1.9rem, 4vw, 3rem);
+            font-weight: 900; letter-spacing: -0.02em;
+            line-height: 1.2; margin-bottom: 16px;
+        }
+        .hero-title .grad {
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 35%, #6366f1 70%, #8b5cf6 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            background-size: 200% 200%; animation: gradShift 6s ease infinite;
+        }
+        @keyframes gradShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .hero-desc {
+            color: var(--text-secondary); font-size: 0.92rem; font-weight: 500;
+            line-height: 1.85; margin-bottom: 24px; max-width: 620px;
+        }
+
+        /* Hero stats */
+        .hero-stats {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+        }
+        .hero-stat {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 20px 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative; overflow: hidden;
+        }
+        .hero-stat::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.4; transition: opacity 0.3s ease;
+        }
+        .hero-stat:hover {
+            border-color: var(--card-border-hover);
+            transform: translateY(-3px);
+        }
+        .hero-stat:hover::before { opacity: 1; }
+        .hero-stat .num {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, #22d3ee, #6366f1);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            display: block; margin-bottom: 4px; line-height: 1;
+        }
+        .hero-stat .lbl {
+            font-size: 0.7rem; font-weight: 700; color: var(--text-secondary);
+        }
+
+        /* SECTION HEAD */
+        .section-head {
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 22px; padding-bottom: 14px;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .section-icon {
+            width: 42px; height: 42px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 1rem;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(99, 102, 241, 0.18));
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            color: var(--accent);
+        }
+        .section-title { font-size: 1.15rem; font-weight: 900; letter-spacing: -0.01em; }
+        .section-sub {
+            font-size: 0.72rem; color: var(--text-muted);
+            font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px;
+        }
+
+        /* FILTERS */
+        .filters-row {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; flex-wrap: wrap; margin-bottom: 24px;
+        }
+        .filters {
+            display: flex; flex-wrap: wrap; gap: 8px;
+        }
+        .filter-btn {
+            padding: 9px 18px; border-radius: 10px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            font-family: inherit; font-weight: 700; font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex; align-items: center; gap: 7px;
+        }
+        .filter-btn:hover {
+            border-color: var(--card-border-hover);
+            color: var(--accent);
+        }
+        .filter-btn.active {
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 6px 18px -6px rgba(14, 165, 233, 0.5);
+        }
+        .filter-btn .count {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.68rem; font-weight: 700;
+            padding: 1px 6px; border-radius: 5px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .filter-btn:not(.active) .count {
+            background: rgba(148, 163, 184, 0.15);
+            color: var(--text-muted);
+        }
+        .results-info {
+            font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .results-info strong {
+            color: var(--accent); font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* COURSES GRID */
+        .courses-grid {
+            display: grid; grid-template-columns: 1fr; gap: 18px;
+        }
+        @media (min-width: 640px) {
+            .courses-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 1024px) {
+            .courses-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        /* COURSE CARD */
+        .course-card {
+            --card-accent: #0ea5e9;
+            --card-accent-soft: rgba(14, 165, 233, 0.12);
+            position: relative;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 24px 22px 20px;
+            overflow: hidden;
+            display: flex; flex-direction: column; gap: 14px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .course-card::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, var(--card-accent), transparent);
+            opacity: 0.75;
+            transition: opacity 0.3s ease;
+        }
+        .course-card::after {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(circle at 100% 0%, var(--card-accent-soft) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+        .course-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--card-accent);
+            box-shadow: 0 24px 48px -20px var(--card-accent-soft);
+        }
+        .course-card:hover::before { opacity: 1; }
+        .course-card:hover::after { opacity: 1; }
+
+        .course-top {
+            display: flex; align-items: center; justify-content: space-between;
+            position: relative; z-index: 1;
+        }
+        .course-icon {
+            width: 48px; height: 48px; border-radius: 13px;
+            background: var(--card-accent-soft);
+            border: 1px solid var(--card-accent);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--card-accent);
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .course-card:hover .course-icon {
+            background: var(--card-accent);
+            color: #fff;
+            transform: scale(1.08) rotate(-6deg);
+            box-shadow: 0 8px 20px -6px var(--card-accent-soft);
+        }
+        .course-category {
+            font-size: 0.62rem; font-weight: 800;
+            padding: 4px 10px; border-radius: 6px;
+            background: var(--card-accent-soft);
+            color: var(--card-accent);
+            border: 1px solid var(--card-accent);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .course-body {
+            display: flex; flex-direction: column; gap: 8px;
+            position: relative; z-index: 1;
+            flex: 1;
+        }
+        .course-title {
+            font-size: 1rem; font-weight: 900;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+        .course-desc {
+            font-size: 0.78rem; font-weight: 500;
+            color: var(--text-secondary);
+            line-height: 1.75;
+        }
+
+        .course-meta {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--card-border);
+            position: relative; z-index: 1;
+        }
+        .meta-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 0.68rem; font-weight: 700;
+            color: var(--text-muted);
+            padding: 3px 8px; border-radius: 6px;
+            background: rgba(148, 163, 184, 0.06);
+        }
+        .meta-chip i { font-size: 0.62rem; color: var(--card-accent); }
+
+        /* PDF Button */
+        .btn-pdf {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 10px;
+            padding: 11px 16px;
+            border-radius: 11px;
+            background: var(--card-accent-soft);
+            border: 1px solid var(--card-accent);
+            color: var(--card-accent);
+            font-family: inherit;
+            font-size: 0.78rem; font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; z-index: 1;
+            margin-top: auto;
+        }
+        .btn-pdf:hover {
+            background: var(--card-accent);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px -8px var(--card-accent-soft);
+        }
+        .btn-pdf .pdf-label {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .btn-pdf .pdf-icon {
+            font-size: 0.9rem;
+        }
+        .btn-pdf .pdf-arrow {
+            font-size: 0.72rem; opacity: 0.7;
+            transition: transform 0.3s ease;
+        }
+        .btn-pdf:hover .pdf-arrow { opacity: 1; transform: translate(-3px, -3px); }
+
+        /* Empty state (when filter hides all) */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--card-bg);
+            border: 1px dashed var(--card-border);
+            border-radius: 20px;
+            display: none;
+        }
+        .empty-state.show { display: block; }
+        .empty-state i {
+            font-size: 2.5rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: block;
+        }
+        .empty-state h3 {
+            font-size: 1rem; font-weight: 900;
+            color: var(--text-primary); margin-bottom: 6px;
+        }
+        .empty-state p {
+            font-size: 0.82rem; font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* CTA BANNER */
+        .cta-banner {
+            margin-top: 40px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(99, 102, 241, 0.08) 100%);
+            border: 1px solid rgba(14, 165, 233, 0.25);
+            border-radius: 24px;
+            padding: 32px 28px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 24px; flex-wrap: wrap;
+            position: relative; overflow: hidden;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .cta-banner::before {
+            content: ''; position: absolute; top: -50%; right: -10%;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(14, 165, 233, 0.2) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none;
+        }
+        .cta-content { position: relative; z-index: 1; max-width: 560px; }
+        .cta-title {
+            font-size: 1.3rem; font-weight: 900;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        .cta-desc {
+            font-size: 0.85rem; font-weight: 600;
+            color: var(--text-secondary); line-height: 1.7;
+        }
+        .cta-actions {
+            display: flex; gap: 10px; flex-wrap: wrap;
+            position: relative; z-index: 1;
+        }
+        .btn-ghost {
+            padding: 12px 24px; border-radius: 11px;
+            font-weight: 800; font-size: 0.82rem;
+            cursor: pointer; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 8px;
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+            background: var(--card-bg);
+            transition: all 0.3s ease;
+        }
+        .btn-ghost:hover {
+            border-color: rgba(14, 165, 233, 0.45);
+            background: rgba(14, 165, 233, 0.06);
+            color: var(--accent);
+        }
+        .cta-actions .btn-primary {
+            padding: 12px 26px; font-size: 0.82rem;
+        }
+
+        /* FOOTER */
+        .footer-shell {
+            max-width: 1200px; margin: 24px auto;
+            padding: 22px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px; text-align: center;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        }
+        .footer-brand {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            letter-spacing: 0.35em; font-size: 0.75rem;
+            background: linear-gradient(135deg, #22d3ee, #6366f1);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .footer-text { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+        .credit-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-weight: 800; font-size: 0.7rem; }
+        .credit-indigo { color: #a5b4fc; background: rgba(99, 102, 241, 0.12); }
+        .credit-teal { color: #5eead4; background: rgba(20, 184, 166, 0.12); }
+
+        /* ANIMATIONS */
+        [data-animate] {
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        [data-animate].in-view { opacity: 1; transform: translateY(0); }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+            html { scroll-behavior: auto; }
+        }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4));
+            border-radius: 10px; border: 2px solid var(--bg);
+        }
+        ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="scroll-progress" id="scrollProgress"></div>
+    <div class="aurora-bg"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- ================= NAVBAR ================= -->
+    <div class="nav-shell">
+        <header class="nav-inner">
+            <div class="flex items-center gap-3">
+                <div class="logo-dot"></div>
+                <div>
+                    <a href="index.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
+                </div>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-7">
+                <a href="index.html" class="nav-link">الرئيسية</a>
+                <a href="about.html" class="nav-link">عن النظام</a>
+                <a href="contact.html" class="nav-link">تواصل معنا</a>
+                <a href="courses.html" class="nav-link active">دورات تدريبية</a>
+                <a href="feedback.html" class="nav-link">رأيك يهمنا</a>
+            </nav>
+
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم" aria-label="تبديل الثيم">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </button>
+                <a href="login.html" class="btn-primary">تسجيل الدخول</a>
+            </div>
+        </header>
+    </div>
+
+    <main class="app-container">
+
+        <!-- HERO -->
+        <section class="hero-split" data-animate>
+            <div>
+                <div class="hero-badge">
+                    <span class="pulse-dot"></span>
+                    Training Academy
+                </div>
+                <h1 class="hero-title">
+                    الدورات التدريبية<br>
+                    <span class="grad">لإدارة السجلات الطبية</span>
+                </h1>
+                <p class="hero-desc">
+                    برنامج تدريبي متكامل مصمّم لإعداد وتأهيل الكوادر الطبية والإدارية على أعلى معايير التوثيق والجودة في إدارة السجلات الطبية. كل دورة معتمدة ومرفقة بدليل PDF مفصّل يغطي المنهج كاملاً والمتطلبات والشهادات.
+                </p>
+            </div>
+
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="num">8</span>
+                    <span class="lbl">دورات معتمدة</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="num">4</span>
+                    <span class="lbl">مسارات تدريبية</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="num">+500</span>
+                    <span class="lbl">متدرب سنوياً</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="num">PDF</span>
+                    <span class="lbl">دليل لكل دورة</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- COURSES -->
+        <section style="margin-top: 32px;" data-animate>
+            <div class="section-head">
+                <div class="section-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                <div>
+                    <div class="section-title">كتالوج الدورات التدريبية</div>
+                    <div class="section-sub">Courses Catalog</div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-row">
+                <div class="filters" id="filters">
+                    <button class="filter-btn active" data-filter="all">
+                        <i class="fa-solid fa-layer-group"></i>
+                        الكل
+                        <span class="count" data-count="all">8</span>
+                    </button>
+                    <button class="filter-btn" data-filter="basics">
+                        <i class="fa-solid fa-book-medical"></i>
+                        أساسيات
+                        <span class="count" data-count="basics">2</span>
+                    </button>
+                    <button class="filter-btn" data-filter="audit">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        تدقيق ومراجعة
+                        <span class="count" data-count="audit">2</span>
+                    </button>
+                    <button class="filter-btn" data-filter="quality">
+                        <i class="fa-solid fa-award"></i>
+                        جودة واعتماد
+                        <span class="count" data-count="quality">2</span>
+                    </button>
+                    <button class="filter-btn" data-filter="tech">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        تقنية وأمن
+                        <span class="count" data-count="tech">2</span>
+                    </button>
+                </div>
+                <div class="results-info">
+                    <i class="fa-solid fa-circle-check" style="color:#10b981;"></i>
+                    عرض <strong id="resultsCount">8</strong> دورة
+                </div>
+            </div>
+
+            <!-- Grid -->
+            <div class="courses-grid" id="coursesGrid">
+
+                <!-- 01: Basics -->
+                <article class="course-card" data-category="basics"
+                    style="--card-accent: #0ea5e9; --card-accent-soft: rgba(14, 165, 233, 0.12);">
+                    <div class="course-top">
+                        <div class="course-icon"><i class="fa-solid fa-book-medical"></i></div>
+                        <span class="course-category">أساسيات</span>
+                    </div>
+                    <div class="course-body">
+                        <h3 class="course-title">أساسيات إدارة السجلات الطبية</h3>
+                        <p class="course-desc">مدخل شامل إلى علم إدارة السجلات الطبية: التعريف، الهيكل التنظيمي، دورة حياة الملف الطبي، وحقوق المريض.</p>
+                    </div>
+                    <div class="course-meta">
+                        <span class="meta-chip"><i class="fa-solid fa-clock"></i> 8 ساعات</span>
+                        <span class="meta-chip"><i class="fa-solid fa-layer-group"></i> 12 درس</span>
+                        <span class="meta-chip"><i class="fa-solid fa-signal"></i> مبتدئ</span>
+                    </div>
+                    <!-- ✏️ غيّر الرابط إلى ملف PDF الحقيقي -->
+                    <a href="assets/pdfs/course-01-basics.pdf" target="_blank" rel="noopener" class="btn-pdf">
+                        <span class="pdf-label">
+                            <i class="fa-solid fa-file-pdf pdf-icon"></i>
+                            عرض دليل الدورة PDF
+                        </span>
+                        <i class="fa-solid fa-arrow-up-right-from-square pdf-arrow"></i>
+                    </a>
+                </article>
+
+                <!-- 02: Basics -->
+                <article class="course-card" data-category="basics"
+                    style="--card-accent: #0ea5e9; --card-accent-soft: rgba(14, 165, 233, 0.12);">
+                    <div class="course-top">
+                        <div class="course-icon"><i class="fa-solid fa-laptop-medical"></i></div>
+                        <span class="course-category">أساسيات</span>
+                    </div>
+                    <div class="course-body">
+                        <h3 class="course-title">استخدام نظام VEXORIS للمبتدئين</h3>
+                        <p class="course-desc">دورة تطبيقية لاستخدام وحدات النظام العشر: المراجعة، الإحصائيات، التقارير، ودورة العمل اليومية.</p>
+                    </div>
+                    <div class="course-meta">
+                        <span class="meta-chip"><i class="fa-solid fa-clock"></i> 6 ساعات</span>
+                        <span class="meta-chip"><i class="fa-solid fa-layer-group"></i> 10 دروس</span>
+                        <span class="meta-chip"><i class="fa-solid fa-signal"></i> مبتدئ</span>
+                    </div>
+                    <a href="assets/pdfs/course-02-vexoris-basics.pdf" target="_blank" rel="noopener" class="btn-pdf">
+                        <span class="pdf-label">
+                            <i class="fa-solid fa-file-pdf pdf-icon"></i>
+                            عرض دليل الدورة PDF
+                        </span>
+                        <i class="fa-solid fa-arrow-up-right-from-square pdf-arrow"></i>
+                    </a>
+                </article>
+
+                <!-- 03: Audit -->
+                <article class="course-card" data-category="audit"
+                    style="--card-accent: #f59e0b; --card-accent-soft: rgba(245, 158, 11, 0.12);">
+                    <div class="course-top">
+                        <div class="course-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+                        <span class="course-category">تدقيق</span>
+                    </div>
+                    <div class="course-body">
+                        <h3 class="course-title">تدقيق ومراجعة الملفات الطبية</h3>
+                        <p class="course-desc">منهجية التدقيق الشامل للملفات: قوائم المراجعة، رصد الثغرات، توثيق الملاحظات، وإعداد تقارير الجودة.</p>
+                    </div>
+                    <div class="course-meta">
+                        <span class="meta-chip"><i class="fa-solid fa-clock"></i> 12 ساعة</span>
+                        <span class="meta-chip"><i class="fa-solid fa-layer-group"></i> 16 درساً</span>
+                        <span class="meta-chip"><i class="fa-solid fa-signal"></i> متوسط</span>
+                    </div>
+                    <a href="assets/pdfs/course-03-audit.pdf" target="_blank" rel="noopener" class="btn-pdf">
+                        <span class="pdf-label">
+                            <i class="fa-solid fa-file-pdf pdf-icon"></i>
+                            عرض دليل الدورة PDF
+                        </span>
+                        <i class="fa-solid fa-arrow-up-right-from-square pdf-arrow"></i>
+                    </a>
+                </article>
+
+                <!-- 04: Audit -->
+                <article class="course-card" data-category="audit"
+                    style="--card-accent: #f59e0b; --card-accent-soft: rgba(245, 158, 11, 0.12);">
+                    <div class="course-top">
+                        <div class="course-icon"><i class="fa-solid fa-truck-medical"></i></div>
+                        <span class="course-category">تدقيق</span>
+                    </div>
+                    <div class="course-body">
+                        <h3 class="course-title">نماذج الطوارئ والتوثيق الإكلينيكي</h3>
+                        <p class="course-desc">تدقيق متخصص لشيتات الطوارئ، مراجعة القرارات السريعة، إدارة الوقت، وتوثيق الحالات الحرجة.</p>
+                    </div>
+                    <div class="course-meta">
+                        <span class="meta-chip"><i class="fa-solid fa-clock"></i> 10 ساعات</span>
+                        <span class="meta-chip"><i class="fa-solid fa-layer-group"></i> 14 درساً</span>
+                        <span class="meta-chip"><i class="fa-solid fa-signal"></i> متقدم</span>
+                    </div>
+                    <a href="assets/pdfs/course-04-emergency.pdf" target="_blank" rel="noopener" class="btn-pdf">
+                        <span class="pdf-label">
+                            <i class="fa-solid fa-file-pdf pdf-icon"></i>
+                            عرض دليل الدورة PDF
+                        </span>
+                        <i class="fa-solid fa-arrow-up-right-from-square pdf-arrow"></i>
+                    </a>
+                </article>
+
+                <!-- 05: Quality -->
+                <article class="course-card" data-category="quality"
+                    style="--card-accent: #10b981; --card-accent-soft: rgba(16, 185, 129, 0.12);">
+                    <div class="course-top">
+                        <div class="course-icon"><i class="fa-solid fa-award"></i></div>
+                        <span class="course-category">جودة</span>
+                    </div>
+                    <div class="course-body">
+                        <h3 class="course-title">جودة التوثيق الطبي والمعايير الدولية</h3>
+                        <p class="course-desc">تطبيق معايير JCI و CBAHI و ISO في التوثيق الطبي، وبناء مؤشرات الجودة القابلة للقياس.</p>
+                    </div>
+                    <div class="course-meta">
+                        <span class="meta-chip"><i class="fa-solid fa-clock"></i> 14 ساعة</span>
+                        <span class="meta-chip"><i class="fa-solid fa-layer-group"></i> 18 درساً</span>
+                        <span class="meta-chip"><i class="fa-solid fa-signal"></i> متقدم</span>
+                    </div>
+                    <a href="assets/pdfs/course-05-quality.pdf" target="_blank" rel="noopener" class="btn-pdf">
+                        <span class="pdf-label">
+                            <i class="fa-solid fa-file-pdf pdf-icon"></i>
+                            عرض دليل الدورة PDF
+                        </span>
+                        <i class="fa-solid fa-arrow-up-right-from-square pdf-arrow"></i>
+                    </a>
+                </article>
+
+                <!-- 06: Quality -->
+                <article class="course-card" data-category="quality"
+                    style="--card-accent: #10b981; --card-accent-soft: rgba(16, 185, 129, 0.12);">
+                    <div class="course-top">
+                        <div class="course-icon"><i class="fa-solid fa-certificate"></i></div>
+                        <span class="course-category">اعتماد</span>
+                    </div>
+                    <div class="course-body">
+                        <h3 class="course-title">الاعتماد الصحي وإدارة الجودة</h3>
+                        <p class="course-desc">الاستعداد لزيارات الاعتماد، إعداد الملفات للتفتيش، بناء خطة التحسين المستمر، وإدارة المخاطر.</p>
+                    </div>
+                    <div class="course-meta">
+                        <span class="meta-chip"><i class="fa-solid fa-clock"></i> 12 ساعة</span>
+                        <span class="meta-chip"><i class="fa-solid fa-layer-group"></i> 15 درساً</span>
+                        <span class="meta-chip"><i class="fa-solid fa-signal"></i> متقدم</span>
+                    </div>
+                    <a href="assets/pdfs/course-06-accreditation.pdf" target="_blank" rel="noopener" class="btn-pdf">
+                        <span class="pdf-label">
+                            <i class="fa-solid fa-file-pdf pdf-icon"></i>
+                            عرض دليل الدورة PDF
+                        </span>
+                        <i class="fa-solid fa-arrow-up-right-from-square pdf-arrow"></i>
+                    </a>
+                </article>
+
+                <!-- 07: Tech -->
+                <article class="course-card" data-category="tech"
+                    style="--card-accent: #8b5cf6; --card-accent-soft: rgba(139, 92, 246, 0.12);">
+                    <div class="course-top">
+                        <div class="course-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                        <span class="course-category">أمن</span>
+                    </div>
+                    <div class="course-body">
+                        <h3 class="course-title">أمن وسرية المعلومات الصحية</h3>
+                        <p class="course-desc">حماية بيانات المرضى، تطبيق HIPAA، إدارة الوصول، التعامل مع الحوادث الأمنية، وسياسات السرية.</p>
+                    </div>
+                    <div class="course-meta">
+                        <span class="meta-chip"><i class="fa-solid fa-clock"></i> 8 ساعات</span>
+                        <span class="meta-chip"><i class="fa-solid fa-layer-group"></i> 11 درساً</span>
+                        <span class="meta-chip"><i class="fa-solid fa-signal"></i> متوسط</span>
+                    </div>
+                    <a href="assets/pdfs/course-07-security.pdf" target="_blank" rel="noopener" class="btn-pdf">
+                        <span class="pdf-label">
+                            <i class="fa-solid fa-file-pdf pdf-icon"></i>
+                            عرض دليل الدورة PDF
+                        </span>
+                        <i class="fa-solid fa-arrow-up-right-from-square pdf-arrow"></i>
+                    </a>
+                </article>
+
+                <!-- 08: Tech -->
+                <article class="course-card" data-category="tech"
+                    style="--card-accent: #8b5cf6; --card-accent-soft: rgba(139, 92, 246, 0.12);">
+                    <div class="course-top">
+                        <div class="course-icon"><i class="fa-solid fa-chart-line"></i></div>
+                        <span class="course-category">تقنية</span>
+                    </div>
+                    <div class="course-body">
+                        <h3 class="course-title">تحليل البيانات والتقارير الطبية</h3>
+                        <p class="course-desc">قراءة وتحليل مخرجات النظام، بناء لوحات المعلومات، اكتشاف الأنماط، ودعم القرار المبني على البيانات.</p>
+                    </div>
+                    <div class="course-meta">
+                        <span class="meta-chip"><i class="fa-solid fa-clock"></i> 10 ساعات</span>
+                        <span class="meta-chip"><i class="fa-solid fa-layer-group"></i> 13 درساً</span>
+                        <span class="meta-chip"><i class="fa-solid fa-signal"></i> متوسط</span>
+                    </div>
+                    <a href="assets/pdfs/course-08-analytics.pdf" target="_blank" rel="noopener" class="btn-pdf">
+                        <span class="pdf-label">
+                            <i class="fa-solid fa-file-pdf pdf-icon"></i>
+                            عرض دليل الدورة PDF
+                        </span>
+                        <i class="fa-solid fa-arrow-up-right-from-square pdf-arrow"></i>
+                    </a>
+                </article>
+
+            </div>
+
+            <!-- Empty state -->
+            <div class="empty-state" id="emptyState">
+                <i class="fa-solid fa-folder-open"></i>
+                <h3>لا توجد دورات في هذا التصنيف</h3>
+                <p>جرّب تصنيفاً آخر أو اضغط "الكل" لعرض جميع الدورات المتاحة.</p>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-banner">
+                <div class="cta-content">
+                    <div class="cta-title">هل تحتاج إلى برنامج تدريبي مخصص؟</div>
+                    <div class="cta-desc">
+                        نصمم برامج تدريبية مُخصّصة وفق احتياجات مؤسستك — تواصل مع فريق التطوير لإعداد خطة تدريب مخصصة لموظفيك.
+                    </div>
+                </div>
+                <div class="cta-actions">
+                    <a href="contact.html" class="btn-ghost">
+                        <i class="fa-solid fa-comments"></i>
+                        تواصل معنا
+                    </a>
+                    <a href="feedback.html" class="btn-primary">
+                        اقترح دورة جديدة
+                        <i class="fa-solid fa-arrow-left" style="font-size: 0.72rem;"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer-shell">
+        <div class="footer-brand">VEXORIS SYSTEM</div>
+        <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+        <div class="footer-text">
+            تم برمجة النظام وتنفيذه بواسطة
+            <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+            <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+            <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+        </div>
+    </footer>
+
+    <script>
+        // Scroll progress
+        const progress = document.getElementById('scrollProgress');
+        window.addEventListener('scroll', () => {
+            const h = document.documentElement.scrollHeight - window.innerHeight;
+            if (h > 0) progress.style.width = (window.scrollY / h) * 100 + '%';
+        }, { passive: true });
+
+        // Theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        // Scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.05 });
+        document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
+
+        // ============ FILTER SYSTEM ============
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const courseCards = document.querySelectorAll('.course-card');
+        const resultsCount = document.getElementById('resultsCount');
+        const emptyState = document.getElementById('emptyState');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Active state
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const filter = btn.dataset.filter;
+                let visibleCount = 0;
+
+                courseCards.forEach((card, i) => {
+                    const match = filter === 'all' || card.dataset.category === filter;
+                    if (match) {
+                        visibleCount++;
+                        card.style.display = 'flex';
+                        // Re-trigger animation
+                        card.style.animation = 'none';
+                        void card.offsetWidth;
+                        card.style.animation = '';
+                        // Staggered entrance
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(14px)';
+                        setTimeout(() => {
+                            card.style.transition = 'opacity 0.45s cubic-bezier(0.4,0,0.2,1), transform 0.45s cubic-bezier(0.4,0,0.2,1)';
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        }, visibleCount * 50);
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // Update results count
+                resultsCount.textContent = visibleCount;
+
+                // Toggle empty state
+                emptyState.classList.toggle('show', visibleCount === 0);
+            });
+        });
+
+        // Initial card stagger
+        courseCards.forEach((card, i) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(16px)';
+            const cardObs = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            card.style.transition = 'opacity 0.55s cubic-bezier(0.4,0,0.2,1), transform 0.55s cubic-bezier(0.4,0,0.2,1)';
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        }, i * 60);
+                        cardObs.unobserve(card);
+                    }
+                });
+            }, { threshold: 0.1 });
+            cardObs.observe(card);
+        });
+    </script>
+</body>
+</html>
