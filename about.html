@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>عن النظام والدليل | VEXORIS System</title>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 
-    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = { darkMode: 'class' };
@@ -23,7 +20,7 @@
     </script>
 
     <style>
-        /* ================= BASE ================= */
+        /* ================= TOKENS ================= */
         :root {
             --bg: #04070f;
             --card-bg: rgba(15, 23, 42, 0.55);
@@ -51,7 +48,6 @@
         }
 
         * { -webkit-tap-highlight-color: transparent; }
-
         html { scroll-behavior: smooth; }
 
         body {
@@ -63,12 +59,9 @@
             overflow-x: hidden;
         }
 
-        /* ================= AURORA BG ================= */
+        /* ================= BG ================= */
         .aurora-bg {
-            position: fixed;
-            inset: 0;
-            z-index: -2;
-            pointer-events: none;
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
             background:
                 radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.16) 0%, transparent 60%),
                 radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.14) 0%, transparent 60%),
@@ -80,13 +73,8 @@
                 radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
                 radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.07) 0%, transparent 65%);
         }
-
-        /* Grid overlay */
         .grid-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            pointer-events: none;
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
             background-image:
                 linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
                 linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
@@ -102,11 +90,7 @@
 
         /* ================= SCROLL PROGRESS ================= */
         .scroll-progress {
-            position: fixed;
-            top: 0; right: 0;
-            height: 2px;
-            width: 0%;
-            z-index: 100;
+            position: fixed; top: 0; right: 0; height: 2px; width: 0%; z-index: 100;
             background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
             box-shadow: 0 0 12px rgba(14, 165, 233, 0.6);
             transition: width 0.1s linear;
@@ -114,38 +98,25 @@
 
         /* ================= NAVBAR ================= */
         .nav-shell {
-            position: sticky;
-            top: 12px;
-            z-index: 50;
-            margin: 12px auto 0;
-            max-width: 1200px;
-            padding: 0 16px;
+            position: sticky; top: 12px; z-index: 50;
+            margin: 12px auto 0; max-width: 1200px; padding: 0 16px;
         }
         .nav-inner {
             background: var(--card-bg);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid var(--card-border);
-            border-radius: 18px;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
+            border-radius: 18px; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
         }
-
         .logo-dot {
-            position: relative;
-            width: 12px; height: 12px;
-            border-radius: 50%;
+            position: relative; width: 12px; height: 12px; border-radius: 50%;
             background: var(--accent);
             box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18), 0 0 20px rgba(14, 165, 233, 0.7);
+            flex-shrink: 0;
         }
         .logo-dot::before {
-            content: '';
-            position: absolute;
-            inset: -3px;
-            border-radius: 50%;
+            content: ''; position: absolute; inset: -3px; border-radius: 50%;
             border: 1px solid rgba(14, 165, 233, 0.5);
             animation: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
         }
@@ -153,127 +124,105 @@
             0% { transform: scale(1); opacity: 0.9; }
             100% { transform: scale(2.4); opacity: 0; }
         }
-
         .brand-text {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
             letter-spacing: 0.18em;
             background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 40%, #6366f1 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
         }
-
         .nav-link {
-            position: relative;
-            color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 0.875rem;
-            padding: 6px 2px;
+            position: relative; color: var(--text-secondary);
+            font-weight: 600; font-size: 0.875rem; padding: 6px 2px;
             transition: color 0.3s ease;
         }
         .nav-link:hover { color: var(--accent); }
-        .nav-link.active {
-            color: var(--accent);
-            font-weight: 800;
-        }
+        .nav-link.active { color: var(--accent); font-weight: 800; }
         .nav-link.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px; right: 0; left: 0;
-            height: 2px;
-            border-radius: 2px;
+            content: ''; position: absolute; bottom: -2px; right: 0; left: 0; height: 2px; border-radius: 2px;
             background: linear-gradient(90deg, transparent, var(--accent), transparent);
         }
-
         .icon-btn {
-            width: 36px; height: 36px;
-            border-radius: 10px;
-            border: 1px solid var(--card-border);
-            background: transparent;
-            color: var(--accent);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.25s ease;
+            width: 36px; height: 36px; border-radius: 10px;
+            border: 1px solid var(--card-border); background: transparent; color: var(--accent);
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.25s ease;
         }
         .icon-btn:hover {
             background: rgba(14, 165, 233, 0.1);
             border-color: rgba(14, 165, 233, 0.4);
             transform: rotate(15deg);
         }
-
         .btn-primary {
             background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
-            color: #fff;
-            border: none;
-            padding: 9px 22px;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 0.8rem;
-            cursor: pointer;
+            color: #fff; border: none; padding: 10px 22px; border-radius: 10px;
+            font-weight: 800; font-size: 0.8rem; cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 20px rgba(14, 165, 233, 0.3);
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex; align-items: center; gap: 8px;
         }
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 28px rgba(99, 102, 241, 0.45);
         }
+        .btn-ghost {
+            padding: 10px 22px; border-radius: 10px;
+            font-weight: 800; font-size: 0.8rem; cursor: pointer;
+            text-decoration: none;
+            display: inline-flex; align-items: center; gap: 8px;
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+        .btn-ghost:hover {
+            border-color: rgba(14, 165, 233, 0.45);
+            background: rgba(14, 165, 233, 0.06);
+            color: var(--accent);
+        }
 
         /* ================= CONTAINER ================= */
-        .app-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 16px;
-        }
+        .app-container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
 
-        /* ================= HERO ================= */
-        .hero {
-            text-align: center;
-            padding: 56px 16px 32px;
+        /* ================= HERO (SPLIT) ================= */
+        .hero-split {
+            display: grid; grid-template-columns: 1fr;
+            gap: 32px; align-items: center;
+            padding: 40px 0 32px;
+        }
+        @media (min-width: 900px) {
+            .hero-split {
+                grid-template-columns: 1.35fr 1fr;
+                gap: 48px;
+                padding: 48px 0 32px;
+            }
         }
         .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 7px 18px;
-            border-radius: 999px;
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 7px 18px; border-radius: 999px;
             background: rgba(14, 165, 233, 0.08);
             border: 1px solid rgba(14, 165, 233, 0.25);
-            color: var(--accent);
-            font-size: 0.7rem;
-            font-weight: 800;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            margin-bottom: 20px;
+            color: var(--accent); font-size: 0.7rem; font-weight: 800;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            margin-bottom: 18px;
         }
         .hero-badge .pulse-dot {
-            width: 6px; height: 6px;
-            border-radius: 50%;
-            background: var(--accent);
-            box-shadow: 0 0 10px var(--accent);
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent); box-shadow: 0 0 10px var(--accent);
             animation: pulse 2s ease-in-out infinite;
         }
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.4; transform: scale(0.85); }
         }
-
-        .hero h1 {
-            font-size: clamp(1.9rem, 4.5vw, 3.2rem);
-            font-weight: 900;
-            letter-spacing: -0.02em;
-            line-height: 1.2;
-            margin-bottom: 16px;
+        .hero-title {
+            font-size: clamp(1.8rem, 4vw, 2.9rem);
+            font-weight: 900; letter-spacing: -0.02em;
+            line-height: 1.2; margin-bottom: 16px;
         }
-        .hero h1 .grad {
+        .hero-title .grad {
             background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 35%, #6366f1 70%, #8b5cf6 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
             background-size: 200% 200%;
             animation: gradShift 6s ease infinite;
         }
@@ -281,174 +230,236 @@
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
         }
-        .hero p.lead {
+        .hero-desc {
             color: var(--text-secondary);
-            font-size: 0.95rem;
-            font-weight: 500;
-            max-width: 620px;
-            margin: 0 auto;
-            line-height: 1.7;
+            font-size: 0.92rem; font-weight: 500;
+            line-height: 1.8; margin-bottom: 24px;
+        }
+        .hero-actions {
+            display: flex; flex-wrap: wrap; gap: 10px;
         }
 
-        /* Stats row */
-        .stats-row {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 28px;
+        /* Hero stats grid */
+        .hero-stats {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
         }
-        .stat-pill {
+        .hero-stat-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 14px;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            border-radius: 16px;
+            padding: 20px 16px;
+            text-align: center;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .stat-pill:hover {
+        .hero-stat-card::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.4; transition: opacity 0.3s ease;
+        }
+        .hero-stat-card:hover {
             border-color: var(--card-border-hover);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
         }
-        .stat-pill .num {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            font-size: 1.15rem;
+        .hero-stat-card:hover::before { opacity: 1; }
+        .hero-stat-card .num {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            font-size: 1.6rem;
             background: linear-gradient(135deg, #22d3ee, #6366f1);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            display: block; margin-bottom: 4px; line-height: 1;
         }
-        .stat-pill .lbl {
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: var(--text-secondary);
+        .hero-stat-card .lbl {
+            font-size: 0.7rem; font-weight: 700; color: var(--text-secondary);
         }
 
-        /* ================= SECTION HEADERS ================= */
+        /* ================= SECTION HEADER ================= */
         .section-head {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 20px;
-            padding-bottom: 14px;
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 28px; padding-bottom: 14px;
             border-bottom: 1px solid var(--card-border);
         }
         .section-icon {
-            width: 42px; height: 42px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
+            width: 42px; height: 42px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 1rem;
             flex-shrink: 0;
             background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(99, 102, 241, 0.18));
             border: 1px solid rgba(14, 165, 233, 0.3);
             color: var(--accent);
         }
-        .section-title {
-            font-size: 1.15rem;
-            font-weight: 900;
-            letter-spacing: -0.01em;
-        }
+        .section-title { font-size: 1.15rem; font-weight: 900; letter-spacing: -0.01em; }
         .section-sub {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-top: 2px;
+            font-size: 0.72rem; color: var(--text-muted);
+            font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px;
         }
 
-        /* ================= MODULE CARDS ================= */
-        .modules-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 14px;
+        /* ================= SPLIT COLUMNS ================= */
+        .split-columns {
+            display: grid; grid-template-columns: 1fr; gap: 32px;
+            position: relative;
         }
-        @media (min-width: 768px) {
-            .modules-grid { grid-template-columns: 1fr 1fr; }
+        @media (min-width: 900px) {
+            .split-columns {
+                grid-template-columns: 1fr 1fr;
+                gap: 48px;
+            }
+            .split-columns.with-divider::before {
+                content: ''; position: absolute;
+                top: 0; bottom: 0; left: 50%; width: 1px;
+                background: linear-gradient(180deg, transparent, var(--card-border) 15%, var(--card-border) 85%, transparent);
+                pointer-events: none;
+            }
         }
 
-        .module-card {
+        /* ================= COLUMN HEADER ================= */
+        .col-header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 22px; padding-bottom: 14px;
+            border-bottom: 1px dashed var(--card-border);
+        }
+        .col-badge {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700; font-size: 0.65rem; letter-spacing: 0.12em;
+            padding: 5px 10px; border-radius: 6px;
+            background: rgba(14, 165, 233, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(14, 165, 233, 0.25);
+        }
+        .col-badge.purple {
+            background: rgba(139, 92, 246, 0.1);
+            color: #a78bfa;
+            border-color: rgba(139, 92, 246, 0.28);
+        }
+        .col-title { font-size: 0.95rem; font-weight: 900; color: var(--text-primary); line-height: 1.2; }
+        .col-sub {
+            font-size: 0.65rem; font-weight: 700; color: var(--text-muted);
+            letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px;
+        }
+
+        /* ================= TIMELINE ================= */
+        .timeline {
+            position: relative;
+            padding-inline-start: 32px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            inset-inline-start: 8px;
+            top: 14px;
+            bottom: 14px;
+            width: 2px;
+            background: linear-gradient(180deg,
+                var(--accent) 0%,
+                var(--accent-2) 50%,
+                rgba(139, 92, 246, 0.2) 100%);
+            border-radius: 2px;
+            opacity: 0.5;
+        }
+
+        .tl-item { position: relative; padding-bottom: 12px; }
+        .tl-item:last-child { padding-bottom: 0; }
+
+        .tl-dot {
+            position: absolute;
+            inset-inline-start: -30px;
+            top: 22px;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: var(--bg);
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12), 0 0 12px rgba(14, 165, 233, 0.3);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+        .tl-item:hover .tl-dot {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.25), 0 0 20px rgba(14, 165, 233, 0.6);
+            transform: scale(1.2);
+        }
+
+        .tl-card {
             position: relative;
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 22px 20px 20px;
+            border-radius: 14px;
+            padding: 16px 18px;
             overflow: hidden;
+            cursor: pointer;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
         }
-        .module-card::before {
+        .tl-card::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, transparent 0%, rgba(14, 165, 233, 0.04) 50%, transparent 100%);
+            background: linear-gradient(135deg, transparent 0%, rgba(14, 165, 233, 0.05) 50%, transparent 100%);
             opacity: 0;
             transition: opacity 0.4s ease;
             pointer-events: none;
         }
-        .module-card:hover {
+        .tl-card:hover {
             border-color: var(--card-border-hover);
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px -16px var(--glow), 0 0 0 1px rgba(14, 165, 233, 0.15);
+            transform: translateX(-4px);
+            box-shadow: 0 14px 30px -14px var(--glow);
         }
-        .module-card:hover::before { opacity: 1; }
+        .tl-card:hover::after { opacity: 1; }
 
-        .mc-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .mc-icon {
-            width: 40px; height: 40px;
-            border-radius: 11px;
-            background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(99, 102, 241, 0.12));
-            border: 1px solid rgba(14, 165, 233, 0.28);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent);
-            font-size: 0.95rem;
-            transition: all 0.4s ease;
-        }
-        .module-card:hover .mc-icon {
-            background: linear-gradient(135deg, rgba(14, 165, 233, 0.32), rgba(99, 102, 241, 0.22));
-            transform: scale(1.08) rotate(-5deg);
-        }
-        .mc-number {
+        /* Watermark number */
+        .tl-num {
+            position: absolute;
+            top: -8px;
+            inset-inline-end: 8px;
             font-family: 'Space Grotesk', sans-serif;
             font-weight: 700;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            background: rgba(148, 163, 184, 0.08);
-            padding: 3px 10px;
-            border-radius: 6px;
-            letter-spacing: 0.06em;
+            font-size: 2.8rem;
+            line-height: 1;
+            color: rgba(14, 165, 233, 0.06);
+            pointer-events: none;
+            user-select: none;
+            transition: all 0.4s ease;
+            letter-spacing: -0.05em;
         }
-        .module-card:hover .mc-number {
-            color: var(--accent);
-            background: rgba(14, 165, 233, 0.12);
+        .tl-card:hover .tl-num {
+            color: rgba(14, 165, 233, 0.16);
+            transform: scale(1.06) rotate(-3deg);
         }
-        .mc-title {
-            font-size: 0.95rem;
-            font-weight: 800;
+        html:not(.dark) .tl-num { color: rgba(14, 165, 233, 0.08); }
+        html:not(.dark) .tl-card:hover .tl-num { color: rgba(14, 165, 233, 0.18); }
+
+        .tl-body {
+            position: relative;
+            z-index: 1;
+            display: flex; align-items: flex-start; gap: 12px;
+        }
+        .tl-icon {
+            width: 34px; height: 34px; border-radius: 9px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(99, 102, 241, 0.12));
+            border: 1px solid rgba(14, 165, 233, 0.28);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); font-size: 0.8rem;
+            flex-shrink: 0;
+            transition: all 0.35s ease;
+        }
+        .tl-card:hover .tl-icon {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #fff;
+            border-color: transparent;
+            transform: rotate(-5deg) scale(1.05);
+            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);
+        }
+        .tl-content { flex: 1; min-width: 0; }
+        .tl-title {
+            font-size: 0.85rem; font-weight: 800;
             color: var(--text-primary);
-            line-height: 1.4;
+            line-height: 1.4; margin-bottom: 3px;
         }
-        .mc-desc {
-            font-size: 0.8rem;
-            font-weight: 500;
+        .tl-desc {
+            font-size: 0.72rem; font-weight: 500;
             color: var(--text-secondary);
-            line-height: 1.7;
+            line-height: 1.65;
         }
 
-        /* ================= GOALS CARD ================= */
+        /* ================= GLASS CARD (Goals) ================= */
         .glass-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -460,37 +471,26 @@
             border-color: rgba(99, 102, 241, 0.35);
             box-shadow: 0 20px 50px -20px rgba(99, 102, 241, 0.2);
         }
-
         .goal-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
+            display: flex; align-items: flex-start; gap: 14px;
             padding: 14px 0;
             border-bottom: 1px dashed var(--card-border);
         }
         .goal-item:last-child { border-bottom: none; padding-bottom: 0; }
         .goal-item:first-child { padding-top: 4px; }
-
         .goal-num {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            font-size: 0.7rem;
-            color: #fff;
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            font-size: 0.7rem; color: #fff;
             background: linear-gradient(135deg, #0ea5e9, #6366f1);
-            width: 26px; height: 26px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 26px; height: 26px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
             box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
         }
         .goal-text {
-            font-size: 0.82rem;
-            font-weight: 600;
+            font-size: 0.82rem; font-weight: 600;
             color: var(--text-secondary);
-            line-height: 1.65;
-            padding-top: 3px;
+            line-height: 1.65; padding-top: 3px;
         }
 
         /* ================= MISSION ================= */
@@ -504,25 +504,20 @@
         }
         .mission-card::before {
             content: '\201D';
-            position: absolute;
-            top: -20px; left: 20px;
-            font-size: 8rem;
-            font-weight: 900;
+            position: absolute; top: -20px; left: 20px;
+            font-size: 8rem; font-weight: 900;
             font-family: 'Tajawal', serif;
             color: rgba(14, 165, 233, 0.08);
-            line-height: 1;
-            pointer-events: none;
+            line-height: 1; pointer-events: none;
         }
         .mission-card p {
             position: relative;
-            font-size: 0.85rem;
-            font-weight: 500;
+            font-size: 0.85rem; font-weight: 500;
             color: var(--text-secondary);
-            line-height: 1.9;
-            text-align: justify;
+            line-height: 1.9; text-align: justify;
         }
 
-        /* ================= CONTACT CARDS ================= */
+        /* ================= CONTACTS ================= */
         .contact-card {
             position: relative;
             background: var(--card-bg);
@@ -533,10 +528,7 @@
             transition: all 0.4s ease;
         }
         .contact-card::before {
-            content: '';
-            position: absolute;
-            top: 0; right: 0; left: 0;
-            height: 3px;
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
             background: linear-gradient(90deg, transparent, var(--accent), transparent);
             opacity: 0.6;
         }
@@ -545,109 +537,70 @@
             border-color: rgba(14, 165, 233, 0.4);
             box-shadow: 0 16px 40px -16px var(--glow);
         }
-
         .avatar-circle {
-            width: 44px; height: 44px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            font-size: 0.95rem;
-            color: #fff;
-            flex-shrink: 0;
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 0.95rem; color: #fff; flex-shrink: 0;
         }
         .avatar-pink { background: linear-gradient(135deg, #ec4899, #8b5cf6); box-shadow: 0 8px 20px rgba(236, 72, 153, 0.3); }
         .avatar-blue { background: linear-gradient(135deg, #0ea5e9, #6366f1); box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3); }
-
         .contact-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.78rem;
-            font-weight: 600;
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.78rem; font-weight: 600;
             color: var(--text-secondary);
             padding: 6px 0;
             transition: color 0.25s ease;
         }
         .contact-row:hover { color: var(--accent); }
         .contact-row i { width: 16px; text-align: center; flex-shrink: 0; }
-
         .role-tag {
-            font-size: 0.6rem;
-            font-weight: 800;
-            padding: 3px 9px;
-            border-radius: 6px;
-            letter-spacing: 0.02em;
+            font-size: 0.6rem; font-weight: 800;
+            padding: 3px 9px; border-radius: 6px; letter-spacing: 0.02em;
         }
         .role-pink { background: rgba(236, 72, 153, 0.12); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.25); }
         .role-blue { background: rgba(14, 165, 233, 0.12); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.25); }
 
         .ai-note {
-            margin-top: 18px;
-            padding: 12px 16px;
+            margin-top: 20px;
+            padding: 14px 18px;
             border-radius: 12px;
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.08));
             border: 1px solid rgba(99, 102, 241, 0.22);
             text-align: center;
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: #a5b4fc;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            font-size: 0.72rem; font-weight: 700; color: #a5b4fc;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
 
         /* ================= FOOTER ================= */
         .footer-shell {
-            max-width: 1200px;
-            margin: 24px auto;
+            max-width: 1200px; margin: 24px auto;
             padding: 22px 20px;
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 20px;
-            text-align: center;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            border-radius: 20px; text-align: center;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
         }
         .footer-brand {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            letter-spacing: 0.35em;
-            font-size: 0.75rem;
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            letter-spacing: 0.35em; font-size: 0.75rem;
             background: linear-gradient(135deg, #22d3ee, #6366f1);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
             margin-bottom: 8px;
         }
-        .footer-text {
-            font-size: 0.72rem;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
+        .footer-text { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
         .credit-badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 6px;
-            font-weight: 800;
-            font-size: 0.7rem;
+            display: inline-block; padding: 3px 10px; border-radius: 6px;
+            font-weight: 800; font-size: 0.7rem;
         }
         .credit-indigo { color: #a5b4fc; background: rgba(99, 102, 241, 0.12); }
         .credit-teal { color: #5eead4; background: rgba(20, 184, 166, 0.12); }
 
         /* ================= ANIMATIONS ================= */
         [data-animate] {
-            opacity: 0;
-            transform: translateY(20px);
+            opacity: 0; transform: translateY(20px);
             transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        [data-animate].in-view {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
+        [data-animate].in-view { opacity: 1; transform: translateY(0); }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -656,31 +609,21 @@
             html { scroll-behavior: auto; }
         }
 
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb {
             background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4));
-            border-radius: 10px;
-            border: 2px solid var(--bg);
+            border-radius: 10px; border: 2px solid var(--bg);
         }
         ::-webkit-scrollbar-thumb:hover {
             background: linear-gradient(180deg, var(--accent), var(--accent-2));
         }
-
-        /* Selection */
-        ::selection {
-            background: rgba(14, 165, 233, 0.35);
-            color: #fff;
-        }
+        ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
     </style>
 </head>
 <body>
 
-    <!-- Scroll Progress -->
     <div class="scroll-progress" id="scrollProgress"></div>
-
-    <!-- Background Layers -->
     <div class="aurora-bg"></div>
     <div class="grid-overlay"></div>
 
@@ -714,32 +657,55 @@
         </header>
     </div>
 
-    <!-- Main -->
     <main class="app-container">
 
-        <!-- HERO -->
-        <section class="hero" data-animate>
-            <div class="hero-badge">
-                <span class="pulse-dot"></span>
-                System Documentation Directory
+        <!-- SPLIT HERO -->
+        <section class="hero-split" data-animate>
+            <div>
+                <div class="hero-badge">
+                    <span class="pulse-dot"></span>
+                    System Documentation Directory
+                </div>
+                <h1 class="hero-title">
+                    دليل ومعلومات منظومة <span class="grad">VEXORIS</span>
+                </h1>
+                <p class="hero-desc">
+                    منظومة رقمية متكاملة لحوكمة وتدقيق السجلات الطبية والملفات الإكلينيكية — بمعايير عالمية، وذكاء تحليلي، وبنية قابلة للتوسع.
+                </p>
+                <div class="hero-actions">
+                    <a href="index.html" class="btn-primary">
+                        ابدأ الآن
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <a href="contact.html" class="btn-ghost">
+                        <i class="fa-solid fa-headset"></i>
+                        تواصل معنا
+                    </a>
+                </div>
             </div>
-            <h1>
-                دليل ومعلومات منظومة <span class="grad">VEXORIS</span>
-            </h1>
-            <p class="lead">
-                منظومة رقمية متكاملة لحوكمة وتدقيق السجلات الطبية والملفات الإكلينيكية — بمعايير عالمية، وذكاء تحليلي، وبنية قابلة للتوسع.
-            </p>
 
-            <div class="stats-row">
-                <div class="stat-pill"><span class="num">10</span><span class="lbl">وحدات تشغيلية</span></div>
-                <div class="stat-pill"><span class="num">100%</span><span class="lbl">رقمي بالكامل</span></div>
-                <div class="stat-pill"><span class="num">24/7</span><span class="lbl">دعم فني</span></div>
-                <div class="stat-pill"><span class="num">AI</span><span class="lbl">تحليلات ذكية</span></div>
+            <div class="hero-stats">
+                <div class="hero-stat-card">
+                    <span class="num">10</span>
+                    <span class="lbl">وحدات تشغيلية</span>
+                </div>
+                <div class="hero-stat-card">
+                    <span class="num">100%</span>
+                    <span class="lbl">رقمي بالكامل</span>
+                </div>
+                <div class="hero-stat-card">
+                    <span class="num">24/7</span>
+                    <span class="lbl">دعم فني</span>
+                </div>
+                <div class="hero-stat-card">
+                    <span class="num">AI</span>
+                    <span class="lbl">تحليلات ذكية</span>
+                </div>
             </div>
         </section>
 
-        <!-- MODULES SECTION -->
-        <section style="margin-top: 40px;" data-animate>
+        <!-- MODULES — SPLIT INTO TWO HALVES -->
+        <section style="margin-top: 32px;" data-animate>
             <div class="section-head">
                 <div class="section-icon"><i class="fa-solid fa-layer-group"></i></div>
                 <div>
@@ -748,161 +714,236 @@
                 </div>
             </div>
 
-            <div class="modules-grid">
-                <!-- 01 -->
-                <article class="module-card">
-                    <div class="mc-top">
-                        <div class="mc-icon"><i class="fa-solid fa-folder-medical"></i></div>
-                        <span class="mc-number">MODULE 01</span>
-                    </div>
-                    <h3 class="mc-title">نظام مراجعة الملفات الطبية</h3>
-                    <p class="mc-desc">مراجعة شاملة لجميع النماذج الطبية بالملف الطبي طبقاً لتعليمات الجودة المؤسسية.</p>
-                </article>
+            <div class="split-columns with-divider">
 
-                <!-- 02 -->
-                <article class="module-card">
-                    <div class="mc-top">
-                        <div class="mc-icon"><i class="fa-solid fa-chart-line"></i></div>
-                        <span class="mc-number">MODULE 02</span>
+                <!-- RIGHT COLUMN: Core Systems 01-05 -->
+                <div class="split-col">
+                    <div class="col-header">
+                        <div class="col-badge">PART 01</div>
+                        <div>
+                            <div class="col-title">الأنظمة الأساسية</div>
+                            <div class="col-sub">Core Clinical Systems</div>
+                        </div>
                     </div>
-                    <h3 class="mc-title">نظام مراجعة نماذج الطوارئ</h3>
-                    <p class="mc-desc">مراجعة كافة النماذج الطبية بشيتات الطوارئ للتحقق من معايير الجودة المعتمدة.</p>
-                </article>
 
-                <!-- 03 -->
-                <article class="module-card">
-                    <div class="mc-top">
-                        <div class="mc-icon"><i class="fa-solid fa-kit-medical"></i></div>
-                        <span class="mc-number">MODULE 03</span>
+                    <div class="timeline">
+                        <!-- 01 -->
+                        <div class="tl-item">
+                            <div class="tl-dot"></div>
+                            <div class="tl-card">
+                                <div class="tl-num">01</div>
+                                <div class="tl-body">
+                                    <div class="tl-icon"><i class="fa-solid fa-folder-medical"></i></div>
+                                    <div class="tl-content">
+                                        <h3 class="tl-title">نظام مراجعة الملفات الطبية</h3>
+                                        <p class="tl-desc">مراجعة شاملة لجميع النماذج الطبية بالملف الطبي طبقاً لتعليمات الجودة المؤسسية.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 02 -->
+                        <div class="tl-item">
+                            <div class="tl-dot"></div>
+                            <div class="tl-card">
+                                <div class="tl-num">02</div>
+                                <div class="tl-body">
+                                    <div class="tl-icon"><i class="fa-solid fa-chart-line"></i></div>
+                                    <div class="tl-content">
+                                        <h3 class="tl-title">نظام مراجعة نماذج الطوارئ</h3>
+                                        <p class="tl-desc">مراجعة كافة النماذج الطبية بشيتات الطوارئ للتحقق من معايير الجودة المعتمدة.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 03 -->
+                        <div class="tl-item">
+                            <div class="tl-dot"></div>
+                            <div class="tl-card">
+                                <div class="tl-num">03</div>
+                                <div class="tl-body">
+                                    <div class="tl-icon"><i class="fa-solid fa-kit-medical"></i></div>
+                                    <div class="tl-content">
+                                        <h3 class="tl-title">نظام ملاحظات الأطباء والتمريض</h3>
+                                        <p class="tl-desc">تدقيق وتتبع كافة الملاحظات والتدوينات الطبية والتمريضية اليومية.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 04 -->
+                        <div class="tl-item">
+                            <div class="tl-dot"></div>
+                            <div class="tl-card">
+                                <div class="tl-num">04</div>
+                                <div class="tl-body">
+                                    <div class="tl-icon"><i class="fa-solid fa-sitemap"></i></div>
+                                    <div class="tl-content">
+                                        <h3 class="tl-title">نظام تسجيل مؤشر الخروج</h3>
+                                        <p class="tl-desc">رصد ومتابعة مواعيد الخروج وتحليل أسباب التأخير والإدارات المتسببة.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 05 -->
+                        <div class="tl-item">
+                            <div class="tl-dot"></div>
+                            <div class="tl-card">
+                                <div class="tl-num">05</div>
+                                <div class="tl-body">
+                                    <div class="tl-icon"><i class="fa-solid fa-route"></i></div>
+                                    <div class="tl-content">
+                                        <h3 class="tl-title">نظام تتبع سير العمل</h3>
+                                        <p class="tl-desc">متابعة مستخدمي النظام وتدقيق عمليات الإدخال والتدفقات اليومية.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <h3 class="mc-title">نظام ملاحظات الأطباء والتمريض</h3>
-                    <p class="mc-desc">تدقيق وتتبع كافة الملاحظات والتدوينات الطبية والتمريضية اليومية.</p>
-                </article>
+                </div>
 
-                <!-- 04 -->
-                <article class="module-card">
-                    <div class="mc-top">
-                        <div class="mc-icon"><i class="fa-solid fa-sitemap"></i></div>
-                        <span class="mc-number">MODULE 04</span>
+                <!-- LEFT COLUMN: Analytics & Support 06-10 -->
+                <div class="split-col">
+                    <div class="col-header">
+                        <div class="col-badge purple">PART 02</div>
+                        <div>
+                            <div class="col-title">أنظمة التحليل والدعم</div>
+                            <div class="col-sub">Analytics &amp; Support</div>
+                        </div>
                     </div>
-                    <h3 class="mc-title">نظام تسجيل مؤشر الخروج</h3>
-                    <p class="mc-desc">رصد ومتابعة مواعيد الخروج وتحليل أسباب التأخير والإدارات المتسببة.</p>
-                </article>
 
-                <!-- 05 -->
-                <article class="module-card">
-                    <div class="mc-top">
-                        <div class="mc-icon"><i class="fa-solid fa-chart-pie"></i></div>
-                        <span class="mc-number">MODULE 05</span>
+                    <div class="timeline">
+                        <!-- 06 -->
+                        <div class="tl-item">
+                            <div class="tl-dot"></div>
+                            <div class="tl-card">
+                                <div class="tl-num">06</div>
+                                <div class="tl-body">
+                                    <div class="tl-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                                    <div class="tl-content">
+                                        <h3 class="tl-title">إحصائيات الملفات الطبية</h3>
+                                        <p class="tl-desc">استخراج التقارير الإحصائية الشاملة للأقسام، الأطباء، التمريض والملفات.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 07 -->
+                        <div class="tl-item">
+                            <div class="tl-dot"></div>
+                            <div class="tl-card">
+                                <div class="tl-num">07</div>
+                                <div class="tl-body">
+                                    <div class="tl-icon"><i class="fa-solid fa-hospital-user"></i></div>
+                                    <div class="tl-content">
+                                        <h3 class="tl-title">إحصائيات الأقسام الطبية</h3>
+                                        <p class="tl-desc">تمكين رؤساء الأقسام من تتبع جودة التوثيق والحد من التكرار بشكل استباقي.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 08 -->
+                        <div class="tl-item">
+                            <div class="tl-dot"></div>
+                            <div class="tl-card">
+                                <div class="tl-num">08</div>
+                                <div class="tl-body">
+                                    <div class="tl-icon"><i class="fa-solid fa-award"></i></div>
+                                    <div class="tl-content">
+                                        <h3 class="tl-title">نظام إحصائيات الجودة</h3>
+                                        <p class="tl-desc">تزويد إدارة الجودة بالإحصائيات الدقيقة لإبلاغ الأطقم بالأخطاء وعلاجها.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 09 -->
+                        <div class="tl-item">
+                            <div class="tl-dot"></div>
+                            <div class="tl-card">
+                                <div class="tl-num">09</div>
+                                <div class="tl-body">
+                                    <div class="tl-icon"><i class="fa-solid fa-truck-medical"></i></div>
+                                    <div class="tl-content">
+                                        <h3 class="tl-title">نظام إحصائيات الطوارئ</h3>
+                                        <p class="tl-desc">تحليل نماذج الطوارئ واكتشاف ثغرات الإدخال للوصول لأعلى احترافية.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 10 -->
+                        <div class="tl-item">
+                            <div class="tl-dot"></div>
+                            <div class="tl-card">
+                                <div class="tl-num">10</div>
+                                <div class="tl-body">
+                                    <div class="tl-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                                    <div class="tl-content">
+                                        <h3 class="tl-title">نظام الدورات التدريبية</h3>
+                                        <p class="tl-desc">منصة العروض التوضيحية والتدريبية لسياسات السجلات للكوادر الجديدة.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <h3 class="mc-title">إحصائيات الملفات الطبية</h3>
-                    <p class="mc-desc">استخراج التقارير الإحصائية الشاملة للأقسام، الأطباء، التمريض والملفات.</p>
-                </article>
+                </div>
 
-                <!-- 06 -->
-                <article class="module-card">
-                    <div class="mc-top">
-                        <div class="mc-icon"><i class="fa-solid fa-hospital-user"></i></div>
-                        <span class="mc-number">MODULE 06</span>
-                    </div>
-                    <h3 class="mc-title">إحصائيات الأقسام الطبية</h3>
-                    <p class="mc-desc">تمكين رؤساء الأقسام من تتبع جودة التوثيق والحد من التكرار بشكل استباقي.</p>
-                </article>
-
-                <!-- 07 -->
-                <article class="module-card">
-                    <div class="mc-top">
-                        <div class="mc-icon"><i class="fa-solid fa-award"></i></div>
-                        <span class="mc-number">MODULE 07</span>
-                    </div>
-                    <h3 class="mc-title">نظام إحصائيات الجودة</h3>
-                    <p class="mc-desc">تزويد إدارة الجودة بالإحصائيات الدقيقة لإبلاغ الأطقم بالأخطاء وعلاجها.</p>
-                </article>
-
-                <!-- 08 -->
-                <article class="module-card">
-                    <div class="mc-top">
-                        <div class="mc-icon"><i class="fa-solid fa-truck-medical"></i></div>
-                        <span class="mc-number">MODULE 08</span>
-                    </div>
-                    <h3 class="mc-title">نظام إحصائيات الطوارئ</h3>
-                    <p class="mc-desc">تحليل نماذج الطوارئ واكتشاف ثغرات الإدخال للوصول لأعلى احترافية.</p>
-                </article>
-
-                <!-- 09 -->
-                <article class="module-card">
-                    <div class="mc-top">
-                        <div class="mc-icon"><i class="fa-solid fa-route"></i></div>
-                        <span class="mc-number">MODULE 09</span>
-                    </div>
-                    <h3 class="mc-title">نظام تتبع سير العمل</h3>
-                    <p class="mc-desc">متابعة مستخدمي النظام وتدقيق عمليات الإدخال والتدفقات اليومية.</p>
-                </article>
-
-                <!-- 10 -->
-                <article class="module-card">
-                    <div class="mc-top">
-                        <div class="mc-icon"><i class="fa-solid fa-graduation-cap"></i></div>
-                        <span class="mc-number">MODULE 10</span>
-                    </div>
-                    <h3 class="mc-title">نظام الدورات التدريبية</h3>
-                    <p class="mc-desc">منصة العروض التوضيحية والتدريبية لسياسات السجلات للكوادر الجديدة.</p>
-                </article>
             </div>
         </section>
 
-        <!-- GOALS + MISSION -->
+        <!-- GOALS + MISSION — SPLIT -->
         <section style="margin-top: 48px;" data-animate>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div class="split-columns with-divider">
 
                 <!-- Goals -->
-                <div class="glass-card">
-                    <div class="section-head">
-                        <div class="section-icon"><i class="fa-solid fa-bullseye"></i></div>
-                        <div>
-                            <div class="section-title">الأهداف الإستراتيجية للمنظومة</div>
-                            <div class="section-sub">Strategic Objectives</div>
+                <div class="split-col">
+                    <div class="glass-card">
+                        <div class="section-head">
+                            <div class="section-icon"><i class="fa-solid fa-bullseye"></i></div>
+                            <div>
+                                <div class="section-title">الأهداف الإستراتيجية للمنظومة</div>
+                                <div class="section-sub">Strategic Objectives</div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div>
-                        <div class="goal-item">
-                            <span class="goal-num">01</span>
-                            <p class="goal-text">مراجعة وتدقيق السجلات والملفات الطبية وتحويلها رقمياً بنسبة 100%.</p>
-                        </div>
-                        <div class="goal-item">
-                            <span class="goal-num">02</span>
-                            <p class="goal-text">رصد الثغرات والأخطاء التوثيقية فوراً وتحديد المتسبب لعلاجها والحد منها.</p>
-                        </div>
-                        <div class="goal-item">
-                            <span class="goal-num">03</span>
-                            <p class="goal-text">توليد تقارير إحصائية وتحليلات بيانية دقيقة تدعم متخذي القرار بالمنشأة.</p>
-                        </div>
-                        <div class="goal-item">
-                            <span class="goal-num">04</span>
-                            <p class="goal-text">الحفاظ على سلامة ونزاهة البيانات الإجمالية ومنع أي فجوات رقمية (Gaps).</p>
+                        <div>
+                            <div class="goal-item">
+                                <span class="goal-num">01</span>
+                                <p class="goal-text">مراجعة وتدقيق السجلات والملفات الطبية وتحويلها رقمياً بنسبة 100%.</p>
+                            </div>
+                            <div class="goal-item">
+                                <span class="goal-num">02</span>
+                                <p class="goal-text">رصد الثغرات والأخطاء التوثيقية فوراً وتحديد المتسبب لعلاجها والحد منها.</p>
+                            </div>
+                            <div class="goal-item">
+                                <span class="goal-num">03</span>
+                                <p class="goal-text">توليد تقارير إحصائية وتحليلات بيانية دقيقة تدعم متخذي القرار بالمنشأة.</p>
+                            </div>
+                            <div class="goal-item">
+                                <span class="goal-num">04</span>
+                                <p class="goal-text">الحفاظ على سلامة ونزاهة البيانات الإجمالية ومنع أي فجوات رقمية (Gaps).</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Mission -->
-                <div class="mission-card">
-                    <div class="section-head">
-                        <div class="section-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
-                        <div>
-                            <div class="section-title">رسالة إدارة السجلات الطبية</div>
-                            <div class="section-sub">Mission Statement</div>
+                <div class="split-col">
+                    <div class="mission-card">
+                        <div class="section-head">
+                            <div class="section-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+                            <div>
+                                <div class="section-title">رسالة إدارة السجلات الطبية</div>
+                                <div class="section-sub">Mission Statement</div>
+                            </div>
                         </div>
+                        <p>
+                            تلتزم إدارة السجلات الطبية بتقديم رؤية رقمية متكاملة تهدف إلى حوكمة وتدقيق البيانات الصحية داخل المنظومة الطبية بالكامل. تم بناء نظام VEXORIS ليواكب أحدث التقنيات الإلكترونية كنظام ذكي مخصص لمراجعة وتدقيق جودة الملفات الطبية ونماذج الطوارئ، وتحليل مخرجات الأداء، وإنشاء الإحصائيات الاحترافية بما يضمن دقة التوثيق الطبي والحد من الثغرات الإدارية والإحصائية للوصول بالمنشأة الطبية إلى أعلى مستويات النزاهة والدقة والاحترافية والجودة وتصفية عيوب الإدخال البشري بشكل استباقي.
+                        </p>
                     </div>
-                    <p>
-                        تلتزم إدارة السجلات الطبية بتقديم رؤية رقمية متكاملة تهدف إلى حوكمة وتدقيق البيانات الصحية داخل المنظومة الطبية بالكامل. تم بناء نظام VEXORIS ليواكب أحدث التقنيات الإلكترونية كنظام ذكي مخصص لمراجعة وتدقيق جودة الملفات الطبية ونماذج الطوارئ، وتحليل مخرجات الأداء، وإنشاء الإحصائيات الاحترافية بما يضمن دقة التوثيق الطبي والحد من الثغرات الإدارية والإحصائية للوصول بالمنشأة الطبية إلى أعلى مستويات النزاهة والدقة والاحترافية والجودة وتصفية عيوب الإدخال البشري بشكل استباقي.
-                    </p>
                 </div>
+
             </div>
         </section>
 
-        <!-- CONTACTS -->
-        <section style="margin-top: 32px;" data-animate>
+        <!-- CONTACTS — SPLIT -->
+        <section style="margin-top: 40px;" data-animate>
             <div class="section-head">
                 <div class="section-icon"><i class="fa-solid fa-address-card"></i></div>
                 <div>
@@ -911,47 +952,52 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="split-columns with-divider">
 
                 <!-- Nadia -->
-                <div class="contact-card">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="avatar-circle avatar-pink">ن</div>
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <strong class="text-sm font-black" style="color: var(--text-primary);">أ/ نادية عادل</strong>
-                                <span class="role-tag role-pink">إشراف وتدقيق المنظومة</span>
+                <div class="split-col">
+                    <div class="contact-card">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="avatar-circle avatar-pink">ن</div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <strong class="text-sm font-black" style="color: var(--text-primary);">أ/ نادية عادل</strong>
+                                    <span class="role-tag role-pink">إشراف وتدقيق المنظومة</span>
+                                </div>
+                                <p class="text-[11px] font-bold mt-0.5" style="color: var(--text-muted);">مدير إدارة السجلات الطبية والمطور الإداري للنظام</p>
                             </div>
-                            <p class="text-[11px] font-bold mt-0.5" style="color: var(--text-muted);">مدير إدارة السجلات الطبية والمطور الإداري للنظام</p>
                         </div>
-                    </div>
 
-                    <div class="pt-3 border-t" style="border-color: var(--card-border);">
-                        <div class="contact-row"><i class="fa-solid fa-phone" style="color: var(--text-muted);"></i><span>01093810333 <span style="color: var(--text-muted);">(8 AM - 3 PM)</span></span></div>
-                        <div class="contact-row"><i class="fa-brands fa-whatsapp" style="color: #10b981;"></i><span>01093810333 <span style="color: var(--text-muted);">(24/7)</span></span></div>
-                        <div class="contact-row"><i class="fa-solid fa-phone-volume" style="color: #f59e0b;"></i><span>Internal: 6931</span></div>
-                        <div class="contact-row"><i class="fa-solid fa-envelope" style="color: var(--accent);"></i><span>Nadia@ganzourihospital.com</span></div>
+                        <div class="pt-3 border-t" style="border-color: var(--card-border);">
+                            <div class="contact-row"><i class="fa-solid fa-phone" style="color: var(--text-muted);"></i><span>01093810333 <span style="color: var(--text-muted);">(8 AM - 3 PM)</span></span></div>
+                            <div class="contact-row"><i class="fa-brands fa-whatsapp" style="color: #10b981;"></i><span>01093810333 <span style="color: var(--text-muted);">(24/7)</span></span></div>
+                            <div class="contact-row"><i class="fa-solid fa-phone-volume" style="color: #f59e0b;"></i><span>Internal: 6931</span></div>
+                            <div class="contact-row"><i class="fa-solid fa-envelope" style="color: var(--accent);"></i><span>Nadia@ganzourihospital.com</span></div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Khaled -->
-                <div class="contact-card">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="avatar-circle avatar-blue">خ</div>
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <strong class="text-sm font-black" style="color: var(--text-primary);">أ/ خالد شوقي</strong>
-                                <span class="role-tag role-blue">هندسة البرمجة والنظام</span>
+                <div class="split-col">
+                    <div class="contact-card">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="avatar-circle avatar-blue">خ</div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <strong class="text-sm font-black" style="color: var(--text-primary);">أ/ خالد شوقي</strong>
+                                    <span class="role-tag role-blue">هندسة البرمجة والنظام</span>
+                                </div>
+                                <p class="text-[11px] font-bold mt-0.5" style="color: var(--text-muted);">المطور الفني للنظام واختباره وتطويره</p>
                             </div>
-                            <p class="text-[11px] font-bold mt-0.5" style="color: var(--text-muted);">المطور الفني للنظام واختباره وتطويره</p>
+                        </div>
+
+                        <div class="pt-3 border-t" style="border-color: var(--card-border);">
+                            <div class="contact-row"><i class="fa-solid fa-phone" style="color: var(--text-muted);"></i><span>01024274411 — 01153341262</span></div>
+                            <div class="contact-row"><i class="fa-brands fa-whatsapp" style="color: #10b981;"></i><span>01024274411 <span style="color: var(--text-muted);">(24/7)</span></span></div>
                         </div>
                     </div>
-
-                    <div class="pt-3 border-t" style="border-color: var(--card-border);">
-                        <div class="contact-row"><i class="fa-solid fa-phone" style="color: var(--text-muted);"></i><span>01024274411 — 01153341262</span></div>
-                        <div class="contact-row"><i class="fa-brands fa-whatsapp" style="color: #10b981;"></i><span>01024274411 <span style="color: var(--text-muted);">(24/7)</span></span></div>
-                    </div>
                 </div>
+
             </div>
 
             <div class="ai-note">
@@ -961,7 +1007,6 @@
         </section>
     </main>
 
-    <!-- Footer -->
     <footer class="footer-shell">
         <div class="footer-brand">VEXORIS SYSTEM</div>
         <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
@@ -974,25 +1019,21 @@
     </footer>
 
     <script>
-        // Scroll Progress
         const progress = document.getElementById('scrollProgress');
         window.addEventListener('scroll', () => {
             const h = document.documentElement.scrollHeight - window.innerHeight;
-            progress.style.width = (window.scrollY / h) * 100 + '%';
+            if (h > 0) progress.style.width = (window.scrollY / h) * 100 + '%';
         }, { passive: true });
 
-        // Theme toggle
         function toggleTheme() {
             const html = document.documentElement;
             html.classList.toggle('dark');
             localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
         }
 
-        // Scroll animations
         const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry, i) => {
+            entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.style.transitionDelay = `${i * 40}ms`;
                     entry.target.classList.add('in-view');
                     observer.unobserve(entry.target);
                 }
@@ -1001,23 +1042,23 @@
 
         document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
 
-        // Staggered module cards entrance
-        document.querySelectorAll('.module-card').forEach((card, i) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(16px)';
-            const cardObs = new IntersectionObserver((entries) => {
+        // Staggered timeline items
+        document.querySelectorAll('.tl-item').forEach((item, i) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(12px)';
+            const itemObs = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         setTimeout(() => {
-                            card.style.transition = 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-                            card.style.opacity = '1';
-                            card.style.transform = 'translateY(0)';
-                        }, i * 55);
-                        cardObs.unobserve(card);
+                            item.style.transition = 'opacity 0.55s cubic-bezier(0.4,0,0.2,1), transform 0.55s cubic-bezier(0.4,0,0.2,1)';
+                            item.style.opacity = '1';
+                            item.style.transform = 'translateY(0)';
+                        }, (i % 5) * 60);
+                        itemObs.unobserve(item);
                     }
                 });
             }, { threshold: 0.1 });
-            cardObs.observe(card);
+            itemObs.observe(item);
         });
     </script>
 </body>
