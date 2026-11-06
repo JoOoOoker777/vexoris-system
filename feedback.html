@@ -4,69 +4,1222 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>رأيك يهمنا | VEXORIS System</title>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = { darkMode: 'class' };
-      if (localStorage.getItem('theme') === 'light') { document.documentElement.classList.remove('dark'); }
+      if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+      }
     </script>
-    <link rel="stylesheet" href="assets/css/main.css">
+
+    <style>
+        /* ================= TOKENS ================= */
+        :root {
+            --bg: #04070f;
+            --card-bg: rgba(15, 23, 42, 0.55);
+            --card-border: rgba(148, 163, 184, 0.12);
+            --card-border-hover: rgba(14, 165, 233, 0.45);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #0ea5e9;
+            --accent-2: #6366f1;
+            --accent-3: #8b5cf6;
+            --glow: rgba(14, 165, 233, 0.15);
+            --input-bg: rgba(15, 23, 42, 0.5);
+            --input-bg-focus: rgba(14, 165, 233, 0.05);
+        }
+        html:not(.dark) {
+            --bg: #f5f8fc;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(148, 163, 184, 0.28);
+            --card-border-hover: rgba(14, 165, 233, 0.6);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --glow: rgba(14, 165, 233, 0.12);
+            --input-bg: rgba(255, 255, 255, 0.9);
+            --input-bg-focus: rgba(14, 165, 233, 0.04);
+        }
+
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Tajawal', system-ui, sans-serif;
+            background: var(--bg); color: var(--text-primary);
+            transition: background 0.4s ease, color 0.4s ease;
+            min-height: 100vh; overflow-x: hidden;
+        }
+
+        /* BG */
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.16) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.14) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.12) 0%, transparent 65%);
+        }
+        html:not(.dark) .aurora-bg {
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.07) 0%, transparent 65%);
+        }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+        }
+        html:not(.dark) .grid-overlay {
+            background-image:
+                linear-gradient(to right, rgba(15, 23, 42, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+        }
+
+        /* Scroll progress */
+        .scroll-progress {
+            position: fixed; top: 0; right: 0; height: 2px; width: 0%; z-index: 100;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.6);
+            transition: width 0.1s linear;
+        }
+
+        /* ================= NAVBAR ================= */
+        .nav-shell { position: sticky; top: 12px; z-index: 50; margin: 12px auto 0; max-width: 1200px; padding: 0 16px; }
+        .nav-inner {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 18px; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .logo-dot {
+            position: relative; width: 12px; height: 12px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18), 0 0 20px rgba(14, 165, 233, 0.7);
+            flex-shrink: 0;
+        }
+        .logo-dot::before {
+            content: ''; position: absolute; inset: -3px; border-radius: 50%;
+            border: 1px solid rgba(14, 165, 233, 0.5);
+            animation: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes ping {
+            0% { transform: scale(1); opacity: 0.9; }
+            100% { transform: scale(2.4); opacity: 0; }
+        }
+        .brand-text {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: 0.18em;
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 40%, #6366f1 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .nav-link {
+            position: relative; color: var(--text-secondary); font-weight: 600;
+            font-size: 0.875rem; padding: 6px 2px; transition: color 0.3s ease;
+        }
+        .nav-link:hover { color: var(--accent); }
+        .nav-link.active { color: var(--accent); font-weight: 800; }
+        .nav-link.active::after {
+            content: ''; position: absolute; bottom: -2px; right: 0; left: 0; height: 2px; border-radius: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+        .icon-btn {
+            width: 36px; height: 36px; border-radius: 10px;
+            border: 1px solid var(--card-border); background: transparent; color: var(--accent);
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .icon-btn:hover {
+            background: rgba(14, 165, 233, 0.1);
+            border-color: rgba(14, 165, 233, 0.4);
+            transform: rotate(15deg);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+            color: #fff; border: none; padding: 10px 22px; border-radius: 10px;
+            font-weight: 800; font-size: 0.8rem; cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(14, 165, 233, 0.3);
+            text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(99, 102, 241, 0.45); }
+
+        /* ================= CONTAINER ================= */
+        .app-container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+        /* ================= HERO ================= */
+        .hero-split {
+            display: grid; grid-template-columns: 1fr;
+            gap: 32px; align-items: center;
+            padding: 40px 0 24px;
+        }
+        @media (min-width: 900px) {
+            .hero-split { grid-template-columns: 1.3fr 1fr; gap: 48px; padding: 48px 0 32px; }
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 7px 18px; border-radius: 999px;
+            background: rgba(14, 165, 233, 0.08);
+            border: 1px solid rgba(14, 165, 233, 0.25);
+            color: var(--accent); font-size: 0.7rem; font-weight: 800;
+            letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 18px;
+        }
+        .hero-badge .pulse-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent); box-shadow: 0 0 10px var(--accent);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+        .hero-title {
+            font-size: clamp(1.9rem, 4vw, 3rem);
+            font-weight: 900; letter-spacing: -0.02em;
+            line-height: 1.2; margin-bottom: 16px;
+        }
+        .hero-title .grad {
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 35%, #6366f1 70%, #8b5cf6 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            background-size: 200% 200%; animation: gradShift 6s ease infinite;
+        }
+        @keyframes gradShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .hero-desc {
+            color: var(--text-secondary); font-size: 0.92rem; font-weight: 500;
+            line-height: 1.85; margin-bottom: 24px; max-width: 560px;
+        }
+
+        /* Trust panel */
+        .trust-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 20px;
+            display: flex; flex-direction: column; gap: 14px;
+            position: relative; overflow: hidden;
+        }
+        .trust-panel::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.6;
+        }
+        .trust-item {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 10px 12px; border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .trust-item:hover { background: rgba(14, 165, 233, 0.05); }
+        .trust-icon {
+            width: 34px; height: 34px; border-radius: 9px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(99, 102, 241, 0.12));
+            border: 1px solid rgba(14, 165, 233, 0.28);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); font-size: 0.8rem; flex-shrink: 0;
+        }
+        .trust-item h4 { font-size: 0.82rem; font-weight: 800; margin-bottom: 2px; }
+        .trust-item p { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); line-height: 1.4; }
+
+        /* ================= CHOICE SECTION ================= */
+        .choice-section { padding: 24px 0; }
+        .section-head {
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 22px; padding-bottom: 14px;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .section-icon {
+            width: 42px; height: 42px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 1rem;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(99, 102, 241, 0.18));
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            color: var(--accent);
+        }
+        .section-title { font-size: 1.15rem; font-weight: 900; letter-spacing: -0.01em; }
+        .section-sub {
+            font-size: 0.72rem; color: var(--text-muted);
+            font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px;
+        }
+
+        .choice-grid {
+            display: grid; grid-template-columns: 1fr; gap: 16px;
+            max-width: 820px; margin: 0 auto;
+        }
+        @media (min-width: 640px) {
+            .choice-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .choice-card {
+            position: relative;
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 22px;
+            padding: 30px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            font-family: inherit;
+            color: var(--text-primary);
+            display: flex; flex-direction: column; align-items: center;
+            gap: 10px;
+        }
+        .choice-card::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(circle at 50% 0%, var(--choice-glow, transparent) 0%, transparent 70%);
+            opacity: 0; transition: opacity 0.4s ease;
+        }
+        .choice-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--choice-color);
+            box-shadow: 0 24px 44px -20px var(--choice-glow);
+        }
+        .choice-card:hover::before { opacity: 1; }
+        .choice-card.active {
+            border-color: var(--choice-color);
+            background: var(--choice-bg);
+            box-shadow: 0 20px 40px -18px var(--choice-glow);
+        }
+
+        .choice-complaint {
+            --choice-color: #f59e0b;
+            --choice-glow: rgba(245, 158, 11, 0.22);
+            --choice-bg: rgba(245, 158, 11, 0.06);
+        }
+        .choice-suggestion {
+            --choice-color: #10b981;
+            --choice-glow: rgba(16, 185, 129, 0.22);
+            --choice-bg: rgba(16, 185, 129, 0.06);
+        }
+
+        .choice-icon {
+            width: 56px; height: 56px; border-radius: 16px;
+            background: var(--choice-bg);
+            border: 1px solid var(--choice-color);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--choice-color); font-size: 1.3rem;
+            margin-bottom: 4px;
+            transition: all 0.4s ease;
+        }
+        .choice-card:hover .choice-icon,
+        .choice-card.active .choice-icon {
+            background: var(--choice-color);
+            color: #fff;
+            transform: scale(1.08) rotate(-6deg);
+            box-shadow: 0 10px 24px -8px var(--choice-glow);
+        }
+        .choice-title {
+            font-size: 1.05rem; font-weight: 900;
+            color: var(--text-primary);
+        }
+        .choice-desc {
+            font-size: 0.78rem; font-weight: 600;
+            color: var(--text-secondary); line-height: 1.65;
+            max-width: 240px;
+        }
+        .choice-meta {
+            margin-top: 6px;
+            font-size: 0.65rem; font-weight: 800;
+            color: var(--choice-color);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .choice-check {
+            position: absolute; top: 14px; right: 14px;
+            width: 26px; height: 26px; border-radius: 50%;
+            background: var(--choice-color); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem;
+            transform: scale(0);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .choice-card.active .choice-check { transform: scale(1); }
+
+        /* ================= FORM ================= */
+        .form-section { padding: 24px 0 32px; display: none; }
+        .form-section.visible {
+            display: block;
+            animation: slideUp 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-shell {
+            max-width: 900px; margin: 0 auto;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .form-shell::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, var(--form-accent), transparent);
+            opacity: 0.85;
+        }
+        .form-shell[data-type="complaint"] {
+            --form-accent: #f59e0b;
+            --form-accent-soft: rgba(245, 158, 11, 0.12);
+        }
+        .form-shell[data-type="suggestion"] {
+            --form-accent: #10b981;
+            --form-accent-soft: rgba(16, 185, 129, 0.12);
+        }
+
+        .form-header {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 16px; flex-wrap: wrap;
+            margin-bottom: 24px; padding-bottom: 20px;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .form-header-left { display: flex; align-items: center; gap: 14px; }
+        .form-header-icon {
+            width: 46px; height: 46px; border-radius: 12px;
+            background: var(--form-accent-soft);
+            border: 1px solid var(--form-accent);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--form-accent); font-size: 1.05rem;
+            flex-shrink: 0;
+        }
+        .form-header-title { font-size: 1.05rem; font-weight: 900; }
+        .form-header-sub { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); margin-top: 2px; }
+
+        .btn-change {
+            background: transparent;
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            padding: 8px 16px; border-radius: 10px;
+            font-size: 0.75rem; font-weight: 700;
+            cursor: pointer; font-family: inherit;
+            transition: all 0.3s ease;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-change:hover {
+            border-color: var(--form-accent);
+            color: var(--form-accent);
+            background: var(--form-accent-soft);
+        }
+
+        .form-grid {
+            display: grid; grid-template-columns: 1fr; gap: 18px;
+        }
+        @media (min-width: 640px) {
+            .form-grid { grid-template-columns: 1fr 1fr; }
+            .form-field.full { grid-column: 1 / -1; }
+        }
+
+        .form-field { display: flex; flex-direction: column; }
+        .form-label {
+            font-size: 0.78rem; font-weight: 800;
+            color: var(--text-secondary);
+            margin-bottom: 7px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .form-label .req { color: #ef4444; font-size: 0.9rem; line-height: 1; }
+        .form-hint {
+            font-size: 0.68rem; font-weight: 600;
+            color: var(--text-muted); margin-top: 5px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%; padding: 12px 16px;
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 11px;
+            color: var(--text-primary);
+            font-size: 0.85rem; font-weight: 600;
+            font-family: inherit;
+            transition: all 0.25s ease;
+        }
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: var(--text-muted); font-weight: 500;
+        }
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--form-accent);
+            background: var(--input-bg);
+            box-shadow: 0 0 0 3px var(--form-accent-soft);
+        }
+        .form-textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+
+        .form-select {
+            appearance: none; -webkit-appearance: none; -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: left 14px center;
+            background-size: 16px;
+            padding-inline-start: 16px;
+            padding-inline-end: 42px;
+            cursor: pointer;
+        }
+        .form-select option {
+            background: #0f172a; color: #f1f5f9;
+        }
+        html:not(.dark) .form-select option {
+            background: #fff; color: #0f172a;
+        }
+
+        .textarea-wrapper { position: relative; }
+        .textarea-wrapper .form-textarea { padding-bottom: 30px; }
+        .char-counter {
+            position: absolute; bottom: 10px; left: 12px;
+            font-size: 0.65rem; font-weight: 700;
+            color: var(--text-muted);
+            background: var(--card-bg);
+            padding: 2px 8px; border-radius: 6px;
+            pointer-events: none;
+        }
+
+        /* Priority radios */
+        .priority-group {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+        }
+        @media (min-width: 500px) {
+            .priority-group { grid-template-columns: repeat(4, 1fr); }
+        }
+        .priority-option {
+            padding: 11px 14px;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.75rem; font-weight: 800;
+            cursor: pointer;
+            background: var(--input-bg);
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .priority-option input { display: none; }
+        .priority-option:hover {
+            border-color: var(--form-accent);
+            color: var(--form-accent);
+        }
+        .priority-option:has(input:checked) {
+            border-color: var(--form-accent);
+            background: var(--form-accent-soft);
+            color: var(--form-accent);
+            box-shadow: 0 4px 12px -4px var(--form-accent-soft);
+        }
+        .priority-option .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: currentColor; opacity: 0.5;
+        }
+        .priority-option:has(input:checked) .dot { opacity: 1; }
+
+        /* Checkbox */
+        .checkbox-wrapper {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 14px 16px;
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 11px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .checkbox-wrapper:hover { border-color: var(--form-accent); }
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 18px; height: 18px; margin-top: 1px;
+            accent-color: var(--form-accent);
+            cursor: pointer; flex-shrink: 0;
+        }
+        .checkbox-wrapper span {
+            font-size: 0.8rem; font-weight: 600;
+            color: var(--text-secondary); line-height: 1.5;
+        }
+
+        /* Submit */
+        .form-actions {
+            margin-top: 24px; padding-top: 22px;
+            border-top: 1px solid var(--card-border);
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 16px; flex-wrap: wrap;
+        }
+        .form-actions-note {
+            font-size: 0.7rem; font-weight: 600;
+            color: var(--text-muted);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .btn-submit {
+            background: linear-gradient(135deg, var(--form-accent), #6366f1);
+            color: #fff; border: none;
+            padding: 13px 32px; border-radius: 11px;
+            font-weight: 900; font-size: 0.85rem;
+            cursor: pointer; font-family: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 24px -8px var(--form-accent);
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px -8px var(--form-accent);
+        }
+        .btn-submit:active { transform: translateY(0); }
+
+        /* Success panel */
+        .success-panel {
+            max-width: 620px; margin: 32px auto 0;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 48px 32px; text-align: center;
+            animation: successIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative; overflow: hidden;
+        }
+        @keyframes successIn {
+            from { opacity: 0; transform: scale(0.92); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .success-panel::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, #10b981, transparent);
+        }
+        .success-icon {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #0ea5e9);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.8rem;
+            margin: 0 auto 20px;
+            box-shadow: 0 12px 32px -8px rgba(16, 185, 129, 0.5);
+            animation: checkPop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+        }
+        @keyframes checkPop {
+            from { transform: scale(0) rotate(-90deg); }
+            to { transform: scale(1) rotate(0deg); }
+        }
+        .success-title {
+            font-size: 1.4rem; font-weight: 900; margin-bottom: 10px;
+        }
+        .success-desc {
+            font-size: 0.88rem; font-weight: 600; color: var(--text-secondary);
+            line-height: 1.7; margin-bottom: 24px;
+        }
+        .reference-box {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 14px 22px; border-radius: 12px;
+            background: rgba(14, 165, 233, 0.06);
+            border: 1px solid rgba(14, 165, 233, 0.25);
+            margin-bottom: 24px;
+        }
+        .reference-box .label {
+            font-size: 0.72rem; font-weight: 700; color: var(--text-muted);
+        }
+        .reference-box .code {
+            font-family: 'Space Grotesk', monospace;
+            font-size: 0.95rem; font-weight: 700; letter-spacing: 0.06em;
+            background: linear-gradient(135deg, #22d3ee, #6366f1);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .btn-new {
+            background: transparent;
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            padding: 11px 24px; border-radius: 10px;
+            font-size: 0.8rem; font-weight: 800;
+            cursor: pointer; font-family: inherit;
+            transition: all 0.3s ease;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-new:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(14, 165, 233, 0.06);
+        }
+
+        /* ================= FOOTER ================= */
+        .footer-shell {
+            max-width: 1200px; margin: 24px auto;
+            padding: 22px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px; text-align: center;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        }
+        .footer-brand {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            letter-spacing: 0.35em; font-size: 0.75rem;
+            background: linear-gradient(135deg, #22d3ee, #6366f1);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .footer-text { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+        .credit-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-weight: 800; font-size: 0.7rem; }
+        .credit-indigo { color: #a5b4fc; background: rgba(99, 102, 241, 0.12); }
+        .credit-teal { color: #5eead4; background: rgba(20, 184, 166, 0.12); }
+
+        /* ================= ANIMATIONS ================= */
+        [data-animate] {
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        [data-animate].in-view { opacity: 1; transform: translateY(0); }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+            html { scroll-behavior: auto; }
+        }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4));
+            border-radius: 10px; border: 2px solid var(--bg);
+        }
+        ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
+    </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between bg-grid-pattern">
+<body>
 
-    <div class="app-container flex flex-col min-h-screen">
-        
-        <!-- Unified Navbar -->
-        <header class="custom-card sticky top-0 z-50 px-8 py-4 my-4 rounded-2xl flex items-center justify-between border">
+    <div class="scroll-progress" id="scrollProgress"></div>
+    <div class="aurora-bg"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- Navbar -->
+    <div class="nav-shell">
+        <header class="nav-inner">
             <div class="flex items-center gap-3">
-                <div class="w-3.5 h-3.5 rounded-full bg-sky-500 shadow-md shadow-sky-500/50 animate-pulse"></div>
-                <a href="index.html" class="text-xl font-black tracking-wider bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent">VEXORIS</a>
-            </div>
-            
-            <div class="flex items-center gap-6">
-                <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
-                    <a href="index.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">الرئيسية</a>
-                    <a href="about.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">عن النظام</a>
-                    <a href="contact.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">تواصل معنا</a>
-                    <a href="courses.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">دورات تدريبية</a>
-                    <a href="feedback.html" class="text-sky-500 transition-colors">رأيك يهمنا</a>
-                </nav>
-
-                <div class="flex items-center gap-3">
-                    <button onclick="toggleTheme()" class="btn btn-ghost btn-circle btn-sm text-sky-500 border border-sky-500/30 hover:bg-sky-500/10" title="تبديل الثيم">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                    </button>
-                    <a href="login.html" class="btn btn-sm bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold border-none px-5 shadow-md shadow-sky-500/20">تسجيل الدخول</a>
+                <div class="logo-dot"></div>
+                <div>
+                    <a href="index.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
                 </div>
             </div>
-        </header>
 
-        <main class="flex-grow py-12">
-            <div class="custom-card p-8 rounded-2xl max-w-xl mx-auto">
-                <h1 class="text-2xl font-black mb-4 text-sky-500">رأيك يهمنا لتطوير النظام</h1>
-                <form class="space-y-4" onsubmit="event.preventDefault(); alert('شكراً لمشاركتك القيمة!');">
-                    <input type="text" placeholder="الاسم الكريم" class="input input-bordered w-full bg-transparent" required />
-                    <select class="select select-bordered w-full bg-transparent">
-                        <option disabled selected>تقييم تجربة الاستخدام</option>
-                        <option>ممتاز جداً وعالمي</option>
-                        <option>جيد بحاجة لتعديلات طفيفة</option>
-                    </select>
-                    <textarea placeholder="اكتب مقترحاتك وملاحظاتك لتطوير VEXORIS..." class="textarea textarea-bordered w-full bg-transparent h-32" required></textarea>
-                    <button type="submit" class="btn bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold w-full border-none shadow-md shadow-sky-500/20">إرسال التقييم</button>
-                </form>
+            <nav class="hidden md:flex items-center gap-7">
+                <a href="index.html" class="nav-link">الرئيسية</a>
+                <a href="about.html" class="nav-link">عن النظام</a>
+                <a href="contact.html" class="nav-link">تواصل معنا</a>
+                <a href="courses.html" class="nav-link">دورات تدريبية</a>
+                <a href="feedback.html" class="nav-link active">رأيك يهمنا</a>
+            </nav>
+
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم" aria-label="تبديل الثيم">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </button>
+                <a href="login.html" class="btn-primary">تسجيل الدخول</a>
             </div>
-        </main>
-
-        <footer class="custom-card py-6 mb-4 rounded-2xl text-center text-xs opacity-75 border">
-            <p class="mono-font">VEXORIS Enterprise Architecture © 2026 - All Rights Reserved</p>
-        </footer>
+        </header>
     </div>
 
+    <main class="app-container">
+
+        <!-- HERO -->
+        <section class="hero-split" data-animate>
+            <div>
+                <div class="hero-badge">
+                    <span class="pulse-dot"></span>
+                    Voice of the User
+                </div>
+                <h1 class="hero-title">
+                    رأيك <span class="grad">يصنع الفرق</span> في VEXORIS
+                </h1>
+                <p class="hero-desc">
+                    سواء كنت تواجه مشكلة أو لديك فكرة لتطوير المنظومة — نريد أن نسمعك. اختر ما يناسبك بالأسفل، واملأ النموذج، وسيتواصل معك فريق مختص شخصياً.
+                </p>
+            </div>
+
+            <aside class="trust-panel" data-animate style="transition-delay: 150ms;">
+                <div class="trust-item">
+                    <div class="trust-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div>
+                        <h4>سرية تامة</h4>
+                        <p>بياناتك محفوظة ولن تُشارك مع أي طرف ثالث.</p>
+                    </div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <div>
+                        <h4>استجابة خلال 48 ساعة</h4>
+                        <p>سنراجع رسالتك ونرد عليك في أقرب وقت.</p>
+                    </div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-icon"><i class="fa-solid fa-user-tie"></i></div>
+                    <div>
+                        <h4>متابعة شخصية</h4>
+                        <p>سيتم التواصل معك من مسؤول مختص بالحالة.</p>
+                    </div>
+                </div>
+            </aside>
+        </section>
+
+        <!-- CHOICE -->
+        <section class="choice-section" id="choiceSection" data-animate>
+            <div class="section-head">
+                <div class="section-icon"><i class="fa-solid fa-comment-dots"></i></div>
+                <div>
+                    <div class="section-title">اختر نوع الرسالة</div>
+                    <div class="section-sub">Choose Message Type</div>
+                </div>
+            </div>
+
+            <div class="choice-grid">
+                <button type="button" class="choice-card choice-complaint" data-type="complaint">
+                    <div class="choice-check"><i class="fa-solid fa-check"></i></div>
+                    <div class="choice-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="choice-title">تقديم شكوى</div>
+                    <div class="choice-desc">صف لنا أي مشكلة أو تجربة غير مُرضية لتقوم الإدارة بمراجعتها.</div>
+                    <div class="choice-meta">COMPLAINT</div>
+                </button>
+
+                <button type="button" class="choice-card choice-suggestion" data-type="suggestion">
+                    <div class="choice-check"><i class="fa-solid fa-check"></i></div>
+                    <div class="choice-icon"><i class="fa-solid fa-lightbulb"></i></div>
+                    <div class="choice-title">تقديم اقتراح</div>
+                    <div class="choice-desc">شاركنا أفكارك لتحسين المنظومة أو تجربة الاستخدام.</div>
+                    <div class="choice-meta">SUGGESTION</div>
+                </button>
+            </div>
+        </section>
+
+        <!-- FORM -->
+        <section class="form-section" id="formSection">
+            <div class="form-shell" id="formShell" data-type="complaint">
+                <div class="form-header">
+                    <div class="form-header-left">
+                        <div class="form-header-icon" id="formHeaderIcon">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div>
+                            <div class="form-header-title" id="formHeaderTitle">تقديم شكوى</div>
+                            <div class="form-header-sub" id="formHeaderSub">صف لنا ما حدث لنعمل على حلّه</div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-change" onclick="resetSelection()">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        تغيير النوع
+                    </button>
+                </div>
+
+                <!-- ============ COMPLAINT FORM ============ -->
+                <form class="form-fields" id="complaintForm" data-type="complaint" onsubmit="handleSubmit(event, 'complaint')">
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="form-label">الاسم الكريم <span class="req">*</span></label>
+                            <input type="text" class="form-input" name="name" required placeholder="أدخل اسمك بالكامل" />
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label">رقم الهاتف <span class="req">*</span></label>
+                            <input type="tel" class="form-input" name="phone" pattern="[0-9]{11}" required placeholder="01xxxxxxxxx" />
+                            <div class="form-hint">11 رقماً يبدأ بـ 01 — للتواصل ومتابعة الشكوى</div>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label">البريد الإلكتروني</label>
+                            <input type="email" class="form-input" name="email" placeholder="name@example.com" />
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label">القسم / الإدارة</label>
+                            <select class="form-select" name="department">
+                                <option value="">اختر القسم</option>
+                                <option>إدارة السجلات الطبية</option>
+                                <option>قسم الطوارئ</option>
+                                <option>قسم الأشعة</option>
+                                <option>قسم المعامل</option>
+                                <option>قسم الصيدلية</option>
+                                <option>قسم الجودة</option>
+                                <option>أخرى</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label">نوع الشكوى <span class="req">*</span></label>
+                            <select class="form-select" name="complaintType" required>
+                                <option value="">اختر النوع</option>
+                                <option>جودة الخدمة</option>
+                                <option>توثيق الملفات الطبية</option>
+                                <option>تأخير في الخدمة</option>
+                                <option>سلوك تعاملي</option>
+                                <option>خصوصية وأمن البيانات</option>
+                                <option>أخرى</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label">تاريخ الواقعة</label>
+                            <input type="date" class="form-input" name="incidentDate" />
+                        </div>
+
+                        <div class="form-field full">
+                            <label class="form-label">درجة الأهمية <span class="req">*</span></label>
+                            <div class="priority-group">
+                                <label class="priority-option">
+                                    <input type="radio" name="priority" value="low" required />
+                                    <span class="dot"></span>
+                                    <span>منخفضة</span>
+                                </label>
+                                <label class="priority-option">
+                                    <input type="radio" name="priority" value="medium" />
+                                    <span class="dot"></span>
+                                    <span>متوسطة</span>
+                                </label>
+                                <label class="priority-option">
+                                    <input type="radio" name="priority" value="high" />
+                                    <span class="dot"></span>
+                                    <span>عالية</span>
+                                </label>
+                                <label class="priority-option">
+                                    <input type="radio" name="priority" value="critical" />
+                                    <span class="dot"></span>
+                                    <span>حرجة</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-field full">
+                            <label class="form-label">وصف تفصيلي للشكوى <span class="req">*</span></label>
+                            <div class="textarea-wrapper">
+                                <textarea class="form-textarea" name="description" required maxlength="2000"
+                                    placeholder="اشرح بالتفصيل ما حدث، مع ذكر التواريخ والأشخاص أو الأقسام المعنية إن وُجدت..." style="min-height: 140px;"></textarea>
+                                <span class="char-counter"><span data-count="description">0</span> / 2000</span>
+                            </div>
+                            <div class="form-hint">كلما زادت التفاصيل، كان التحقيق أدقّ وأسرع.</div>
+                        </div>
+
+                        <div class="form-field full">
+                            <label class="form-label">النتيجة التي تتوقعها</label>
+                            <div class="textarea-wrapper">
+                                <textarea class="form-textarea" name="expectedOutcome" maxlength="500"
+                                    placeholder="ما هي الطريقة التي تفضّل أن تُعالج بها الشكوى؟"></textarea>
+                                <span class="char-counter"><span data-count="expectedOutcome">0</span> / 500</span>
+                            </div>
+                        </div>
+
+                        <div class="form-field full">
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox" name="consent" required />
+                                <span>أُوافق على قيام فريق المنظومة بالتواصل معي عبر رقم الهاتف أو البريد المُدخل لمراجعة الشكوى ومتابعتها. <span class="req" style="color:#ef4444;">*</span></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <div class="form-actions-note">
+                            <i class="fa-solid fa-lock" style="color:#10b981;"></i>
+                            جميع البيانات مُشفّرة ومحمية.
+                        </div>
+                        <button type="submit" class="btn-submit">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            إرسال الشكوى
+                        </button>
+                    </div>
+                </form>
+
+                <!-- ============ SUGGESTION FORM ============ -->
+                <form class="form-fields" id="suggestionForm" data-type="suggestion" onsubmit="handleSubmit(event, 'suggestion')" style="display:none;">
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="form-label">الاسم الكريم <span class="req">*</span></label>
+                            <input type="text" class="form-input" name="name" required placeholder="أدخل اسمك بالكامل" />
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label">رقم الهاتف <span class="req">*</span></label>
+                            <input type="tel" class="form-input" name="phone" pattern="[0-9]{11}" required placeholder="01xxxxxxxxx" />
+                            <div class="form-hint">للتواصل ومناقشة الاقتراح</div>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label">البريد الإلكتروني</label>
+                            <input type="email" class="form-input" name="email" placeholder="name@example.com" />
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label">القسم / الإدارة</label>
+                            <select class="form-select" name="department">
+                                <option value="">اختر القسم</option>
+                                <option>إدارة السجلات الطبية</option>
+                                <option>قسم الطوارئ</option>
+                                <option>قسم الأشعة</option>
+                                <option>قسم المعامل</option>
+                                <option>قسم الصيدلية</option>
+                                <option>قسم الجودة</option>
+                                <option>أخرى</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label">مجال الاقتراح <span class="req">*</span></label>
+                            <select class="form-select" name="category" required>
+                                <option value="">اختر المجال</option>
+                                <option>تحسين الأداء التشغيلي</option>
+                                <option>تجربة المستخدم والواجهة</option>
+                                <option>أمن وحماية البيانات</option>
+                                <option>تدريب وتطوير الكوادر</option>
+                                <option>تقارير وإحصائيات</option>
+                                <option>أخرى</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label">عنوان الاقتراح <span class="req">*</span></label>
+                            <input type="text" class="form-input" name="title" required maxlength="120" placeholder="مثال: إضافة تنبيه تلقائي للملفات الناقصة" />
+                        </div>
+
+                        <div class="form-field full">
+                            <label class="form-label">وصف تفصيلي للاقتراح <span class="req">*</span></label>
+                            <div class="textarea-wrapper">
+                                <textarea class="form-textarea" name="description" required maxlength="2000"
+                                    placeholder="اشرح فكرتك بالتفصيل: ما المشكلة؟ ما هو الحل المقترح؟ وكيف سيطبَّق؟" style="min-height: 140px;"></textarea>
+                                <span class="char-counter"><span data-count="description">0</span> / 2000</span>
+                            </div>
+                        </div>
+
+                        <div class="form-field full">
+                            <label class="form-label">الفائدة المتوقعة</label>
+                            <div class="textarea-wrapper">
+                                <textarea class="form-textarea" name="benefit" maxlength="500"
+                                    placeholder="ما الأثر الإيجابي المتوقع على العمل أو تجربة المستخدم؟"></textarea>
+                                <span class="char-counter"><span data-count="benefit">0</span> / 500</span>
+                            </div>
+                        </div>
+
+                        <div class="form-field full">
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox" name="consent" required />
+                                <span>أُوافق على قيام فريق المنظومة بالتواصل معي عبر رقم الهاتف أو البريد المُدخل لمناقشة الاقتراح وإمكانية تنفيذه. <span class="req" style="color:#ef4444;">*</span></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <div class="form-actions-note">
+                            <i class="fa-solid fa-lock" style="color:#10b981;"></i>
+                            جميع البيانات مُشفّرة ومحمية.
+                        </div>
+                        <button type="submit" class="btn-submit">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            إرسال الاقتراح
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- SUCCESS PANEL (hidden) -->
+            <div class="success-panel" id="successPanel" style="display:none;">
+                <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+                <div class="success-title">تم استلام رسالتك بنجاح</div>
+                <div class="success-desc" id="successDesc">
+                    شكراً لمساهمتك. سيتم مراجعة رسالتك من الفريق المختص والتواصل معك خلال 48 ساعة.
+                </div>
+                <div class="reference-box">
+                    <span class="label">رقم المتابعة:</span>
+                    <span class="code" id="referenceCode">—</span>
+                </div>
+                <div>
+                    <button type="button" class="btn-new" onclick="resetAll()">
+                        <i class="fa-solid fa-plus"></i>
+                        تقديم رسالة أخرى
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer-shell">
+        <div class="footer-brand">VEXORIS SYSTEM</div>
+        <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+        <div class="footer-text">
+            تم برمجة النظام وتنفيذه بواسطة
+            <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+            <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+            <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+        </div>
+    </footer>
+
     <script>
+        // ============ Scroll progress ============
+        const progress = document.getElementById('scrollProgress');
+        window.addEventListener('scroll', () => {
+            const h = document.documentElement.scrollHeight - window.innerHeight;
+            if (h > 0) progress.style.width = (window.scrollY / h) * 100 + '%';
+        }, { passive: true });
+
+        // ============ Theme ============
         function toggleTheme() {
             const html = document.documentElement;
             html.classList.toggle('dark');
             localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        // ============ Scroll animations ============
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.05 });
+        document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
+
+        // ============ Choice logic ============
+        const choiceCards = document.querySelectorAll('.choice-card');
+        const formSection = document.getElementById('formSection');
+        const formShell = document.getElementById('formShell');
+        const successPanel = document.getElementById('successPanel');
+        const formHeaderIcon = document.getElementById('formHeaderIcon');
+        const formHeaderTitle = document.getElementById('formHeaderTitle');
+        const formHeaderSub = document.getElementById('formHeaderSub');
+        const complaintForm = document.getElementById('complaintForm');
+        const suggestionForm = document.getElementById('suggestionForm');
+
+        const headers = {
+            complaint: {
+                icon: '<i class="fa-solid fa-triangle-exclamation"></i>',
+                title: 'تقديم شكوى',
+                sub: 'صف لنا ما حدث لنعمل على حلّه'
+            },
+            suggestion: {
+                icon: '<i class="fa-solid fa-lightbulb"></i>',
+                title: 'تقديم اقتراح',
+                sub: 'شاركنا فكرتك لتحسين المنظومة'
+            }
+        };
+
+        choiceCards.forEach(card => {
+            card.addEventListener('click', () => selectType(card.dataset.type));
+        });
+
+        function selectType(type) {
+            // Update active state on choice cards
+            choiceCards.forEach(c => c.classList.toggle('active', c.dataset.type === type));
+
+            // Update form shell
+            formShell.setAttribute('data-type', type);
+            formHeaderIcon.innerHTML = headers[type].icon;
+            formHeaderTitle.textContent = headers[type].title;
+            formHeaderSub.textContent = headers[type].sub;
+
+            // Show correct form
+            complaintForm.style.display = type === 'complaint' ? 'block' : 'none';
+            suggestionForm.style.display = type === 'suggestion' ? 'block' : 'none';
+
+            // Show form section
+            formSection.classList.add('visible');
+
+            // Scroll to form
+            setTimeout(() => {
+                formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 80);
+
+            // Reset any previous success state
+            formShell.style.display = 'block';
+            successPanel.style.display = 'none';
+        }
+
+        function resetSelection() {
+            choiceCards.forEach(c => c.classList.remove('active'));
+            formSection.classList.remove('visible');
+            setTimeout(() => {
+                document.getElementById('choiceSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 80);
+        }
+
+        function resetAll() {
+            // Clear forms
+            complaintForm.reset();
+            suggestionForm.reset();
+            updateAllCounters();
+            // Reset selection
+            resetSelection();
+            // Restore form shell
+            formShell.style.display = 'block';
+            successPanel.style.display = 'none';
+        }
+
+        // ============ Character counters ============
+        function updateCounter(field) {
+            const name = field.name;
+            const wrapper = field.closest('.textarea-wrapper');
+            if (!wrapper) return;
+            const counter = wrapper.querySelector('[data-count]');
+            if (counter) counter.textContent = field.value.length;
+        }
+        function updateAllCounters() {
+            document.querySelectorAll('.form-textarea').forEach(updateCounter);
+        }
+        document.querySelectorAll('.form-textarea').forEach(ta => {
+            ta.addEventListener('input', () => updateCounter(ta));
+        });
+
+        // ============ Submit ============
+        function handleSubmit(e, type) {
+            e.preventDefault();
+            const form = e.target;
+
+            // Use native validation first
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const submitBtn = form.querySelector('.btn-submit');
+            const originalHTML = submitBtn.innerHTML;
+
+            // Loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الإرسال...';
+            submitBtn.style.opacity = '0.7';
+
+            setTimeout(() => {
+                // Generate reference code
+                const ref = generateReference(type);
+                document.getElementById('referenceCode').textContent = ref;
+                document.getElementById('successDesc').textContent =
+                    type === 'complaint'
+                        ? 'شكراً لك. تم تسجيل شكواك تحت رقم المتابعة أدناه. سيتم مراجعتها من قبل الفريق المختص والتواصل معك خلال 48 ساعة.'
+                        : 'شكراً لمساهمتك. تم تسجيل اقتراحك تحت رقم المتابعة أدناه. سيدرسه الفريق المختص للاستفادة منه في تطوير المنظومة.';
+
+                // Hide form, show success
+                formShell.style.display = 'none';
+                successPanel.style.display = 'block';
+                successPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Reset button (in case user comes back)
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalHTML;
+                submitBtn.style.opacity = '1';
+
+                // Reset form for next time
+                form.reset();
+                updateAllCounters();
+            }, 1400);
+        }
+
+        function generateReference(type) {
+            const prefix = type === 'complaint' ? 'CMP' : 'SGT';
+            const year = new Date().getFullYear();
+            const random = String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0');
+            return `VX-${prefix}-${year}-${random}`;
         }
     </script>
 </body>
