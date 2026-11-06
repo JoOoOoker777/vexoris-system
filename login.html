@@ -401,28 +401,30 @@
             background: var(--card-border);
         }
 
+        /* Single Google button — full width, centered */
         .sso-row {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
             position: relative; z-index: 1;
         }
         .btn-sso {
-            padding: 11px 14px;
+            width: 100%;
+            padding: 12px 18px;
             background: var(--input-bg);
             border: 1px solid var(--card-border);
-            border-radius: 10px;
+            border-radius: 11px;
             color: var(--text-primary);
             font-family: inherit;
-            font-size: 0.78rem; font-weight: 700;
+            font-size: 0.82rem; font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
         }
         .btn-sso:hover {
             border-color: var(--card-border-hover);
             background: rgba(14, 165, 233, 0.06);
             transform: translateY(-1px);
+            box-shadow: 0 8px 20px -8px rgba(14, 165, 233, 0.3);
         }
-        .btn-sso i { font-size: 0.9rem; }
+        .btn-sso i { font-size: 1rem; }
 
         .login-footnote {
             text-align: center;
@@ -566,6 +568,9 @@
                     <p class="brand-desc">
                         منظومة إدارة وتدقيق السجلات الطبية المعتمدة. سجّل دخولك بأمان للوصول إلى أدوات المراجعة والإحصائيات وتقارير الجودة الخاصة بمؤسستك.
                     </p>
+
+                    <div class="feature-list">
+                        <!-- Remaining single feature: Full activity log -->
                         <div class="feature-item">
                             <div class="feature-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
                             <div>
@@ -598,7 +603,7 @@
                     <form onsubmit="handleLogin(event)" novalidate>
                         <div class="form-group">
                             <div class="form-label">
-                                <span>البريد الإلكتروني او اسم المستخدم</span>
+                                <span>البريد الإلكتروني المؤسسي</span>
                             </div>
                             <div class="input-wrap" id="emailWrap">
                                 <i class="fa-solid fa-envelope input-icon"></i>
@@ -625,21 +630,22 @@
                                 <input type="checkbox" checked />
                                 <span>تذكر هذا الجهاز</span>
                             </label>
-                            <span class="secure-tag"><i class="fa-solid fa-lock"></i> اتصال مشفر</span>
+                            <span class="secure-tag"><i class="fa-solid fa-lock"></i> اتصال آمن</span>
                         </div>
 
                         <button type="submit" class="btn-submit" id="submitBtn">
                             <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                            <span>تسجيل الدخول</span>
+                            <span>دخول آمن إلى النظام</span>
                         </button>
                     </form>
 
                     <div class="divider">أو الدخول عبر</div>
 
+                    <!-- Google SSO only -->
                     <div class="sso-row">
                         <button type="button" class="btn-sso" onclick="ssoLogin('Google')">
                             <i class="fa-brands fa-google" style="color:#ea4335;"></i>
-                            Google
+                            <span>المتابعة باستخدام Google</span>
                         </button>
                     </div>
 
@@ -719,7 +725,6 @@
             alert(`جاري توجيهك لتسجيل الدخول عبر ${provider}...`);
         }
 
-        // زرار الهيدر: يمرر للنموذج ويتركّز على حقل البريد
         function focusLogin(e) {
             e.preventDefault();
             const card = document.getElementById('login-card');
