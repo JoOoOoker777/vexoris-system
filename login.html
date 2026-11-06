@@ -4,108 +4,826 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تسجيل الدخول | VEXORIS System</title>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = { darkMode: 'class' };
-      // تطبيق الثيم المحفوظ فوري قبل التحميل لمنع أي وميض أو تغيير مفاجئ
       if (localStorage.getItem('theme') === 'light') {
           document.documentElement.classList.remove('dark');
       }
     </script>
-    <link rel="stylesheet" href="assets/css/main.css">
+
+    <style>
+        :root {
+            --bg: #04070f;
+            --card-bg: rgba(15, 23, 42, 0.55);
+            --card-border: rgba(148, 163, 184, 0.12);
+            --card-border-hover: rgba(14, 165, 233, 0.45);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #0ea5e9;
+            --accent-2: #6366f1;
+            --accent-3: #8b5cf6;
+            --glow: rgba(14, 165, 233, 0.15);
+            --input-bg: rgba(15, 23, 42, 0.5);
+        }
+        html:not(.dark) {
+            --bg: #f5f8fc;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(148, 163, 184, 0.28);
+            --card-border-hover: rgba(14, 165, 233, 0.6);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --glow: rgba(14, 165, 233, 0.12);
+            --input-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Tajawal', system-ui, sans-serif;
+            background: var(--bg); color: var(--text-primary);
+            transition: background 0.4s ease, color 0.4s ease;
+            min-height: 100vh; overflow-x: hidden;
+        }
+
+        /* BG */
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.16) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.14) 0%, transparent 65%);
+        }
+        html:not(.dark) .aurora-bg {
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.07) 0%, transparent 65%);
+        }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+        }
+        html:not(.dark) .grid-overlay {
+            background-image:
+                linear-gradient(to right, rgba(15, 23, 42, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+        }
+
+        .scroll-progress {
+            position: fixed; top: 0; right: 0; height: 2px; width: 0%; z-index: 100;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.6);
+        }
+
+        /* NAVBAR */
+        .nav-shell {
+            position: sticky; top: 12px; z-index: 50;
+            margin: 12px auto 0; max-width: 1200px; padding: 0 16px;
+        }
+        .nav-inner {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 18px; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .logo-dot {
+            position: relative; width: 12px; height: 12px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18), 0 0 20px rgba(14, 165, 233, 0.7);
+            flex-shrink: 0;
+        }
+        .logo-dot::before {
+            content: ''; position: absolute; inset: -3px; border-radius: 50%;
+            border: 1px solid rgba(14, 165, 233, 0.5);
+            animation: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes ping {
+            0% { transform: scale(1); opacity: 0.9; }
+            100% { transform: scale(2.4); opacity: 0; }
+        }
+        .brand-text {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: 0.18em;
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 40%, #6366f1 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .nav-link {
+            position: relative; color: var(--text-secondary); font-weight: 600;
+            font-size: 0.875rem; padding: 6px 2px; transition: color 0.3s ease;
+        }
+        .nav-link:hover { color: var(--accent); }
+        .icon-btn {
+            width: 36px; height: 36px; border-radius: 10px;
+            border: 1px solid var(--card-border); background: transparent; color: var(--accent);
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .icon-btn:hover {
+            background: rgba(14, 165, 233, 0.1);
+            border-color: rgba(14, 165, 233, 0.4);
+            transform: rotate(15deg);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+            color: #fff; border: none; padding: 10px 22px; border-radius: 10px;
+            font-weight: 800; font-size: 0.8rem; cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(14, 165, 233, 0.3);
+            text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(99, 102, 241, 0.45); }
+
+        /* ================= LAYOUT ================= */
+        .app-container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+        .login-wrapper {
+            min-height: calc(100vh - 200px);
+            display: flex; align-items: center;
+            padding: 32px 0;
+        }
+
+        .login-split {
+            display: grid; grid-template-columns: 1fr; gap: 32px;
+            width: 100%; align-items: center;
+        }
+        @media (min-width: 960px) {
+            .login-split { grid-template-columns: 1.05fr 1fr; gap: 56px; }
+        }
+
+        /* ================= LEFT PANEL: BRAND ================= */
+        .brand-panel {
+            display: flex; flex-direction: column;
+            gap: 24px;
+        }
+        .brand-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 7px 18px; border-radius: 999px;
+            background: rgba(14, 165, 233, 0.08);
+            border: 1px solid rgba(14, 165, 233, 0.25);
+            color: var(--accent); font-size: 0.7rem; font-weight: 800;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            align-self: flex-start;
+        }
+        .brand-badge .pulse-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent); box-shadow: 0 0 10px var(--accent);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        .brand-title {
+            font-size: clamp(1.9rem, 4vw, 2.8rem);
+            font-weight: 900; letter-spacing: -0.02em;
+            line-height: 1.15; margin: 0;
+        }
+        .brand-title .grad {
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 35%, #6366f1 70%, #8b5cf6 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            background-size: 200% 200%; animation: gradShift 6s ease infinite;
+        }
+        @keyframes gradShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .brand-desc {
+            font-size: 0.92rem; font-weight: 500;
+            color: var(--text-secondary);
+            line-height: 1.85; max-width: 500px;
+        }
+
+        /* Features list */
+        .feature-list {
+            display: flex; flex-direction: column; gap: 4px;
+            margin-top: 8px;
+        }
+        .feature-item {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 12px 14px; border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        .feature-item:hover { background: rgba(14, 165, 233, 0.05); }
+        .feature-icon {
+            width: 32px; height: 32px; border-radius: 9px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(99, 102, 241, 0.12));
+            border: 1px solid rgba(14, 165, 233, 0.28);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); font-size: 0.75rem; flex-shrink: 0;
+        }
+        .feature-item h4 { font-size: 0.82rem; font-weight: 800; margin-bottom: 2px; }
+        .feature-item p { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); line-height: 1.5; }
+
+        /* Trust badges */
+        .trust-badges {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            margin-top: 16px; padding-top: 20px;
+            border-top: 1px solid var(--card-border);
+        }
+        .trust-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            font-size: 0.68rem; font-weight: 700; color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+        .trust-chip:hover {
+            border-color: var(--card-border-hover);
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .trust-chip i { color: var(--accent); font-size: 0.72rem; }
+
+        /* ================= RIGHT PANEL: LOGIN CARD ================= */
+        .login-card {
+            position: relative;
+            background: var(--card-bg);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 36px 32px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px -30px rgba(14, 165, 233, 0.35);
+        }
+        .login-card::before {
+            content: ''; position: absolute;
+            top: 0; right: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, #0ea5e9, #6366f1, transparent);
+            opacity: 0.85;
+        }
+        .login-card::after {
+            content: ''; position: absolute;
+            top: -80px; left: -80px;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .login-head { text-align: center; margin-bottom: 26px; position: relative; z-index: 1; }
+        .login-avatar {
+            width: 62px; height: 62px; border-radius: 18px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(99, 102, 241, 0.15));
+            border: 1px solid rgba(14, 165, 233, 0.35);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); font-size: 1.4rem;
+            margin: 0 auto 14px;
+            position: relative;
+            box-shadow: 0 10px 24px -8px rgba(14, 165, 233, 0.4);
+        }
+        .login-avatar::after {
+            content: '';
+            position: absolute; inset: -6px;
+            border-radius: 22px;
+            border: 1px dashed rgba(14, 165, 233, 0.25);
+            animation: rotateSlow 20s linear infinite;
+        }
+        @keyframes rotateSlow {
+            to { transform: rotate(360deg); }
+        }
+        .login-title {
+            font-size: 1.35rem; font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 6px; letter-spacing: -0.01em;
+        }
+        .login-subtitle {
+            font-size: 0.78rem; font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* Form */
+        .form-group { margin-bottom: 16px; position: relative; z-index: 1; }
+        .form-label {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 0.75rem; font-weight: 800;
+            color: var(--text-secondary);
+            margin-bottom: 7px;
+        }
+        .form-label .link {
+            color: var(--accent); font-weight: 700; font-size: 0.72rem;
+            text-decoration: none; transition: color 0.25s ease;
+        }
+        .form-label .link:hover { color: #22d3ee; text-decoration: underline; }
+
+        .input-wrap { position: relative; }
+        .input-wrap .input-icon {
+            position: absolute; right: 14px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            pointer-events: none;
+            transition: color 0.25s ease;
+        }
+        .input-wrap.focused .input-icon { color: var(--accent); }
+        .input-wrap input {
+            width: 100%; padding: 12px 42px 12px 16px;
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 11px;
+            color: var(--text-primary);
+            font-size: 0.85rem; font-weight: 600;
+            font-family: inherit;
+            transition: all 0.25s ease;
+        }
+        .input-wrap input::placeholder { color: var(--text-muted); font-weight: 500; }
+        .input-wrap input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+        }
+
+        .btn-toggle-pass {
+            position: absolute; left: 10px; top: 50%;
+            transform: translateY(-50%);
+            width: 30px; height: 30px;
+            border-radius: 7px; border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.25s ease;
+        }
+        .btn-toggle-pass:hover { color: var(--accent); background: rgba(14, 165, 233, 0.08); }
+
+        /* Remember row */
+        .remember-row {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 0.75rem; margin: 4px 0 20px;
+            position: relative; z-index: 1;
+        }
+        .remember-label {
+            display: inline-flex; align-items: center; gap: 8px;
+            cursor: pointer; font-weight: 600; color: var(--text-secondary);
+        }
+        .remember-label input[type="checkbox"] {
+            width: 16px; height: 16px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+        .secure-tag {
+            display: inline-flex; align-items: center; gap: 5px;
+            color: #10b981; font-size: 0.68rem; font-weight: 700;
+        }
+        .secure-tag i { font-size: 0.65rem; }
+
+        /* Submit button */
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+            color: #fff; border: none;
+            padding: 13px 20px; border-radius: 11px;
+            font-weight: 900; font-size: 0.85rem;
+            cursor: pointer; font-family: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 24px -8px rgba(14, 165, 233, 0.5);
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            position: relative; z-index: 1;
+            overflow: hidden;
+        }
+        .btn-submit::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 12px 32px -8px rgba(99, 102, 241, 0.5); }
+        .btn-submit:hover::before { transform: translateX(100%); }
+        .btn-submit:active { transform: translateY(0); }
+        .btn-submit:disabled { cursor: not-allowed; opacity: 0.75; transform: none; }
+
+        /* Divider */
+        .divider {
+            display: flex; align-items: center; gap: 12px;
+            margin: 22px 0 16px;
+            color: var(--text-muted);
+            font-size: 0.68rem; font-weight: 700;
+            position: relative; z-index: 1;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; height: 1px;
+            background: var(--card-border);
+        }
+
+        /* SSO buttons */
+        .sso-row {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            position: relative; z-index: 1;
+        }
+        .btn-sso {
+            padding: 11px 14px;
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.78rem; font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-sso:hover {
+            border-color: var(--card-border-hover);
+            background: rgba(14, 165, 233, 0.06);
+            transform: translateY(-1px);
+        }
+        .btn-sso i { font-size: 0.9rem; }
+
+        /* Footer note */
+        .login-footnote {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.72rem; font-weight: 600;
+            color: var(--text-muted);
+            position: relative; z-index: 1;
+        }
+        .login-footnote a {
+            color: var(--accent); font-weight: 800; text-decoration: none;
+        }
+        .login-footnote a:hover { text-decoration: underline; }
+
+        /* Error */
+        .error-banner {
+            display: none;
+            align-items: center; gap: 10px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            font-size: 0.76rem; font-weight: 700;
+            margin-bottom: 16px;
+            position: relative; z-index: 1;
+            animation: shake 0.4s ease;
+        }
+        .error-banner.show { display: flex; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        /* Security note bottom */
+        .security-note {
+            display: flex; align-items: center; justify-content: center;
+            gap: 6px;
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid var(--card-border);
+            font-size: 0.68rem; font-weight: 600;
+            color: var(--text-muted);
+            position: relative; z-index: 1;
+        }
+        .security-note i { color: #10b981; }
+
+        /* ================= FOOTER ================= */
+        .footer-shell {
+            max-width: 1200px; margin: 24px auto;
+            padding: 22px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px; text-align: center;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        }
+        .footer-brand {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            letter-spacing: 0.35em; font-size: 0.75rem;
+            background: linear-gradient(135deg, #22d3ee, #6366f1);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .footer-text { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+        .credit-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-weight: 800; font-size: 0.7rem; }
+        .credit-indigo { color: #a5b4fc; background: rgba(99, 102, 241, 0.12); }
+        .credit-teal { color: #5eead4; background: rgba(20, 184, 166, 0.12); }
+
+        /* Animations */
+        [data-animate] {
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        [data-animate].in-view { opacity: 1; transform: translateY(0); }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+            html { scroll-behavior: auto; }
+        }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4));
+            border-radius: 10px; border: 2px solid var(--bg);
+        }
+        ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
+    </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between bg-grid-pattern selection:bg-sky-500 selection:text-slate-950">
+<body>
 
-    <div class="app-container flex flex-col min-h-screen">
-        
-        <!-- Unified Navbar -->
-        <header class="custom-card sticky top-0 z-50 px-8 py-4 my-4 rounded-2xl flex items-center justify-between border">
+    <div class="scroll-progress" id="scrollProgress"></div>
+    <div class="aurora-bg"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- Navbar -->
+    <div class="nav-shell">
+        <header class="nav-inner">
             <div class="flex items-center gap-3">
-                <div class="w-3.5 h-3.5 rounded-full bg-sky-500 shadow-md shadow-sky-500/50 animate-pulse"></div>
-                <a href="index.html" class="text-xl font-black tracking-wider bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent">VEXORIS</a>
-            </div>
-            
-            <div class="flex items-center gap-6">
-                <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
-                    <a href="index.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">الرئيسية</a>
-                    <a href="about.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">عن النظام</a>
-                    <a href="contact.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">تواصل معنا</a>
-                    <a href="courses.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">دورات تدريبية</a>
-                    <a href="feedback.html" class="hover:text-sky-500 transition-colors opacity-80 hover:opacity-100">رأيك يهمنا</a>
-                </nav>
-
-                <div class="flex items-center gap-3">
-                    <button onclick="toggleTheme()" class="btn btn-ghost btn-circle btn-sm text-sky-500 border border-sky-500/30 hover:bg-sky-500/10" title="تبديل الثيم">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                    </button>
+                <div class="logo-dot"></div>
+                <div>
+                    <a href="index.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
                 </div>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-7">
+                <a href="index.html" class="nav-link">الرئيسية</a>
+                <a href="about.html" class="nav-link">عن النظام</a>
+                <a href="contact.html" class="nav-link">تواصل معنا</a>
+                <a href="courses.html" class="nav-link">دورات تدريبية</a>
+                <a href="feedback.html" class="nav-link">رأيك يهمنا</a>
+            </nav>
+
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم" aria-label="تبديل الثيم">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </button>
             </div>
         </header>
-
-        <!-- Professional Login Content -->
-        <main class="flex-grow flex items-center justify-center py-12">
-            <div class="custom-card p-8 sm:p-10 rounded-3xl w-full max-w-md shadow-2xl border relative overflow-hidden">
-                
-                <!-- Glow Accent -->
-                <div class="absolute -top-12 -right-12 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl pointer-events-none"></div>
-
-                <div class="text-center mb-8">
-                    <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-sky-500/10 text-sky-500 mb-4 border border-sky-500/20">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                    </div>
-                    <h1 class="text-2xl font-black tracking-tight mb-2">تسجيل الدخول الآمن</h1>
-                    <p class="text-xs opacity-75">أدخل بيانات الاعتماد المؤسسية للوصول إلى المنظومة</p>
-                </div>
-
-                <form onsubmit="handleLogin(event)" class="space-y-5">
-                    <div>
-                        <label class="block text-xs font-bold mb-2 opacity-90">البريد الإلكتروني المؤسسي</label>
-                        <input type="email" id="email" required placeholder="name@vexoris.system" class="input input-bordered w-full bg-transparent focus:border-sky-500 text-sm" />
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <label class="text-xs font-bold opacity-90">كلمة المرور</label>
-                            <a href="#" onclick="alert('يرجى مراجعة مسؤول النظام لإعادة ضبط كلمة المرور'); return false;" class="text-xs text-sky-500 hover:underline">نسيت كلمة المرور؟</a>
-                        </div>
-                        <input type="password" id="password" required placeholder="••••••••" class="input input-bordered w-full bg-transparent focus:border-sky-500 text-sm" />
-                    </div>
-
-                    <div class="flex items-center justify-between text-xs py-1">
-                        <label class="cursor-pointer flex items-center gap-2">
-                            <input type="checkbox" checked class="checkbox checkbox-xs checkbox-info" />
-                            <span class="opacity-80">تذكر هذا الجهاز</span>
-                        </label>
-                    </div>
-
-                    <button type="submit" class="btn bg-sky-500 hover:bg-sky-600 text-slate-950 font-black w-full border-none shadow-lg shadow-sky-500/20 text-sm">
-                        دخول النظام
-                    </button>
-                </form>
-
-            </div>
-        </main>
-
-        <!-- Footer -->
-        <footer class="custom-card py-6 mb-4 rounded-2xl text-center text-xs opacity-75 border">
-            <p class="mono-font">VEXORIS Enterprise Security Module © 2026</p>
-        </footer>
     </div>
 
+    <main class="app-container">
+        <div class="login-wrapper">
+            <div class="login-split">
+
+                <!-- LEFT: BRAND SHOWCASE -->
+                <div class="brand-panel" data-animate>
+                    <div class="brand-badge">
+                        <span class="pulse-dot"></span>
+                        Secure Access Portal
+                    </div>
+
+                    <h2 class="brand-title">
+                        مرحباً بك في <span class="grad">VEXORIS</span><br>
+                        بوابة الدخول الموحدة
+                    </h2>
+
+                    <p class="brand-desc">
+                        منظومة إدارة وتدقيق السجلات الطبية المعتمدة. سجّل دخولك بأمان للوصول إلى أدوات المراجعة والإحصائيات وتقارير الجودة الخاصة بمؤسستك.
+                    </p>
+
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                            <div>
+                                <h4>تشفير بمعايير بنكية</h4>
+                                <p>اتصال مشفر AES-256 وحماية متعددة الطبقات لبياناتك.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fa-solid fa-fingerprint"></i></div>
+                            <div>
+                                <h4>توثيق متعدد العوامل</h4>
+                                <p>دعم 2FA و التحقق بالبصمة لضمان أعلى مستويات الأمان.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                            <div>
+                                <h4>سجل نشاط كامل</h4>
+                                <p>كل عملية دخول موثّقة لتحقيق الشفافية والمساءلة.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="trust-badges">
+                        <span class="trust-chip"><i class="fa-solid fa-certificate"></i> ISO 27001</span>
+                        <span class="trust-chip"><i class="fa-solid fa-lock"></i> HIPAA Ready</span>
+                        <span class="trust-chip"><i class="fa-solid fa-user-shield"></i> GDPR Compliant</span>
+                    </div>
+                </div>
+
+                <!-- RIGHT: LOGIN CARD -->
+                <div class="login-card" data-animate style="transition-delay: 120ms;">
+                    <div class="login-head">
+                        <div class="login-avatar"><i class="fa-solid fa-lock"></i></div>
+                        <h1 class="login-title">تسجيل الدخول الآمن</h1>
+                        <p class="login-subtitle">أدخل بيانات الاعتماد المؤسسية للوصول</p>
+                    </div>
+
+                    <div class="error-banner" id="errorBanner">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span id="errorText">بيانات الاعتماد غير صحيحة. حاول مرة أخرى.</span>
+                    </div>
+
+                    <form onsubmit="handleLogin(event)" novalidate>
+                        <!-- Email -->
+                        <div class="form-group">
+                            <div class="form-label">
+                                <span>البريد الإلكتروني المؤسسي</span>
+                            </div>
+                            <div class="input-wrap" id="emailWrap">
+                                <i class="fa-solid fa-envelope input-icon"></i>
+                                <input type="email" id="email" required placeholder="name@vexoris.system" autocomplete="email" />
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="form-group">
+                            <div class="form-label">
+                                <span>كلمة المرور</span>
+                                <a href="#" class="link" onclick="showForgot(); return false;">نسيت كلمة المرور؟</a>
+                            </div>
+                            <div class="input-wrap" id="passWrap">
+                                <i class="fa-solid fa-key input-icon"></i>
+                                <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password" />
+                                <button type="button" class="btn-toggle-pass" onclick="togglePassword()" aria-label="إظهار كلمة المرور">
+                                    <i class="fa-solid fa-eye" id="passEyeIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Remember -->
+                        <div class="remember-row">
+                            <label class="remember-label">
+                                <input type="checkbox" checked />
+                                <span>تذكر هذا الجهاز</span>
+                            </label>
+                            <span class="secure-tag"><i class="fa-solid fa-lock"></i> اتصال آمن</span>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit" class="btn-submit" id="submitBtn">
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                            <span>دخول آمن إلى النظام</span>
+                        </button>
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="divider">أو الدخول عبر</div>
+
+                    <!-- SSO -->
+                    <div class="sso-row">
+                        <button type="button" class="btn-sso" onclick="ssoLogin('Microsoft')">
+                            <i class="fa-brands fa-microsoft" style="color:#0078d4;"></i>
+                            Microsoft
+                        </button>
+                        <button type="button" class="btn-sso" onclick="ssoLogin('Google')">
+                            <i class="fa-brands fa-google" style="color:#ea4335;"></i>
+                            Google
+                        </button>
+                    </div>
+
+                    <!-- Footnote -->
+                    <div class="login-footnote">
+                        ليس لديك حساب؟ <a href="contact.html">تواصل مع مسؤول النظام</a>
+                    </div>
+
+                    <!-- Security note -->
+                    <div class="security-note">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        محمي بواسطة تشفير TLS 1.3 وتسجيل كامل للجلسات
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-shell">
+        <div class="footer-brand">VEXORIS SYSTEM</div>
+        <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+        <div class="footer-text">
+            تم برمجة النظام وتنفيذه بواسطة
+            <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+            <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+            <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+        </div>
+    </footer>
+
     <script>
+        // Scroll progress
+        const progress = document.getElementById('scrollProgress');
+        window.addEventListener('scroll', () => {
+            const h = document.documentElement.scrollHeight - window.innerHeight;
+            if (h > 0) progress.style.width = (window.scrollY / h) * 100 + '%';
+        }, { passive: true });
+
+        // Theme
         function toggleTheme() {
             const html = document.documentElement;
             html.classList.toggle('dark');
             localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
         }
 
+        // Scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.05 });
+        document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
+
+        // Input focus states
+        ['email', 'password'].forEach(id => {
+            const input = document.getElementById(id);
+            const wrap = input.closest('.input-wrap');
+            input.addEventListener('focus', () => wrap.classList.add('focused'));
+            input.addEventListener('blur', () => wrap.classList.remove('focused'));
+        });
+
+        // Toggle password
+        function togglePassword() {
+            const pass = document.getElementById('password');
+            const icon = document.getElementById('passEyeIcon');
+            if (pass.type === 'password') {
+                pass.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                pass.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Forgot password
+        function showForgot() {
+            alert('يرجى التواصل مع مسؤول النظام عبر الرقم الداخلي 6931 لإعادة تعيين كلمة المرور.');
+        }
+
+        // SSO
+        function ssoLogin(provider) {
+            alert(`جاري توجيهك لتسجيل الدخول عبر ${provider}...`);
+        }
+
+        // Handle login
         function handleLogin(e) {
             e.preventDefault();
-            alert('تم التوثيق بنجاح! جاري التوجيه إلى لوحة التحكم...');
-            window.location.href = 'dashboard.html';
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value;
+            const errorBanner = document.getElementById('errorBanner');
+            const errorText = document.getElementById('errorText');
+            const submitBtn = document.getElementById('submitBtn');
+
+            errorBanner.classList.remove('show');
+
+            // Simple validation
+            if (!email || !pass) {
+                errorText.textContent = 'يرجى إدخال البريد الإلكتروني وكلمة المرور.';
+                errorBanner.classList.add('show');
+                return;
+            }
+
+            if (!email.includes('@')) {
+                errorText.textContent = 'يرجى إدخال بريد إلكتروني صحيح.';
+                errorBanner.classList.add('show');
+                return;
+            }
+
+            // Loading state
+            const originalHTML = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>جاري التحقق من الاعتماد...</span>';
+
+            // Simulate auth
+            setTimeout(() => {
+                // Demo: any email ending with @vexoris.system passes
+                if (email.endsWith('@vexoris.system') || email === 'admin@vexoris.system') {
+                    submitBtn.innerHTML = '<i class="fa-solid fa-check"></i><span>تم التوثيق بنجاح</span>';
+                    submitBtn.style.background = 'linear-gradient(135deg, #10b981, #0ea5e9)';
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 700);
+                } else {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalHTML;
+                    errorText.textContent = 'بيانات الاعتماد غير صحيحة. تحقق من البريد وكلمة المرور.';
+                    errorBanner.classList.add('show');
+                }
+            }, 1400);
         }
     </script>
 </body>
