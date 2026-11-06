@@ -90,7 +90,7 @@
             box-shadow: 0 0 12px rgba(14, 165, 233, 0.6);
         }
 
-        /* NAVBAR */
+        /* ================= NAVBAR ================= */
         .nav-shell {
             position: sticky; top: 12px; z-index: 50;
             margin: 12px auto 0; max-width: 1200px; padding: 0 16px;
@@ -166,11 +166,8 @@
             .login-split { grid-template-columns: 1.05fr 1fr; gap: 56px; }
         }
 
-        /* ================= LEFT PANEL: BRAND ================= */
-        .brand-panel {
-            display: flex; flex-direction: column;
-            gap: 24px;
-        }
+        /* LEFT: BRAND */
+        .brand-panel { display: flex; flex-direction: column; gap: 24px; }
         .brand-badge {
             display: inline-flex; align-items: center; gap: 8px;
             padding: 7px 18px; border-radius: 999px;
@@ -210,15 +207,10 @@
             line-height: 1.85; max-width: 500px;
         }
 
-        /* Features list */
-        .feature-list {
-            display: flex; flex-direction: column; gap: 4px;
-            margin-top: 8px;
-        }
+        .feature-list { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
         .feature-item {
             display: flex; align-items: flex-start; gap: 12px;
-            padding: 12px 14px; border-radius: 12px;
-            transition: all 0.3s ease;
+            padding: 12px 14px; border-radius: 12px; transition: all 0.3s ease;
         }
         .feature-item:hover { background: rgba(14, 165, 233, 0.05); }
         .feature-icon {
@@ -231,7 +223,6 @@
         .feature-item h4 { font-size: 0.82rem; font-weight: 800; margin-bottom: 2px; }
         .feature-item p { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); line-height: 1.5; }
 
-        /* Trust badges */
         .trust-badges {
             display: flex; flex-wrap: wrap; gap: 10px;
             margin-top: 16px; padding-top: 20px;
@@ -246,21 +237,18 @@
             transition: all 0.3s ease;
         }
         .trust-chip:hover {
-            border-color: var(--card-border-hover);
-            color: var(--accent);
-            transform: translateY(-2px);
+            border-color: var(--card-border-hover); color: var(--accent); transform: translateY(-2px);
         }
         .trust-chip i { color: var(--accent); font-size: 0.72rem; }
 
-        /* ================= RIGHT PANEL: LOGIN CARD ================= */
+        /* RIGHT: LOGIN CARD */
         .login-card {
             position: relative;
             background: var(--card-bg);
             backdrop-filter: blur(24px) saturate(180%);
             -webkit-backdrop-filter: blur(24px) saturate(180%);
             border: 1px solid var(--card-border);
-            border-radius: 24px;
-            padding: 36px 32px;
+            border-radius: 24px; padding: 36px 32px;
             overflow: hidden;
             box-shadow: 0 30px 60px -30px rgba(14, 165, 233, 0.35);
         }
@@ -275,8 +263,7 @@
             top: -80px; left: -80px;
             width: 200px; height: 200px;
             background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
+            border-radius: 50%; pointer-events: none;
         }
 
         .login-head { text-align: center; margin-bottom: 26px; position: relative; z-index: 1; }
@@ -286,8 +273,7 @@
             border: 1px solid rgba(14, 165, 233, 0.35);
             display: flex; align-items: center; justify-content: center;
             color: var(--accent); font-size: 1.4rem;
-            margin: 0 auto 14px;
-            position: relative;
+            margin: 0 auto 14px; position: relative;
             box-shadow: 0 10px 24px -8px rgba(14, 165, 233, 0.4);
         }
         .login-avatar::after {
@@ -297,20 +283,14 @@
             border: 1px dashed rgba(14, 165, 233, 0.25);
             animation: rotateSlow 20s linear infinite;
         }
-        @keyframes rotateSlow {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes rotateSlow { to { transform: rotate(360deg); } }
         .login-title {
             font-size: 1.35rem; font-weight: 900;
             color: var(--text-primary);
             margin-bottom: 6px; letter-spacing: -0.01em;
         }
-        .login-subtitle {
-            font-size: 0.78rem; font-weight: 600;
-            color: var(--text-muted);
-        }
+        .login-subtitle { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); }
 
-        /* Form */
         .form-group { margin-bottom: 16px; position: relative; z-index: 1; }
         .form-label {
             display: flex; align-items: center; justify-content: space-between;
@@ -364,7 +344,6 @@
         }
         .btn-toggle-pass:hover { color: var(--accent); background: rgba(14, 165, 233, 0.08); }
 
-        /* Remember row */
         .remember-row {
             display: flex; align-items: center; justify-content: space-between;
             font-size: 0.75rem; margin: 4px 0 20px;
@@ -385,7 +364,6 @@
         }
         .secure-tag i { font-size: 0.65rem; }
 
-        /* Submit button */
         .btn-submit {
             width: 100%;
             background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
@@ -411,7 +389,6 @@
         .btn-submit:active { transform: translateY(0); }
         .btn-submit:disabled { cursor: not-allowed; opacity: 0.75; transform: none; }
 
-        /* Divider */
         .divider {
             display: flex; align-items: center; gap: 12px;
             margin: 22px 0 16px;
@@ -424,7 +401,6 @@
             background: var(--card-border);
         }
 
-        /* SSO buttons */
         .sso-row {
             display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
             position: relative; z-index: 1;
@@ -448,7 +424,6 @@
         }
         .btn-sso i { font-size: 0.9rem; }
 
-        /* Footer note */
         .login-footnote {
             text-align: center;
             margin-top: 20px;
@@ -461,7 +436,6 @@
         }
         .login-footnote a:hover { text-decoration: underline; }
 
-        /* Error */
         .error-banner {
             display: none;
             align-items: center; gap: 10px;
@@ -482,7 +456,6 @@
             75% { transform: translateX(6px); }
         }
 
-        /* Security note bottom */
         .security-note {
             display: flex; align-items: center; justify-content: center;
             gap: 6px;
@@ -516,7 +489,6 @@
         .credit-indigo { color: #a5b4fc; background: rgba(99, 102, 241, 0.12); }
         .credit-teal { color: #5eead4; background: rgba(20, 184, 166, 0.12); }
 
-        /* Animations */
         [data-animate] {
             opacity: 0; transform: translateY(20px);
             transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
@@ -542,7 +514,7 @@
     <div class="aurora-bg"></div>
     <div class="grid-overlay"></div>
 
-    <!-- Navbar -->
+    <!-- ================= NAVBAR (IDENTICAL ACROSS ALL PAGES) ================= -->
     <div class="nav-shell">
         <header class="nav-inner">
             <div class="flex items-center gap-3">
@@ -567,6 +539,10 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                 </button>
+                <a href="#login-card" onclick="focusLogin(event)" class="btn-primary">
+                    تسجيل الدخول
+                    <i class="fa-solid fa-arrow-left" style="font-size: 0.7rem;"></i>
+                </a>
             </div>
         </header>
     </div>
@@ -590,22 +566,6 @@
                     <p class="brand-desc">
                         منظومة إدارة وتدقيق السجلات الطبية المعتمدة. سجّل دخولك بأمان للوصول إلى أدوات المراجعة والإحصائيات وتقارير الجودة الخاصة بمؤسستك.
                     </p>
-
-                    <div class="feature-list">
-                        <div class="feature-item">
-                            <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                            <div>
-                                <h4>تشفير بمعايير بنكية</h4>
-                                <p>اتصال مشفر AES-256 وحماية متعددة الطبقات لبياناتك.</p>
-                            </div>
-                        </div>
-                        <div class="feature-item">
-                            <div class="feature-icon"><i class="fa-solid fa-fingerprint"></i></div>
-                            <div>
-                                <h4>توثيق متعدد العوامل</h4>
-                                <p>دعم 2FA و التحقق بالبصمة لضمان أعلى مستويات الأمان.</p>
-                            </div>
-                        </div>
                         <div class="feature-item">
                             <div class="feature-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
                             <div>
@@ -623,7 +583,7 @@
                 </div>
 
                 <!-- RIGHT: LOGIN CARD -->
-                <div class="login-card" data-animate style="transition-delay: 120ms;">
+                <div class="login-card" id="login-card" data-animate style="transition-delay: 120ms;">
                     <div class="login-head">
                         <div class="login-avatar"><i class="fa-solid fa-lock"></i></div>
                         <h1 class="login-title">تسجيل الدخول الآمن</h1>
@@ -636,10 +596,9 @@
                     </div>
 
                     <form onsubmit="handleLogin(event)" novalidate>
-                        <!-- Email -->
                         <div class="form-group">
                             <div class="form-label">
-                                <span>البريد الإلكتروني المؤسسي</span>
+                                <span>البريد الإلكتروني او اسم المستخدم</span>
                             </div>
                             <div class="input-wrap" id="emailWrap">
                                 <i class="fa-solid fa-envelope input-icon"></i>
@@ -647,7 +606,6 @@
                             </div>
                         </div>
 
-                        <!-- Password -->
                         <div class="form-group">
                             <div class="form-label">
                                 <span>كلمة المرور</span>
@@ -662,43 +620,33 @@
                             </div>
                         </div>
 
-                        <!-- Remember -->
                         <div class="remember-row">
                             <label class="remember-label">
                                 <input type="checkbox" checked />
                                 <span>تذكر هذا الجهاز</span>
                             </label>
-                            <span class="secure-tag"><i class="fa-solid fa-lock"></i> اتصال آمن</span>
+                            <span class="secure-tag"><i class="fa-solid fa-lock"></i> اتصال مشفر</span>
                         </div>
 
-                        <!-- Submit -->
                         <button type="submit" class="btn-submit" id="submitBtn">
                             <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                            <span>دخول آمن إلى النظام</span>
+                            <span>تسجيل الدخول</span>
                         </button>
                     </form>
 
-                    <!-- Divider -->
                     <div class="divider">أو الدخول عبر</div>
 
-                    <!-- SSO -->
                     <div class="sso-row">
-                        <button type="button" class="btn-sso" onclick="ssoLogin('Microsoft')">
-                            <i class="fa-brands fa-microsoft" style="color:#0078d4;"></i>
-                            Microsoft
-                        </button>
                         <button type="button" class="btn-sso" onclick="ssoLogin('Google')">
                             <i class="fa-brands fa-google" style="color:#ea4335;"></i>
                             Google
                         </button>
                     </div>
 
-                    <!-- Footnote -->
                     <div class="login-footnote">
                         ليس لديك حساب؟ <a href="contact.html">تواصل مع مسؤول النظام</a>
                     </div>
 
-                    <!-- Security note -->
                     <div class="security-note">
                         <i class="fa-solid fa-shield-halved"></i>
                         محمي بواسطة تشفير TLS 1.3 وتسجيل كامل للجلسات
@@ -708,7 +656,6 @@
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="footer-shell">
         <div class="footer-brand">VEXORIS SYSTEM</div>
         <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
@@ -721,21 +668,18 @@
     </footer>
 
     <script>
-        // Scroll progress
         const progress = document.getElementById('scrollProgress');
         window.addEventListener('scroll', () => {
             const h = document.documentElement.scrollHeight - window.innerHeight;
             if (h > 0) progress.style.width = (window.scrollY / h) * 100 + '%';
         }, { passive: true });
 
-        // Theme
         function toggleTheme() {
             const html = document.documentElement;
             html.classList.toggle('dark');
             localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
         }
 
-        // Scroll animations
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -746,7 +690,6 @@
         }, { threshold: 0.05 });
         document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
 
-        // Input focus states
         ['email', 'password'].forEach(id => {
             const input = document.getElementById(id);
             const wrap = input.closest('.input-wrap');
@@ -754,7 +697,6 @@
             input.addEventListener('blur', () => wrap.classList.remove('focused'));
         });
 
-        // Toggle password
         function togglePassword() {
             const pass = document.getElementById('password');
             const icon = document.getElementById('passEyeIcon');
@@ -769,17 +711,24 @@
             }
         }
 
-        // Forgot password
         function showForgot() {
             alert('يرجى التواصل مع مسؤول النظام عبر الرقم الداخلي 6931 لإعادة تعيين كلمة المرور.');
         }
 
-        // SSO
         function ssoLogin(provider) {
             alert(`جاري توجيهك لتسجيل الدخول عبر ${provider}...`);
         }
 
-        // Handle login
+        // زرار الهيدر: يمرر للنموذج ويتركّز على حقل البريد
+        function focusLogin(e) {
+            e.preventDefault();
+            const card = document.getElementById('login-card');
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => {
+                document.getElementById('email').focus();
+            }, 500);
+        }
+
         function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
@@ -790,7 +739,6 @@
 
             errorBanner.classList.remove('show');
 
-            // Simple validation
             if (!email || !pass) {
                 errorText.textContent = 'يرجى إدخال البريد الإلكتروني وكلمة المرور.';
                 errorBanner.classList.add('show');
@@ -803,14 +751,11 @@
                 return;
             }
 
-            // Loading state
             const originalHTML = submitBtn.innerHTML;
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>جاري التحقق من الاعتماد...</span>';
 
-            // Simulate auth
             setTimeout(() => {
-                // Demo: any email ending with @vexoris.system passes
                 if (email.endsWith('@vexoris.system') || email === 'admin@vexoris.system') {
                     submitBtn.innerHTML = '<i class="fa-solid fa-check"></i><span>تم التوثيق بنجاح</span>';
                     submitBtn.style.background = 'linear-gradient(135deg, #10b981, #0ea5e9)';
