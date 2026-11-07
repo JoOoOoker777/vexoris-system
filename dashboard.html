@@ -615,7 +615,7 @@
         import { supabase } from './supabase-client.js';
 
         // ============================================
-        // CONFIG — التطبيقات بدون roles (تُقرأ من DB)
+        // CONFIG
         // ============================================
         const CATEGORIES = {
             clinical: { title: 'العمليات السريرية', sub: 'Clinical Operations', icon: 'fa-stethoscope' },
@@ -640,18 +640,15 @@
         ];
 
         const ROLE_META = {
-             super_admin: { name: 'المطور',              color: '#a855f7', bg: 'rgba(168,85,247,0.15)', icon: 'fa-crown' },
-             admin:       { name: 'ادارة السجلات الطبية', color: '#0ea5e9', bg: 'rgba(14,165,233,0.15)',  icon: 'fa-user-shield' },
-             manager:     { name: 'المدير الطبي',         color: '#6366f1', bg: 'rgba(99,102,241,0.15)',  icon: 'fa-user-tie' },
-             auditor:     { name: 'مراجع جودة',           color: '#f59e0b', bg: 'rgba(245,158,11,0.15)',  icon: 'fa-magnifying-glass-chart' },
-             senior:      { name: 'رئيس قسم',             color: '#10b981', bg: 'rgba(16,185,129,0.15)',  icon: 'fa-star' },
-             doctor:      { name: 'طبيب',                color: '#14b8a6', bg: 'rgba(20,184,166,0.15)',  icon: 'fa-stethoscope' },
-             viewer:      { name: 'مراجع',              color: '#94a3b8', bg: 'rgba(148,163,184,0.15)', icon: 'fa-user' },
+            super_admin: { name: 'المطور', color: '#a855f7', bg: 'rgba(168,85,247,0.15)', icon: 'fa-crown' },
+            admin:       { name: 'ادارة السجلات الطبية', color: '#0ea5e9', bg: 'rgba(14,165,233,0.15)', icon: 'fa-user-shield' },
+            manager:     { name: 'المدير الطبي', color: '#6366f1', bg: 'rgba(99,102,241,0.15)', icon: 'fa-user-tie' },
+            auditor:     { name: 'مراجع جودة', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', icon: 'fa-magnifying-glass-chart' },
+            senior:      { name: 'رئيس قسم', color: '#10b981', bg: 'rgba(16,185,129,0.15)', icon: 'fa-star' },
+            doctor:      { name: 'طبيب', color: '#14b8a6', bg: 'rgba(20,184,166,0.15)', icon: 'fa-stethoscope' },
+            viewer:      { name: 'مراجع', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)', icon: 'fa-eye' },
         };
 
-        // ============================================
-        // GLOBALS
-        // ============================================
         window.toggleTheme = function() {
             const html = document.documentElement;
             html.classList.toggle('dark');
@@ -659,6 +656,18 @@
         };
 
         window.logout = async function() {
+            // 🔥 استخدام نافذة التأكيد الجديدة
+            if (window.showConfirm) {
+                const confirmed = await window.showConfirm({
+                    title: 'تسجيل الخروج',
+                    message: 'هل أنت متأكد أنك تريد تسجيل الخروج من النظام؟',
+                    confirmText: 'تسجيل الخروج',
+                    cancelText: 'إلغاء',
+                    type: 'danger'
+                });
+                if (!confirmed) return;
+            }
+
             await supabase.auth.signOut();
             sessionStorage.clear();
             localStorage.removeItem('vexoris_user_email');
@@ -701,9 +710,6 @@
         }, { threshold: 0.05 });
         document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
 
-        // ============================================
-        // HELPERS
-        // ============================================
         function getInitials(name) {
             if (!name) return '?';
             const parts = name.trim().split(/\s+/);
@@ -766,18 +772,13 @@
             observer.observe(section);
         }
 
-        // ============================================
-        // INIT
-        // ============================================
         (async () => {
-            // 1. Session check
             const { data: { session }, error: sessionErr } = await supabase.auth.getSession();
             if (sessionErr || !session) {
                 window.location.href = './login.html';
                 return;
             }
 
-            // 2. Load profile (with is_active)
             const { data: profile, error: profileErr } = await supabase
                 .from('profiles')
                 .select('role, username, email, is_active')
@@ -791,7 +792,6 @@
                 return;
             }
 
-            // 3. Check if account is active
             if (profile.is_active === false) {
                 await supabase.auth.signOut();
                 sessionStorage.clear();
@@ -806,7 +806,6 @@
             const roleInfo = ROLE_META[userRole] || ROLE_META.viewer;
             const initials = getInitials(displayName);
 
-            // 4. Update UI — Navbar
             document.getElementById('navUserName').textContent = displayName;
             document.getElementById('navUserRole').textContent = roleInfo.name;
             document.getElementById('navUserRole').style.color = roleInfo.color;
@@ -815,7 +814,6 @@
             avatarEl.textContent = initials;
             avatarEl.style.background = makeAvatarGradient(roleInfo.color);
 
-            // 5. Update UI — Dropdown
             document.getElementById('dropdownAvatar').textContent = initials;
             document.getElementById('dropdownAvatar').style.background = makeAvatarGradient(roleInfo.color);
             document.getElementById('dropdownName').textContent = displayName;
@@ -824,14 +822,12 @@
             document.getElementById('dropdownRoleBadge').style.background = roleInfo.bg;
             document.getElementById('dropdownRoleBadge').style.color = roleInfo.color;
 
-            // 6. Update UI — Welcome
             document.getElementById('welcomeName').textContent = displayName;
             document.getElementById('statRoleName').textContent = roleInfo.name;
             document.getElementById('statRoleIcon').style.background = roleInfo.bg;
             document.getElementById('statRoleIcon').style.color = roleInfo.color;
             document.getElementById('statRoleIcon').innerHTML = `<i class="fa-solid ${roleInfo.icon}"></i>`;
 
-            // 7. 🔥 Load permissions from DB
             const { data: perms, error: permsErr } = await supabase
                 .from('role_permissions')
                 .select('app_id, allowed')
@@ -840,7 +836,6 @@
 
             if (permsErr) {
                 console.error('Permissions fetch error:', permsErr);
-                // Fallback: show error state
                 document.getElementById('categoriesContainer').innerHTML = `
                     <div class="empty-state" style="margin-top: 40px;">
                         <i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b;"></i>
@@ -852,13 +847,11 @@
                 return;
             }
 
-            // 8. Filter APPS using permissions
             const allowedAppIds = new Set((perms || []).map(p => p.app_id));
             const allowedApps = APPS.filter(app => allowedAppIds.has(app.id));
 
             document.getElementById('statAppsCount').textContent = allowedApps.length;
 
-            // 9. Group by category
             const grouped = {
                 clinical: allowedApps.filter(a => a.category === 'clinical'),
                 analytics: allowedApps.filter(a => a.category === 'analytics'),
@@ -885,10 +878,12 @@
                 `;
             }
 
-            // 10. Hide loading
             document.getElementById('loadingScreen').classList.add('hide');
         })();
     </script>
+
+    <!-- 🔥 استدعاء نظام الإشعارات -->
+    <script src="./notify.js"></script>
 
     <script type="module" src="./session-manager.js"></script>
 </body>

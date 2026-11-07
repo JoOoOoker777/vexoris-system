@@ -8,13 +8,13 @@ import { supabase } from './supabase-client.js';
 // ROLE METADATA
 // ============================================
 const ROLE_META = {
-    super_admin: { name: 'مالك النظام', color: '#a855f7' },
-    admin:       { name: 'مدير إداري', color: '#0ea5e9' },
-    manager:     { name: 'مدير طبي', color: '#6366f1' },
-    auditor:     { name: 'مدقق جودة', color: '#f59e0b' },
-    senior:      { name: 'أخصائي أول', color: '#10b981' },
+    super_admin: { name: 'المطور', color: '#a855f7' },
+    admin:       { name: 'ادارة السجلات الطبية', color: '#0ea5e9' },
+    manager:     { name: 'المدير الطبي', color: '#6366f1' },
+    auditor:     { name: 'مراجع جودة', color: '#f59e0b' },
+    senior:      { name: 'رئيس قسم', color: '#10b981' },
     doctor:      { name: 'طبيب', color: '#14b8a6' },
-    viewer:      { name: 'مشاهد', color: '#94a3b8' },
+    viewer:      { name: 'مراجع', color: '#94a3b8' },
 };
 
 // ============================================
@@ -98,24 +98,6 @@ function injectStyles() {
             padding: 20px;
         }
         .vexoris-lock-overlay.active { display: flex; }
-        .vexoris-toast {
-            position: fixed; bottom: 24px; left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            padding: 14px 24px; border-radius: 12px;
-            font-family: 'Tajawal', sans-serif;
-            font-weight: 700; font-size: 0.85rem;
-            z-index: 99998;
-            display: flex; align-items: center; gap: 10px;
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.4);
-            backdrop-filter: blur(20px);
-            opacity: 0;
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            pointer-events: none;
-        }
-        .vexoris-toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
     `;
     document.head.appendChild(style);
 }
@@ -124,35 +106,39 @@ function injectStyles() {
 // REPLACE "الرئيسية" WITH "لوحة التحكم"
 // ============================================
 function replaceHomeWithDashboard() {
-    // Skip if we're already on the dashboard page (it has its own nav)
     const path = window.location.pathname.toLowerCase();
     if (path.includes('dashboard.html') || path.endsWith('/dashboard')) return;
 
     const nav = document.querySelector('.nav-inner nav');
     if (!nav) return;
-
-    // Skip if already replaced
     if (nav.querySelector('a[href="dashboard.html"]')) return;
 
-    // Find "الرئيسية" link (points to index.html)
     const homeLink = nav.querySelector('a[href="index.html"]');
     if (!homeLink) return;
 
-    // Create the dashboard replacement
     const dashLink = document.createElement('a');
     dashLink.href = 'dashboard.html';
     dashLink.className = 'nav-link';
     dashLink.textContent = 'لوحة التحكم';
-    // Note: no "active" class since we're not on dashboard page
 
-    // Replace in place (keeps position: first in nav)
     homeLink.replaceWith(dashLink);
 }
 
 // ============================================
-// LOGOUT (global)
+// LOGOUT (global with confirmation)
 // ============================================
 window.vexorisLogout = async function() {
+    if (window.showConfirm) {
+        const confirmed = await window.showConfirm({
+            title: 'تسجيل الخروج',
+            message: 'هل أنت متأكد أنك تريد تسجيل الخروج من النظام؟',
+            confirmText: 'تسجيل الخروج',
+            cancelText: 'إلغاء',
+            type: 'danger'
+        });
+        if (!confirmed) return;
+    }
+
     await supabase.auth.signOut();
     sessionStorage.clear();
     localStorage.removeItem('vexoris_user_email');
@@ -166,34 +152,24 @@ async function initHeaderAuth() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
-    // Store email for unlock flow (in case JWT expires)
     localStorage.setItem('vexoris_user_email', session.user.email);
 
-    // Find the login button on this page
     const loginBtn = document.querySelector('a[href="login.html"].btn-primary');
     if (!loginBtn) return;
 
-    // Get user info
     const user = session.user;
     const displayName = user.user_metadata?.display_name || 'مستخدم';
     const initials = getInitials(displayName);
 
-    // Fetch role
     let role = 'viewer';
     try {
         const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single();
+            .from('profiles').select('role').eq('id', user.id).single();
         role = profile?.role || 'viewer';
-    } catch (e) {
-        console.warn('Could not fetch role:', e);
-    }
+    } catch (e) {}
 
     const roleInfo = ROLE_META[role] || ROLE_META.viewer;
 
-    // Build replacement
     const wrapper = document.createElement('div');
     wrapper.style.cssText = 'display: inline-flex; align-items: center; gap: 8px;';
     wrapper.innerHTML = `
@@ -394,12 +370,9 @@ function initSessionTimeout() {
                 btn.innerHTML = orig;
                 btn.style.opacity = '1';
 
-                showToast('تم فتح الجلسة بنجاح. يمكنك متابعة العمل.', {
-                    bg: 'rgba(16, 185, 129, 0.15)',
-                    fg: '#5eead4',
-                    border: 'rgba(16, 185, 129, 0.3)',
-                    icon: 'fa-circle-check'
-                });
+                if (window.showNotification) {
+                    showNotification('تم فتح الجلسة بنجاح. يمكنك متابعة العمل.', 'success');
+                }
 
                 resetTimers();
             } catch (err) {
@@ -411,20 +384,6 @@ function initSessionTimeout() {
                 errorBox.style.display = 'block';
             }
         }
-    }
-
-    function showToast(message, colors) {
-        if (!toastEl) {
-            toastEl = document.createElement('div');
-            toastEl.className = 'vexoris-toast';
-            document.body.appendChild(toastEl);
-        }
-        toastEl.style.background = colors.bg;
-        toastEl.style.color = colors.fg;
-        toastEl.style.border = `1px solid ${colors.border}`;
-        toastEl.innerHTML = `<i class="fa-solid ${colors.icon}"></i> ${message}`;
-        requestAnimationFrame(() => toastEl.classList.add('show'));
-        setTimeout(() => toastEl.classList.remove('show'), 5000);
     }
 
     function lockSession() {
@@ -444,12 +403,9 @@ function initSessionTimeout() {
 
         warningTimer = setTimeout(() => {
             if (locked) return;
-            showToast('ستُقفل الجلسة خلال دقيقتين لعدم النشاط', {
-                bg: 'rgba(245, 158, 11, 0.15)',
-                fg: '#fbbf24',
-                border: 'rgba(245, 158, 11, 0.3)',
-                icon: 'fa-triangle-exclamation'
-            });
+            if (window.showNotification) {
+                showNotification('ستُقفل الجلسة خلال دقيقتين لعدم النشاط', 'warning');
+            }
         }, CONFIG.inactivityMs - CONFIG.warningMs);
 
         lockTimer = setTimeout(lockSession, CONFIG.inactivityMs);
@@ -481,9 +437,9 @@ function initSessionTimeout() {
     const { data: { session } } = await supabase.auth.getSession();
 
     if (session) {
-        replaceHomeWithDashboard(); // 🔥 استبدال "الرئيسية" بـ"لوحة التحكم"
-        await initHeaderAuth();     // استبدال زر login بـ User Chip
-        initSessionTimeout();       // تفعيل حماية الجلسة
+        replaceHomeWithDashboard();
+        await initHeaderAuth();
+        initSessionTimeout();
     }
 })();
 

@@ -1,14 +1,19 @@
 /* ============================================
    VEXORIS — Theme Overrides
-   ملف مركزي للتحكم في ألوان الثيم
-   يحمّل بعد الـ stylesheet الأساسي عشان ياخد الأولوية
    ============================================ */
+
+/* ============ 80% SCALE FOR ALL PAGES ============ */
+@media (min-width: 768px) {
+    body {
+        zoom: 0.8;
+    }
+}
 
 /* ============ LIGHT MODE — TOKENS ============ */
 html:not(.dark) {
-    --bg: #e8eef5;                              /* خلفية أعمق وأدفأ */
-    --card-bg: rgba(255, 255, 255, 0.92);        /* كروت أنضف وأوضح */
-    --card-border: rgba(100, 116, 139, 0.22);    /* حدود أوضح */
+    --bg: #e8eef5;
+    --card-bg: rgba(255, 255, 255, 0.92);
+    --card-border: rgba(100, 116, 139, 0.22);
     --card-border-hover: rgba(14, 165, 233, 0.6);
     --text-primary: #0f172a;
     --text-secondary: #475569;
@@ -16,7 +21,7 @@ html:not(.dark) {
     --glow: rgba(14, 165, 233, 0.14);
 }
 
-/* ============ LIGHT MODE — AURORA (أهدى) ============ */
+/* ============ LIGHT MODE — AURORA ============ */
 html:not(.dark) .aurora-bg {
     background:
         radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.14) 0%, transparent 60%),
@@ -33,17 +38,17 @@ html:not(.dark) .grid-overlay {
 
 /* ============ LIGHT MODE — FOOTER CREDIT BADGES ============ */
 html:not(.dark) .credit-indigo {
-    color: #4338ca;                             /* كان #a5b4fc — بقى indigo غامق */
+    color: #4338ca;
     background: rgba(99, 102, 241, 0.16);
     font-weight: 800;
 }
 html:not(.dark) .credit-teal {
-    color: #0f766e;                             /* كان #5eead4 — بقى teal عميق */
+    color: #0f766e;
     background: rgba(20, 184, 166, 0.16);
     font-weight: 800;
 }
 
-/* ============ LIGHT MODE — FOOTER BRAND (تدرج أقوى) ============ */
+/* ============ LIGHT MODE — FOOTER BRAND ============ */
 html:not(.dark) .footer-brand {
     background: linear-gradient(135deg, #0891b2 0%, #4f46e5 100%);
     -webkit-background-clip: text;
@@ -51,19 +56,19 @@ html:not(.dark) .footer-brand {
     -webkit-text-fill-color: transparent;
 }
 
-/* ============ LIGHT MODE — CARDS (خلفية أنضف) ============ */
+/* ============ LIGHT MODE — CARDS ============ */
 html:not(.dark) .app-card {
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.92));
 }
 
-/* ============ LIGHT MODE — SECTION-COUNT (أوضح) ============ */
+/* ============ LIGHT MODE — SECTION-COUNT ============ */
 html:not(.dark) .section-count {
     background: rgba(14, 165, 233, 0.12);
     color: #0284c7;
     border-color: rgba(14, 165, 233, 0.28);
 }
 
-/* ============ LIGHT MODE — SMOOTH TRANSITION ============ */
+/* ============ SMOOTH TRANSITION ============ */
 html {
     transition: background-color 0.4s ease, color 0.4s ease;
 }
