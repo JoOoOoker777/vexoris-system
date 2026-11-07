@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مراجعة الملفات الطبية | VEXORIS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+      if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg: #04070f; --card-bg: rgba(15, 23, 42, 0.55);
+            --card-border: rgba(148, 163, 184, 0.12);
+            --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+            --accent: #0ea5e9; --accent-2: #6366f1; --accent-3: #8b5cf6;
+            --danger: #ef4444; --warning: #f59e0b; --success: #10b981;
+            --input-bg: rgba(15, 23, 42, 0.5);
+        }
+        html:not(.dark) {
+            --bg: #e8eef5; --card-bg: rgba(255, 255, 255, 0.92);
+            --card-border: rgba(100, 116, 139, 0.28);
+            --text-primary: #0b1220; --text-secondary: #1e293b; --text-muted: #475569;
+            --input-bg: rgba(255, 255, 255, 0.9);
+        }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Tajawal', system-ui, sans-serif;
+            background: var(--bg); color: var(--text-primary);
+            min-height: 100vh; overflow-x: hidden;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.16) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.14) 0%, transparent 65%);
+        }
+        html:not(.dark) .aurora-bg {
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.07) 0%, transparent 65%);
+        }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+        }
+        html:not(.dark) .grid-overlay {
+            background-image:
+                linear-gradient(to right, rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(15, 23, 42, 0.045) 1px, transparent 1px);
+        }
+        .nav-shell { position: sticky; top: 12px; z-index: 50; margin: 12px auto 0; max-width: 1400px; padding: 0 16px; }
+        .nav-inner {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 18px; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .logo-dot {
+            position: relative; width: 12px; height: 12px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18), 0 0 20px rgba(14, 165, 233, 0.7);
+            flex-shrink: 0;
+        }
+        .logo-dot::before {
+            content: ''; position: absolute; inset: -3px; border-radius: 50%;
+            border: 1px solid rgba(14, 165, 233, 0.5);
+            animation: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes ping { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(2.4); opacity: 0; } }
+        .brand-text {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: 0.18em;
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 40%, #6366f1 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .nav-link {
+            position: relative; color: var(--text-secondary); font-weight: 600;
+            font-size: 0.875rem; padding: 6px 2px; transition: color 0.3s ease;
+            text-decoration: none;
+        }
+        .nav-link:hover { color: var(--accent); }
+        .icon-btn {
+            width: 36px; height: 36px; border-radius: 10px;
+            border: 1px solid var(--card-border); background: transparent; color: var(--accent);
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .icon-btn:hover { background: rgba(14, 165, 233, 0.1); border-color: rgba(14, 165, 233, 0.4); transform: rotate(15deg); }
+        .app-container { max-width: 1400px; margin: 0 auto; padding: 0 16px; }
+
+        /* Page Hero */
+        .page-hero {
+            margin-top: 24px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(99, 102, 241, 0.05) 50%, rgba(139, 92, 246, 0.08) 100%);
+            border: 1px solid rgba(14, 165, 233, 0.22);
+            border-radius: 24px; padding: 24px 32px;
+            position: relative; overflow: hidden;
+            display: flex; align-items: center; justify-content: space-between; gap: 20px;
+            flex-wrap: wrap;
+        }
+        .page-hero::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, #0ea5e9, #6366f1, transparent);
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 5px 12px; border-radius: 999px;
+            background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.3);
+            color: var(--accent); font-size: 0.65rem; font-weight: 800;
+            letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px;
+        }
+        .hero-badge .pulse-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent); box-shadow: 0 0 10px var(--accent);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+        .hero-title { font-size: clamp(1.2rem, 2.4vw, 1.65rem); font-weight: 900; }
+        .hero-title .grad {
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 35%, #6366f1 70%, #8b5cf6 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero-desc { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-top: 4px; max-width: 540px; }
+
+        /* Glass Panels */
+        .glass-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+        }
+
+        /* Form Section Card */
+        .form-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-top: 20px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .form-card-header {
+            padding: 14px 22px;
+            border-bottom: 1px solid var(--card-border);
+            background: linear-gradient(90deg, rgba(14, 165, 233, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%);
+            display: flex; align-items: center; gap: 12px;
+            flex-wrap: wrap;
+        }
+        .form-card-header h2 {
+            flex: 1; font-size: 0.92rem; font-weight: 900; letter-spacing: -0.01em;
+        }
+        .form-card-icon {
+            width: 34px; height: 34px; border-radius: 9px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(99, 102, 241, 0.15));
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); font-size: 0.8rem; flex-shrink: 0;
+        }
+        .form-card-body { padding: 20px 22px; }
+
+        /* Labels & Inputs */
+        .f-label {
+            display: block; font-size: 0.66rem; font-weight: 800;
+            color: var(--text-secondary); text-transform: uppercase;
+            letter-spacing: 0.04em; margin-bottom: 5px;
+        }
+        .f-label .req { color: var(--danger); }
+        .f-input, .f-select, .f-textarea {
+            width: 100%; padding: 9px 12px;
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 9px;
+            color: var(--text-primary);
+            font-size: 0.8rem; font-weight: 600; font-family: inherit;
+            transition: all 0.2s ease;
+        }
+        .f-input:focus, .f-select:focus, .f-textarea:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+        }
+        .f-textarea { resize: vertical; min-height: 60px; line-height: 1.6; }
+        .f-input::placeholder, .f-textarea::placeholder { color: var(--text-muted); font-weight: 500; }
+
+        /* Radio Pills */
+        .pill-group { display: flex; gap: 6px; flex-wrap: wrap; }
+        .pill {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 6px 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 7px;
+            font-size: 0.72rem; font-weight: 700;
+            color: var(--text-secondary);
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .pill:hover { border-color: var(--accent); color: var(--accent); }
+        .pill input { display: none; }
+        .pill:has(input:checked) {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            border-color: transparent; color: #fff;
+            box-shadow: 0 4px 12px -4px rgba(14, 165, 233, 0.5);
+        }
+
+        /* Checkbox Grid */
+        .cb-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.25);
+            border: 1px solid var(--card-border);
+            border-radius: 11px;
+            max-height: 200px; overflow-y: auto;
+        }
+        html:not(.dark) .cb-grid { background: rgba(248, 250, 252, 0.5); }
+        .cb-item {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.72rem; font-weight: 700;
+            color: var(--text-secondary);
+            cursor: pointer; padding: 4px 6px;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+        }
+        .cb-item:hover { background: rgba(14, 165, 233, 0.06); }
+        .cb-item input[type="checkbox"] {
+            width: 14px; height: 14px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0;
+        }
+
+        /* Service checkboxes */
+        .serv-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+            padding: 14px;
+            background: rgba(15, 23, 42, 0.25);
+            border: 1px solid var(--card-border); border-radius: 11px;
+        }
+        html:not(.dark) .serv-grid { background: rgba(248, 250, 252, 0.5); }
+        @media (min-width: 768px) { .serv-grid { grid-template-columns: repeat(4, 1fr); } }
+        .serv-grid .cb-item { font-size: 0.78rem; }
+
+        /* Search Bar */
+        .search-bar {
+            margin-top: 16px;
+            padding: 14px;
+            background: rgba(14, 165, 233, 0.04);
+            border: 1px solid rgba(14, 165, 233, 0.2);
+            border-radius: 14px;
+            display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap;
+        }
+        .search-bar .f-group { flex: 1; min-width: 160px; }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+            padding: 9px 20px; border-radius: 10px;
+            font-family: inherit; font-weight: 800; font-size: 0.8rem;
+            cursor: pointer; transition: all 0.25s ease;
+            border: none; text-decoration: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            color: #fff;
+            box-shadow: 0 6px 18px -6px rgba(14, 165, 233, 0.5);
+        }
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px -6px rgba(99, 102, 241, 0.6);
+        }
+        .btn-secondary {
+            background: transparent; border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+        }
+        .btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: rgba(14, 165, 233, 0.06); }
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #0ea5e9);
+            color: #fff;
+            box-shadow: 0 6px 18px -6px rgba(16, 185, 129, 0.5);
+        }
+        .btn-success:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 24px -6px rgba(16, 185, 129, 0.6); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Floating Save Button */
+        .floating-save {
+            position: fixed;
+            left: 0; top: 50%;
+            transform: translateY(-50%);
+            z-index: 40;
+            background: linear-gradient(135deg, #10b981, #0ea5e9);
+            color: #fff;
+            padding: 16px 10px;
+            border-radius: 0 14px 14px 0;
+            border: none;
+            cursor: pointer;
+            box-shadow: 4px 0 24px -6px rgba(16, 185, 129, 0.5);
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        .floating-save:hover { padding-left: 16px; }
+        .floating-save i { font-size: 1.1rem; }
+        .floating-save span {
+            font-size: 0.62rem; font-weight: 900;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            writing-mode: vertical-lr;
+            transform: rotate(180deg);
+        }
+        @media (max-width: 767px) {
+            .floating-save { display: none; }
+        }
+
+        /* Section Divider */
+        .divider-line {
+            height: 1px; background: var(--card-border);
+            margin: 14px 0;
+        }
+
+        /* Audit Question Cards */
+        .question-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-top: 3px solid var(--accent);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 14px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: none;
+        }
+        .question-card.visible { display: block; }
+        .question-header {
+            padding: 12px 18px;
+            background: rgba(148, 163, 184, 0.04);
+            border-bottom: 1px solid var(--card-border);
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            flex-wrap: wrap;
+        }
+        .question-title {
+            font-size: 0.85rem; font-weight: 900;
+            color: var(--text-primary);
+            display: flex; align-items: center; gap: 8px;
+            flex: 1;
+        }
+        .question-num {
+            width: 22px; height: 22px; border-radius: 6px;
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-family: 'Space Grotesk', sans-serif; font-size: 0.62rem; font-weight: 700;
+            flex-shrink: 0;
+        }
+        .question-body { padding: 16px 18px; }
+
+        /* Assessment Unit */
+        .assess-unit {
+            background: rgba(15, 23, 42, 0.25);
+            border: 1px solid var(--card-border);
+            border-radius: 13px;
+            padding: 14px;
+            margin-bottom: 12px;
+            transition: all 0.25s ease;
+        }
+        html:not(.dark) .assess-unit { background: rgba(248, 250, 252, 0.5); }
+        .assess-unit:hover { border-color: rgba(14, 165, 233, 0.3); }
+        .assess-unit-head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding-bottom: 10px; margin-bottom: 12px;
+            border-bottom: 1px dashed var(--card-border);
+        }
+        .assess-unit-num {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.68rem; font-weight: 800;
+            color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .assess-unit-actions { display: flex; gap: 6px; }
+        .mini-btn {
+            padding: 4px 10px; border-radius: 6px;
+            background: transparent; border: 1px solid var(--card-border);
+            color: var(--text-muted); font-family: inherit;
+            font-size: 0.65rem; font-weight: 800;
+            cursor: pointer; transition: all 0.2s ease;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .mini-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .mini-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+        /* Hidden utility */
+        .hidden-logic { display: none !important; }
+
+        /* Loading */
+        .loading-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .loading-screen.hide { opacity: 0; pointer-events: none; }
+
+        /* Footer */
+        .footer-shell {
+            max-width: 1400px; margin: 32px auto 24px; padding: 22px 20px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 20px; text-align: center;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        }
+        .footer-brand {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            letter-spacing: 0.35em; font-size: 0.75rem;
+            background: linear-gradient(135deg, #22d3ee, #6366f1);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .footer-text { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+        .credit-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-weight: 800; font-size: 0.7rem; }
+        .credit-indigo { color: #a5b4fc; background: rgba(99, 102, 241, 0.12); }
+        .credit-teal { color: #5eead4; background: rgba(20, 184, 166, 0.12); }
+        html:not(.dark) .credit-indigo { color: #4338ca; background: rgba(99, 102, 241, 0.16); }
+        html:not(.dark) .credit-teal { color: #0f766e; background: rgba(20, 184, 166, 0.16); }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4));
+            border-radius: 10px; border: 2px solid var(--bg);
+        }
+        ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
+
+        @media print { .no-print { display: none !important; } }
+    </style>
+    <link rel="stylesheet" href="../theme-overrides.css" />
+</head>
+<body>
+
+    <div class="loading-screen" id="loadingScreen">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري تحميل واجهة المراجعة...</p>
+    </div>
+
+    <div class="aurora-bg"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="nav-shell">
+        <header class="nav-inner">
+            <div class="flex items-center gap-3">
+                <div class="logo-dot"></div>
+                <div>
+                    <a href="../dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
+                </div>
+            </div>
+            <nav class="hidden md:flex items-center gap-7">
+                <a href="../dashboard.html" class="nav-link">لوحة التحكم</a>
+                <a href="../about.html" class="nav-link">عن النظام</a>
+                <a href="../security.html" class="nav-link">درع VEXORIS</a>
+                <a href="../courses.html" class="nav-link">دورات تدريبية</a>
+                <a href="../feedback.html" class="nav-link">رأيك يهمنا</a>
+            </nav>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </button>
+                <a href="../dashboard.html" style="padding: 8px 16px; border-radius: 10px; background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    رجوع
+                </a>
+            </div>
+        </header>
+    </div>
+
+    <main class="app-container">
+
+        <!-- PAGE HERO -->
+        <section class="page-hero no-print">
+            <div>
+                <div class="hero-badge">
+                    <span class="pulse-dot"></span>
+                    Medical File Audit
+                </div>
+                <h1 class="hero-title">مراجعة <span class="grad">الملفات الطبية</span></h1>
+                <p class="hero-desc">
+                    أدخل بيانات الملف الطبي، وأضف التقييمات لكل نموذج. النظام يخفي ويُظهر النماذج تلقائياً حسب التخصص والخدمات وحالة الملف.
+                </p>
+            </div>
+        </section>
+
+        <!-- SEARCH BAR -->
+        <div class="search-bar no-print">
+            <div class="f-group">
+                <label class="f-label">الرقم الطبي (Medical ID)</label>
+                <div style="position: relative;">
+                    <i class="fa-solid fa-magnifying-glass" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color: var(--accent); font-size: 0.8rem; pointer-events: none;"></i>
+                    <input type="text" id="searchFile" class="f-input" style="padding-right: 34px;" placeholder="ابحث بالرقم..." />
+                </div>
+            </div>
+            <div class="f-group">
+                <label class="f-label">رقم الزيارة</label>
+                <div style="position: relative;">
+                    <i class="fa-solid fa-hashtag" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color: var(--text-muted); font-size: 0.8rem; pointer-events: none;"></i>
+                    <input type="text" id="searchVisit" class="f-input" style="padding-right: 34px;" placeholder="الزيارة..." />
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="handleSearch()">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                استدعاء
+            </button>
+        </div>
+
+        <!-- BASIC DATA -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="form-card-icon"><i class="fa-solid fa-folder-open"></i></div>
+                <h2>البيانات الأساسية</h2>
+                <button class="mini-btn" onclick="savePartial()">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    مسودة
+                </button>
+            </div>
+            <div class="form-card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+                    <div>
+                        <label class="f-label">اسم المريض <span class="req">*</span></label>
+                        <input type="text" id="patientName" class="f-input" placeholder="الاسم الكامل" />
+                    </div>
+                    <div>
+                        <label class="f-label">الرقم الطبي <span class="req">*</span></label>
+                        <input type="text" id="medicalId" class="f-input" placeholder="Medical ID" style="font-family: 'Space Grotesk', monospace;" />
+                    </div>
+                    <div>
+                        <label class="f-label">تاريخ الدخول <span class="req">*</span></label>
+                        <input type="date" id="admissionDate" class="f-input" />
+                    </div>
+                    <div id="div_discharge_date" class="hidden-logic">
+                        <label class="f-label">تاريخ الخروج <span class="req">*</span></label>
+                        <input type="date" id="dischargeDate" class="f-input" style="color: var(--accent);" />
+                    </div>
+                </div>
+
+                <div class="divider-line"></div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
+                    <div>
+                        <label class="f-label">حالة الملف</label>
+                        <div class="pill-group">
+                            <label class="pill"><input type="radio" name="caseStatus" value="Open" onchange="handleGlobalLogic()" checked> مفتوحة</label>
+                            <label class="pill"><input type="radio" name="caseStatus" value="Closed" onchange="handleGlobalLogic()"> تم الخروج</label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="f-label">رقم الزيارة <span class="req">*</span></label>
+                        <input type="text" id="visitNumber" class="f-input" placeholder="Visit #" style="font-family: 'Space Grotesk', monospace;" />
+                    </div>
+                    <div>
+                        <label class="f-label">مكان الدخول</label>
+                        <div class="pill-group">
+                            <label class="pill"><input type="radio" name="admissionType" value="طوارئ" onchange="handleGlobalLogic()"> طوارئ</label>
+                            <label class="pill"><input type="radio" name="admissionType" value="عيادات" onchange="handleGlobalLogic()"> عيادات</label>
+                            <label class="pill"><input type="radio" name="admissionType" value="مكتب الدخول" onchange="handleGlobalLogic()"> مكتب دخول</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divider-line"></div>
+
+                <div>
+                    <label class="f-label">حركة الملف</label>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                        <input type="text" id="mov_type" class="f-input" placeholder="مكان الدخول" readonly style="opacity: 0.7; cursor: not-allowed; background: rgba(148,163,184,0.1);" />
+                        <input type="text" id="mov_floor1" class="f-input" placeholder="المحطة 1" />
+                        <input type="text" id="mov_floor2" class="f-input" placeholder="المحطة 2" />
+                        <input type="text" id="mov_discharge" class="f-input" placeholder="نقطة الخروج" />
+                    </div>
+                </div>
+
+                <div class="divider-line"></div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div>
+                        <label class="f-label">الاستشاري المسؤول <span class="req">*</span></label>
+                        <div style="position: relative;">
+                            <i class="fa-solid fa-user-md" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color: var(--accent); opacity: 0.7; font-size: 0.8rem; pointer-events: none;"></i>
+                            <input list="doctorsList" id="consultantInput" class="f-input" style="padding-right: 34px;" onchange="handleCard1T8(this)" placeholder="اختر الطبيب..." />
+                            <datalist id="doctorsList"></datalist>
+                        </div>
+                        <div id="consultantSpecialty" style="display: none; margin-top: 8px; padding: 4px 10px; border-radius: 999px; background: rgba(14,165,233,0.1); color: var(--accent); font-size: 0.68rem; font-weight: 800; display: inline-flex; align-items: center; gap: 5px;"></div>
+                        <div id="t8_manual_div" class="hidden-logic" style="margin-top: 8px; padding: 10px; border-radius: 10px; background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.2);">
+                            <span style="font-size: 0.62rem; color: #f59e0b; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 6px;">طبيب غير مسجل</span>
+                            <input type="text" id="t8_manual_input" class="f-input" placeholder="اكتب الاسم الكامل..." />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="f-label">التخصصات <span class="req">*</span></label>
+                        <div class="cb-grid" id="specialtiesList">
+                            <!-- Populated by JS -->
+                        </div>
+                        <div id="dayCaseDeptContainer" class="hidden-logic" style="margin-top: 10px; padding: 10px; background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.25); border-radius: 10px;">
+                            <label class="f-label" style="color: #10b981;">القسم الرئيسي لليوم الواحد <span class="req">*</span></label>
+                            <select id="dayCaseDept" class="f-select">
+                                <option value="">-- اختر القسم --</option>
+                                <option value="جراحة">جراحة</option>
+                                <option value="عظام">عظام</option>
+                                <option value="مسالك">مسالك</option>
+                                <option value="مخ واعصاب">مخ واعصاب</option>
+                                <option value="نساء وتوليد">نساء وتوليد</option>
+                                <option value="أطفال">أطفال</option>
+                                <option value="رعاية مركزة">رعاية مركزة</option>
+                                <option value="باطنة">باطنة</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SERVICES -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="form-card-icon"><i class="fa-solid fa-notes-medical"></i></div>
+                <h2>الإجراءات والخدمات</h2>
+            </div>
+            <div class="form-card-body">
+                <div class="serv-grid" id="servicesList">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- WARD CLERKS -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="form-card-icon"><i class="fa-solid fa-users-gear"></i></div>
+                <h2>مدخلو البيانات (Ward Clerk)</h2>
+            </div>
+            <div class="form-card-body">
+                <div id="wardQContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- AUDIT QUESTIONS CONTAINER -->
+        <div id="qContainer" style="margin-top: 20px;">
+            <!-- Populated dynamically -->
+        </div>
+
+        <!-- SUBMIT BUTTONS -->
+        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 24px; margin-bottom: 30px; flex-wrap: wrap;" class="no-print">
+            <button class="btn btn-primary" id="submitBtn" onclick="generateReport()" style="padding: 12px 30px; font-size: 0.88rem;">
+                <i class="fa-solid fa-paper-plane"></i>
+                اعتماد وإرسال
+            </button>
+            <button class="btn btn-success hidden-logic" id="btnOpenReport" onclick="redirectToFinalReport()" style="padding: 12px 30px; font-size: 0.88rem;">
+                <i class="fa-solid fa-file-contract"></i>
+                فتح التقرير
+            </button>
+        </div>
+    </main>
+
+    <!-- FLOATING SAVE BUTTON -->
+    <button class="floating-save no-print" onclick="savePartial()" title="حفظ جزئي">
+        <i class="fa-solid fa-floppy-disk"></i>
+        <span>حفظ</span>
+    </button>
+
+    <!-- FOOTER -->
+    <footer class="footer-shell">
+        <div class="footer-brand">VEXORIS SYSTEM</div>
+        <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+        <div class="footer-text">
+            تم برمجة النظام وتنفيذه بواسطة
+            <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+            <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+            <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+        </div>
+    </footer>
+
+    <script src="../notify.js"></script>
+
+    <script type="module">
+        import { supabase } from '../supabase-client.js';
+        import { logAudit, AUDIT } from '../audit-log.js';
+        import {
+            MARS_CONFIG,
+            DATE_REQUIRED_QS,
+            ISSUE_CATEGORIES,
+            ROLES,
+            SCORE_OPTIONS,
+            ERROR_TRANSLATIONS
+        } from './js/medical-audit-config.js';
+
+        // ============================================
+        // STATE
+        // ============================================
+        let currentUser = null;
+        let currentReviewer = '';
+        let unitCounter = 0;
+        let cardCloneCounter = 0;
+        let finalReportUrl = '';
+        let DOCTORS = [];
+        let CLERKS = [];
+        let AUDIT_QUESTIONS = [];
+        let initialized = false;
+
+        // ============================================
+        // HELPERS
+        // ============================================
+        window.toggleTheme = function() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        };
+
+        function safeParse(s) {
+            if (!s) return [];
+            try {
+                let p = JSON.parse(s);
+                if (typeof p === 'string') p = JSON.parse(p);
+                return Array.isArray(p) ? p : [];
+            } catch(e) { return []; }
+        }
+
+        function getInitials(name) {
+            if (!name) return '?';
+            const parts = name.trim().split(/\s+/);
+            if (parts.length === 1) return parts[0].slice(0, 2);
+            return parts[0][0] + (parts[1]?.[0] || '');
+        }
+
+        // ============================================
+        // HTML BUILDERS
+        // ============================================
+        function buildTemplateHtml(type, qId, unitId, isWard = false) {
+            const pre = `unit_${qId}_${unitId}`;
+            const fid = `${pre}_${type}`;
+            let h = `<div id="cont_${fid}" class="w-full transition-all duration-300`;
+
+            if (['T3', 'T5', 'T6', 'T7'].includes(type)) h += ' hidden-logic';
+            if (isWard && type === 'T7') h = h.replace(' hidden-logic', '');
+            h += `">`;
+
+            if (type === 'T1') {
+                h += `<label class="f-label">التاريخ</label>
+                      <input type="date" name="${fid}" class="f-input" onchange="handleLocalLogic('T1',this,'${qId}','${unitId}')">`;
+            }
+            else if (type === 'T2') {
+                h += `<label class="f-label">التقييم</label>
+                      <select name="${fid}" id="sel_${fid}" class="f-select" onchange="handleLocalLogic('T2',this,'${qId}','${unitId}')">
+                        <option value="" disabled selected>اختر التقييم...</option>
+                        ${SCORE_OPTIONS.map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
+                      </select>`;
+            }
+            else if (type === 'T3' || type === 'T8') {
+                const list = type === 'T8' ? DOCTORS : DOCTORS;
+                h += `<label class="f-label">${type === 'T8' ? 'الاستشاري' : 'الطبيب'}</label>
+                      <input list="l_${fid}" id="in_${fid}" name="${fid}" class="f-input" placeholder="اسم الطبيب..." onchange="handleLocalLogic('${type}',this,'${qId}','${unitId}')">
+                      <datalist id="l_${fid}">
+                        ${list.map(x => `<option value="${x.name}">`).join('')}
+                        <option value="غير موجود">
+                      </datalist>
+                      <div id="spec_${fid}" class="text-[10px] font-black mt-1.5 hidden-logic flex items-center gap-1 opacity-90 px-2" style="color: var(--accent);">
+                        <i class="fa-solid fa-tag"></i> <span class="spec-text"></span>
+                      </div>`;
+            }
+            else if (type === 'T7') {
+                h += `<label class="f-label">المدخل</label>
+                      <input list="l_${fid}" name="${fid}" class="f-input" placeholder="اسم المدخل..." onchange="handleLocalLogic('T7',this,'${qId}','${unitId}')">
+                      <datalist id="l_${fid}">
+                        ${CLERKS.map(c => `<option value="${c.name}">`).join('')}
+                        <option value="غير موجود">
+                      </datalist>`;
+            }
+            else if (type === 'T4') {
+                h += `<div class="w-full mt-2">
+                        <div style="padding: 12px; background: rgba(15,23,42,0.2); border-radius: 10px; border: 1px solid var(--card-border);">
+                          <div style="font-size: 0.62rem; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;">الأخطاء المرصودة</div>`;
+                ISSUE_CATEGORIES.forEach((group, idx) => {
+                    h += `<div style="margin-bottom: ${idx === ISSUE_CATEGORIES.length - 1 ? '0' : '10px'};">
+                            <div onclick="this.nextElementSibling.classList.toggle('hidden-logic'); this.querySelector('i').style.transform = this.nextElementSibling.classList.contains('hidden-logic') ? 'rotate(0deg)' : 'rotate(-90deg)';"
+                                 style="font-size: 0.7rem; font-weight: 900; color: var(--accent); padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid var(--card-border); cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none;">
+                              <i class="fa-solid fa-caret-left" style="transition: transform 0.2s;"></i> ${group.category}
+                            </div>
+                            <div class="hidden-logic" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 8px;">`;
+                    group.items.forEach(o => {
+                        h += `<label class="cb-item" style="font-size: 0.68rem;">
+                                <input type="checkbox" name="${fid}" value="${o.value}" onchange="handleLocalLogic('T4',this,'${qId}','${unitId}')">
+                                ${o.text}
+                              </label>`;
+                    });
+                    h += `</div></div>`;
+                });
+                h += `</div></div>`;
+            }
+            else if (type === 'T5') {
+                h += `<label class="f-label">الاسم / ملاحظة</label>
+                      <input type="text" name="${fid}" class="f-input" placeholder="الاسم أو الملاحظة..." onchange="handleLocalLogic('T5',this,'${qId}','${unitId}')">`;
+            }
+            else if (type === 'T6') {
+                h += `<label class="f-label" style="color: var(--danger);">توضيح الأخطاء</label>
+                      <textarea name="${fid}" class="f-textarea" maxlength="3000" placeholder="اكتب الأخطاء بدقة..."></textarea>`;
+            }
+            else if (type === 'T9') {
+                h += `<div class="pill-group">`;
+                ROLES.forEach(o => {
+                    h += `<label class="pill" style="font-size: 0.68rem;"><input type="radio" name="${fid}" value="${o.value}" onchange="handleLocalLogic('T9',this,'${qId}','${unitId}')"> ${o.text}</label>`;
+                });
+                h += `</div>`;
+            }
+
+            h += `</div>`;
+            return h;
+        }
+
+        function buildAssessmentUnitHtml(qId, unitId, deletable, hasDate, isWard) {
+            return `
+            <div id="unit-${qId}-${unitId}" class="assess-unit">
+                <div class="assess-unit-head">
+                    <span class="assess-unit-num">
+                        <i class="fa-solid fa-id-badge"></i>
+                        تقييم فردي #${unitId.replace('A','')}
+                    </span>
+                    <div class="assess-unit-actions">
+                        ${!isWard ? `<button type="button" class="mini-btn" onclick="cloneAssessmentUnit('${qId}')"><i class="fa-solid fa-user-plus"></i> إضافة</button>` : ''}
+                        ${deletable ? `<button type="button" class="mini-btn danger" onclick="document.getElementById('unit-${qId}-${unitId}').remove()"><i class="fa-solid fa-trash"></i> حذف</button>` : ''}
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: ${hasDate ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 10px; margin-bottom: 12px;">
+                    ${hasDate ? `<div>${buildTemplateHtml('T1', qId, unitId)}</div>` : ''}
+                    <div>${buildTemplateHtml('T2', qId, unitId)}</div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-end;">
+                        ${!isWard ? buildTemplateHtml('T9', qId, unitId) : ''}
+                        ${buildTemplateHtml('T3', qId, unitId, isWard)}
+                        ${buildTemplateHtml('T7', qId, unitId, isWard)}
+                        ${buildTemplateHtml('T5', qId, unitId, isWard)}
+                    </div>
+                </div>
+                ${!isWard ? buildTemplateHtml('T4', qId, unitId) : ''}
+                <div style="margin-top: 10px;">${buildTemplateHtml('T6', qId, unitId)}</div>
+            </div>`;
+        }
+
+        // ============================================
+        // RENDER
+        // ============================================
+        function populateSpecialtiesServices() {
+            // Specialties
+            const specContainer = document.getElementById('specialtiesList');
+            const allSpecials = [...Object.keys(MARS_CONFIG.specialties), ...Object.keys(MARS_CONFIG.dayCase)];
+            specContainer.innerHTML = allSpecials.map(s => 
+                `<label class="cb-item"><input type="checkbox" name="caseSpecialty" value="${s}" onchange="handleGlobalLogic()"> ${s}</label>`
+            ).join('');
+
+            // Services
+            const servContainer = document.getElementById('servicesList');
+            const allServices = Object.keys(MARS_CONFIG.services);
+            servContainer.innerHTML = allServices.map(s => 
+                `<label class="cb-item"><input type="checkbox" name="addServ" value="${s}" onchange="handleGlobalLogic()"> ${s}</label>`
+            ).join('');
+
+            // Doctors datalist
+            document.getElementById('doctorsList').innerHTML = 
+                DOCTORS.map(d => `<option value="${d.name}">`).join('') + `<option value="غير موجود">`;
+        }
+
+        function renderQuestions() {
+            const c = document.getElementById('qContainer');
+            c.innerHTML = '';
+            unitCounter = 0;
+
+            if (!AUDIT_QUESTIONS || AUDIT_QUESTIONS.length === 0) {
+                c.innerHTML = `<div style="padding: 40px; text-align: center; background: var(--card-bg); border: 1px dashed var(--card-border); border-radius: 14px; color: var(--text-muted);">
+                    <i class="fa-solid fa-inbox" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.4; display: block;"></i>
+                    <div style="font-weight: 900; margin-bottom: 6px;">لا توجد أسئلة مراجعة مسجلة</div>
+                    <div style="font-size: 0.8rem;">يرجى إضافة الأسئلة في جدول <code>audit_questions</code> من قاعدة البيانات.</div>
+                </div>`;
+                return;
+            }
+
+            AUDIT_QUESTIONS.forEach((q, index) => {
+                const qId = `Q${index + 1}`;
+                const unitId = `A${++unitCounter}`;
+                const qText = (q.text || '').trim();
+                const hasDate = DATE_REQUIRED_QS.includes(qText);
+
+                const card = `
+                    <div class="question-card" id="card-${qId}">
+                        <div class="question-header">
+                            <div class="question-title">
+                                <span class="question-num">${index + 1}</span>
+                                <span>${qText}</span>
+                            </div>
+                            <button type="button" class="mini-btn" onclick="cloneQuestion('${qId}')">
+                                <i class="fa-solid fa-copy"></i> تكرار
+                            </button>
+                        </div>
+                        <div class="question-body" id="unit-container-${qId}">
+                            ${buildAssessmentUnitHtml(qId, unitId, false, hasDate, false)}
+                        </div>
+                    </div>`;
+                c.insertAdjacentHTML('beforeend', card);
+            });
+        }
+
+        function renderWardQuestions() {
+            const c = document.getElementById('wardQContainer');
+            c.innerHTML = '';
+            const qs = [
+                { id: 'W1', text: 'نظافة الملف' },
+                { id: 'W2', text: 'ترتيب وتنسيق الملف الطبي' },
+                { id: 'W3', text: 'ملصق بيانات المريض' }
+            ];
+            qs.forEach(q => {
+                const unitId = `A${++unitCounter}`;
+                c.insertAdjacentHTML('beforeend', `
+                    <div>
+                        <h4 style="font-size: 0.72rem; font-weight: 900; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-check-square" style="color: var(--accent);"></i> ${q.text}
+                        </h4>
+                        ${buildAssessmentUnitHtml(q.id, unitId, false, false, true)}
+                    </div>
+                `);
+            });
+        }
+
+        // ============================================
+        // LOCAL LOGIC (within a unit)
+        // ============================================
+        window.handleLocalLogic = function(type, el, qId, unitId) {
+            const pre = `unit_${qId}_${unitId}`;
+            const val = el.value;
+
+            if (type === 'T3' || type === 'T8') {
+                const specDiv = document.getElementById(`spec_${pre}_${type}`);
+                if (specDiv) {
+                    const doc = DOCTORS.find(d => d.name === val.trim());
+                    if (doc && doc.specialty) {
+                        specDiv.querySelector('.spec-text').innerText = doc.specialty;
+                        specDiv.classList.remove('hidden-logic');
+                        specDiv.style.display = 'flex';
+                    } else {
+                        specDiv.classList.add('hidden-logic');
+                    }
+                }
+                // Show manual input if "غير موجود"
+                if (type === 'T3') {
+                    const t5 = document.getElementById(`cont_${pre}_T5`);
+                    if (val === 'غير موجود') {
+                        if (t5) t5.classList.remove('hidden-logic');
+                    } else {
+                        if (t5) t5.classList.add('hidden-logic');
+                    }
+                }
+            }
+
+            if (type === 'T9') {
+                const t3 = document.getElementById(`cont_${pre}_T3`);
+                const t7 = document.getElementById(`cont_${pre}_T7`);
+                const t5 = document.getElementById(`cont_${pre}_T5`);
+
+                if (val === 'doctor') {
+                    if (t3) t3.classList.remove('hidden-logic');
+                    if (t7) t7.classList.add('hidden-logic');
+                    if (t5) t5.classList.add('hidden-logic');
+                } else if (val === 'Ward Clerk') {
+                    if (t7) t7.classList.remove('hidden-logic');
+                    if (t3) t3.classList.add('hidden-logic');
+                    if (t5) t5.classList.add('hidden-logic');
+                } else if (val === 'nurse' || val === 'admin') {
+                    if (t5) t5.classList.remove('hidden-logic');
+                    if (t3) t3.classList.add('hidden-logic');
+                    if (t7) t7.classList.add('hidden-logic');
+                }
+            }
+
+            if (type === 'T2') {
+                const t4 = document.getElementById(`cont_${pre}_T4`);
+                const t5 = document.getElementById(`cont_${pre}_T5`);
+                const t3 = document.getElementById(`cont_${pre}_T3`);
+                const t6 = document.getElementById(`cont_${pre}_T6`);
+                const t9 = document.getElementById(`cont_${pre}_T9`);
+
+                document.querySelectorAll(`input[name="${pre}_T4"]`).forEach(cb => cb.disabled = false);
+
+                const role = document.querySelector(`input[name="${pre}_T9"]:checked`)?.value;
+                const t3Inp = document.getElementById(`in_${pre}_T3`);
+                const t3Val = t3Inp ? t3Inp.value : null;
+                const isNameInput = (role === 'nurse' || role === 'admin' || t3Val === 'غير موجود');
+
+                if (val === 'NA') {
+                    if (t4) t4.classList.add('hidden-logic');
+                    if (t6) t6.classList.add('hidden-logic');
+                    if (t5) t5.classList.remove('hidden-logic');
+                    if (t9) t9.classList.remove('hidden-logic');
+                    if (t3) t3.classList.remove('hidden-logic');
+                } else if (val === 'Score 2') {
+                    if (t4) t4.classList.add('hidden-logic');
+                    if (t6) t6.classList.add('hidden-logic');
+                    if (t5) t5.classList.remove('hidden-logic');
+                    if (t9) t9.classList.remove('hidden-logic');
+                } else if (val === 'Score 0' || val === 'Score 1') {
+                    if (t4) t4.classList.remove('hidden-logic');
+                    if (t6) t6.classList.add('hidden-logic');
+                    if (!isNameInput && t5) t5.classList.add('hidden-logic');
+                    if (t9) t9.classList.remove('hidden-logic');
+                }
+            }
+
+            if (type === 'T4') {
+                const t6 = document.getElementById(`cont_${pre}_T6`);
+                const allChecks = document.querySelectorAll(`input[name="${pre}_T4"]`);
+                const scoreSelect = document.getElementById(`sel_${pre}_T2`);
+
+                if ((val === 'missingForm' || val === 'emptyForm') && el.checked) {
+                    if (scoreSelect) scoreSelect.value = 'Score 0';
+                    allChecks.forEach(cb => { if (cb.value !== val) { cb.checked = false; cb.disabled = true; } });
+                } else if ((val === 'missingForm' || val === 'emptyForm') && !el.checked) {
+                    allChecks.forEach(cb => cb.disabled = false);
+                }
+
+                const incompleteCheck = Array.from(allChecks).find(c => c.value === 'incompleteData');
+                if (incompleteCheck && incompleteCheck.checked) {
+                    if (t6) t6.classList.remove('hidden-logic');
+                } else {
+                    if (t6) t6.classList.add('hidden-logic');
+                }
+            }
+        };
+
+        // ============================================
+        // GLOBAL LOGIC (show/hide cards)
+        // ============================================
+        window.handleGlobalLogic = function() {
+            document.querySelectorAll('#qContainer .question-card').forEach(c => {
+                c.classList.remove('visible');
+            });
+
+            const specChecks = Array.from(document.querySelectorAll('input[name="caseSpecialty"]:checked')).map(x => x.value);
+            const servChecks = Array.from(document.querySelectorAll('input[name="addServ"]:checked')).map(x => x.value);
+
+            const isDayCaseAdult = specChecks.includes('حالة يوم واحد كبار');
+            const isDayCasePed = specChecks.includes('حالة يوم واحد أطفال');
+            const dayCaseContainer = document.getElementById('dayCaseDeptContainer');
+            if (isDayCaseAdult || isDayCasePed) {
+                dayCaseContainer.classList.remove('hidden-logic');
+            } else {
+                dayCaseContainer.classList.add('hidden-logic');
+                document.getElementById('dayCaseDept').value = '';
+            }
+
+            const admType = document.querySelector('input[name="admissionType"]:checked')?.value;
+            if (admType) {
+                document.getElementById('mov_type').value = admType;
+            }
+
+            const caseStatus = document.querySelector('input[name="caseStatus"]:checked')?.value;
+            const disDateDiv = document.getElementById('div_discharge_date');
+            if (caseStatus === 'Open') disDateDiv?.classList.add('hidden-logic');
+            else if (caseStatus === 'Closed') disDateDiv?.classList.remove('hidden-logic');
+
+            // Collect forms to show
+            let toShow = [];
+            specChecks.forEach(s => {
+                if (MARS_CONFIG.specialties[s]) toShow.push(...MARS_CONFIG.specialties[s]);
+                if (MARS_CONFIG.dayCase[s]) toShow.push(...MARS_CONFIG.dayCase[s]);
+            });
+            servChecks.forEach(s => {
+                if (MARS_CONFIG.services[s]) toShow.push(...MARS_CONFIG.services[s]);
+            });
+
+            toShow = [...new Set(toShow)];
+
+            // Apply exclusions
+            let finalShow = [];
+            toShow.forEach(form => {
+                let show = true;
+                if (admType && MARS_CONFIG.exclusions[admType]?.includes(form)) show = false;
+                if (caseStatus && MARS_CONFIG.exclusions[caseStatus]?.includes(form)) show = false;
+                if (show) finalShow.push(form);
+            });
+
+            // Show matching cards
+            document.querySelectorAll('#qContainer .question-card').forEach(card => {
+                const titleEl = card.querySelector('.question-title span:last-child');
+                if (!titleEl) return;
+                const title = titleEl.textContent.trim().replace(/\s+/g, ' ');
+                if (finalShow.includes(title)) {
+                    card.classList.add('visible');
+                }
+            });
+        };
+
+        // ============================================
+        // CLONE
+        // ============================================
+        window.cloneQuestion = function(originalQId) {
+            const orig = document.getElementById(`card-${originalQId}`);
+            if (!orig) return;
+            const newQId = `${originalQId}_C${++cardCloneCounter}`;
+            const titleText = orig.querySelector('.question-title span:last-child').textContent.trim();
+            const hasDate = DATE_REQUIRED_QS.includes(titleText);
+            const newUnitId = `A${++unitCounter}`;
+
+            const html = `
+                <div class="question-card visible" id="card-${newQId}" style="border-top-color: var(--warning);">
+                    <div class="question-header" style="background: rgba(245,158,11,0.05);">
+                        <div class="question-title">
+                            <i class="fa-solid fa-copy" style="color: var(--warning);"></i>
+                            <span>${titleText}</span>
+                            <span style="font-size: 0.6rem; background: var(--warning); color: #fff; padding: 1px 8px; border-radius: 999px; font-weight: 900;">نسخة مكررة</span>
+                        </div>
+                        <div style="display: flex; gap: 6px;">
+                            <button type="button" class="mini-btn" onclick="cloneQuestion('${originalQId}')">تكرار</button>
+                            <button type="button" class="mini-btn danger" onclick="document.getElementById('card-${newQId}').remove()">حذف</button>
+                        </div>
+                    </div>
+                    <div class="question-body" id="unit-container-${newQId}">
+                        ${buildAssessmentUnitHtml(newQId, newUnitId, false, hasDate, false)}
+                    </div>
+                </div>`;
+            orig.insertAdjacentHTML('afterend', html);
+        };
+
+        window.cloneAssessmentUnit = function(qId) {
+            const container = document.getElementById(`unit-container-${qId}`);
+            if (!container) return;
+            const newUnitId = `A${++unitCounter}`;
+            const hasDate = container.innerHTML.includes('type="date"');
+            container.insertAdjacentHTML('beforeend', buildAssessmentUnitHtml(qId, newUnitId, true, hasDate, false));
+            showNotification('تمت إضافة تقييم جديد', 'success');
+        };
+
+        // ============================================
+        // CONSULTANT AUTOCOMPLETE
+        // ============================================
+        window.handleCard1T8 = function(select) {
+            const manualDiv = document.getElementById('t8_manual_div');
+            const specDiv = document.getElementById('consultantSpecialty');
+            const val = select.value.trim();
+            const found = DOCTORS.find(d => d.name === val);
+
+            if (found && found.specialty) {
+                specDiv.innerHTML = `<i class="fa-solid fa-tag"></i> التخصص: ${found.specialty}`;
+                specDiv.classList.remove('hidden-logic');
+                specDiv.style.display = 'inline-flex';
+            } else {
+                specDiv.classList.add('hidden-logic');
+            }
+
+            if ((!found && val !== '') || val === 'غير موجود') {
+                manualDiv.classList.remove('hidden-logic');
+                document.getElementById('t8_manual_input').value = (val === 'غير موجود') ? '' : val;
+                if (val === 'غير موجود') document.getElementById('t8_manual_input').focus();
+            } else {
+                manualDiv.classList.add('hidden-logic');
+            }
+        };
+
+        // ============================================
+        // SEARCH
+        // ============================================
+        window.handleSearch = async function() {
+            const medId = document.getElementById('searchFile').value.trim();
+            const visitNum = document.getElementById('searchVisit').value.trim();
+
+            if (!medId) {
+                showNotification('يرجى إدخال الرقم الطبي للبحث', 'warning');
+                return;
+            }
+
+            const submitBtn = document.querySelector('#searchFile');
+            submitBtn.disabled = true;
+
+            try {
+                let query = supabase.from('medical_file_reviews')
+                    .select('*')
+                    .eq('medical_id', medId);
+                if (visitNum) query = query.eq('visit_number', visitNum);
+
+                const { data, error } = await query.order('updated_at', { ascending: false }).limit(1).maybeSingle();
+
+                if (error) throw error;
+
+                if (!data) {
+                    showNotification('لا يوجد سجل مطابق لهذا الرقم', 'info');
+                    return;
+                }
+
+                // Fill the form
+                document.getElementById('patientName').value = data.patient_name || '';
+                document.getElementById('medicalId').value = data.medical_id || '';
+                document.getElementById('admissionDate').value = data.admission_date || '';
+                document.getElementById('dischargeDate').value = data.discharge_date || '';
+                document.getElementById('visitNumber').value = data.visit_number || '';
+                document.getElementById('movement' in data ? 'mov_type' : 'mov_type').value = (data.movement || '').split(' -> ')[0] || '';
+                document.getElementById('mov_floor1').value = (data.movement || '').split(' -> ')[1] || '';
+                document.getElementById('mov_floor2').value = (data.movement || '').split(' -> ')[2] || '';
+                document.getElementById('mov_discharge').value = (data.movement || '').split(' -> ')[3] || '';
+                document.getElementById('consultantInput').value = data.consultant || '';
+
+                if (data.case_status) {
+                    document.querySelector(`input[name="caseStatus"][value="${data.case_status}"]`)?.click();
+                }
+                if (data.admission_type) {
+                    document.querySelector(`input[name="admissionType"][value="${data.admission_type}"]`)?.click();
+                }
+
+                // Specialties
+                document.querySelectorAll('input[name="caseSpecialty"]').forEach(cb => cb.checked = false);
+                if (data.specialties) {
+                    data.specialties.split(',').forEach(s => {
+                        let sp = s.trim();
+                        if (sp.includes(' - ')) sp = sp.split(' - ')[0].trim();
+                        const cb = document.querySelector(`input[name="caseSpecialty"][value="${sp}"]`);
+                        if (cb) cb.checked = true;
+                    });
+                }
+
+                // Services
+                document.querySelectorAll('input[name="addServ"]').forEach(cb => cb.checked = false);
+                if (data.services) {
+                    data.services.split(',').forEach(s => {
+                        const cb = document.querySelector(`input[name="addServ"][value="${s.trim()}"]`);
+                        if (cb) cb.checked = true;
+                    });
+                }
+
+                handleGlobalLogic();
+                handleCard1T8(document.getElementById('consultantInput'));
+
+                // Load ward questions
+                const wardData = safeParse(data.ward_questions);
+                wardData.forEach((w, i) => {
+                    const selects = document.querySelectorAll('#wardQContainer select[name$="_T2"]');
+                    if (selects[i]) {
+                        const actualUnitId = selects[i].name.split('_')[2];
+                        selects[i].value = w.score || '';
+                        handleLocalLogic('T2', selects[i], `W${i+1}`, actualUnitId);
+
+                        const clerkInput = document.querySelector(`input[name="unit_W${i+1}_${actualUnitId}_T7"]`);
+                        if (clerkInput) clerkInput.value = w.clerk || '';
+
+                        const notesTA = document.querySelector(`textarea[name="unit_W${i+1}_${actualUnitId}_T6"]`);
+                        if (notesTA) notesTA.value = Array.isArray(w.notes) ? w.notes.join(' / ') : (w.note || '');
+                    }
+                });
+
+                // Load audit questions - simplified approach
+                const auditData = safeParse(data.audit_questions);
+                const clearedCards = new Set();
+
+                auditData.forEach(savedCard => {
+                    const qTitle = (savedCard.text || savedCard.question || '').trim();
+                    if (!qTitle || !savedCard.data) return;
+
+                    const primaryCard = Array.from(document.querySelectorAll('#qContainer .question-card')).find(c => {
+                        if (c.id.includes('_C')) return false;
+                        const titleEl = c.querySelector('.question-title span:last-child');
+                        if (!titleEl) return false;
+                        return titleEl.textContent.trim().replace(/\s+/g, ' ') === qTitle.replace(/\s+/g, ' ');
+                    });
+
+                    if (primaryCard) {
+                        const targetQId = primaryCard.id.replace('card-', '');
+                        const container = document.getElementById(`unit-container-${targetQId}`);
+
+                        if (!clearedCards.has(primaryCard.id)) {
+                            container.innerHTML = '';
+                            clearedCards.add(primaryCard.id);
+                        }
+
+                        const hasDate = DATE_REQUIRED_QS.includes(qTitle);
+
+                        savedCard.data.forEach((sUnit, idx) => {
+                            if (!sUnit.score && !sUnit.person && !sUnit.role && !sUnit.date) return;
+
+                            const nUnitId = `A${++unitCounter}`;
+                            container.insertAdjacentHTML('beforeend', buildAssessmentUnitHtml(targetQId, nUnitId, container.children.length > 0, hasDate, false));
+                            const pre = `unit_${targetQId}_${nUnitId}`;
+
+                            const setField = (sel, v) => {
+                                const el = document.querySelector(sel);
+                                if (el && v !== undefined && v !== null) {
+                                    if (el.tagName === 'SELECT') {
+                                        Array.from(el.options).forEach(opt => {
+                                            if (opt.value.trim().toLowerCase() === String(v).trim().toLowerCase()) el.value = opt.value;
+                                        });
+                                    } else {
+                                        el.value = v;
+                                    }
+                                }
+                                return el;
+                            };
+
+                            if (sUnit.date) setField(`input[name="${pre}_T1"]`, sUnit.date.split('T')[0]);
+                            if (sUnit.role) {
+                                const rEl = document.querySelector(`input[name="${pre}_T9"][value="${sUnit.role}"]`);
+                                if (rEl) { rEl.checked = true; handleLocalLogic('T9', rEl, targetQId, nUnitId); }
+                            }
+
+                            const sT2 = setField(`select[name="${pre}_T2"]`, sUnit.score || 'NA');
+                            if (sT2) handleLocalLogic('T2', sT2, targetQId, nUnitId);
+
+                            setField(`input[name="${pre}_T3"]`, sUnit.person || '');
+                            setField(`input[name="${pre}_T7"]`, sUnit.person || '');
+                            setField(`input[name="${pre}_T5"]`, sUnit.otherName || sUnit.person || '');
+
+                            const noteTxt = Array.isArray(sUnit.notes) ? sUnit.notes.join(' / ') : (sUnit.note || '');
+                            setField(`textarea[name="${pre}_T6"]`, noteTxt);
+
+                            const issues = Array.isArray(sUnit.issues) ? sUnit.issues : (sUnit.issues || '').split(',').map(s => s.trim()).filter(Boolean);
+                            issues.forEach(issue => {
+                                const cb = document.querySelector(`input[name="${pre}_T4"][value="${issue}"]`);
+                                if (cb) { cb.checked = true; handleLocalLogic('T4', cb, targetQId, nUnitId); }
+                            });
+                        });
+
+                        primaryCard.classList.add('visible');
+                    }
+                });
+
+                showNotification('تم استدعاء الملف بنجاح', 'success');
+                await logAudit('medical_record_searched', {
+                    entityType: 'medical_file',
+                    entityId: `${medId}/${visitNum || 'any'}`,
+                    description: 'بحث عن ملف طبي محفوظ',
+                    severity: 'info'
+                });
+
+            } catch (err) {
+                console.error('Search error:', err);
+                showNotification('فشل البحث: ' + err.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        };
+
+        // ============================================
+        // COLLECT DATA
+        // ============================================
+        function collectAllData() {
+            const errorSep = /[.\-_\/\\،,]+/;
+            const dayCaseDept = document.getElementById('dayCaseDept').value;
+
+            const specialties = Array.from(document.querySelectorAll('input[name="caseSpecialty"]:checked')).map(e => {
+                if (e.value.includes('يوم واحد') && dayCaseDept) return `${e.value} - ${dayCaseDept}`;
+                return e.value;
+            }).join(', ');
+
+            const data = {
+                medical_id: document.getElementById('medicalId').value.trim(),
+                visit_number: document.getElementById('visitNumber').value.trim(),
+                patient_name: document.getElementById('patientName').value.trim(),
+                admission_date: document.getElementById('admissionDate').value || null,
+                discharge_date: document.getElementById('dischargeDate').value || null,
+                case_status: document.querySelector('input[name="caseStatus"]:checked')?.value || null,
+                admission_type: document.querySelector('input[name="admissionType"]:checked')?.value || null,
+                movement: `${document.getElementById('mov_type').value} -> ${document.getElementById('mov_floor1').value} -> ${document.getElementById('mov_floor2').value} -> ${document.getElementById('mov_discharge').value}`,
+                consultant: document.getElementById('t8_manual_input')?.value || document.getElementById('consultantInput').value,
+                specialties,
+                services: Array.from(document.querySelectorAll('input[name="addServ"]:checked')).map(e => e.value).join(', '),
+                ward_questions: [],
+                audit_questions: [],
+            };
+
+            // Ward
+            document.querySelectorAll('#wardQContainer > div').forEach((div, i) => {
+                const selectEl = div.querySelector('select[name^="unit_W"]');
+                if (!selectEl) return;
+                const prefix = selectEl.name.split('_').slice(0, 3).join('_');
+                const txtArea = div.querySelector(`textarea[name="${prefix}_T6"]`);
+                data.ward_questions.push({
+                    qId: `W${i+1}`,
+                    score: selectEl.value || '',
+                    clerk: div.querySelector(`input[name="${prefix}_T7"]`)?.value || '',
+                    notes: (txtArea && txtArea.value) ? txtArea.value.split(errorSep).map(s => s.trim()).filter(Boolean) : []
+                });
+            });
+
+            // Audit
+            document.querySelectorAll('#qContainer .question-card.visible').forEach(card => {
+                const qId = card.id.replace('card-', '');
+                const titleEl = card.querySelector('.question-title span:last-child');
+                const qText = titleEl ? titleEl.textContent.trim() : '';
+                const units = [];
+
+                card.querySelectorAll('[id^="unit-"]').forEach(uDiv => {
+                    const uId = uDiv.id.split('-')[2];
+                    const pre = `unit_${qId}_${uId}`;
+                    const manualName = uDiv.querySelector(`input[name="${pre}_T5"]`)?.value.trim();
+                    const txtArea = uDiv.querySelector(`textarea[name="${pre}_T6"]`);
+
+                    units.push({
+                        date: uDiv.querySelector(`input[name="${pre}_T1"]`)?.value || '',
+                        score: uDiv.querySelector(`select[name="${pre}_T2"]`)?.value || '',
+                        role: uDiv.querySelector(`input[name="${pre}_T9"]:checked`)?.value || '',
+                        person: manualName || uDiv.querySelector(`input[name="${pre}_T3"]`)?.value || uDiv.querySelector(`input[name="${pre}_T7"]`)?.value || '',
+                        issues: Array.from(uDiv.querySelectorAll(`input[name="${pre}_T4"]:checked`)).map(e => e.value),
+                        notes: (txtArea && txtArea.value) ? txtArea.value.split(errorSep).map(s => s.trim()).filter(Boolean) : [],
+                        otherName: manualName
+                    });
+                });
+
+                data.audit_questions.push({ qId, text: qText, data: units });
+            });
+
+            return data;
+        }
+
+        // ============================================
+        // SAVE PARTIAL
+        // ============================================
+        window.savePartial = async function() {
+            const data = collectAllData();
+            if (!data.medical_id || !data.visit_number) {
+                showNotification('يرجى إدخال الرقم الطبي ورقم الزيارة قبل الحفظ', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+
+            try {
+                const { error } = await supabase.from('medical_file_reviews').upsert({
+                    ...data,
+                    is_partial: true,
+                    reviewer_id: currentUser.id,
+                    reviewer_name: currentReviewer,
+                    updated_at: new Date().toISOString(),
+                }, { onConflict: 'medical_id,visit_number' });
+
+                if (error) throw error;
+
+                showNotification('تم حفظ المسودة بنجاح', 'success');
+                await logAudit('medical_record_partial_saved', {
+                    entityType: 'medical_file',
+                    entityId: `${data.medical_id}/${data.visit_number}`,
+                    description: 'حفظ جزئي لمراجعة ملف طبي',
+                    severity: 'info'
+                });
+            } catch (err) {
+                console.error('Save error:', err);
+                showNotification('فشل الحفظ: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        };
+
+        // ============================================
+        // GENERATE REPORT (Final Submit)
+        // ============================================
+        window.generateReport = async function() {
+            const data = collectAllData();
+
+            if (!data.medical_id || !data.visit_number || !data.patient_name || !data.admission_date || !data.consultant) {
+                showNotification('يرجى استكمال جميع الحقول الإجبارية (الاسم، الرقم الطبي، الزيارة، الدخول، الاستشاري)', 'warning');
+                return;
+            }
+            if (data.case_status === 'Closed' && !data.discharge_date) {
+                showNotification('تاريخ الخروج إجباري لأن حالة الملف "تم الخروج"', 'warning');
+                return;
+            }
+            if ((data.specialties.includes('يوم واحد')) && !document.getElementById('dayCaseDept').value) {
+                showNotification('يرجى تحديد القسم الرئيسي لحالة اليوم الواحد', 'warning');
+                return;
+            }
+
+            const confirmed = await window.showConfirm({
+                title: 'اعتماد التقرير',
+                message: 'هل أنت متأكد من اعتماد التقرير نهائياً؟ لن تتمكن من تعديله بعد ذلك إلا بإذن من المسؤول.',
+                confirmText: 'اعتماد وإرسال',
+                cancelText: 'إلغاء',
+                type: 'warning'
+            });
+            if (!confirmed) return;
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الاعتماد...';
+
+            try {
+                const { data: saved, error } = await supabase.from('medical_file_reviews').upsert({
+                    ...data,
+                    is_partial: false,
+                    reviewer_id: currentUser.id,
+                    reviewer_name: currentReviewer,
+                    updated_at: new Date().toISOString(),
+                }, { onConflict: 'medical_id,visit_number' }).select().single();
+
+                if (error) throw error;
+
+                finalReportUrl = `./medical-audit-report.html?reportId=${encodeURIComponent(data.medical_id)}&visit=${encodeURIComponent(data.visit_number)}`;
+                document.getElementById('btnOpenReport').classList.remove('hidden-logic');
+
+                showNotification('تم الاعتماد بنجاح! جاري التوجيه للتقرير...', 'success');
+                await logAudit('medical_record_submitted', {
+                    entityType: 'medical_file',
+                    entityId: `${data.medical_id}/${data.visit_number}`,
+                    description: 'اعتماد نهائي لمراجعة ملف طبي',
+                    severity: 'info'
+                });
+
+                setTimeout(() => { window.location.href = finalReportUrl; }, 1500);
+            } catch (err) {
+                console.error('Submit error:', err);
+                showNotification('فشل الاعتماد: ' + err.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> اعتماد وإرسال';
+            }
+        };
+
+        window.redirectToFinalReport = function() {
+            if (finalReportUrl) window.location.href = finalReportUrl;
+        };
+
+        // ============================================
+        // INIT
+        // ============================================
+        (async () => {
+            try {
+                // 1. Auth
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    window.location.href = '../login.html';
+                    return;
+                }
+                currentUser = session.user;
+
+                // 2. Fetch profile
+                const { data: profile } = await supabase
+                    .from('profiles').select('display_name, username, role, is_active')
+                    .eq('id', currentUser.id).single();
+
+                if (!profile || profile.is_active === false) {
+                    showNotification('حسابك موقوف أو غير صالح', 'error');
+                    await supabase.auth.signOut();
+                    window.location.href = '../login.html';
+                    return;
+                }
+
+                // Check access
+                const allowedRoles = ['super_admin', 'admin', 'manager', 'auditor', 'senior', 'doctor'];
+                if (!allowedRoles.includes(profile.role)) {
+                    showNotification('ليس لديك صلاحية استخدام هذه الواجهة', 'error');
+                    setTimeout(() => window.location.href = '../dashboard.html', 2000);
+                    return;
+                }
+
+                currentReviewer = profile.display_name || profile.username || 'مستخدم';
+
+                // 3. Load data
+                const [doctorsRes, clerksRes, questionsRes] = await Promise.all([
+                    supabase.from('doctors').select('*').eq('is_active', true).order('name'),
+                    supabase.from('ward_clerks').select('*').eq('is_active', true).order('name'),
+                    supabase.from('audit_questions').select('*').eq('is_active', true).order('order_index')
+                ]);
+
+                DOCTORS = doctorsRes.data || [];
+                CLERKS = clerksRes.data || [];
+                AUDIT_QUESTIONS = questionsRes.data || [];
+
+                // 4. Build UI
+                populateSpecialtiesServices();
+                renderQuestions();
+                renderWardQuestions();
+                handleGlobalLogic();
+
+                initialized = true;
+                document.getElementById('loadingScreen').classList.add('hide');
+
+                // Show warnings if empty
+                if (DOCTORS.length === 0) {
+                    console.warn('[medical-audit] No doctors found. Add rows to `doctors` table.');
+                }
+                if (AUDIT_QUESTIONS.length === 0) {
+                    console.warn('[medical-audit] No audit questions found. Add rows to `audit_questions` table.');
+                }
+
+            } catch (err) {
+                console.error('Init error:', err);
+                showNotification('فشل تحميل الواجهة: ' + err.message, 'error');
+                document.getElementById('loadingScreen').classList.add('hide');
+            }
+        })();
+    </script>
+
+    <script type="module" src="../session-manager.js"></script>
+</body>
+</html>
