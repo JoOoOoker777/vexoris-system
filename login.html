@@ -472,6 +472,8 @@
 
     <script type="module">
         import { supabase, resolveLoginEmail, translateAuthError } from './supabase-client.js';
+        import { isDeviceTrusted } from './device-trust.js';
+
         window.toggleTheme = function() {
             const html = document.documentElement;
             html.classList.toggle('dark');
@@ -515,24 +517,25 @@
             errorText.textContent = msg;
             errorBanner.classList.add('show');
         }
-
-        function hideError() {
-            errorBanner.classList.remove('show');
-        }
+        function hideError() { errorBanner.classList.remove('show'); }
 
         function setLoading(isLoading) {
             if (isLoading) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>جاري التحقق من الاعتماد...</span>';
+                submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>جاري التحقق...</span>';
             } else {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i><span>دخول آمن إلى النظام</span>';
             }
         }
-        sessionStorage.removeItem('email_mfa_verified');
+
+        // ============================================
+        // LOGIN HANDLER
+        // ============================================
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             hideError();
+            sessionStorage.removeItem('email_mfa_verified');
 
             const rawEmail = emailInput.value.trim();
             const password = passwordInput.value;
@@ -543,7 +546,6 @@
             }
 
             const email = await resolveLoginEmail(rawEmail);
-
             if (!email.includes('@') || !email.includes('.')) {
                 showError('صيغة اسم المستخدم غير صحيحة.');
                 return;
@@ -552,37 +554,94 @@
             setLoading(true);
 
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email,
-                    password,
-                });
-
+                // 1. Sign in with password
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) {
                     setLoading(false);
                     showError(translateAuthError(error.message));
                     return;
                 }
 
+                // 2. Load profile (role, is_active)
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role, is_active')
+                    .eq('id', data.user.id)
+                    .single();
+
+                if (profile && profile.is_active === false) {
+                    await supabase.auth.signOut();
+                    setLoading(false);
+                    showError('حسابك موقوف حالياً. تواصل مع مسؤول النظام.');
+                    return;
+                }
+
                 const meta = data.user.user_metadata || {};
 
-                setLoading(false);
-                submitBtn.innerHTML = '<i class="fa-solid fa-check"></i><span>تم التوثيق بنجاح</span>';
-                submitBtn.style.background = 'linear-gradient(135deg, #10b981, #0ea5e9)';
+                // 3. First-login flows
+                if (!meta.password_changed) {
+                    setLoading(false);
+                    window.location.href = './change-password.html';
+                    return;
+                }
+                if (!meta.mfa_method) {
+                    setLoading(false);
+                    window.location.href = './mfa-setup.html';
+                    return;
+                }
 
-                setTimeout(() => {
-                    if (!meta.password_changed) {
-                        window.location.href = './change-password.html';
-                    } else if (!meta.mfa_method) {
-                        window.location.href = './mfa-setup.html';
-                    } else if (meta.mfa_method === 'email') {
-                        // 🔥 تخطي التحقق الثنائي للإيميل لأنه تم التحقق منه مسبقاً
-                        window.location.href = './dashboard.html';
-                    } else {
-                        // لو جوجل أوثنتيكيتور، لازم يروح يتحقق
-                        window.location.href = './mfa-verify.html';
+                // 4. 🔥 DEVICE TRUST CHECK
+                // الحصول على AAL
+                const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+                const isAAL2 = aal?.currentLevel === 'aal2';
+
+                // هل الجهاز موثوق؟
+                const { trusted, fingerprint } = await isDeviceTrusted(data.user.id);
+                sessionStorage.setItem('device_fingerprint', fingerprint || '');
+
+                // ===== القواعد =====
+                // - إذا المستخدم عنده MFA + الجهاز موثوق + الجلسة AAL2 → ادخل
+                // - إذا المستخدم عنده MFA + الجهاز موثوق + الجلسة AAL1 (مثلاً دخل من جلسة قديمة) → تحقق MFA
+                // - إذا المستخدم عنده MFA + الجهاز مش موثوق → تحقق MFA (وبعدها نضيف الجهاز)
+                // - إذا المستخدم عنده MFA + اختار إيميل (mfa_method = 'email') ومش محتاج تحقق متكرر → ادخل
+                // - إذا المستخدم عنده MFA + اختار TOTP → لزم AAL2
+
+                const mfaMethod = meta.mfa_method;
+
+                // Email OTP: مسموح لو موثوق
+                if (mfaMethod === 'email') {
+                    if (!trusted) {
+                        setLoading(false);
+                        // إيميل جديد: نطلب تحقق عبر الإيميل
+                        sessionStorage.setItem('email_mfa_verified', 'false');
+                        window.location.href = './mfa-verify.html?reason=new_device';
+                        return;
                     }
-                }, 700);
+                    // الجهاز موثوق، لا حاجة لتحقق إضافي
+                    setLoading(false);
+                    submitBtn.innerHTML = '<i class="fa-solid fa-check"></i><span>تم التوثيق</span>';
+                    submitBtn.style.background = 'linear-gradient(135deg, #10b981, #0ea5e9)';
+                    setTimeout(() => window.location.href = './dashboard.html', 600);
+                    return;
+                }
 
+                // TOTP: يحتاج AAL2 دائماً
+                if (mfaMethod === 'totp') {
+                    if (!trusted || !isAAL2) {
+                        setLoading(false);
+                        window.location.href = './mfa-verify.html?reason=' + (trusted ? 'aal' : 'new_device');
+                        return;
+                    }
+                    // الجهاز موثوق + AAL2
+                    setLoading(false);
+                    submitBtn.innerHTML = '<i class="fa-solid fa-check"></i><span>تم التوثيق</span>';
+                    submitBtn.style.background = 'linear-gradient(135deg, #10b981, #0ea5e9)';
+                    setTimeout(() => window.location.href = './dashboard.html', 600);
+                    return;
+                }
+
+                // Fallback: لو حالة غير معروفة
+                window.location.href = './mfa-verify.html';
             } catch (err) {
                 setLoading(false);
                 console.error('Login error:', err);
@@ -590,12 +649,19 @@
             }
         });
 
+        // ============================================
+        // GOOGLE OAUTH
+        // ============================================
         googleBtn.addEventListener('click', async () => {
             hideError();
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
                     redirectTo: `${window.location.origin}/dashboard.html`,
+                    queryParams: {
+                        access_type: 'offline',
+                        prompt: 'select_account',
+                    },
                 },
             });
             if (error) {
@@ -604,12 +670,26 @@
             }
         });
 
+        // ============================================
+        // AUTO-REDIRECT IF LOGGED IN
+        // ============================================
         (async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
+                // التحقق من اكتمال التهيئة
+                const meta = session.user.user_metadata || {};
+                if (!meta.password_changed) {
+                    window.location.href = './change-password.html';
+                    return;
+                }
+                if (!meta.mfa_method) {
+                    window.location.href = './mfa-setup.html';
+                    return;
+                }
+                // جلسة كاملة → الداشبورد
                 window.location.href = './dashboard.html';
             }
         })();
-    </script>
+     </script>
 </body>
 </html>

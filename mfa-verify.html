@@ -46,6 +46,10 @@
             background: radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.18) 0%, transparent 60%),
                         radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.16) 0%, transparent 60%);
         }
+        html:not(.dark) .aurora-bg {
+            background: radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
+                        radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%);
+        }
         .setup-card {
             background: var(--card-bg);
             backdrop-filter: blur(20px);
@@ -99,6 +103,33 @@
             cursor: pointer; text-decoration: underline;
         }
         .resend-btn:disabled { opacity: 0.5; cursor: not-allowed; text-decoration: none; }
+
+        /* 🔥 New Device Alert */
+        .new-device-alert {
+            display: none;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(251, 146, 60, 0.08));
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            color: #fbbf24;
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-align: right;
+            line-height: 1.65;
+            animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .new-device-alert.show { display: flex; align-items: flex-start; gap: 10px; }
+        .new-device-alert i {
+            font-size: 1.1rem;
+            color: #f59e0b;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
     <link rel="stylesheet" href="./theme-overrides.css" />
 </head>
@@ -106,6 +137,15 @@
     <div class="aurora-bg"></div>
 
     <div class="setup-card">
+        <!-- 🔥 تنبيه الجهاز الجديد -->
+        <div class="new-device-alert" id="newDeviceAlert">
+            <i class="fa-solid fa-shield-halved"></i>
+            <div>
+                <strong style="display: block; margin-bottom: 3px;">جهاز جديد تم اكتشافه</strong>
+                هذا أول تحقق من هذا الجهاز. يرجى إكمال التحقق لمرة واحدة — بعد ذلك سيتم اعتبار هذا الجهاز موثوقاً ولن تُطلب منك إعادة التحقق منه في المرات القادمة.
+            </div>
+        </div>
+
         <!-- قسم Google Authenticator -->
         <div id="totpView" style="display: none;">
             <div class="setup-icon"><i class="fa-solid fa-shield-halved"></i></div>
@@ -154,13 +194,24 @@
 
     <script type="module">
         import { supabase } from './supabase-client.js';
+        import { isDeviceTrusted, trustCurrentDevice } from './device-trust.js';
 
         let currentUser = null;
         let mfaMethod = '';
         let totpFactorId = '';
-        let targetEmail = ''; // متغير لحفظ البريد الشخصي اللي هنبعت عليه
+        let targetEmail = '';
+        let isNewDevice = false;
 
-        // 1. التأكد من الجلسة
+        // ============================================
+        // قراءة reason من URL
+        // ============================================
+        const urlParams = new URLSearchParams(window.location.search);
+        const reason = urlParams.get('reason') || '';
+        isNewDevice = reason === 'new_device';
+
+        // ============================================
+        // 1. التهيئة والتحقق من الجلسة
+        // ============================================
         (async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
@@ -178,6 +229,12 @@
             }
 
             document.getElementById('loadingView').style.display = 'none';
+
+            // 🔥 إظهار تنبيه الجهاز الجديد إذا لزم
+            if (isNewDevice) {
+                const alertEl = document.getElementById('newDeviceAlert');
+                alertEl.classList.add('show');
+            }
 
             if (mfaMethod === 'totp') {
                 // لو كان عامل تحقق قبل كده، دخل الداشبورد
@@ -214,7 +271,9 @@
             }
         })();
 
-        // ================== التحقق بـ Google Authenticator ==================
+        // ============================================
+        // التحقق بـ Google Authenticator (TOTP)
+        // ============================================
         window.verifyTOTP = async function() {
             const code = document.getElementById('totpCode').value.trim();
             const btn = document.getElementById('totpBtn');
@@ -255,7 +314,16 @@
                 return;
             }
 
-            // نجاح
+            // ============================================
+            // 🔥 3. نجاح - تسجيل الجهاز كموثوق
+            // ============================================
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري تسجيل الجهاز...';
+            const trusted = await trustCurrentDevice(currentUser.id);
+            if (!trusted) {
+                console.warn('Device trust failed, but verification succeeded');
+            }
+
+            // 4. تم التحقق بنجاح
             btn.innerHTML = '<i class="fa-solid fa-check"></i> تم التحقق بنجاح';
             btn.style.background = '#10b981';
             
@@ -264,7 +332,9 @@
             }, 800);
         };
 
-        // ================== التحقق بـ Email OTP ==================
+        // ============================================
+        // التحقق بـ Email OTP
+        // ============================================
         window.sendEmailOTP = async function() {
             const resendBtn = document.getElementById('resendBtn');
             const errorBox = document.getElementById('emailError');
@@ -330,9 +400,19 @@
                 return;
             }
 
-            // نجاح - نضع علامة في الـ sessionStorage عشان الداشبورد تعرف
+            // علامة الجلسة للداشبورد
             sessionStorage.setItem('email_mfa_verified', 'true');
-            
+
+            // ============================================
+            // 🔥 نجاح - تسجيل الجهاز كموثوق
+            // ============================================
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري تسجيل الجهاز...';
+            const trusted = await trustCurrentDevice(currentUser.id);
+            if (!trusted) {
+                console.warn('Device trust failed, but verification succeeded');
+            }
+
+            // تم التحقق بنجاح
             btn.innerHTML = '<i class="fa-solid fa-check"></i> تم التحقق بنجاح';
             btn.style.background = '#10b981';
 
