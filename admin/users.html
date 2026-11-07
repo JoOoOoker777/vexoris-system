@@ -506,6 +506,14 @@
             border-radius: 10px; border: 2px solid var(--bg);
         }
         ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
+                .user-avatar-sm i, .modal-avatar i {
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));
+        }
+        .user-avatar-sm { font-size: 1rem; }
+        .modal-avatar { font-size: 1.4rem; }
+
     </style>
     <link rel="stylesheet" href="../theme-overrides.css" />
 </head>
@@ -762,12 +770,14 @@
             localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
         };
 
-        function getInitials(name) {
-            if (!name) return '?';
-            const parts = name.trim().split(/\s+/);
-            if (parts.length === 1) return parts[0].slice(0, 2);
-            return parts[0][0] + (parts[1]?.[0] || '');
+        function makeAvatarGradient(color) {
+            return `radial-gradient(circle at 30% 25%, rgba(255,255,255,0.35) 0%, transparent 55%), linear-gradient(135deg, ${color}, ${color}cc)`;
         }
+        function renderAvatarHtml(role) {
+            const info = ROLE_META[role] || ROLE_META.viewer;
+            return `<i class="fa-solid ${info.icon}"></i>`;
+        }
+
 
         // ============ LOAD USERS ============
         async function loadUsers() {
@@ -828,7 +838,6 @@
 
             tbody.innerHTML = filtered.map(u => {
                 const roleInfo = ROLE_META[u.role] || ROLE_META.viewer;
-                const initials = getInitials(u.display_name || u.username);
                 const isSelf = u.id === currentUserId;
                 const isActive = u.is_active !== false;
 
@@ -836,8 +845,7 @@
                     <tr data-id="${u.id}">
                         <td>
                             <div class="user-cell">
-                                <div class="user-avatar-sm" style="background: linear-gradient(135deg, ${roleInfo.color}, ${roleInfo.color}cc);">${initials}</div>
-                                <div class="user-cell-info">
+                                <div class="user-avatar-sm" style="background: ${makeAvatarGradient(roleInfo.color)}; color: #fff;">${renderAvatarHtml(u.role)}</div>                                <div class="user-cell-info">
                                     <div class="user-cell-name">${u.display_name || u.username}${isSelf ? ' <span style="font-size:0.6rem;color:var(--accent);">(أنت)</span>' : ''}</div>
                                     <div class="user-cell-username">@${u.username}</div>
                                 </div>
@@ -878,12 +886,13 @@
 
             editingUser = user;
             const roleInfo = ROLE_META[user.role] || ROLE_META.viewer;
-            const initials = getInitials(user.display_name || user.username);
+            
 
             // Header
             const avatarEl = document.getElementById('modalAvatar');
-            avatarEl.textContent = initials;
-            avatarEl.style.background = `linear-gradient(135deg, ${roleInfo.color}, ${roleInfo.color}cc)`;
+            avatarEl.innerHTML = renderAvatarHtml(user.role);
+            avatarEl.style.background = makeAvatarGradient(roleInfo.color);
+            avatarEl.style.color = '#fff';
             document.getElementById('modalName').textContent = user.display_name || user.username;
             document.getElementById('modalUsername').textContent = '@' + user.username;
 

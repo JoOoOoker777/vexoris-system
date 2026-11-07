@@ -140,14 +140,20 @@
         .user-avatar {
             width: 32px; height: 32px; border-radius: 9px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 0.8rem; color: #fff;
+            font-weight: 900; font-size: 0.95rem; color: #fff;
             flex-shrink: 0; position: relative; overflow: hidden;
+            box-shadow: 0 2px 6px -1px rgba(0,0,0,0.25);
+        }
+        .user-avatar i {
+            position: relative; z-index: 2;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));
         }
         .user-avatar::before {
             content: ''; position: absolute; inset: 0;
             background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%);
             background-size: 200% 100%;
             animation: shine 4s infinite;
+            z-index: 1;
         }
         @keyframes shine { 0% { background-position: -200% 0; } 50%, 100% { background-position: 200% 0; } }
         .user-info { display: flex; flex-direction: column; gap: 1px; text-align: right; }
@@ -173,14 +179,20 @@
         .dropdown-avatar-lg {
             width: 48px; height: 48px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 1rem; color: #fff;
+            font-weight: 900; font-size: 1.35rem; color: #fff;
             flex-shrink: 0; position: relative; overflow: hidden;
+            box-shadow: 0 4px 12px -2px rgba(0,0,0,0.3);
+        }
+        .dropdown-avatar-lg i {
+            position: relative; z-index: 2;
+            filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
         }
         .dropdown-avatar-lg::before {
             content: ''; position: absolute; inset: 0;
             background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
             background-size: 200% 100%;
             animation: shine 4s infinite;
+            z-index: 1;
         }
         .dropdown-name { font-size: 0.88rem; font-weight: 900; color: var(--text-primary); line-height: 1.2; }
         .dropdown-email { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); line-height: 1.3; margin-top: 1px; }
@@ -528,7 +540,7 @@
                     </svg>
                 </button>
                 <button class="user-chip" id="userChip" aria-label="قائمة المستخدم">
-                    <div class="user-avatar" id="userAvatar">...</div>
+                    <div class="user-avatar" id="userAvatar"></div>
                     <div class="user-info">
                         <span class="user-name" id="navUserName">...</span>
                         <span class="user-role" id="navUserRole" style="color: var(--accent);">...</span>
@@ -544,7 +556,7 @@
 
     <div class="user-dropdown" id="userDropdown">
         <div class="dropdown-profile">
-            <div class="dropdown-avatar-lg" id="dropdownAvatar">...</div>
+            <div class="dropdown-avatar-lg" id="dropdownAvatar"></div>
             <div>
                 <div class="dropdown-name" id="dropdownName">...</div>
                 <div class="dropdown-email" id="dropdownEmail">...</div>
@@ -631,7 +643,6 @@
     <script type="module">
         import { supabase } from './supabase-client.js';
 
-        // 🔥 تغيير اسم القسم الأول
         const CATEGORIES = {
             clinical: { title: 'أنظمة المراجعة', sub: 'Review Systems', icon: 'fa-stethoscope' },
             analytics: { title: 'التحليلات والتقارير', sub: 'Analytics', icon: 'fa-chart-line' },
@@ -639,10 +650,8 @@
         };
 
         const APPS = [
-            // 🔥 تم تغيير الأيقونة من fa-folder-medical (Pro) إلى fa-notes-medical (Free)
             { id: 'medical-audit', name: 'مراجعة الملفات الطبية', desc: 'تدقيق النماذج الطبية بالملف الطبي طبقاً لتعليمات الجودة.', icon: 'fa-notes-medical', color: '#0ea5e9', soft: 'rgba(14,165,233,0.12)', category: 'clinical', tag: 'MODULE 01', url: '#' },
             { id: 'emergency-audit', name: 'مراجعة الطوارئ', desc: 'تدقيق شيتات الطوارئ للتحقق من معايير الجودة المعتمدة.', icon: 'fa-truck-medical', color: '#f59e0b', soft: 'rgba(245,158,11,0.12)', category: 'clinical', tag: 'MODULE 02', url: '#' },
-            // 🔥 تم تغيير الأيقونة من fa-kit-medical (Pro) إلى fa-briefcase-medical (Free)
             { id: 'doctor-notes', name: 'ملاحظات الأطباء', desc: 'متابعة وتدقيق الملاحظات والتدوينات الطبية اليومية.', icon: 'fa-briefcase-medical', color: '#10b981', soft: 'rgba(16,185,129,0.12)', category: 'clinical', tag: 'MODULE 03', url: '#' },
             { id: 'discharge', name: 'مؤشر الخروج', desc: 'رصد مواعيد الخروج وتحليل أسباب التأخير والإدارات.', icon: 'fa-sitemap', color: '#8b5cf6', soft: 'rgba(139,92,246,0.12)', category: 'clinical', tag: 'MODULE 04', url: '#' },
             { id: 'stats-files', name: 'إحصائيات الملفات', desc: 'تقارير إحصائية شاملة للأقسام والأطباء والملفات.', icon: 'fa-chart-pie', color: '#06b6d4', soft: 'rgba(6,182,212,0.12)', category: 'analytics', tag: 'MODULE 05', url: '#' },
@@ -660,7 +669,7 @@
             super_admin: { name: 'المطور', color: '#a855f7', bg: 'rgba(168,85,247,0.15)', icon: 'fa-crown' },
             admin:       { name: 'ادارة السجلات الطبية', color: '#0ea5e9', bg: 'rgba(14,165,233,0.15)', icon: 'fa-user-shield' },
             manager:     { name: 'المدير الطبي', color: '#6366f1', bg: 'rgba(99,102,241,0.15)', icon: 'fa-user-tie' },
-            auditor:     { name: 'مراجع جودة', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', icon: 'fa-magnifying-glass-chart' },
+            auditor:     { name: 'مراجع جودة', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', icon: 'fa-clipboard-check' },
             senior:      { name: 'رئيس قسم', color: '#10b981', bg: 'rgba(16,185,129,0.15)', icon: 'fa-star' },
             doctor:      { name: 'طبيب', color: '#14b8a6', bg: 'rgba(20,184,166,0.15)', icon: 'fa-stethoscope' },
             viewer:      { name: 'مراجع', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)', icon: 'fa-eye' },
@@ -725,13 +734,17 @@
         }, { threshold: 0.05 });
         document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
 
-        function getInitials(name) {
-            if (!name) return '?';
-            const parts = name.trim().split(/\s+/);
-            if (parts.length === 1) return parts[0].slice(0, 2);
-            return parts[0][0] + (parts[1]?.[0] || '');
+        // ✅ Avatar rendering
+        function makeAvatarGradient(color) {
+            return `radial-gradient(circle at 30% 25%, rgba(255,255,255,0.35) 0%, transparent 55%), linear-gradient(135deg, ${color}, ${color}cc)`;
         }
-        function makeAvatarGradient(color) { return `linear-gradient(135deg, ${color}, ${color}cc)`; }
+
+        function renderAvatar(el, role) {
+            const info = ROLE_META[role] || ROLE_META.viewer;
+            el.innerHTML = `<i class="fa-solid ${info.icon}"></i>`;
+            el.style.background = makeAvatarGradient(info.color);
+            el.style.color = '#fff';
+        }
 
         function createAppCard(app) {
             const card = document.createElement('a');
@@ -819,18 +832,15 @@
             const displayName = session.user.user_metadata?.display_name || profile.username || 'مستخدم';
             const userEmail = session.user.email || profile.email || '';
             const roleInfo = ROLE_META[userRole] || ROLE_META.viewer;
-            const initials = getInitials(displayName);
 
             document.getElementById('navUserName').textContent = displayName;
             document.getElementById('navUserRole').textContent = roleInfo.name;
             document.getElementById('navUserRole').style.color = roleInfo.color;
 
-            const avatarEl = document.getElementById('userAvatar');
-            avatarEl.textContent = initials;
-            avatarEl.style.background = makeAvatarGradient(roleInfo.color);
+            // 🔥 Avatar rendering with role icon
+            renderAvatar(document.getElementById('userAvatar'), userRole);
+            renderAvatar(document.getElementById('dropdownAvatar'), userRole);
 
-            document.getElementById('dropdownAvatar').textContent = initials;
-            document.getElementById('dropdownAvatar').style.background = makeAvatarGradient(roleInfo.color);
             document.getElementById('dropdownName').textContent = displayName;
             document.getElementById('dropdownEmail').textContent = userEmail;
             document.getElementById('dropdownRoleBadge').innerHTML = `<i class="fa-solid ${roleInfo.icon}"></i> ${roleInfo.name}`;

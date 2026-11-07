@@ -7,13 +7,13 @@ import { supabase } from './supabase-client.js';
 // ROLE METADATA
 // ============================================
 const ROLE_META = {
-    super_admin: { name: 'المطور', color: '#a855f7' },
-    admin:       { name: 'ادارة السجلات الطبية', color: '#0ea5e9' },
-    manager:     { name: 'المدير الطبي', color: '#6366f1' },
-    auditor:     { name: 'مراجع جودة', color: '#f59e0b' },
-    senior:      { name: 'رئيس قسم', color: '#10b981' },
-    doctor:      { name: 'طبيب', color: '#14b8a6' },
-    viewer:      { name: 'مراجع', color: '#94a3b8' },
+    super_admin: { name: 'المطور', color: '#a855f7', icon: 'fa-crown' },
+    admin:       { name: 'ادارة السجلات الطبية', color: '#0ea5e9', icon: 'fa-user-shield' },
+    manager:     { name: 'المدير الطبي', color: '#6366f1', icon: 'fa-user-tie' },
+    auditor:     { name: 'مراجع جودة', color: '#f59e0b', icon: 'fa-clipboard-check' },
+    senior:      { name: 'رئيس قسم', color: '#10b981', icon: 'fa-star' },
+    doctor:      { name: 'طبيب', color: '#14b8a6', icon: 'fa-stethoscope' },
+    viewer:      { name: 'مراجع', color: '#94a3b8', icon: 'fa-eye' },
 };
 
 // ============================================
@@ -24,14 +24,29 @@ const CONFIG = {
     warningMs: 2 * 60 * 1000,
 };
 
-// ============================================
-// ZOOM CONFIG
-// ============================================
 const ZOOM_LEVELS = [70, 80, 90, 100, 110, 120, 130, 150];
 const DEFAULT_ZOOM = 80;
 const MIN_ZOOM = ZOOM_LEVELS[0];
 const MAX_ZOOM = ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
 
+// ============================================
+// AVATAR HELPERS
+// ============================================
+function makeAvatarGradient(color) {
+    return `radial-gradient(circle at 30% 25%, rgba(255,255,255,0.35) 0%, transparent 55%), linear-gradient(135deg, ${color}, ${color}cc)`;
+}
+
+function renderRoleAvatar(el, role) {
+    if (!el) return;
+    const info = ROLE_META[role] || ROLE_META.viewer;
+    el.innerHTML = `<i class="fa-solid ${info.icon}"></i>`;
+    el.style.background = makeAvatarGradient(info.color);
+    el.style.color = '#fff';
+}
+
+// ============================================
+// ZOOM
+// ============================================
 function getCurrentZoom() {
     const saved = sessionStorage.getItem('vexoris_zoom');
     return saved ? parseInt(saved) : DEFAULT_ZOOM;
@@ -43,16 +58,6 @@ function applyZoom(level) {
     document.body.style.zoom = clamped / 100;
     sessionStorage.setItem('vexoris_zoom', clamped);
     return clamped;
-}
-
-// ============================================
-// HELPERS
-// ============================================
-function getInitials(name) {
-    if (!name) return '?';
-    const parts = name.trim().split(/\s+/);
-    if (parts.length === 1) return parts[0].slice(0, 2);
-    return parts[0][0] + (parts[1]?.[0] || '');
 }
 
 // ============================================
@@ -80,14 +85,21 @@ function injectStyles() {
         .vexoris-user-avatar {
             width: 32px; height: 32px; border-radius: 9px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 0.8rem; color: #fff;
+            font-weight: 900; font-size: 0.95rem; color: #fff;
             flex-shrink: 0; position: relative; overflow: hidden;
+            box-shadow: 0 2px 6px -1px rgba(0,0,0,0.25);
+        }
+        .vexoris-user-avatar i {
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));
         }
         .vexoris-user-avatar::before {
             content: ''; position: absolute; inset: 0;
             background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%);
             background-size: 200% 100%;
             animation: vexoris-shine 4s infinite;
+            z-index: 1;
         }
         @keyframes vexoris-shine {
             0% { background-position: -200% 0; }
@@ -119,7 +131,6 @@ function injectStyles() {
         }
         .vexoris-lock-overlay.active { display: flex; }
 
-        /* ===== ZOOM WIDGET ===== */
         #vexorisZoomWidget {
             display: inline-flex; align-items: center; gap: 1px;
             background: var(--card-bg, rgba(15,23,42,0.55));
@@ -127,9 +138,7 @@ function injectStyles() {
             border-radius: 10px; padding: 2px;
             height: 36px; transition: all 0.25s ease;
         }
-        #vexorisZoomWidget:hover {
-            border-color: rgba(14, 165, 233, 0.4);
-        }
+        #vexorisZoomWidget:hover { border-color: rgba(14, 165, 233, 0.4); }
         .vz-btn {
             width: 26px; height: 30px; border: none; background: transparent;
             color: var(--text-secondary, #94a3b8);
@@ -141,9 +150,7 @@ function injectStyles() {
             background: rgba(14, 165, 233, 0.12);
             color: var(--accent, #0ea5e9);
         }
-        .vz-btn:active {
-            transform: scale(0.9);
-        }
+        .vz-btn:active { transform: scale(0.9); }
         .vz-label {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 0.6rem; font-weight: 700;
@@ -163,7 +170,7 @@ function injectStyles() {
 // ============================================
 function injectZoomControls() {
     if (document.getElementById('vexorisZoomWidget')) return;
-    if (window.innerWidth < 768) return; // hide on mobile
+    if (window.innerWidth < 768) return;
 
     const themeBtn = document.querySelector('.icon-btn[onclick*="toggleTheme"]');
     if (!themeBtn) return;
@@ -262,7 +269,6 @@ async function initHeaderAuth() {
 
     const user = session.user;
     const displayName = user.user_metadata?.display_name || 'مستخدم';
-    const initials = getInitials(displayName);
 
     let role = 'viewer';
     try {
@@ -277,7 +283,9 @@ async function initHeaderAuth() {
     wrapper.style.cssText = 'display: inline-flex; align-items: center; gap: 8px;';
     wrapper.innerHTML = `
         <a href="dashboard.html" class="vexoris-user-chip">
-            <div class="vexoris-user-avatar" style="background: linear-gradient(135deg, ${roleInfo.color}, ${roleInfo.color}cc);">${initials}</div>
+            <div class="vexoris-user-avatar">
+                <i class="fa-solid ${roleInfo.icon}"></i>
+            </div>
             <div class="vexoris-user-info">
                 <span class="vexoris-user-name">${displayName}</span>
                 <span class="vexoris-user-role" style="color: ${roleInfo.color};">${roleInfo.name}</span>
@@ -287,6 +295,10 @@ async function initHeaderAuth() {
             <i class="fa-solid fa-power-off"></i>
         </button>
     `;
+
+    // Set avatar gradient after inserting to DOM
+    const avatarEl = wrapper.querySelector('.vexoris-user-avatar');
+    avatarEl.style.background = makeAvatarGradient(roleInfo.color);
 
     loginBtn.replaceWith(wrapper);
 }
@@ -298,7 +310,6 @@ function initSessionTimeout() {
     let locked = false;
     let warningTimer = null;
     let lockTimer = null;
-    let toastEl = null;
 
     function ensureOverlay() {
         if (document.getElementById('vexorisLockOverlay')) return;
@@ -540,7 +551,6 @@ function initSessionTimeout() {
     const { data: { session } } = await supabase.auth.getSession();
 
     if (session) {
-        // Apply saved zoom
         const savedZoom = sessionStorage.getItem('vexoris_zoom');
         if (savedZoom && window.innerWidth >= 768) {
             applyZoom(parseInt(savedZoom));
