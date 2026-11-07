@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>جاري المصادقة | VEXORIS</title>
+    <style>
+        body { background: #04070f; color: #f1f5f9; font-family: 'Tajawal', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; margin: 0; }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); border-top-color: #0ea5e9; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error { display: none; color: #f87171; background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3); margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div>
+        <div class="spinner" id="spinner"></div>
+        <h2 id="title">جاري التحقق من حسابك...</h2>
+        <p id="subtitle">يرجى الانتظار بينما نقوم بتأمين جلستك.</p>
+        <div class="error" id="errorBox">حدث خطأ أثناء الدخول. يرجى المحاولة مرة أخرى.</div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabase-client.js';
+        import { isDeviceTrusted } from './device-trust.js';
+
+        (async () => {
+            // 1. التحقق من وجود خطأ في الرابط
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('error')) {
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('title').textContent = 'فشل تسجيل الدخول';
+                document.getElementById('subtitle').textContent = urlParams.get('error_description') || 'حدث خطأ غير متوقع.';
+                document.getElementById('errorBox').style.display = 'block';
+                setTimeout(() => window.location.href = './login.html', 3000);
+                return;
+            }
+
+            // 2. انتظار لحظة لسوبابيس لمعالجة الكود
+            await new Promise(r => setTimeout(r, 800));
+
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (error || !session) {
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('title').textContent = 'تعذر إنشاء الجلسة';
+                document.getElementById('errorBox').style.display = 'block';
+                setTimeout(() => window.location.href = './login.html', 3000);
+                return;
+            }
+
+            const user = session.user;
+            const meta = user.user_metadata || {};
+
+            // 3. توجيه المستخدم بناءً على حالة حسابه
+            if (!meta.password_changed) { 
+                window.location.href = './change-password.html'; 
+                return; 
+            }
+            if (!meta.mfa_method) { 
+                window.location.href = './mfa-setup.html'; 
+                return; 
+            }
+
+            const { trusted } = await isDeviceTrusted(user.id);
+
+            if (trusted) {
+                sessionStorage.setItem('email_mfa_verified', 'true');
+                window.location.href = './dashboard.html';
+            } else {
+                window.location.href = './mfa-verify.html?reason=new_device_via_google';
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -108,7 +108,6 @@
         }
         .app-container { max-width: 1400px; margin: 0 auto; padding: 0 16px; }
 
-        /* Hero */
         .page-hero {
             margin-top: 32px;
             background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(99, 102, 241, 0.05) 50%, rgba(139, 92, 246, 0.08) 100%);
@@ -140,7 +139,6 @@
         }
         .hero-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); line-height: 1.75; max-width: 720px; }
 
-        /* Stats */
         .stats-row {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
             margin-top: 24px;
@@ -169,25 +167,17 @@
             font-size: 1.6rem; font-weight: 700; line-height: 1;
             color: var(--stat-color);
         }
-        .stat-label {
-            font-size: 0.72rem; font-weight: 700;
-            color: var(--text-muted); margin-top: 4px;
-        }
+        .stat-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); margin-top: 4px; }
 
-        /* Toolbar */
         .toolbar {
             display: flex; gap: 10px; margin-top: 24px;
             flex-wrap: wrap; align-items: center;
         }
-        .search-wrap {
-            flex: 1; min-width: 240px; position: relative;
-        }
+        .search-wrap { flex: 1; min-width: 240px; position: relative; }
         .search-wrap input {
             width: 100%; padding: 12px 42px 12px 16px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 11px;
-            color: var(--text-primary);
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 11px; color: var(--text-primary);
             font-size: 0.85rem; font-weight: 600; font-family: inherit;
             transition: all 0.25s ease;
         }
@@ -201,49 +191,32 @@
         }
         .filter-select {
             padding: 12px 16px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 11px;
-            color: var(--text-primary);
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 11px; color: var(--text-primary);
             font-size: 0.82rem; font-weight: 700; font-family: inherit;
-            cursor: pointer; min-width: 180px;
-            transition: all 0.25s ease;
+            cursor: pointer; min-width: 180px; transition: all 0.25s ease;
         }
-        .filter-select:focus {
-            outline: none; border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
-        }
+        .filter-select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12); }
 
-        /* Table */
         .table-wrap {
             margin-top: 20px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            overflow: hidden;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 20px; overflow: hidden;
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         }
         .table-scroll { overflow-x: auto; }
-        table.users-table {
-            width: 100%; border-collapse: separate; border-spacing: 0; min-width: 900px;
-        }
+        table.users-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 900px; }
         table.users-table thead th {
-            background: rgba(148, 163, 184, 0.03);
-            padding: 14px 16px;
+            background: rgba(148, 163, 184, 0.03); padding: 14px 16px;
             border-bottom: 1px solid var(--card-border);
-            text-align: right;
-            font-size: 0.7rem; font-weight: 800;
-            color: var(--text-muted);
-            letter-spacing: 0.05em; text-transform: uppercase;
-            white-space: nowrap;
+            text-align: right; font-size: 0.7rem; font-weight: 800;
+            color: var(--text-muted); letter-spacing: 0.05em;
+            text-transform: uppercase; white-space: nowrap;
         }
         table.users-table tbody td {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--card-border);
+            padding: 14px 16px; border-bottom: 1px solid var(--card-border);
             font-size: 0.82rem; font-weight: 600;
-            color: var(--text-secondary);
-            vertical-align: middle;
+            color: var(--text-secondary); vertical-align: middle;
         }
         table.users-table tbody tr { transition: background 0.15s ease; }
         table.users-table tbody tr:hover { background: rgba(14, 165, 233, 0.03); }
@@ -267,28 +240,12 @@
         .user-cell-name { font-size: 0.85rem; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
         .user-cell-username { font-family: 'Space Grotesk', sans-serif; font-size: 0.68rem; font-weight: 600; color: var(--text-muted); direction: ltr; text-align: right; }
 
-        .role-select {
-            padding: 6px 28px 6px 10px;
-            border-radius: 7px;
-            border: 1px solid var(--role-color);
-            background: var(--role-soft);
-            color: var(--role-color);
-            font-family: inherit;
+        .role-badge-sm {
+            display: inline-block; padding: 5px 12px; border-radius: 7px;
             font-size: 0.72rem; font-weight: 800;
-            cursor: pointer;
-            appearance: none; -webkit-appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: left 8px center;
-            background-size: 12px;
-            transition: all 0.2s ease;
+            border: 1px solid;
         }
-        .role-select:focus { outline: none; box-shadow: 0 0 0 3px var(--role-soft); }
-        .role-select:disabled { opacity: 0.5; cursor: not-allowed; }
-        .role-select option { background: #0f172a; color: #f1f5f9; }
-        html:not(.dark) .role-select option { background: #fff; color: #0f172a; }
 
-        /* Status toggle */
         .status-toggle {
             display: inline-flex; align-items: center; gap: 8px;
             cursor: pointer; user-select: none;
@@ -297,57 +254,223 @@
         .status-track {
             width: 36px; height: 20px; border-radius: 999px;
             background: rgba(148, 163, 184, 0.25);
-            position: relative;
-            transition: all 0.3s ease;
+            position: relative; transition: all 0.3s ease;
         }
         .status-track::after {
-            content: '';
-            position: absolute; top: 2px; right: 2px;
+            content: ''; position: absolute; top: 2px; right: 2px;
             width: 16px; height: 16px; border-radius: 50%;
-            background: #fff;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: #fff; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        .status-toggle input:checked + .status-track {
-            background: linear-gradient(135deg, #10b981, #0ea5e9);
-        }
-        .status-toggle input:checked + .status-track::after {
-            transform: translateX(-16px);
-        }
-        .status-text {
-            font-size: 0.72rem; font-weight: 800;
-            color: var(--text-muted);
-        }
+        .status-toggle input:checked + .status-track { background: linear-gradient(135deg, #10b981, #0ea5e9); }
+        .status-toggle input:checked + .status-track::after { transform: translateX(-16px); }
+        .status-text { font-size: 0.72rem; font-weight: 800; color: var(--text-muted); }
         .status-toggle input:checked ~ .status-text { color: #10b981; }
 
-        /* MFA badge */
-        .mfa-badge {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 3px 9px; border-radius: 6px;
-            font-size: 0.68rem; font-weight: 800;
-        }
-        .mfa-badge.yes { background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
-        .mfa-badge.no { background: rgba(148, 163, 184, 0.12); color: var(--text-muted); border: 1px solid var(--card-border); }
-
-        /* Buttons */
         .action-btn {
             width: 32px; height: 32px; border-radius: 8px;
             border: 1px solid var(--card-border);
             background: transparent; color: var(--text-secondary);
             display: inline-flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s ease;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
         }
-        .action-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(14, 165, 233, 0.08); }
-        .action-btn.danger:hover { border-color: #f87171; color: #f87171; background: rgba(239, 68, 68, 0.08); }
+        .action-btn:hover {
+            border-color: var(--accent); color: var(--accent);
+            background: rgba(14, 165, 233, 0.08);
+            transform: scale(1.05);
+        }
 
-        /* Empty state */
-        .empty-state {
-            padding: 60px 20px; text-align: center;
+        /* ============ MODAL ============ */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(4, 7, 15, 0.7);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
         }
-        .empty-state i { font-size: 2.5rem; color: var(--text-muted); margin-bottom: 12px; display: block; }
-        .empty-state h3 { font-size: 1rem; font-weight: 900; margin-bottom: 6px; }
-        .empty-state p { font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+        .modal-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            width: 100%; max-width: 640px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
+            transform: scale(0.92);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+        .modal-overlay.open .modal-card { transform: scale(1); }
+
+        .modal-card::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, #0ea5e9, #6366f1, transparent);
+            z-index: 1;
+        }
+
+        .modal-head {
+            padding: 24px 28px 20px;
+            border-bottom: 1px solid var(--card-border);
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 16px;
+        }
+        .modal-head-left { display: flex; align-items: center; gap: 14px; }
+        .modal-avatar {
+            width: 52px; height: 52px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 1.1rem; color: #fff;
+            flex-shrink: 0;
+            position: relative; overflow: hidden;
+        }
+        .modal-avatar::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+            background-size: 200% 100%;
+            animation: shine 4s infinite;
+        }
+        .modal-name { font-size: 1.1rem; font-weight: 900; color: var(--text-primary); line-height: 1.2; }
+        .modal-username { font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); direction: ltr; }
+        .modal-close {
+            width: 36px; height: 36px; border-radius: 10px;
+            border: 1px solid var(--card-border);
+            background: transparent; color: var(--text-secondary);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .modal-close:hover { border-color: #f87171; color: #f87171; background: rgba(239, 68, 68, 0.08); }
+
+        .modal-body {
+            padding: 24px 28px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-section { margin-bottom: 24px; }
+        .modal-section:last-child { margin-bottom: 0; }
+
+        .modal-section-title {
+            font-size: 0.8rem; font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--card-border);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .modal-section-title i {
+            width: 26px; height: 26px; border-radius: 7px;
+            background: rgba(14, 165, 233, 0.12);
+            color: var(--accent);
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .modal-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+        }
+        @media (max-width: 500px) { .modal-grid { grid-template-columns: 1fr; } }
+        .modal-grid .full { grid-column: 1 / -1; }
+
+        .form-field { display: flex; flex-direction: column; gap: 6px; }
+        .form-field label {
+            font-size: 0.72rem; font-weight: 800;
+            color: var(--text-secondary);
+            display: flex; align-items: center; gap: 4px;
+        }
+        .form-field label .req { color: #f87171; font-size: 0.9rem; }
+        .form-field input,
+        .form-field select {
+            width: 100%; padding: 10px 14px;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.82rem; font-weight: 600;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+        html:not(.dark) .form-field input,
+        html:not(.dark) .form-field select {
+            background: rgba(255, 255, 255, 0.7);
+        }
+        .form-field input:focus,
+        .form-field select:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+        }
+        .form-field input:disabled {
+            opacity: 0.5; cursor: not-allowed;
+        }
+        .form-field .hint {
+            font-size: 0.65rem; font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .modal-warning {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 12px 14px;
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 10px;
+            font-size: 0.72rem; font-weight: 700;
+            color: #fbbf24;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .modal-warning i { color: #f59e0b; font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+
+        .modal-error {
+            display: none;
+            padding: 12px 14px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            border-radius: 10px;
+            font-size: 0.78rem; font-weight: 700;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .modal-error.show { display: block; }
+
+        .modal-footer {
+            padding: 16px 28px;
+            border-top: 1px solid var(--card-border);
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px;
+            background: rgba(15, 23, 42, 0.2);
+        }
+        html:not(.dark) .modal-footer { background: rgba(248, 250, 252, 0.5); }
+
+        .modal-btn {
+            padding: 10px 22px; border-radius: 10px;
+            font-family: inherit; font-weight: 800; font-size: 0.82rem;
+            cursor: pointer; transition: all 0.25s ease;
+            border: none;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .modal-btn.cancel {
+            background: transparent; border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+        }
+        .modal-btn.cancel:hover { border-color: var(--text-secondary); background: rgba(148, 163, 184, 0.08); }
+        .modal-btn.save {
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+            color: #fff;
+            box-shadow: 0 6px 18px -6px rgba(14, 165, 233, 0.5);
+        }
+        .modal-btn.save:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px -6px rgba(99, 102, 241, 0.6);
+        }
+        .modal-btn.save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
         /* Toast */
         .toast {
@@ -365,7 +488,6 @@
         .toast.success { background: rgba(16, 185, 129, 0.15); color: #5eead4; border: 1px solid rgba(16, 185, 129, 0.3); }
         .toast.error { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
 
-        /* Loading */
         .loading-screen {
             position: fixed; inset: 0; background: var(--bg); z-index: 999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -373,7 +495,6 @@
         }
         .loading-screen.hide { opacity: 0; pointer-events: none; }
 
-        /* Footer */
         .footer-shell {
             max-width: 1400px; margin: 32px auto 24px; padding: 22px 20px;
             background: var(--card-bg); border: 1px solid var(--card-border);
@@ -453,11 +574,10 @@
             </div>
             <h1 class="hero-title">إدارة <span class="grad">المستخدمين</span></h1>
             <p class="hero-desc">
-                تحكّم في حسابات المستخدمين وصلاحياتهم. يمكنك تعديل الدور، إيقاف/تفعيل الحساب، والاطلاع على حالة الأمان لكل مستخدم.
+                تحكّم كامل في حسابات المستخدمين. اضغط على أيقونة الإعدادات بجانب أي مستخدم لفتح نافذة التعديل الشاملة التي تتيح تغيير الاسم، البريد، كلمة المرور، الدور، وحالة الحساب — جميع التعديلات تُطبَّق فوراً على كل النظام.
             </p>
         </section>
 
-        <!-- Stats -->
         <div class="stats-row">
             <div class="stat-card" style="--stat-color: #0ea5e9; --stat-soft: rgba(14,165,233,0.12);">
                 <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
@@ -481,7 +601,6 @@
             </div>
         </div>
 
-        <!-- Toolbar -->
         <div class="toolbar">
             <div class="search-wrap">
                 <input type="text" id="searchInput" placeholder="ابحث بالاسم أو اسم المستخدم أو البريد..." />
@@ -497,7 +616,6 @@
             </select>
         </div>
 
-        <!-- Table -->
         <div class="table-wrap">
             <div class="table-scroll">
                 <table class="users-table">
@@ -506,18 +624,121 @@
                             <th>المستخدم</th>
                             <th>البريد الإلكتروني</th>
                             <th>الدور</th>
-                            <th>MFA</th>
                             <th>الحالة</th>
                             <th>إجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="usersTbody">
-                        <tr><td colspan="6" style="text-align: center; padding: 40px;"><i class="fa-solid fa-circle-notch fa-spin"></i> جاري التحميل...</td></tr>
+                        <tr><td colspan="5" style="text-align: center; padding: 40px;"><i class="fa-solid fa-circle-notch fa-spin"></i> جاري التحميل...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </main>
+
+    <!-- ============ MODAL ============ -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-card">
+            <div class="modal-head">
+                <div class="modal-head-left">
+                    <div class="modal-avatar" id="modalAvatar">؟</div>
+                    <div>
+                        <div class="modal-name" id="modalName">—</div>
+                        <div class="modal-username" id="modalUsername">—</div>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeModal()" title="إغلاق">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-warning">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>جميع التعديلات تُطبَّق فوراً على كل النظام. تأكد قبل الحفظ.</span>
+                </div>
+
+                <div class="modal-error" id="modalError">—</div>
+
+                <!-- Basic Info -->
+                <div class="modal-section">
+                    <div class="modal-section-title">
+                        <i class="fa-solid fa-user"></i>
+                        المعلومات الأساسية
+                    </div>
+                    <div class="modal-grid">
+                        <div class="form-field">
+                            <label>اسم المستخدم <span class="req">*</span></label>
+                            <input type="text" id="fieldUsername" required />
+                            <div class="hint">حروف إنجليزية صغيرة وأرقام فقط</div>
+                        </div>
+                        <div class="form-field">
+                            <label>الاسم المعروض</label>
+                            <input type="text" id="fieldDisplayName" />
+                        </div>
+                        <div class="form-field">
+                            <label>رقم الهاتف</label>
+                            <input type="tel" id="fieldPhone" placeholder="01xxxxxxxxx" />
+                        </div>
+                        <div class="form-field">
+                            <label>القسم / الإدارة</label>
+                            <input type="text" id="fieldDepartment" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Access -->
+                <div class="modal-section">
+                    <div class="modal-section-title">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        الصلاحيات والحالة
+                    </div>
+                    <div class="modal-grid">
+                        <div class="form-field">
+                            <label>الدور</label>
+                            <select id="fieldRole"></select>
+                        </div>
+                        <div class="form-field">
+                            <label>حالة الحساب</label>
+                            <label class="status-toggle" style="padding: 10px 0;">
+                                <input type="checkbox" id="fieldIsActive">
+                                <span class="status-track"></span>
+                                <span class="status-text" id="fieldIsActiveText">نشط</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security -->
+                <div class="modal-section">
+                    <div class="modal-section-title">
+                        <i class="fa-solid fa-lock"></i>
+                        الأمان (اختياري)
+                    </div>
+                    <div class="modal-grid">
+                        <div class="form-field full">
+                            <label>البريد الإلكتروني</label>
+                            <input type="email" id="fieldEmail" style="direction: ltr; text-align: right;" />
+                            <div class="hint">اتركه كما هو إذا لا تريد تغييره</div>
+                        </div>
+                        <div class="form-field full">
+                            <label>كلمة المرور الجديدة</label>
+                            <input type="password" id="fieldPassword" placeholder="اتركه فارغاً لعدم التغيير" autocomplete="new-password" />
+                            <div class="hint">8 أحرف على الأقل، حرف كبير + صغير + رقم + رمز</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="modal-btn cancel" onclick="closeModal()">إلغاء</button>
+                <button class="modal-btn save" id="modalSaveBtn" onclick="saveChanges()">
+                    <i class="fa-solid fa-check"></i>
+                    حفظ التغييرات
+                </button>
+            </div>
+        </div>
+    </div>
 
     <footer class="footer-shell">
         <div class="footer-brand">VEXORIS SYSTEM</div>
@@ -533,21 +754,22 @@
     <div class="toast" id="toast"></div>
 
     <script type="module">
-        import { supabase } from '../supabase-client.js';
+        import { supabase, SUPABASE_ANON_KEY } from '../supabase-client.js';
 
         const ROLE_META = {
-            super_admin: { name: 'المطور', color: '#a855f7', soft: 'rgba(168,85,247,0.12)' },
+            super_admin: { name: 'المطور',               color: '#a855f7', soft: 'rgba(168,85,247,0.12)' },
             admin:       { name: 'ادارة السجلات الطبية', color: '#0ea5e9', soft: 'rgba(14,165,233,0.12)' },
-            manager:     { name: 'المدير الطبي', color: '#6366f1', soft: 'rgba(99,102,241,0.12)' },
-            auditor:     { name: 'مراجع جودة', color: '#f59e0b', soft: 'rgba(245,158,11,0.12)' },
-            senior:      { name: 'رئيس قسم', color: '#10b981', soft: 'rgba(16,185,129,0.12)' },
-            doctor:      { name: 'طبيب', color: '#14b8a6', soft: 'rgba(20,184,166,0.12)' },
-            viewer:      { name: 'مراجع', color: '#94a3b8', soft: 'rgba(148,163,184,0.12)' },
+            manager:     { name: 'المدير الطبي',         color: '#6366f1', soft: 'rgba(99,102,241,0.12)' },
+            auditor:     { name: 'مراجع جودة',           color: '#f59e0b', soft: 'rgba(245,158,11,0.12)' },
+            senior:      { name: 'رئيس قسم',             color: '#10b981', soft: 'rgba(16,185,129,0.12)' },
+            doctor:      { name: 'طبيب',                color: '#14b8a6', soft: 'rgba(20,184,166,0.12)' },
+            viewer:      { name: 'مراجع',              color: '#94a3b8', soft: 'rgba(148,163,184,0.12)' },
         };
 
         let allUsers = [];
         let currentUserRole = null;
         let currentUserId = null;
+        let editingUser = null;
 
         window.toggleTheme = function() {
             const html = document.documentElement;
@@ -573,10 +795,9 @@
 
         // ============ LOAD USERS ============
         async function loadUsers() {
-            // Get from profiles (has role, username, is_active) + join auth.users for email/mfa via RPC
             const { data, error } = await supabase
                 .from('profiles')
-                .select('id, username, role, email, is_active')
+                .select('id, username, display_name, role, email, is_active, phone, department')
                 .order('username');
 
             if (error) {
@@ -585,70 +806,45 @@
                 return;
             }
 
-            // Fetch auth data via a helper RPC would be ideal, but for now get from getSession cache
-            // We'll merge with what we can see
-            allUsers = data.map(p => ({
-                id: p.id,
-                username: p.username,
-                role: p.role,
-                email: p.email,
-                is_active: p.is_active !== false,
-                display_name: p.username, // fallback
-                mfa_enabled: false, // will be populated below if we can fetch
-            }));
-
-            // Try to enrich with metadata via edge function (or skip)
-            // For now, use profiles data only
-
-            // Fetch MFA status - not accessible client-side, mark as unknown
-            // Skip for now
-
+            allUsers = data || [];
             renderStats();
             renderTable();
         }
 
-        // ============ STATS ============
         function renderStats() {
             const total = allUsers.length;
-            const active = allUsers.filter(u => u.is_active).length;
-            const inactive = total - active;
-            // MFA - we can't easily check without admin API, show "—"
+            const active = allUsers.filter(u => u.is_active !== false).length;
             document.getElementById('statTotal').textContent = total;
             document.getElementById('statActive').textContent = active;
-            document.getElementById('statInactive').textContent = inactive;
+            document.getElementById('statInactive').textContent = total - active;
             document.getElementById('statMfa').textContent = '—';
         }
 
-        // ============ TABLE ============
         function renderTable() {
             const search = document.getElementById('searchInput').value.trim().toLowerCase();
             const roleFilter = document.getElementById('roleFilter').value;
             const statusFilter = document.getElementById('statusFilter').value;
 
             let filtered = allUsers;
-
             if (search) {
                 filtered = filtered.filter(u =>
-                    u.username.toLowerCase().includes(search) ||
-                    (u.email && u.email.toLowerCase().includes(search))
+                    (u.username || '').toLowerCase().includes(search) ||
+                    (u.email || '').toLowerCase().includes(search) ||
+                    (u.display_name || '').toLowerCase().includes(search)
                 );
             }
-            if (roleFilter) {
-                filtered = filtered.filter(u => u.role === roleFilter);
-            }
-            if (statusFilter === 'active') filtered = filtered.filter(u => u.is_active);
-            if (statusFilter === 'inactive') filtered = filtered.filter(u => !u.is_active);
+            if (roleFilter) filtered = filtered.filter(u => u.role === roleFilter);
+            if (statusFilter === 'active') filtered = filtered.filter(u => u.is_active !== false);
+            if (statusFilter === 'inactive') filtered = filtered.filter(u => u.is_active === false);
 
             const tbody = document.getElementById('usersTbody');
 
             if (filtered.length === 0) {
                 tbody.innerHTML = `
-                    <tr><td colspan="6">
-                        <div class="empty-state">
-                            <i class="fa-solid fa-users-slash"></i>
-                            <h3>لا يوجد مستخدمون مطابقون</h3>
-                            <p>جرّب تغيير كلمات البحث أو الفلاتر.</p>
-                        </div>
+                    <tr><td colspan="5" style="text-align: center; padding: 60px 20px;">
+                        <i class="fa-solid fa-users-slash" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 12px; display: block;"></i>
+                        <div style="font-weight: 900; margin-bottom: 6px;">لا يوجد مستخدمون مطابقون</div>
+                        <div style="color: var(--text-secondary); font-size: 0.82rem;">جرّب تغيير كلمات البحث أو الفلاتر.</div>
                     </td></tr>
                 `;
                 return;
@@ -656,8 +852,9 @@
 
             tbody.innerHTML = filtered.map(u => {
                 const roleInfo = ROLE_META[u.role] || ROLE_META.viewer;
-                const initials = getInitials(u.username);
+                const initials = getInitials(u.display_name || u.username);
                 const isSelf = u.id === currentUserId;
+                const isActive = u.is_active !== false;
 
                 return `
                     <tr data-id="${u.id}">
@@ -665,134 +862,201 @@
                             <div class="user-cell">
                                 <div class="user-avatar-sm" style="background: linear-gradient(135deg, ${roleInfo.color}, ${roleInfo.color}cc);">${initials}</div>
                                 <div class="user-cell-info">
-                                    <div class="user-cell-name">${u.username}${isSelf ? ' <span style="font-size:0.6rem;color:var(--accent);">(أنت)</span>' : ''}</div>
+                                    <div class="user-cell-name">${u.display_name || u.username}${isSelf ? ' <span style="font-size:0.6rem;color:var(--accent);">(أنت)</span>' : ''}</div>
                                     <div class="user-cell-username">@${u.username}</div>
                                 </div>
                             </div>
                         </td>
-                        <td style="direction: ltr; text-align: right; font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem;">${u.email}</td>
+                        <td style="direction: ltr; text-align: right; font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem;">${u.email || '—'}</td>
                         <td>
-                            <select class="role-select" data-uid="${u.id}" ${isSelf ? 'disabled' : ''}
-                                style="--role-color: ${roleInfo.color}; --role-soft: ${roleInfo.soft};">
-                                ${Object.entries(ROLE_META).map(([k, v]) =>
-                                    `<option value="${k}" ${k === u.role ? 'selected' : ''}>${v.name}</option>`
-                                ).join('')}
-                            </select>
-                        </td>
-                        <td>
-                            <span class="mfa-badge ${u.mfa_enabled ? 'yes' : 'no'}">
-                                <i class="fa-solid ${u.mfa_enabled ? 'fa-shield-check' : 'fa-shield'}"></i>
-                                ${u.mfa_enabled ? 'مفعّل' : 'غير مفعّل'}
+                            <span class="role-badge-sm" style="background: ${roleInfo.soft}; color: ${roleInfo.color}; border-color: ${roleInfo.color}80;">
+                                ${roleInfo.name}
                             </span>
                         </td>
                         <td>
-                            <label class="status-toggle" ${isSelf ? 'style="opacity:0.4;cursor:not-allowed;"' : ''}>
-                                <input type="checkbox" ${u.is_active ? 'checked' : ''} data-uid="${u.id}" ${isSelf ? 'disabled' : ''}>
+                            <span class="status-toggle" style="${isSelf ? 'opacity:0.4;cursor:not-allowed;' : ''}">
+                                <input type="checkbox" ${isActive ? 'checked' : ''} disabled>
                                 <span class="status-track"></span>
-                                <span class="status-text">${u.is_active ? 'نشط' : 'موقوف'}</span>
-                            </label>
+                                <span class="status-text">${isActive ? 'نشط' : 'موقوف'}</span>
+                            </span>
                         </td>
                         <td>
-                            <button class="action-btn danger" data-reset="${u.id}" title="إعادة تعيين كلمة المرور" ${isSelf ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>
-                                <i class="fa-solid fa-key"></i>
+                            <button class="action-btn" data-edit="${u.id}" title="إعدادات المستخدم">
+                                <i class="fa-solid fa-gear"></i>
                             </button>
                         </td>
                     </tr>
                 `;
             }).join('');
 
-            // Wire up role changes
-            tbody.querySelectorAll('.role-select').forEach(sel => {
-                sel.addEventListener('change', async () => {
-                    const uid = sel.dataset.uid;
-                    const newRole = sel.value;
-                    await updateUserRole(uid, newRole, sel);
-                });
-            });
-
-            // Wire up status toggles
-            tbody.querySelectorAll('.status-toggle input').forEach(input => {
-                input.addEventListener('change', async () => {
-                    const uid = input.dataset.uid;
-                    await toggleUserStatus(uid, input.checked, input);
-                });
+            // Wire up edit buttons
+            tbody.querySelectorAll('[data-edit]').forEach(btn => {
+                btn.addEventListener('click', () => openModal(btn.dataset.edit));
             });
         }
 
-        // ============ UPDATE ROLE ============
-        async function updateUserRole(uid, newRole, selEl) {
-            // Cannot modify super_admin if you're not super_admin
-            const targetUser = allUsers.find(u => u.id === uid);
-            if (!targetUser) return;
+        // ============ MODAL ============
+        function openModal(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
 
-            if (targetUser.role === 'super_admin' && currentUserRole !== 'super_admin') {
-                showToast('لا يمكن تعديل مالك النظام إلا بواسطة مالك آخر', 'error');
-                selEl.value = targetUser.role;
-                return;
+            editingUser = user;
+            const roleInfo = ROLE_META[user.role] || ROLE_META.viewer;
+            const initials = getInitials(user.display_name || user.username);
+
+            // Header
+            const avatarEl = document.getElementById('modalAvatar');
+            avatarEl.textContent = initials;
+            avatarEl.style.background = `linear-gradient(135deg, ${roleInfo.color}, ${roleInfo.color}cc)`;
+            document.getElementById('modalName').textContent = user.display_name || user.username;
+            document.getElementById('modalUsername').textContent = '@' + user.username;
+
+            // Fields
+            document.getElementById('fieldUsername').value = user.username || '';
+            document.getElementById('fieldDisplayName').value = user.display_name || '';
+            document.getElementById('fieldPhone').value = user.phone || '';
+            document.getElementById('fieldDepartment').value = user.department || '';
+            document.getElementById('fieldRole').value = user.role || 'viewer';
+            document.getElementById('fieldIsActive').checked = user.is_active !== false;
+            document.getElementById('fieldEmail').value = user.email || '';
+            document.getElementById('fieldPassword').value = '';
+
+            // Update active text
+            document.getElementById('fieldIsActiveText').textContent = user.is_active !== false ? 'نشط' : 'موقوف';
+
+            // Prevent self-edit of role
+            const isSelf = user.id === currentUserId;
+            const roleSelect = document.getElementById('fieldRole');
+            const isActiveToggle = document.getElementById('fieldIsActive');
+
+            if (isSelf) {
+                roleSelect.disabled = true;
+                isActiveToggle.disabled = true;
+            } else {
+                roleSelect.disabled = false;
+                isActiveToggle.disabled = false;
             }
 
-            if (newRole === 'super_admin' && currentUserRole !== 'super_admin') {
-                showToast('لا يمكن تعيين مالك نظام إلا بواسطة مالك', 'error');
-                selEl.value = targetUser.role;
-                return;
+            // Warn if target is super_admin
+            const superAdminField = user.role === 'super_admin';
+            const saveBtn = document.getElementById('modalSaveBtn');
+            if (superAdminField && currentUserRole !== 'super_admin') {
+                saveBtn.disabled = true;
+                saveBtn.title = 'لا يمكن تعديل المطور إلا بواسطة مطور آخر';
+            } else {
+                saveBtn.disabled = false;
+                saveBtn.title = '';
             }
 
-            const oldRole = targetUser.role;
-            selEl.disabled = true;
+            // Hide error
+            document.getElementById('modalError').classList.remove('show');
 
-            const { error } = await supabase
-                .from('profiles')
-                .update({ role: newRole })
-                .eq('id', uid);
-
-            selEl.disabled = false;
-
-            if (error) {
-                console.error('Update error:', error);
-                showToast('فشل تحديث الدور: ' + error.message, 'error');
-                selEl.value = oldRole;
-                return;
-            }
-
-            targetUser.role = newRole;
-            // Re-render table to update colors
-            renderTable();
-            renderStats();
-            showToast(`تم تحديث دور ${targetUser.username} إلى ${ROLE_META[newRole].name}`, 'success');
+            // Show modal
+            document.getElementById('editModal').classList.add('open');
         }
 
-        // ============ TOGGLE STATUS ============
-        async function toggleUserStatus(uid, isActive, inputEl) {
-            const targetUser = allUsers.find(u => u.id === uid);
-            if (!targetUser) return;
+        window.closeModal = function() {
+            document.getElementById('editModal').classList.remove('open');
+            editingUser = null;
+        };
 
-            inputEl.disabled = true;
+        // Close on backdrop click
+        document.getElementById('editModal').addEventListener('click', (e) => {
+            if (e.target.id === 'editModal') closeModal();
+        });
 
-            const { error } = await supabase
-                .from('profiles')
-                .update({ is_active: isActive })
-                .eq('id', uid);
+        // Close on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (document.getElementById('editModal').classList.contains('open')) closeModal();
+            }
+        });
 
-            inputEl.disabled = false;
+        // Toggle text
+        document.getElementById('fieldIsActive').addEventListener('change', (e) => {
+            document.getElementById('fieldIsActiveText').textContent = e.target.checked ? 'نشط' : 'موقوف';
+        });
 
-            if (error) {
-                console.error('Toggle error:', error);
-                showToast('فشل تغيير الحالة: ' + error.message, 'error');
-                inputEl.checked = !isActive;
+        // ============ SAVE ============
+        window.saveChanges = async function() {
+            if (!editingUser) return;
+
+            const btn = document.getElementById('modalSaveBtn');
+            const errorBox = document.getElementById('modalError');
+            errorBox.classList.remove('show');
+
+            const newUsername = document.getElementById('fieldUsername').value.trim().toLowerCase();
+            const newDisplayName = document.getElementById('fieldDisplayName').value.trim();
+            const newPhone = document.getElementById('fieldPhone').value.trim();
+            const newDepartment = document.getElementById('fieldDepartment').value.trim();
+            const newRole = document.getElementById('fieldRole').value;
+            const newIsActive = document.getElementById('fieldIsActive').checked;
+            const newEmail = document.getElementById('fieldEmail').value.trim();
+            const newPassword = document.getElementById('fieldPassword').value;
+
+            if (!newUsername) { showModalError('اسم المستخدم مطلوب'); return; }
+            if (!/^[a-z0-9._-]+$/.test(newUsername)) {
+                showModalError('اسم المستخدم يجب أن يحتوي على حروف إنجليزية صغيرة وأرقام فقط');
                 return;
             }
+            if (newEmail && !newEmail.includes('@')) { showModalError('البريد الإلكتروني غير صحيح'); return; }
+            if (newPassword && newPassword.length < 8) { showModalError('كلمة المرور يجب أن تكون 8 أحرف على الأقل'); return; }
 
-            targetUser.is_active = isActive;
-            renderStats();
-            showToast(
-                isActive ? `تم تفعيل حساب ${targetUser.username}` : `تم إيقاف حساب ${targetUser.username}`,
-                'success'
-            );
+            const updates = {};
+            if (newUsername !== editingUser.username) updates.username = newUsername;
+            if (newDisplayName !== (editingUser.display_name || '')) updates.display_name = newDisplayName;
+            if (newPhone !== (editingUser.phone || '')) updates.phone = newPhone;
+            if (newDepartment !== (editingUser.department || '')) updates.department = newDepartment;
+            if (newRole !== editingUser.role) updates.role = newRole;
+            if (newIsActive !== (editingUser.is_active !== false)) updates.is_active = newIsActive;
+            if (newEmail !== (editingUser.email || '')) updates.email = newEmail;
+            if (newPassword) updates.password = newPassword;
+
+            if (Object.keys(updates).length === 0) { showModalError('لم يتم تغيير أي شيء'); return; }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحفظ...';
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) throw new Error('انتهت الجلسة');
+
+                const EDGE_FUNCTION_URL = 'https://omezrsyjsxdeaautmsad.supabase.co/functions/v1/admin-update-user';
+
+                const response = await fetch(EDGE_FUNCTION_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'apikey': SUPABASE_ANON_KEY,
+                    },
+                    body: JSON.stringify({ userId: editingUser.id, updates }),
+                });
+
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || result.error || 'فشل الحفظ');
+
+                showToast('تم حفظ التغييرات بنجاح', 'success');
+                closeModal();
+                await loadUsers();
+            } catch (err) {
+                console.error('Save error:', err);
+                showModalError(err.message || 'فشل حفظ التغييرات. تأكد من أن Edge Function منشورة.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> حفظ التغييرات';
+            }
+        };
+
+        function showModalError(msg) {
+            const box = document.getElementById('modalError');
+            box.textContent = msg;
+            box.classList.add('show');
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         // ============ INIT ============
         (async () => {
-            // 1. Auth
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
                 window.location.href = '../login.html';
@@ -801,7 +1065,6 @@
 
             currentUserId = session.user.id;
 
-            // 2. Role guard
             const { data: profile } = await supabase
                 .from('profiles')
                 .select('role')
@@ -816,7 +1079,7 @@
 
             currentUserRole = profile.role;
 
-            // 3. Populate role filter
+            // Populate role filter
             const roleFilter = document.getElementById('roleFilter');
             Object.entries(ROLE_META).forEach(([k, v]) => {
                 const opt = document.createElement('option');
@@ -825,15 +1088,21 @@
                 roleFilter.appendChild(opt);
             });
 
-            // 4. Load users
+            // Populate modal role select
+            const roleSelect = document.getElementById('fieldRole');
+            Object.entries(ROLE_META).forEach(([k, v]) => {
+                const opt = document.createElement('option');
+                opt.value = k;
+                opt.textContent = v.name;
+                roleSelect.appendChild(opt);
+            });
+
             await loadUsers();
 
-            // 5. Wire filters
             document.getElementById('searchInput').addEventListener('input', renderTable);
             document.getElementById('roleFilter').addEventListener('change', renderTable);
             document.getElementById('statusFilter').addEventListener('change', renderTable);
 
-            // 6. Hide loading
             document.getElementById('loadingScreen').classList.add('hide');
         })();
     </script>

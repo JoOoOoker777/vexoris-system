@@ -1,0 +1,7 @@
+{
+  "imports": {},
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window", "esnext"]
+  }
+}
