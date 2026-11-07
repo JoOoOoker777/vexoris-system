@@ -1,8 +1,14 @@
+<<<<<<< HEAD
 // notify.js
 // نظام الرسائل التنبيهية المركزي (Toast Notifications) لهوية VEXORIS
 
 (function() {
     // حقن الـ CSS الخاص بالرسائل
+=======
+// notify.js - نظام الرسائل التنبيهية المركزي لهوية VEXORIS
+
+(function() {
+>>>>>>> afc16d7 (feat: add central notification system and update admin pages)
     const style = document.createElement('style');
     style.textContent = `
         .vexoris-toast-container {
@@ -82,7 +88,11 @@
         .vexoris-toast-title {
             font-size: 0.85rem;
             font-weight: 900;
+<<<<<<< HEAD
             color: var(--text-primary, #f1f5f9);
+=======
+            color: #f1f5f9;
+>>>>>>> afc16d7 (feat: add central notification system and update admin pages)
             line-height: 1.2;
         }
         html:not(.dark) .vexoris-toast-title { color: #0f172a; }
@@ -90,7 +100,11 @@
         .vexoris-toast-message {
             font-size: 0.78rem;
             font-weight: 600;
+<<<<<<< HEAD
             color: var(--text-secondary, #94a3b8);
+=======
+            color: #94a3b8;
+>>>>>>> afc16d7 (feat: add central notification system and update admin pages)
             line-height: 1.4;
         }
         html:not(.dark) .vexoris-toast-message { color: #475569; }
@@ -110,6 +124,7 @@
             to { width: 0%; }
         }
 
+<<<<<<< HEAD
         /* Success */
         .vexoris-toast.success {
             --toast-color: #10b981;
@@ -138,6 +153,15 @@
     document.head.appendChild(style);
 
     // إنشاء الحاوية
+=======
+        .vexoris-toast.success { --toast-color: #10b981; --toast-bg: rgba(16, 185, 129, 0.1); --toast-border: rgba(16, 185, 129, 0.3); }
+        .vexoris-toast.error { --toast-color: #ef4444; --toast-bg: rgba(239, 68, 68, 0.1); --toast-border: rgba(239, 68, 68, 0.3); }
+        .vexoris-toast.warning { --toast-color: #f59e0b; --toast-bg: rgba(245, 158, 11, 0.1); --toast-border: rgba(245, 158, 11, 0.3); }
+        .vexoris-toast.info { --toast-color: #0ea5e9; --toast-bg: rgba(14, 165, 233, 0.1); --toast-border: rgba(14, 165, 233, 0.3); }
+    `;
+    document.head.appendChild(style);
+
+>>>>>>> afc16d7 (feat: add central notification system and update admin pages)
     let container = document.querySelector('.vexoris-toast-container');
     if (!container) {
         container = document.createElement('div');
@@ -145,12 +169,16 @@
         document.body.appendChild(container);
     }
 
+<<<<<<< HEAD
     // الدالة الأساسية لإنشاء الرسالة
+=======
+>>>>>>> afc16d7 (feat: add central notification system and update admin pages)
     window.showNotification = function(message, type = 'info', title = '', duration = 4000) {
         const toast = document.createElement('div');
         toast.className = `vexoris-toast ${type}`;
         toast.style.setProperty('--toast-duration', `${duration}ms`);
 
+<<<<<<< HEAD
         // تحديد الأيقونة والعنوان الافتراضي
         let icon = 'fa-circle-info';
         let defaultTitle = 'معلومة';
@@ -165,6 +193,14 @@
             icon = 'fa-triangle-exclamation';
             defaultTitle = 'تنبيه';
         }
+=======
+        let icon = 'fa-circle-info';
+        let defaultTitle = 'معلومة';
+        
+        if (type === 'success') { icon = 'fa-circle-check'; defaultTitle = 'تم بنجاح'; } 
+        else if (type === 'error') { icon = 'fa-circle-xmark'; defaultTitle = 'حدث خطأ'; } 
+        else if (type === 'warning') { icon = 'fa-triangle-exclamation'; defaultTitle = 'تنبيه'; }
+>>>>>>> afc16d7 (feat: add central notification system and update admin pages)
 
         toast.innerHTML = `
             <div class="vexoris-toast-icon"><i class="fa-solid ${icon}"></i></div>
@@ -177,11 +213,15 @@
 
         container.appendChild(toast);
 
+<<<<<<< HEAD
         // أنيميشن الدخول
+=======
+>>>>>>> afc16d7 (feat: add central notification system and update admin pages)
         requestAnimationFrame(() => {
             setTimeout(() => toast.classList.add('show'), 10);
         });
 
+<<<<<<< HEAD
         // الإزالة التلقائية
         setTimeout(() => {
             toast.classList.remove('show');
@@ -190,8 +230,21 @@
 
         // الإزالة عند الضغط
         toast.addEventListener('click', () => {
+=======
+        const timeout = setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, duration);
+
+        toast.addEventListener('click', () => {
+            clearTimeout(timeout);
+>>>>>>> afc16d7 (feat: add central notification system and update admin pages)
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 400);
         });
     };
+<<<<<<< HEAD
 })();
+=======
+})();
+>>>>>>> afc16d7 (feat: add central notification system and update admin pages)
