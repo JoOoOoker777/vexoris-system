@@ -1,9 +1,16 @@
+<<<<<<< HEAD
 // notify.js - نظام الإشعارات ونوافذ التأكيد المركزي
+=======
+// notify.js - نظام الرسائل التنبيهية المركزي لهوية VEXORIS
+>>>>>>> afc16d7adc3742d099c34e996d0fd3137d40e212
 
 (function() {
     const style = document.createElement('style');
     style.textContent = `
+<<<<<<< HEAD
         /* ============ TOASTS ============ */
+=======
+>>>>>>> afc16d7adc3742d099c34e996d0fd3137d40e212
         .vexoris-toast-container {
             position: fixed;
             top: 24px;
@@ -20,16 +27,27 @@
             pointer-events: auto;
             min-width: 320px;
             max-width: 90vw;
+<<<<<<< HEAD
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(16px) saturate(180%);
             -webkit-backdrop-filter: blur(16px) saturate(180%);
             border: 1px solid rgba(148, 163, 184, 0.3);
+=======
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+>>>>>>> afc16d7adc3742d099c34e996d0fd3137d40e212
             border-radius: 14px;
             padding: 16px 20px;
             display: flex;
             align-items: center;
             gap: 14px;
+<<<<<<< HEAD
             box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+=======
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
+>>>>>>> afc16d7adc3742d099c34e996d0fd3137d40e212
             transform: translateY(-20px) scale(0.95);
             opacity: 0;
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -38,11 +56,18 @@
             font-family: 'Tajawal', sans-serif;
         }
         
+<<<<<<< HEAD
         /* تحسين الوضع النهاري للإشعارات */
         html:not(.dark) .vexoris-toast {
             background: #ffffff;
             border-color: rgba(148, 163, 184, 0.4);
             box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15);
+=======
+        html:not(.dark) .vexoris-toast {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(148, 163, 184, 0.3);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+>>>>>>> afc16d7adc3742d099c34e996d0fd3137d40e212
         }
 
         .vexoris-toast.show {
@@ -88,12 +113,21 @@
         html:not(.dark) .vexoris-toast-title { color: #0f172a; }
 
         .vexoris-toast-message {
+<<<<<<< HEAD
             font-size: 0.8rem;
             font-weight: 700;
             color: #cbd5e1;
             line-height: 1.4;
         }
         html:not(.dark) .vexoris-toast-message { color: #334155; }
+=======
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+        html:not(.dark) .vexoris-toast-message { color: #475569; }
+>>>>>>> afc16d7adc3742d099c34e996d0fd3137d40e212
 
         .vexoris-toast-progress {
             position: absolute;
@@ -110,11 +144,15 @@
             to { width: 0%; }
         }
 
+<<<<<<< HEAD
         /* ألوان الوضع الليلي */
+=======
+>>>>>>> afc16d7adc3742d099c34e996d0fd3137d40e212
         .vexoris-toast.success { --toast-color: #10b981; --toast-bg: rgba(16, 185, 129, 0.1); --toast-border: rgba(16, 185, 129, 0.3); }
         .vexoris-toast.error { --toast-color: #ef4444; --toast-bg: rgba(239, 68, 68, 0.1); --toast-border: rgba(239, 68, 68, 0.3); }
         .vexoris-toast.warning { --toast-color: #f59e0b; --toast-bg: rgba(245, 158, 11, 0.1); --toast-border: rgba(245, 158, 11, 0.3); }
         .vexoris-toast.info { --toast-color: #0ea5e9; --toast-bg: rgba(14, 165, 233, 0.1); --toast-border: rgba(14, 165, 233, 0.3); }
+<<<<<<< HEAD
 
         /* ألوان الوضع النهاري (أغمق وأوضح) */
         html:not(.dark) .vexoris-toast.success { --toast-bg: rgba(16, 185, 129, 0.15); --toast-border: #10b981; }
@@ -218,6 +256,8 @@
             --confirm-bg: rgba(245, 158, 11, 0.1);
             --confirm-border: rgba(245, 158, 11, 0.3);
         }
+=======
+>>>>>>> afc16d7adc3742d099c34e996d0fd3137d40e212
     `;
     document.head.appendChild(style);
 
@@ -266,6 +306,7 @@
             setTimeout(() => toast.remove(), 400);
         });
     };
+<<<<<<< HEAD
 
     window.showConfirm = function(options) {
         return new Promise((resolve) => {
@@ -323,4 +364,6 @@
             });
         });
     };
+=======
+>>>>>>> afc16d7adc3742d099c34e996d0fd3137d40e212
 })();
