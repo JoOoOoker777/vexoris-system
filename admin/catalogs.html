@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم الشاملة | VEXORIS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+      if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg: #04070f; --card-bg: rgba(15, 23, 42, 0.55);
+            --card-border: rgba(148, 163, 184, 0.12);
+            --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+            --accent: #0ea5e9; --accent-2: #6366f1; --accent-3: #8b5cf6;
+            --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+            --input-bg: rgba(15, 23, 42, 0.5);
+        }
+        html:not(.dark) {
+            --bg: #e8eef5; --card-bg: rgba(255, 255, 255, 0.92);
+            --card-border: rgba(100, 116, 139, 0.28);
+            --text-primary: #0b1220; --text-secondary: #1e293b; --text-muted: #475569;
+            --input-bg: rgba(255, 255, 255, 0.9);
+        }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', system-ui, sans-serif;
+            background: var(--bg); color: var(--text-primary);
+            min-height: 100vh; overflow-x: hidden;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.16) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.14) 0%, transparent 65%);
+        }
+        html:not(.dark) .aurora-bg {
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.07) 0%, transparent 65%);
+        }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+        }
+        html:not(.dark) .grid-overlay {
+            background-image:
+                linear-gradient(to right, rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(15, 23, 42, 0.045) 1px, transparent 1px);
+        }
+
+        /* NAV */
+        .nav-shell { position: sticky; top: 12px; z-index: 40; margin: 12px auto 0; max-width: 1600px; padding: 0 16px; }
+        .nav-inner {
+            background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 18px; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .logo-dot {
+            position: relative; width: 12px; height: 12px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18), 0 0 20px rgba(14, 165, 233, 0.7);
+            flex-shrink: 0;
+        }
+        .logo-dot::before {
+            content: ''; position: absolute; inset: -3px; border-radius: 50%;
+            border: 1px solid rgba(14, 165, 233, 0.5);
+            animation: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes ping { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(2.4); opacity: 0; } }
+        .brand-text {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: 0.18em;
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 40%, #6366f1 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .nav-link {
+            position: relative; color: var(--text-secondary); font-weight: 600;
+            font-size: 0.875rem; padding: 6px 2px; transition: color 0.3s ease; text-decoration: none;
+        }
+        .nav-link:hover { color: var(--accent); }
+        .icon-btn {
+            width: 36px; height: 36px; border-radius: 10px;
+            border: 1px solid var(--card-border); background: transparent; color: var(--accent);
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .icon-btn:hover { background: rgba(14, 165, 233, 0.1); border-color: rgba(14, 165, 233, 0.4); transform: rotate(15deg); }
+        .app-container { max-width: 1600px; margin: 0 auto; padding: 0 16px; }
+
+        /* HERO */
+        .page-hero {
+            margin-top: 20px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(99, 102, 241, 0.05) 50%, rgba(139, 92, 246, 0.08) 100%);
+            border: 1px solid rgba(14, 165, 233, 0.22);
+            border-radius: 22px; padding: 20px 28px;
+            position: relative; overflow: hidden;
+        }
+        .page-hero::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, #0ea5e9, #6366f1, transparent);
+        }
+        .hero-title { font-size: 1.35rem; font-weight: 900; display: flex; align-items: center; gap: 10px; }
+        .hero-title .grad {
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 35%, #6366f1 70%, #8b5cf6 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero-desc { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-top: 4px; }
+
+        /* LAYOUT */
+        .catalogs-layout {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 16px;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 900px) {
+            .catalogs-layout { grid-template-columns: 1fr; }
+        }
+
+        /* SIDEBAR */
+        .tabs-sidebar {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 12px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            height: fit-content;
+            position: sticky;
+            top: 90px;
+        }
+        .tabs-sidebar-title {
+            font-size: 0.65rem; font-weight: 900;
+            color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0 8px 8px;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 8px;
+        }
+        .tab-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 12px;
+            border-radius: 9px;
+            font-size: 0.78rem; font-weight: 700;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 2px;
+        }
+        .tab-item:hover { background: rgba(14, 165, 233, 0.06); color: var(--accent); }
+        .tab-item.active {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(99, 102, 241, 0.1));
+            color: var(--accent);
+            font-weight: 900;
+        }
+        .tab-item .tab-icon {
+            width: 26px; height: 26px; border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem;
+            background: rgba(148, 163, 184, 0.08);
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+        .tab-item.active .tab-icon {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            color: #fff;
+        }
+        .tab-count {
+            margin-inline-start: auto;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.62rem; font-weight: 700;
+            padding: 1px 7px; border-radius: 5px;
+            background: rgba(148, 163, 184, 0.1);
+        }
+        .tab-item.active .tab-count {
+            background: rgba(14, 165, 233, 0.2);
+            color: var(--accent);
+        }
+
+        /* CONTENT */
+        .catalog-content {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex; flex-direction: column;
+            min-height: 600px;
+        }
+        .catalog-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--card-border);
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; flex-wrap: wrap;
+            background: linear-gradient(90deg, rgba(14, 165, 233, 0.04), transparent);
+        }
+        .catalog-title {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .catalog-title-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(99, 102, 241, 0.15));
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); font-size: 0.85rem;
+        }
+        .catalog-title h2 { font-size: 1rem; font-weight: 900; line-height: 1.2; }
+        .catalog-title p { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); margin-top: 1px; }
+        .catalog-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .cbtn {
+            padding: 7px 14px; border-radius: 8px;
+            font-family: inherit; font-weight: 800; font-size: 0.72rem;
+            cursor: pointer; border: none;
+            display: inline-flex; align-items: center; gap: 5px;
+            transition: all 0.2s ease;
+        }
+        .cbtn-primary {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            color: #fff;
+            box-shadow: 0 4px 12px -4px rgba(14, 165, 233, 0.5);
+        }
+        .cbtn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 18px -4px rgba(99, 102, 241, 0.55); }
+        .cbtn-secondary {
+            background: transparent; border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+        }
+        .cbtn-secondary:hover { border-color: var(--accent); color: var(--accent); background: rgba(14, 165, 233, 0.06); }
+        .cbtn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* SEARCH BAR */
+        .catalog-search-bar {
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--card-border);
+            background: rgba(15, 23, 42, 0.2);
+        }
+        html:not(.dark) .catalog-search-bar { background: rgba(248, 250, 252, 0.5); }
+        .search-input-wrap { position: relative; max-width: 400px; }
+        .search-input-wrap i {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            color: var(--text-muted); font-size: 0.75rem; pointer-events: none;
+        }
+        .search-input {
+            width: 100%; padding: 8px 34px 8px 12px;
+            background: var(--input-bg); border: 1px solid var(--card-border);
+            border-radius: 8px; color: var(--text-primary);
+            font-size: 0.78rem; font-weight: 600; font-family: inherit;
+        }
+        .search-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12); }
+
+        /* TABLE */
+        .catalog-table-wrap {
+            flex: 1; overflow: auto;
+        }
+        table.catalog-table {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+        }
+        table.catalog-table thead th {
+            background: rgba(148, 163, 184, 0.04);
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--card-border);
+            text-align: right; font-size: 0.66rem; font-weight: 800;
+            color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase;
+            white-space: nowrap; position: sticky; top: 0; z-index: 2;
+        }
+        table.catalog-table tbody td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--card-border);
+            font-size: 0.78rem; font-weight: 600;
+            color: var(--text-secondary); vertical-align: middle;
+        }
+        table.catalog-table tbody tr:hover { background: rgba(14, 165, 233, 0.03); }
+        table.catalog-table tbody tr:last-child td { border-bottom: none; }
+
+        .cell-name { font-weight: 800; color: var(--text-primary); }
+        .cell-muted { color: var(--text-muted); font-size: 0.72rem; }
+        .cell-badge {
+            display: inline-block; padding: 2px 9px; border-radius: 5px;
+            font-size: 0.65rem; font-weight: 800;
+            background: rgba(14, 165, 233, 0.1); color: var(--accent);
+            border: 1px solid rgba(14, 165, 233, 0.25);
+        }
+        .status-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 9px; border-radius: 6px;
+            font-size: 0.65rem; font-weight: 800;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .status-pill.on { background: rgba(16, 185, 129, 0.12); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-pill.off { background: rgba(148, 163, 184, 0.12); color: var(--text-muted); border: 1px solid var(--card-border); }
+
+        .row-actions { display: flex; gap: 4px; }
+        .row-action {
+            width: 26px; height: 26px; border-radius: 6px;
+            background: transparent; border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 0.68rem;
+            transition: all 0.2s;
+        }
+        .row-action:hover { border-color: var(--accent); color: var(--accent); background: rgba(14, 165, 233, 0.08); }
+        .row-action.delete:hover { border-color: var(--danger); color: var(--danger); background: rgba(239, 68, 68, 0.08); }
+
+        /* EMPTY / LOADING */
+        .table-empty {
+            text-align: center; padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        .table-empty i { font-size: 2.5rem; opacity: 0.3; margin-bottom: 12px; display: block; }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(4, 7, 15, 0.75);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            width: 100%; max-width: 560px;
+            max-height: 90vh; overflow: hidden;
+            display: flex; flex-direction: column;
+            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
+            transform: scale(0.92);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+        .modal-overlay.open .modal-card { transform: scale(1); }
+        .modal-card.wide { max-width: 720px; }
+        .modal-card::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, #0ea5e9, #6366f1, transparent);
+            z-index: 1;
+        }
+        .modal-head {
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--card-border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .modal-head h3 { font-size: 1rem; font-weight: 900; }
+        .modal-head .close-x {
+            width: 30px; height: 30px; border-radius: 8px;
+            border: 1px solid var(--card-border); background: transparent;
+            color: var(--text-secondary);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .modal-head .close-x:hover { border-color: var(--danger); color: var(--danger); }
+        .modal-body { padding: 20px 22px; overflow-y: auto; flex: 1; }
+        .modal-foot {
+            padding: 14px 22px;
+            border-top: 1px solid var(--card-border);
+            display: flex; justify-content: flex-end; gap: 8px;
+            background: rgba(15, 23, 42, 0.2);
+        }
+        html:not(.dark) .modal-foot { background: rgba(248, 250, 252, 0.5); }
+
+        /* FORM */
+        .f-group { margin-bottom: 14px; }
+        .f-label {
+            display: block; font-size: 0.68rem; font-weight: 800;
+            color: var(--text-secondary); margin-bottom: 5px;
+        }
+        .f-label .req { color: var(--danger); }
+        .f-input, .f-select, .f-textarea {
+            width: 100%; padding: 9px 12px;
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 9px;
+            color: var(--text-primary);
+            font-size: 0.8rem; font-weight: 600; font-family: inherit;
+            transition: all 0.2s;
+        }
+        .f-input:focus, .f-select:focus, .f-textarea:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+        }
+        .f-textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
+        .f-hint { font-size: 0.65rem; font-weight: 600; color: var(--text-muted); margin-top: 3px; }
+
+        .multi-select-box {
+            max-height: 150px; overflow-y: auto;
+            border: 1px solid var(--card-border);
+            border-radius: 9px;
+            padding: 8px;
+            background: var(--input-bg);
+        }
+        .ms-item {
+            display: flex; align-items: center; gap: 6px;
+            padding: 4px 6px; border-radius: 6px;
+            font-size: 0.75rem; font-weight: 700;
+            cursor: pointer;
+        }
+        .ms-item:hover { background: rgba(14, 165, 233, 0.06); }
+        .ms-item input { width: 14px; height: 14px; accent-color: var(--accent); cursor: pointer; }
+
+        /* IMPORT MODAL */
+        .import-tabs {
+            display: flex; gap: 4px;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 14px;
+        }
+        .import-tab {
+            padding: 6px 12px;
+            font-size: 0.75rem; font-weight: 800;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .import-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        .drop-zone {
+            border: 2px dashed var(--card-border);
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: var(--accent);
+            background: rgba(14, 165, 233, 0.04);
+        }
+        .drop-zone i { font-size: 2rem; color: var(--accent); margin-bottom: 8px; display: block; opacity: 0.5; }
+        .drop-zone h4 { font-size: 0.85rem; font-weight: 900; margin-bottom: 3px; }
+        .drop-zone p { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); }
+
+        /* PREVIEW TABLE */
+        .preview-table {
+            width: 100%; border-collapse: collapse;
+            font-size: 0.72rem;
+            margin-top: 12px;
+        }
+        .preview-table th, .preview-table td {
+            padding: 5px 8px;
+            border: 1px solid var(--card-border);
+            text-align: right;
+        }
+        .preview-table th {
+            background: rgba(14, 165, 233, 0.08);
+            font-weight: 800;
+            font-size: 0.65rem;
+        }
+        .preview-table tbody tr:nth-child(even) { background: rgba(148, 163, 184, 0.04); }
+
+        /* LOADING */
+        .loading-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .loading-screen.hide { opacity: 0; pointer-events: none; }
+
+        /* FOOTER */
+        .footer-shell {
+            max-width: 1600px; margin: 20px auto 20px; padding: 16px 20px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 16px; text-align: center;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        }
+        .footer-brand {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            letter-spacing: 0.35em; font-size: 0.72rem;
+            background: linear-gradient(135deg, #22d3ee, #6366f1);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+        .footer-text { font-size: 0.68rem; font-weight: 600; color: var(--text-muted); }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4));
+            border-radius: 8px; border: 2px solid var(--bg);
+        }
+    </style>
+    <link rel="stylesheet" href="../theme-overrides.css" />
+</head>
+<body>
+
+    <div class="loading-screen" id="loadingScreen">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري التحميل...</p>
+    </div>
+
+    <div class="aurora-bg"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="nav-shell">
+        <header class="nav-inner">
+            <div class="flex items-center gap-3">
+                <div class="logo-dot"></div>
+                <div>
+                    <a href="../dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
+                </div>
+            </div>
+            <nav class="hidden md:flex items-center gap-6">
+                <a href="../dashboard.html" class="nav-link">لوحة التحكم</a>
+                <a href="users.html" class="nav-link">المستخدمين</a>
+                <a href="rbac.html" class="nav-link">الصلاحيات</a>
+                <a href="audit-log.html" class="nav-link">سجل التدقيق</a>
+                <a href="catalogs.html" class="nav-link" style="color: var(--accent); font-weight: 900;">إدارة الكاتالوجات</a>
+            </nav>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <a href="../dashboard.html" style="padding: 7px 14px; border-radius: 9px; background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); font-weight: 700; font-size: 0.75rem; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+                    <i class="fa-solid fa-arrow-right"></i> رجوع
+                </a>
+            </div>
+        </header>
+    </div>
+
+    <main class="app-container">
+
+        <section class="page-hero">
+            <h1 class="hero-title">
+                <i class="fa-solid fa-database" style="color: var(--accent);"></i>
+                <span>لوحة <span class="grad">التحكم الشاملة</span></span>
+            </h1>
+            <p class="hero-desc">أضف، عدّل، احذف، واستورد أي بيانات في النظام من مكان واحد — بدون كتابة كود.</p>
+        </section>
+
+        <div class="catalogs-layout">
+
+            <!-- SIDEBAR -->
+            <aside class="tabs-sidebar">
+                <div class="tabs-sidebar-title">الكاتالوجات</div>
+                <div id="tabsList"></div>
+            </aside>
+
+            <!-- CONTENT -->
+            <section class="catalog-content">
+                <div class="catalog-header">
+                    <div class="catalog-title" id="catalogTitle">
+                        <div class="catalog-title-icon"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+                        <div>
+                            <h2>جاري التحميل...</h2>
+                            <p>—</p>
+                        </div>
+                    </div>
+                    <div class="catalog-actions">
+                        <button class="cbtn cbtn-secondary" onclick="openImportModal()" id="btnImport">
+                            <i class="fa-solid fa-file-excel"></i> رفع Excel
+                        </button>
+                        <button class="cbtn cbtn-secondary" onclick="exportCSV()">
+                            <i class="fa-solid fa-download"></i> تصدير
+                        </button>
+                        <button class="cbtn cbtn-primary" onclick="openCreateModal()">
+                            <i class="fa-solid fa-plus"></i> إضافة جديد
+                        </button>
+                    </div>
+                </div>
+
+                <div class="catalog-search-bar">
+                    <div class="search-input-wrap">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" class="search-input" id="searchInput" placeholder="ابحث..." oninput="filterTable()" />
+                    </div>
+                </div>
+
+                <div class="catalog-table-wrap">
+                    <table class="catalog-table">
+                        <thead id="catalogThead"></thead>
+                        <tbody id="catalogTbody">
+                            <tr><td colspan="10" style="text-align:center; padding:40px;"><i class="fa-solid fa-circle-notch fa-spin"></i> جاري التحميل...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ===== GENERIC CRUD MODAL ===== -->
+    <div class="modal-overlay" id="crudModal">
+        <div class="modal-card wide">
+            <div class="modal-head">
+                <h3 id="crudModalTitle">إضافة جديد</h3>
+                <button class="close-x" onclick="closeModal('crudModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="crudModalBody"></div>
+            <div class="modal-foot">
+                <button class="cbtn cbtn-secondary" onclick="closeModal('crudModal')">إلغاء</button>
+                <button class="cbtn cbtn-primary" id="crudSaveBtn" onclick="saveRecord()">
+                    <i class="fa-solid fa-check"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== IMPORT MODAL ===== -->
+    <div class="modal-overlay" id="importModal">
+        <div class="modal-card wide">
+            <div class="modal-head">
+                <h3>استيراد من Excel / CSV</h3>
+                <button class="close-x" onclick="closeModal('importModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                    <i class="fa-solid fa-file-arrow-up"></i>
+                    <h4>اسحب الملف هنا أو اضغط للاختيار</h4>
+                    <p>يدعم: XLSX, XLS, CSV</p>
+                    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;" onchange="handleFileSelect(event)" />
+                </div>
+                <div id="importPreview" style="display: none;">
+                    <div style="margin-top: 14px; padding: 10px 12px; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); border-radius: 9px; font-size: 0.78rem; font-weight: 700; color: var(--success);">
+                        <i class="fa-solid fa-check-circle"></i>
+                        <span id="importCount">0</span> صف جاهز للاستيراد
+                    </div>
+                    <div style="max-height: 240px; overflow: auto; margin-top: 10px;">
+                        <table class="preview-table" id="previewTable"></table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-foot">
+                <button class="cbtn cbtn-secondary" onclick="closeModal('importModal')">إلغاء</button>
+                <button class="cbtn cbtn-primary" id="importSaveBtn" onclick="executeImport()" disabled>
+                    <i class="fa-solid fa-upload"></i> استيراد
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-shell">
+        <div class="footer-brand">VEXORIS SYSTEM</div>
+        <div class="footer-text">جميع حقوق النشر والطباعة محفوظة لإدارة السجلات الطبية 2025 ©</div>
+    </footer>
+
+    <script src="../notify.js"></script>
+
+    <script type="module">
+        import { supabase } from '../supabase-client.js';
+        import { logAudit } from '../audit-log.js';
+
+        window.toggleTheme = () => {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        };
+
+        // ============================================
+        // CATALOG CONFIG
+        // ============================================
+        const CATALOGS = {
+            specialties: {
+                title: 'التخصصات',
+                subtitle: 'Specialties',
+                icon: 'fa-stethoscope',
+                table: 'specialty_catalog',
+                singular: 'تخصص',
+                order: 'order_index',
+                fields: [
+                    { name: 'name', label: 'اسم التخصص', type: 'text', required: true, placeholder: 'مثل: جراحة' },
+                    { name: 'order_index', label: 'الترتيب', type: 'number', default: 0 }
+                ],
+                columns: ['name', 'order_index', 'is_active'],
+                importable: true,
+                csvColumns: ['name', 'order_index']
+            },
+            services: {
+                title: 'الخدمات',
+                subtitle: 'Services',
+                icon: 'fa-briefcase-medical',
+                table: 'service_catalog',
+                singular: 'خدمة',
+                order: 'order_index',
+                fields: [
+                    { name: 'name', label: 'اسم الخدمة', type: 'text', required: true, placeholder: 'مثل: نقل دم' },
+                    { name: 'order_index', label: 'الترتيب', type: 'number', default: 0 }
+                ],
+                columns: ['name', 'order_index', 'is_active'],
+                importable: true,
+                csvColumns: ['name', 'order_index']
+            },
+            admission_types: {
+                title: 'أنواع الدخول',
+                subtitle: 'Admission Types',
+                icon: 'fa-door-open',
+                table: 'admission_type_catalog',
+                singular: 'نوع دخول',
+                order: 'order_index',
+                fields: [
+                    { name: 'name', label: 'اسم النوع', type: 'text', required: true, placeholder: 'مثل: طوارئ' },
+                    { name: 'order_index', label: 'الترتيب', type: 'number', default: 0 }
+                ],
+                columns: ['name', 'order_index', 'is_active'],
+                importable: true,
+                csvColumns: ['name', 'order_index']
+            },
+            case_statuses: {
+                title: 'حالات الملف',
+                subtitle: 'Case Statuses',
+                icon: 'fa-folder-closed',
+                table: 'case_status_catalog',
+                singular: 'حالة',
+                order: 'order_index',
+                fields: [
+                    { name: 'name', label: 'اسم الحالة', type: 'text', required: true, placeholder: 'مثل: Open' },
+                    { name: 'order_index', label: 'الترتيب', type: 'number', default: 0 }
+                ],
+                columns: ['name', 'order_index', 'is_active'],
+                importable: true,
+                csvColumns: ['name', 'order_index']
+            },
+            daycase_types: {
+                title: 'أنواع اليوم الواحد',
+                subtitle: 'Day Case Types',
+                icon: 'fa-calendar-day',
+                table: 'daycase_catalog',
+                singular: 'نوع يوم واحد',
+                order: 'order_index',
+                fields: [
+                    { name: 'name', label: 'اسم النوع', type: 'text', required: true, placeholder: 'مثل: حالة يوم واحد كبار' },
+                    { name: 'order_index', label: 'الترتيب', type: 'number', default: 0 }
+                ],
+                columns: ['name', 'order_index', 'is_active'],
+                importable: true,
+                csvColumns: ['name', 'order_index']
+            },
+            roles: {
+                title: 'الأدوار',
+                subtitle: 'Roles',
+                icon: 'fa-user-tag',
+                table: 'role_catalog',
+                singular: 'دور',
+                order: 'order_index',
+                fields: [
+                    { name: 'code', label: 'الكود (إنجليزي)', type: 'text', required: true, placeholder: 'مثل: doctor' },
+                    { name: 'name', label: 'الاسم بالعربي', type: 'text', required: true, placeholder: 'مثل: طبيب' },
+                    { name: 'order_index', label: 'الترتيب', type: 'number', default: 0 }
+                ],
+                columns: ['code', 'name', 'order_index', 'is_active'],
+                importable: true,
+                csvColumns: ['code', 'name', 'order_index']
+            },
+            scores: {
+                title: 'خيارات التقييم',
+                subtitle: 'Score Options',
+                icon: 'fa-star',
+                table: 'score_catalog',
+                singular: 'خيار تقييم',
+                order: 'order_index',
+                fields: [
+                    { name: 'value', label: 'القيمة (كود)', type: 'text', required: true, placeholder: 'مثل: Score 2' },
+                    { name: 'label', label: 'الاسم المعروض', type: 'text', required: true, placeholder: 'مثل: Score (2)' },
+                    { name: 'points', label: 'النقاط', type: 'number', required: true, default: 0, hint: 'ضع -1 للـ NA' },
+                    { name: 'order_index', label: 'الترتيب', type: 'number', default: 0 }
+                ],
+                columns: ['value', 'label', 'points', 'order_index', 'is_active'],
+                importable: true,
+                csvColumns: ['value', 'label', 'points', 'order_index']
+            },
+            issue_categories: {
+                title: 'تصنيفات الأخطاء',
+                subtitle: 'Issue Categories',
+                icon: 'fa-layer-group',
+                table: 'issue_category_catalog',
+                singular: 'تصنيف',
+                order: 'order_index',
+                fields: [
+                    { name: 'name', label: 'اسم التصنيف', type: 'text', required: true, placeholder: 'مثل: أخطاء عامة' },
+                    { name: 'order_index', label: 'الترتيب', type: 'number', default: 0 }
+                ],
+                columns: ['name', 'order_index', 'is_active'],
+                importable: true,
+                csvColumns: ['name', 'order_index']
+            },
+            issues: {
+                title: 'الأخطاء',
+                subtitle: 'Issues Catalog',
+                icon: 'fa-triangle-exclamation',
+                table: 'issue_catalog',
+                singular: 'خطأ',
+                order: 'order_index',
+                fields: [
+                    { name: 'code', label: 'الكود', type: 'text', required: true, placeholder: 'مثل: noSign' },
+                    { name: 'label', label: 'الوصف', type: 'text', required: true, placeholder: 'مثل: بدون توقيع' },
+                    { name: 'category_id', label: 'التصنيف', type: 'select', required: true, optionsTable: 'issue_category_catalog', optionsLabel: 'name' },
+                    { name: 'order_index', label: 'الترتيب', type: 'number', default: 0 }
+                ],
+                columns: ['code', 'label', 'category_name', 'order_index', 'is_active'],
+                importable: false
+            },
+            doctors: {
+                title: 'الأطباء',
+                subtitle: 'Doctors',
+                icon: 'fa-user-doctor',
+                table: 'doctors',
+                singular: 'طبيب',
+                order: 'name',
+                fields: [
+                    { name: 'name', label: 'اسم الطبيب', type: 'text', required: true, placeholder: 'مثل: د/ أحمد محمد' },
+                    { name: 'specialty', label: 'التخصص', type: 'text', placeholder: 'مثل: جراحة عامة' },
+                    { name: 'department', label: 'القسم', type: 'text', placeholder: 'مثل: قسم الجراحة' }
+                ],
+                columns: ['name', 'specialty', 'department', 'is_active'],
+                importable: true,
+                csvColumns: ['name', 'specialty', 'department']
+            },
+            ward_clerks: {
+                title: 'مدخلو البيانات',
+                subtitle: 'Ward Clerks',
+                icon: 'fa-users-gear',
+                table: 'ward_clerks',
+                singular: 'مدخل بيانات',
+                order: 'name',
+                fields: [
+                    { name: 'name', label: 'الاسم', type: 'text', required: true, placeholder: 'مثل: أحمد محمود' }
+                ],
+                columns: ['name', 'is_active'],
+                importable: true,
+                csvColumns: ['name']
+            },
+            forms: {
+                title: 'النماذج',
+                subtitle: 'Forms Catalog',
+                icon: 'fa-file-lines',
+                table: 'form_catalog',
+                singular: 'نموذج',
+                order: 'order_index',
+                isForm: true,
+                fields: [
+                    { name: 'text', label: 'اسم النموذج', type: 'text', required: true, placeholder: 'مثل: نموذج الدخول' },
+                    { name: 'requires_date', label: 'يتطلب تاريخ', type: 'checkbox', default: false },
+                    { name: 'order_index', label: 'الترتيب', type: 'number', default: 0 }
+                ],
+                columns: ['text', 'requires_date', 'specialties_count', 'services_count', 'order_index', 'is_active'],
+                importable: false
+            }
+        };
+
+        // ============================================
+        // STATE
+        // ============================================
+        let currentUser = null;
+        let currentTab = 'specialties';
+        let currentData = [];
+        let editingId = null;
+        let importRows = [];
+        let cachedOptions = {};
+        let counts = {};
+
+        // ============================================
+        // INIT
+        // ============================================
+        (async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    window.location.href = '../login.html';
+                    return;
+                }
+                currentUser = session.user;
+
+                const { data: profile } = await supabase
+                    .from('profiles').select('role, is_active').eq('id', currentUser.id).single();
+
+                if (!profile || !['super_admin', 'admin'].includes(profile.role)) {
+                    alert('ليس لديك صلاحية الوصول');
+                    window.location.href = '../dashboard.html';
+                    return;
+                }
+
+                renderTabs();
+                await loadCounts();
+                await switchTab('specialties');
+                document.getElementById('loadingScreen').classList.add('hide');
+            } catch (err) {
+                console.error(err);
+                showNotification('خطأ: ' + err.message, 'error');
+            }
+        })();
+
+        // ============================================
+        // TABS
+        // ============================================
+        function renderTabs() {
+            const list = document.getElementById('tabsList');
+            list.innerHTML = Object.entries(CATALOGS).map(([key, cfg]) => `
+                <div class="tab-item" data-tab="${key}" onclick="switchTab('${key}')">
+                    <div class="tab-icon"><i class="fa-solid ${cfg.icon}"></i></div>
+                    <span>${cfg.title}</span>
+                    <span class="tab-count" id="count-${key}">0</span>
+                </div>
+            `).join('');
+        }
+
+        async function loadCounts() {
+            await Promise.all(Object.entries(CATALOGS).map(async ([key, cfg]) => {
+                const { count } = await supabase.from(cfg.table).select('*', { count: 'exact', head: true });
+                counts[key] = count || 0;
+                const el = document.getElementById(`count-${key}`);
+                if (el) el.textContent = count || 0;
+            }));
+        }
+
+        window.switchTab = async function(key) {
+            currentTab = key;
+            const cfg = CATALOGS[key];
+
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.toggle('active', t.dataset.tab === key));
+            document.getElementById('searchInput').value = '';
+
+            document.getElementById('catalogTitle').innerHTML = `
+                <div class="catalog-title-icon"><i class="fa-solid ${cfg.icon}"></i></div>
+                <div>
+                    <h2>${cfg.title}</h2>
+                    <p>${cfg.subtitle} · ${counts[key] || 0} عنصر</p>
+                </div>
+            `;
+
+            document.getElementById('btnImport').style.display = cfg.importable ? 'inline-flex' : 'none';
+
+            await loadData();
+            renderTable();
+        };
+
+        // ============================================
+        // DATA
+        // ============================================
+        async function loadData() {
+            const cfg = CATALOGS[currentTab];
+            let query = supabase.from(cfg.table).select('*');
+            if (cfg.order) query = query.order(cfg.order, { ascending: true });
+            const { data, error } = await query;
+
+            if (error) {
+                showNotification('فشل التحميل: ' + error.message, 'error');
+                return;
+            }
+            currentData = data || [];
+
+            // Load relation labels for issues
+            if (currentTab === 'issues') {
+                const { data: cats } = await supabase.from('issue_category_catalog').select('id, name');
+                const catMap = {};
+                (cats || []).forEach(c => catMap[c.id] = c.name);
+                currentData = currentData.map(d => ({ ...d, category_name: catMap[d.category_id] || '—' }));
+            }
+
+            // Load mappings for forms
+            if (currentTab === 'forms') {
+                const formIds = currentData.map(f => f.id);
+                if (formIds.length > 0) {
+                    const [specRes, servRes] = await Promise.all([
+                        supabase.from('form_specialty_map').select('form_id, specialty_id').in('form_id', formIds),
+                        supabase.from('form_service_map').select('form_id, service_id').in('form_id', formIds)
+                    ]);
+                    const specCounts = {}, servCounts = {};
+                    (specRes.data || []).forEach(m => specCounts[m.form_id] = (specCounts[m.form_id] || 0) + 1);
+                    (servRes.data || []).forEach(m => servCounts[m.form_id] = (servCounts[m.form_id] || 0) + 1);
+                    currentData = currentData.map(f => ({
+                        ...f,
+                        specialties_count: specCounts[f.id] || 0,
+                        services_count: servCounts[f.id] || 0
+                    }));
+                }
+            }
+        }
+
+        // ============================================
+        // TABLE RENDER
+        // ============================================
+        function renderTable() {
+            const cfg = CATALOGS[currentTab];
+            const thead = document.getElementById('catalogThead');
+            const tbody = document.getElementById('catalogTbody');
+
+            const headers = [...cfg.columns, '__actions'];
+
+            thead.innerHTML = `<tr>${headers.map(h => {
+                if (h === '__actions') return `<th style="width:80px;">إجراءات</th>`;
+                return `<th>${labelFor(cfg, h)}</th>`;
+            }).join('')}</tr>`;
+
+            if (currentData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${headers.length}"><div class="table-empty">
+                    <i class="fa-solid fa-inbox"></i>
+                    <div style="font-weight:900; color:var(--text-primary); margin-bottom:4px;">لا توجد بيانات</div>
+                    <div style="font-size:0.78rem;">اضغط "إضافة جديد" لبدء الإضافة</div>
+                </div></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = currentData.map(row => {
+                const cells = cfg.columns.map(col => {
+                    const val = row[col];
+                    if (col === 'is_active') {
+                        return `<td><span class="status-pill ${val ? 'on' : 'off'}" onclick="toggleActive('${row.id}')">${val ? '● نشط' : '○ موقوف'}</span></td>`;
+                    }
+                    if (col === 'order_index' || col === 'points') {
+                        return `<td><span class="cell-muted" style="font-family:'Space Grotesk',monospace;">${val ?? '—'}</span></td>`;
+                    }
+                    if (col === 'requires_date') {
+                        return `<td>${val ? '<i class="fa-solid fa-check" style="color:var(--success);"></i>' : '<span class="cell-muted">—</span>'}</td>`;
+                    }
+                    if (col === 'specialties_count' || col === 'services_count') {
+                        return `<td><span class="cell-badge">${val || 0}</span></td>`;
+                    }
+                    if (col === 'code' || col === 'value') {
+                        return `<td><code style="font-family:'Space Grotesk',monospace; font-size:0.72rem; background:rgba(148,163,184,0.1); padding:2px 8px; border-radius:5px;">${val || '—'}</code></td>`;
+                    }
+                    if (col === 'name' || col === 'text' || col === 'label') {
+                        return `<td class="cell-name">${val || '—'}</td>`;
+                    }
+                    return `<td>${val ?? '—'}</td>`;
+                }).join('');
+
+                return `<tr>
+                    ${cells}
+                    <td>
+                        <div class="row-actions">
+                            <button class="row-action" onclick="openEditModal('${row.id}')" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                            <button class="row-action delete" onclick="deleteRecord('${row.id}')" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function labelFor(cfg, col) {
+            const labels = {
+                name: 'الاسم', text: 'اسم النموذج', code: 'الكود', label: 'الوصف',
+                order_index: 'الترتيب', is_active: 'الحالة', points: 'النقاط', value: 'القيمة',
+                requires_date: 'يتطلب تاريخ', specialties_count: 'تخصصات', services_count: 'خدمات',
+                category_name: 'التصنيف', specialty: 'التخصص', department: 'القسم'
+            };
+            return labels[col] || col;
+        }
+
+        // ============================================
+        // SEARCH
+        // ============================================
+        window.filterTable = function() {
+            const q = document.getElementById('searchInput').value.trim().toLowerCase();
+            const rows = document.querySelectorAll('#catalogTbody tr');
+            rows.forEach(row => {
+                if (row.querySelector('.table-empty')) return;
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(q) ? '' : 'none';
+            });
+        };
+
+        // ============================================
+        // CRUD MODALS
+        // ============================================
+        window.openCreateModal = async function() {
+            editingId = null;
+            const cfg = CATALOGS[currentTab];
+            document.getElementById('crudModalTitle').textContent = `إضافة ${cfg.singular} جديد`;
+
+            if (currentTab === 'forms') {
+                await openFormModal(null);
+                return;
+            }
+
+            document.getElementById('crudModalBody').innerHTML = await buildFormFields(cfg.fields, {});
+            openModal('crudModal');
+        };
+
+        window.openEditModal = async function(id) {
+            editingId = id;
+            const cfg = CATALOGS[currentTab];
+            const row = currentData.find(r => r.id === id);
+            if (!row) return;
+
+            document.getElementById('crudModalTitle').textContent = `تعديل ${cfg.singular}`;
+
+            if (currentTab === 'forms') {
+                await openFormModal(row);
+                return;
+            }
+
+            document.getElementById('crudModalBody').innerHTML = await buildFormFields(cfg.fields, row);
+            openModal('crudModal');
+        };
+
+        async function buildFormFields(fields, values) {
+            let html = '';
+            for (const field of fields) {
+                const val = values[field.name] ?? field.default ?? '';
+                html += `<div class="f-group">
+                    <label class="f-label">${field.label}${field.required ? ' <span class="req">*</span>' : ''}</label>`;
+
+                if (field.type === 'text') {
+                    html += `<input type="text" class="f-input" id="fld-${field.name}" value="${escapeHtml(val)}" placeholder="${field.placeholder || ''}" ${field.required ? 'required' : ''} />`;
+                } else if (field.type === 'number') {
+                    html += `<input type="number" class="f-input" id="fld-${field.name}" value="${val}" ${field.required ? 'required' : ''} />`;
+                } else if (field.type === 'checkbox') {
+                    html += `<label class="ms-item" style="max-width:fit-content;">
+                        <input type="checkbox" id="fld-${field.name}" ${val ? 'checked' : ''} /> ${field.label}
+                    </label>`;
+                } else if (field.type === 'select') {
+                    const options = await getOptions(field.optionsTable, field.optionsLabel);
+                    html += `<select class="f-select" id="fld-${field.name}" ${field.required ? 'required' : ''}>
+                        <option value="">-- اختر --</option>
+                        ${options.map(o => `<option value="${o.id}" ${o.id === val ? 'selected' : ''}>${o.label}</option>`).join('')}
+                    </select>`;
+                }
+                if (field.hint) html += `<div class="f-hint">${field.hint}</div>`;
+                html += `</div>`;
+            }
+            return html;
+        }
+
+        async function getOptions(table, labelCol) {
+            if (cachedOptions[table]) return cachedOptions[table];
+            const { data } = await supabase.from(table).select(`id, ${labelCol}`).eq('is_active', true).order('order_index');
+            const opts = (data || []).map(d => ({ id: d.id, label: d[labelCol] }));
+            cachedOptions[table] = opts;
+            return opts;
+        }
+
+        // ============================================
+        // SAVE RECORD
+        // ============================================
+        window.saveRecord = async function() {
+            const cfg = CATALOGS[currentTab];
+            const btn = document.getElementById('crudSaveBtn');
+            btn.disabled = true;
+
+            const payload = {};
+            for (const field of cfg.fields) {
+                const el = document.getElementById(`fld-${field.name}`);
+                if (!el) continue;
+                if (field.type === 'checkbox') payload[field.name] = el.checked;
+                else if (field.type === 'number') payload[field.name] = el.value === '' ? 0 : parseInt(el.value);
+                else payload[field.name] = el.value.trim();
+
+                if (field.required && !payload[field.name]) {
+                    showNotification(`الحقل "${field.label}" مطلوب`, 'error');
+                    btn.disabled = false;
+                    return;
+                }
+            }
+
+            let error;
+            if (editingId) {
+                ({ error } = await supabase.from(cfg.table).update(payload).eq('id', editingId));
+            } else {
+                ({ error } = await supabase.from(cfg.table).insert(payload));
+            }
+
+            btn.disabled = false;
+
+            if (error) {
+                showNotification('فشل الحفظ: ' + error.message, 'error');
+                return;
+            }
+
+            showNotification(editingId ? 'تم التحديث بنجاح' : 'تمت الإضافة بنجاح', 'success');
+            await logAudit(editingId ? 'catalog_updated' : 'catalog_created', {
+                entityType: cfg.table, entityId: editingId || 'new',
+                description: `${cfg.singular}: ${payload.name || payload.text || payload.code || ''}`
+            });
+
+            closeModal('crudModal');
+            await loadCounts();
+            await switchTab(currentTab);
+        };
+
+        // ============================================
+        // TOGGLE / DELETE
+        // ============================================
+        window.toggleActive = async function(id) {
+            const cfg = CATALOGS[currentTab];
+            const row = currentData.find(r => r.id === id);
+            if (!row) return;
+
+            const { error } = await supabase.from(cfg.table).update({ is_active: !row.is_active }).eq('id', id);
+            if (error) {
+                showNotification('فشل: ' + error.message, 'error');
+                return;
+            }
+
+            showNotification(row.is_active ? 'تم الإيقاف' : 'تم التفعيل', 'success');
+            await switchTab(currentTab);
+        };
+
+        window.deleteRecord = async function(id) {
+            const cfg = CATALOGS[currentTab];
+            const confirmed = await window.showConfirm({
+                title: 'حذف',
+                message: `هل أنت متأكد من حذف هذا ${cfg.singular}؟`,
+                confirmText: 'حذف',
+                cancelText: 'إلغاء',
+                type: 'danger'
+            });
+            if (!confirmed) return;
+
+            const { error } = await supabase.from(cfg.table).delete().eq('id', id);
+            if (error) {
+                showNotification('فشل الحذف: ' + error.message, 'error');
+                return;
+            }
+
+            showNotification('تم الحذف', 'success');
+            await logAudit('catalog_deleted', { entityType: cfg.table, entityId: id, description: cfg.singular });
+            await loadCounts();
+            await switchTab(currentTab);
+        };
+
+        // ============================================
+        // FORMS MODAL (special)
+        // ============================================
+        async function openFormModal(form) {
+            editingId = form ? form.id : null;
+            document.getElementById('crudModalTitle').textContent = form ? 'تعديل النموذج' : 'إضافة نموذج جديد';
+
+            const [specialties, services, daycases, admissionTypes, caseStatuses] = await Promise.all([
+                supabase.from('specialty_catalog').select('id, name').eq('is_active', true).order('order_index'),
+                supabase.from('service_catalog').select('id, name').eq('is_active', true).order('order_index'),
+                supabase.from('daycase_catalog').select('id, name').eq('is_active', true).order('order_index'),
+                supabase.from('admission_type_catalog').select('id, name').eq('is_active', true).order('order_index'),
+                supabase.from('case_status_catalog').select('id, name').eq('is_active', true).order('order_index')
+            ]);
+
+            let mappedSpecs = [], mappedServs = [], mappedDaycases = [], exclusions = [];
+
+            if (form) {
+                const [ms, mv, md, ex] = await Promise.all([
+                    supabase.from('form_specialty_map').select('specialty_id').eq('form_id', form.id),
+                    supabase.from('form_service_map').select('service_id').eq('form_id', form.id),
+                    supabase.from('form_daycase_map').select('daycase_id').eq('form_id', form.id),
+                    supabase.from('form_exclusion_map').select('*').eq('form_id', form.id)
+                ]);
+                mappedSpecs = (ms.data || []).map(x => x.specialty_id);
+                mappedServs = (mv.data || []).map(x => x.service_id);
+                mappedDaycases = (md.data || []).map(x => x.daycase_id);
+                exclusions = ex.data || [];
+            }
+
+            const excludedAdmTypes = exclusions.filter(e => e.exclusion_kind === 'admission_type').map(e => e.exclusion_id);
+            const excludedCaseStatuses = exclusions.filter(e => e.exclusion_kind === 'case_status').map(e => e.exclusion_id);
+
+            document.getElementById('crudModalBody').innerHTML = `
+                <div class="f-group">
+                    <label class="f-label">اسم النموذج <span class="req">*</span></label>
+                    <input type="text" class="f-input" id="fld-text" value="${escapeHtml(form?.text || '')}" placeholder="مثل: نموذج الدخول" required />
+                </div>
+                <div class="f-group">
+                    <label class="f-label">الترتيب</label>
+                    <input type="number" class="f-input" id="fld-order_index" value="${form?.order_index ?? 0}" />
+                </div>
+                <div class="f-group">
+                    <label class="ms-item" style="max-width:fit-content;">
+                        <input type="checkbox" id="fld-requires_date" ${form?.requires_date ? 'checked' : ''} />
+                        <span>يتطلب إدخال تاريخ</span>
+                    </label>
+                </div>
+
+                <div style="border-top:1px solid var(--card-border); margin:14px 0; padding-top:14px;">
+                    <div style="font-size:0.7rem; font-weight:900; color:var(--accent); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px;">الربط</div>
+                </div>
+
+                <div class="f-group">
+                    <label class="f-label">التخصصات المرتبطة (${mappedSpecs.length} محدد)</label>
+                    <div class="multi-select-box" id="specsBox">
+                        ${(specialties.data || []).map(s => `<label class="ms-item"><input type="checkbox" value="${s.id}" ${mappedSpecs.includes(s.id) ? 'checked' : ''} /> ${s.name}</label>`).join('')}
+                    </div>
+                </div>
+
+                <div class="f-group">
+                    <label class="f-label">الخدمات المرتبطة (${mappedServs.length} محدد)</label>
+                    <div class="multi-select-box" id="servsBox">
+                        ${(services.data || []).map(s => `<label class="ms-item"><input type="checkbox" value="${s.id}" ${mappedServs.includes(s.id) ? 'checked' : ''} /> ${s.name}</label>`).join('')}
+                    </div>
+                </div>
+
+                <div class="f-group">
+                    <label class="f-label">أنواع اليوم الواحد المرتبطة</label>
+                    <div class="multi-select-box" id="daycaseBox" style="max-height:90px;">
+                        ${(daycases.data || []).map(s => `<label class="ms-item"><input type="checkbox" value="${s.id}" ${mappedDaycases.includes(s.id) ? 'checked' : ''} /> ${s.name}</label>`).join('')}
+                    </div>
+                </div>
+
+                <div class="f-group">
+                    <label class="f-label">استثناء من أنواع الدخول (يختفي عند اختيارها)</label>
+                    <div class="multi-select-box" id="exclAdmBox" style="max-height:90px;">
+                        ${(admissionTypes.data || []).map(s => `<label class="ms-item"><input type="checkbox" value="${s.id}" ${excludedAdmTypes.includes(s.id) ? 'checked' : ''} /> ${s.name}</label>`).join('')}
+                    </div>
+                </div>
+
+                <div class="f-group">
+                    <label class="f-label">استثناء من حالات الملف</label>
+                    <div class="multi-select-box" id="exclStatusBox" style="max-height:90px;">
+                        ${(caseStatuses.data || []).map(s => `<label class="ms-item"><input type="checkbox" value="${s.id}" ${excludedCaseStatuses.includes(s.id) ? 'checked' : ''} /> ${s.name}</label>`).join('')}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('crudSaveBtn').onclick = saveForm;
+            openModal('crudModal');
+        }
+
+        async function saveForm() {
+            const btn = document.getElementById('crudSaveBtn');
+            btn.disabled = true;
+
+            const text = document.getElementById('fld-text').value.trim();
+            const order_index = parseInt(document.getElementById('fld-order_index').value) || 0;
+            const requires_date = document.getElementById('fld-requires_date').checked;
+
+            if (!text) {
+                showNotification('اسم النموذج مطلوب', 'error');
+                btn.disabled = false;
+                return;
+            }
+
+            const payload = { text, order_index, requires_date };
+
+            let formId = editingId;
+            if (editingId) {
+                const { error } = await supabase.from('form_catalog').update(payload).eq('id', editingId);
+                if (error) { showNotification('فشل: ' + error.message, 'error'); btn.disabled = false; return; }
+            } else {
+                const { data, error } = await supabase.from('form_catalog').insert(payload).select().single();
+                if (error) { showNotification('فشل: ' + error.message, 'error'); btn.disabled = false; return; }
+                formId = data.id;
+            }
+
+            // Clear mappings
+            await Promise.all([
+                supabase.from('form_specialty_map').delete().eq('form_id', formId),
+                supabase.from('form_service_map').delete().eq('form_id', formId),
+                supabase.from('form_daycase_map').delete().eq('form_id', formId),
+                supabase.from('form_exclusion_map').delete().eq('form_id', formId)
+            ]);
+
+            // Insert new mappings
+            const getChecked = (boxId) => Array.from(document.querySelectorAll(`#${boxId} input:checked`)).map(x => x.value);
+
+            const specIds = getChecked('specsBox');
+            const servIds = getChecked('servsBox');
+            const dayIds = getChecked('daycaseBox');
+            const exclAdm = getChecked('exclAdmBox');
+            const exclStatus = getChecked('exclStatusBox');
+
+            if (specIds.length) await supabase.from('form_specialty_map').insert(specIds.map(sid => ({ form_id: formId, specialty_id: sid })));
+            if (servIds.length) await supabase.from('form_service_map').insert(servIds.map(sid => ({ form_id: formId, service_id: sid })));
+            if (dayIds.length) await supabase.from('form_daycase_map').insert(dayIds.map(did => ({ form_id: formId, daycase_id: did })));
+            if (exclAdm.length) await supabase.from('form_exclusion_map').insert(exclAdm.map(id => ({ form_id: formId, exclusion_kind: 'admission_type', exclusion_id: id })));
+            if (exclStatus.length) await supabase.from('form_exclusion_map').insert(exclStatus.map(id => ({ form_id: formId, exclusion_kind: 'case_status', exclusion_id: id })));
+
+            btn.disabled = false;
+            showNotification(editingId ? 'تم التحديث' : 'تمت الإضافة', 'success');
+            await logAudit('form_saved', { entityType: 'form_catalog', entityId: formId, description: text });
+            closeModal('crudModal');
+            await loadCounts();
+            await switchTab('forms');
+        }
+
+        // ============================================
+        // MODAL HELPERS
+        // ============================================
+        function openModal(id) {
+            document.getElementById(id).classList.add('open');
+        }
+        window.closeModal = function(id) {
+            document.getElementById(id).classList.remove('open');
+            editingId = null;
+        };
+
+        function escapeHtml(s) {
+            if (!s) return '';
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // ============================================
+        // IMPORT
+        // ============================================
+        window.openImportModal = function() {
+            importRows = [];
+            document.getElementById('fileInput').value = '';
+            document.getElementById('importPreview').style.display = 'none';
+            document.getElementById('importSaveBtn').disabled = true;
+            openModal('importModal');
+
+            const dz = document.getElementById('dropZone');
+            dz.ondragover = (e) => { e.preventDefault(); dz.classList.add('drag-over'); };
+            dz.ondragleave = () => dz.classList.remove('drag-over');
+            dz.ondrop = (e) => {
+                e.preventDefault();
+                dz.classList.remove('drag-over');
+                if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]);
+            };
+        };
+
+        window.handleFileSelect = function(e) {
+            if (e.target.files.length) processFile(e.target.files[0]);
+        };
+
+        function processFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+                    importRows = json;
+                    showPreview(json);
+                } catch (err) {
+                    showNotification('فشل قراءة الملف: ' + err.message, 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function showPreview(rows) {
+            if (!rows.length) return;
+            document.getElementById('importPreview').style.display = 'block';
+            document.getElementById('importCount').textContent = rows.length;
+            document.getElementById('importSaveBtn').disabled = false;
+
+            const cols = Object.keys(rows[0]);
+            const preview = rows.slice(0, 5);
+            document.getElementById('previewTable').innerHTML = `
+                <thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+                <tbody>${preview.map(r => `<tr>${cols.map(c => `<td>${escapeHtml(r[c])}</td>`).join('')}</tr>`).join('')}</tbody>
+            `;
+        }
+
+        window.executeImport = async function() {
+            const btn = document.getElementById('importSaveBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الاستيراد...';
+
+            const cfg = CATALOGS[currentTab];
+            let success = 0, failed = 0;
+
+            for (const row of importRows) {
+                const payload = {};
+                for (const col of cfg.csvColumns) {
+                    if (row[col] !== undefined && row[col] !== '') {
+                        payload[col] = isNaN(row[col]) || col === 'name' || col === 'code' || col === 'value' || col === 'label' || col === 'specialty' || col === 'department'
+                            ? String(row[col]).trim()
+                            : Number(row[col]);
+                    }
+                }
+
+                if (!Object.keys(payload).length) { failed++; continue; }
+
+                const { error } = await supabase.from(cfg.table).upsert(payload, {
+                    onConflict: cfg.csvColumns[0]
+                });
+                if (error) failed++; else success++;
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-upload"></i> استيراد';
+
+            showNotification(`تم استيراد ${success} صف بنجاح${failed ? `، فشل ${failed}` : ''}`, success > 0 ? 'success' : 'error');
+            closeModal('importModal');
+            await loadCounts();
+            await switchTab(currentTab);
+        };
+
+        // ============================================
+        // EXPORT
+        // ============================================
+        window.exportCSV = function() {
+            const cfg = CATALOGS[currentTab];
+            if (!currentData.length) { showNotification('لا توجد بيانات للتصدير', 'info'); return; }
+
+            const exportData = currentData.map(row => {
+                const obj = {};
+                cfg.columns.forEach(col => {
+                    if (['specialties_count','services_count','category_name'].includes(col)) return;
+                    obj[col] = row[col];
+                });
+                return obj;
+            });
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, cfg.title);
+            XLSX.writeFile(wb, `${currentTab}_${new Date().toISOString().split('T')[0]}.xlsx`);
+            showNotification('تم التصدير', 'success');
+        };
+    </script>
+
+    <script type="module" src="../session-manager.js"></script>
+</body>
+</html>
