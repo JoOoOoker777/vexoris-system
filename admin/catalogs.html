@@ -664,9 +664,24 @@
     <script src="../notify.js"></script>
 
     <script type="module">
+        
         import { supabase } from '../supabase-client.js';
         import { logAudit } from '../audit-log.js';
-
+// 🔥 Fallback لو notify.js مش متحمل
+        if (typeof window.showNotification !== 'function') {
+            console.warn('[catalogs] notify.js not loaded — using fallback');
+            window.showNotification = function(msg, type = 'info') {
+                console.log(`[Notification/${type}]`, msg);
+                if (type === 'error') alert('خطأ: ' + msg);
+                else if (type === 'warning') alert('تنبيه: ' + msg);
+                else alert(msg);
+            };
+        }
+        if (typeof window.showConfirm !== 'function') {
+            window.showConfirm = async function(opts) {
+                return confirm(opts.message || opts.title || 'هل أنت متأكد؟');
+            };
+        }
         window.toggleTheme = () => {
             const html = document.documentElement;
             html.classList.toggle('dark');
@@ -1158,46 +1173,89 @@
         window.saveRecord = async function() {
             const cfg = CATALOGS[currentTab];
             const btn = document.getElementById('crudSaveBtn');
+            const originalHTML = btn.innerHTML;
             btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحفظ...';
 
-            const payload = {};
-            for (const field of cfg.fields) {
-                const el = document.getElementById(`fld-${field.name}`);
-                if (!el) continue;
-                if (field.type === 'checkbox') payload[field.name] = el.checked;
-                else if (field.type === 'number') payload[field.name] = el.value === '' ? 0 : parseInt(el.value);
-                else payload[field.name] = el.value.trim();
+            try {
+                // 1. جمع البيانات
+                const payload = {};
+                for (const field of cfg.fields) {
+                    const el = document.getElementById(`fld-${field.name}`);
+                    if (!el) continue;
+                    if (field.type === 'checkbox') payload[field.name] = el.checked;
+                    else if (field.type === 'number') payload[field.name] = el.value === '' ? 0 : parseInt(el.value);
+                    else payload[field.name] = el.value.trim();
 
-                if (field.required && !payload[field.name]) {
-                    showNotification(`الحقل "${field.label}" مطلوب`, 'error');
+                    if (field.required && !payload[field.name]) {
+                        if (window.showNotification) showNotification(`الحقل "${field.label}" مطلوب`, 'error');
+                        else alert(`الحقل "${field.label}" مطلوب`);
+                        btn.disabled = false;
+                        btn.innerHTML = originalHTML;
+                        return;
+                    }
+                }
+
+                console.log('[saveRecord] Payload:', payload);
+
+                // 2. حفظ في Supabase
+                let error;
+                if (editingId) {
+                    ({ error } = await supabase.from(cfg.table).update(payload).eq('id', editingId));
+                } else {
+                    ({ error } = await supabase.from(cfg.table).insert(payload));
+                }
+
+                if (error) {
+                    console.error('[saveRecord] Supabase error:', error);
+                    if (window.showNotification) showNotification('فشل الحفظ: ' + error.message, 'error');
+                    else alert('فشل الحفظ: ' + error.message);
                     btn.disabled = false;
+                    btn.innerHTML = originalHTML;
                     return;
                 }
+
+                console.log('[saveRecord] ✅ Saved to database');
+
+                // 3. إشعار النجاح — مباشرة بعد الحفظ
+                if (window.showNotification) {
+                    showNotification(editingId ? 'تم التحديث بنجاح' : 'تمت الإضافة بنجاح', 'success');
+                } else {
+                    alert(editingId ? 'تم التحديث بنجاح' : 'تمت الإضافة بنجاح');
+                }
+
+                // 4. إغلاق الموديول — قبل أي عملية تانية
+                closeModal('crudModal');
+                console.log('[saveRecord] ✅ Modal closed');
+
+                // 5. تسجيل في Audit (لا يكسر العملية لو فشل)
+                try {
+                    await logAudit(editingId ? 'catalog_updated' : 'catalog_created', {
+                        entityType: cfg.table,
+                        entityId: editingId || 'new',
+                        description: `${cfg.singular}: ${payload.name || payload.text || payload.code || ''}`
+                    });
+                } catch (auditErr) {
+                    console.warn('[saveRecord] Audit log failed (ignored):', auditErr);
+                }
+
+                // 6. تحديث العداد + الجدول
+                try {
+                    await loadCounts();
+                    await switchTab(currentTab);
+                    console.log('[saveRecord] ✅ Data refreshed');
+                } catch (refreshErr) {
+                    console.warn('[saveRecord] Refresh failed:', refreshErr);
+                }
+
+            } catch (err) {
+                console.error('[saveRecord] ❌ Unexpected error:', err);
+                if (window.showNotification) showNotification('حدث خطأ غير متوقع: ' + err.message, 'error');
+                else alert('حدث خطأ: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
             }
-
-            let error;
-            if (editingId) {
-                ({ error } = await supabase.from(cfg.table).update(payload).eq('id', editingId));
-            } else {
-                ({ error } = await supabase.from(cfg.table).insert(payload));
-            }
-
-            btn.disabled = false;
-
-            if (error) {
-                showNotification('فشل الحفظ: ' + error.message, 'error');
-                return;
-            }
-
-            showNotification(editingId ? 'تم التحديث بنجاح' : 'تمت الإضافة بنجاح', 'success');
-            await logAudit(editingId ? 'catalog_updated' : 'catalog_created', {
-                entityType: cfg.table, entityId: editingId || 'new',
-                description: `${cfg.singular}: ${payload.name || payload.text || payload.code || ''}`
-            });
-
-            closeModal('crudModal');
-            await loadCounts();
-            await switchTab(currentTab);
         };
 
         // ============================================
@@ -1339,59 +1397,76 @@
                 return window.saveRecord();
             }
             const btn = document.getElementById('crudSaveBtn');
+            const originalHTML = btn.innerHTML;
             btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحفظ...';
 
-            const text = document.getElementById('fld-text').value.trim();
-            const order_index = parseInt(document.getElementById('fld-order_index').value) || 0;
-            const requires_date = document.getElementById('fld-requires_date').checked;
+            try {
+                const text = document.getElementById('fld-text').value.trim();
+                const order_index = parseInt(document.getElementById('fld-order_index').value) || 0;
+                const requires_date = document.getElementById('fld-requires_date').checked;
 
-            if (!text) {
-                showNotification('اسم النموذج مطلوب', 'error');
+                if (!text) {
+                    if (window.showNotification) showNotification('اسم النموذج مطلوب', 'error');
+                    else alert('اسم النموذج مطلوب');
+                    return;
+                }
+
+                const payload = { text, order_index, requires_date };
+
+                let formId = editingId;
+                if (editingId) {
+                    const { error } = await supabase.from('form_catalog').update(payload).eq('id', editingId);
+                    if (error) throw error;
+                } else {
+                    const { data, error } = await supabase.from('form_catalog').insert(payload).select().single();
+                    if (error) throw error;
+                    formId = data.id;
+                }
+
+                // Clear mappings
+                await Promise.all([
+                    supabase.from('form_specialty_map').delete().eq('form_id', formId),
+                    supabase.from('form_service_map').delete().eq('form_id', formId),
+                    supabase.from('form_daycase_map').delete().eq('form_id', formId),
+                    supabase.from('form_exclusion_map').delete().eq('form_id', formId)
+                ]);
+
+                // Insert new mappings
+                const getChecked = (boxId) => Array.from(document.querySelectorAll(`#${boxId} input:checked`)).map(x => x.value);
+
+                const specIds = getChecked('specsBox');
+                const servIds = getChecked('servsBox');
+                const dayIds = getChecked('daycaseBox');
+                const exclAdm = getChecked('exclAdmBox');
+                const exclStatus = getChecked('exclStatusBox');
+
+                if (specIds.length) await supabase.from('form_specialty_map').insert(specIds.map(sid => ({ form_id: formId, specialty_id: sid })));
+                if (servIds.length) await supabase.from('form_service_map').insert(servIds.map(sid => ({ form_id: formId, service_id: sid })));
+                if (dayIds.length) await supabase.from('form_daycase_map').insert(dayIds.map(did => ({ form_id: formId, daycase_id: did })));
+                if (exclAdm.length) await supabase.from('form_exclusion_map').insert(exclAdm.map(id => ({ form_id: formId, exclusion_kind: 'admission_type', exclusion_id: id })));
+                if (exclStatus.length) await supabase.from('form_exclusion_map').insert(exclStatus.map(id => ({ form_id: formId, exclusion_kind: 'case_status', exclusion_id: id })));
+
+                if (window.showNotification) showNotification(editingId ? 'تم التحديث بنجاح' : 'تمت الإضافة بنجاح', 'success');
+                else alert(editingId ? 'تم التحديث' : 'تمت الإضافة');
+
+                closeModal('crudModal');
+
+                try {
+                    await logAudit('form_saved', { entityType: 'form_catalog', entityId: formId, description: text });
+                } catch (e) { console.warn('Audit failed:', e); }
+
+                await loadCounts();
+                await switchTab('forms');
+
+            } catch (err) {
+                console.error('[saveForm] Error:', err);
+                if (window.showNotification) showNotification('فشل الحفظ: ' + err.message, 'error');
+                else alert('فشل الحفظ: ' + err.message);
+            } finally {
                 btn.disabled = false;
-                return;
+                btn.innerHTML = originalHTML;
             }
-
-            const payload = { text, order_index, requires_date };
-
-            let formId = editingId;
-            if (editingId) {
-                const { error } = await supabase.from('form_catalog').update(payload).eq('id', editingId);
-                if (error) { showNotification('فشل: ' + error.message, 'error'); btn.disabled = false; return; }
-            } else {
-                const { data, error } = await supabase.from('form_catalog').insert(payload).select().single();
-                if (error) { showNotification('فشل: ' + error.message, 'error'); btn.disabled = false; return; }
-                formId = data.id;
-            }
-
-            // Clear mappings
-            await Promise.all([
-                supabase.from('form_specialty_map').delete().eq('form_id', formId),
-                supabase.from('form_service_map').delete().eq('form_id', formId),
-                supabase.from('form_daycase_map').delete().eq('form_id', formId),
-                supabase.from('form_exclusion_map').delete().eq('form_id', formId)
-            ]);
-
-            // Insert new mappings
-            const getChecked = (boxId) => Array.from(document.querySelectorAll(`#${boxId} input:checked`)).map(x => x.value);
-
-            const specIds = getChecked('specsBox');
-            const servIds = getChecked('servsBox');
-            const dayIds = getChecked('daycaseBox');
-            const exclAdm = getChecked('exclAdmBox');
-            const exclStatus = getChecked('exclStatusBox');
-
-            if (specIds.length) await supabase.from('form_specialty_map').insert(specIds.map(sid => ({ form_id: formId, specialty_id: sid })));
-            if (servIds.length) await supabase.from('form_service_map').insert(servIds.map(sid => ({ form_id: formId, service_id: sid })));
-            if (dayIds.length) await supabase.from('form_daycase_map').insert(dayIds.map(did => ({ form_id: formId, daycase_id: did })));
-            if (exclAdm.length) await supabase.from('form_exclusion_map').insert(exclAdm.map(id => ({ form_id: formId, exclusion_kind: 'admission_type', exclusion_id: id })));
-            if (exclStatus.length) await supabase.from('form_exclusion_map').insert(exclStatus.map(id => ({ form_id: formId, exclusion_kind: 'case_status', exclusion_id: id })));
-
-            btn.disabled = false;
-            showNotification(editingId ? 'تم التحديث' : 'تمت الإضافة', 'success');
-            await logAudit('form_saved', { entityType: 'form_catalog', entityId: formId, description: text });
-            closeModal('crudModal');
-            await loadCounts();
-            await switchTab('forms');
         }
 
         // ============================================
