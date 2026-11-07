@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقرير مراجعة الملف الطبي | VEXORIS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+      if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg: #04070f; --card-bg: rgba(15, 23, 42, 0.55);
+            --card-border: rgba(148, 163, 184, 0.12);
+            --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+            --accent: #0ea5e9; --accent-2: #6366f1; --accent-3: #8b5cf6;
+            --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+        }
+        html:not(.dark) {
+            --bg: #e8eef5; --card-bg: rgba(255, 255, 255, 0.92);
+            --card-border: rgba(100, 116, 139, 0.28);
+            --text-primary: #0b1220; --text-secondary: #1e293b; --text-muted: #475569;
+        }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', system-ui, sans-serif;
+            background: var(--bg); color: var(--text-primary);
+            min-height: 100vh; overflow-x: hidden;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.16) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.14) 0%, transparent 65%);
+        }
+        html:not(.dark) .aurora-bg {
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.07) 0%, transparent 65%);
+        }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+        }
+        html:not(.dark) .grid-overlay {
+            background-image:
+                linear-gradient(to right, rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(15, 23, 42, 0.045) 1px, transparent 1px);
+        }
+        .nav-shell { position: sticky; top: 12px; z-index: 50; margin: 12px auto 0; max-width: 1400px; padding: 0 16px; }
+        .nav-inner {
+            background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 18px; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .logo-dot {
+            position: relative; width: 12px; height: 12px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18), 0 0 20px rgba(14, 165, 233, 0.7);
+            flex-shrink: 0;
+        }
+        .logo-dot::before {
+            content: ''; position: absolute; inset: -3px; border-radius: 50%;
+            border: 1px solid rgba(14, 165, 233, 0.5);
+            animation: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes ping { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(2.4); opacity: 0; } }
+        .brand-text {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: 0.18em;
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 40%, #6366f1 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .nav-link {
+            position: relative; color: var(--text-secondary); font-weight: 600;
+            font-size: 0.875rem; padding: 6px 2px; transition: color 0.3s ease;
+            text-decoration: none;
+        }
+        .nav-link:hover { color: var(--accent); }
+        .icon-btn {
+            width: 36px; height: 36px; border-radius: 10px;
+            border: 1px solid var(--card-border); background: transparent; color: var(--accent);
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .icon-btn:hover { background: rgba(14, 165, 233, 0.1); border-color: rgba(14, 165, 233, 0.4); transform: rotate(15deg); }
+        .app-container { max-width: 1400px; margin: 0 auto; padding: 0 16px; }
+
+        /* ============================================
+           REPORT - Main Container
+           ============================================ */
+        .report-actions {
+            display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+            gap: 12px; margin: 24px 0 16px;
+        }
+        .report-actions-title {
+            display: flex; align-items: center; gap: 12px;
+        }
+        .report-actions-icon {
+            width: 42px; height: 42px; border-radius: 12px;
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1rem;
+            box-shadow: 0 8px 20px -6px rgba(14, 165, 233, 0.5);
+        }
+        .report-actions-title h2 { font-size: 1.15rem; font-weight: 900; line-height: 1.2; }
+        .report-actions-title p { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+
+        .report-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+        .rbtn {
+            padding: 9px 16px; border-radius: 10px;
+            font-family: inherit; font-weight: 800; font-size: 0.78rem;
+            cursor: pointer; border: none; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 6px;
+            transition: all 0.25s ease;
+        }
+        .rbtn-filter {
+            background: rgba(245, 158, 11, 0.15); color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        .rbtn-filter:hover { background: rgba(245, 158, 11, 0.25); }
+        .rbtn-filter.active { background: #f59e0b; color: #fff; border-color: transparent; }
+        .rbtn-secondary {
+            background: transparent; color: var(--text-secondary);
+            border: 1px solid var(--card-border);
+        }
+        .rbtn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+        .rbtn-primary {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1); color: #fff;
+            box-shadow: 0 6px 18px -6px rgba(14, 165, 233, 0.5);
+        }
+        .rbtn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 24px -6px rgba(99, 102, 241, 0.6); }
+
+        .report-glass {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-top: 4px solid var(--accent);
+            border-radius: 20px;
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
+            min-height: 842px;
+            margin-bottom: 30px;
+        }
+
+        /* Report header */
+        .report-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            padding-bottom: 12px; margin-bottom: 12px;
+            border-bottom: 2px solid var(--card-border);
+            position: relative; z-index: 10;
+            gap: 16px; flex-wrap: wrap;
+        }
+        .report-header h1 { font-size: 1.4rem; font-weight: 900; margin-bottom: 4px; }
+        .report-header p { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+        .report-header .auditor-line { font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); margin-top: 6px; }
+
+        .score-badge {
+            text-align: center;
+            background: rgba(148, 163, 184, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 10px 18px;
+            min-width: 110px;
+        }
+        .score-badge .pct { font-size: 1.8rem; font-weight: 900; line-height: 1; }
+        .score-badge .pct.good { color: var(--success); }
+        .score-badge .pct.warn { color: var(--warning); }
+        .score-badge .pct.bad { color: var(--danger); }
+        .score-badge .lbl { font-size: 0.58rem; font-weight: 800; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+        /* Basic data */
+        .basic-data {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            padding: 12px 16px;
+            background: rgba(148, 163, 184, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            margin-bottom: 12px;
+            position: relative; z-index: 10;
+        }
+        .data-cell .lbl {
+            font-size: 0.58rem; font-weight: 800;
+            color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.06em; display: block; margin-bottom: 2px;
+        }
+        .data-cell .val {
+            font-size: 0.8rem; font-weight: 900; color: var(--text-primary);
+            display: block; word-break: break-word;
+        }
+        .data-cell.wide { grid-column: span 2; }
+
+        /* Score bar */
+        .score-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 14px;
+            background: rgba(14, 165, 233, 0.05);
+            border: 1px solid rgba(14, 165, 233, 0.2);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            position: relative; z-index: 10;
+        }
+        .score-bar .lbl { font-size: 0.78rem; font-weight: 900; }
+        .score-bar .val { font-size: 1.1rem; font-weight: 900; color: var(--accent); }
+
+        /* Section title */
+        .section-title-bar {
+            margin-bottom: 12px; position: relative; z-index: 10;
+        }
+        .section-title-bar h2 {
+            font-size: 0.95rem; font-weight: 900; display: inline-block;
+            border-bottom: 2px solid var(--accent-2); padding-bottom: 4px;
+        }
+
+        /* ============================================
+           DEPARTMENT / STAFF / FORM
+           ============================================ */
+        .dept-block {
+            border: 2px solid rgba(14, 165, 233, 0.15);
+            background: rgba(148, 163, 184, 0.03);
+            padding: 16px;
+            border-radius: 18px;
+            margin-bottom: 14px;
+            position: relative; z-index: 10;
+        }
+        .dept-block-header {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 12px; padding-bottom: 8px;
+            border-bottom: 2px solid rgba(14, 165, 233, 0.2);
+        }
+        .dept-block-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem;
+        }
+        .dept-block h3 {
+            font-size: 1rem; font-weight: 900; color: var(--text-primary);
+        }
+
+        .staff-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 10px;
+            position: relative; overflow: hidden;
+            page-break-inside: avoid;
+        }
+        .staff-card.perfect { border-color: rgba(16, 185, 129, 0.4); }
+        .staff-card.warning { border-color: rgba(245, 158, 11, 0.4); }
+        .staff-card.bad { border-color: rgba(239, 68, 68, 0.4); }
+
+        .staff-head {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            gap: 10px; padding-bottom: 10px;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 10px;
+        }
+        .staff-head .name {
+            font-size: 0.95rem; font-weight: 900;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .staff-head .name i { color: var(--accent); opacity: 0.7; }
+        .staff-head .role {
+            font-size: 0.62rem; font-weight: 800;
+            color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.08em; margin-top: 2px;
+        }
+        .staff-score { text-align: center; min-width: 75px; }
+        .staff-score .pct { font-size: 1.4rem; font-weight: 900; line-height: 1; }
+        .staff-score .pts { font-size: 0.58rem; font-weight: 800; color: var(--text-muted); margin-top: 2px; }
+
+        .progress-bar-wrap {
+            width: 100%; height: 6px;
+            background: rgba(148, 163, 184, 0.15);
+            border-radius: 999px; overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .progress-bar {
+            height: 100%; border-radius: 999px;
+            transition: width 1s ease;
+        }
+
+        /* Form row */
+        .form-row {
+            padding: 8px 10px;
+            border-bottom: 1px dashed var(--card-border);
+            border-radius: 6px;
+            margin-bottom: 2px;
+        }
+        .form-row:last-child { border-bottom: none; }
+        .form-row:hover { background: rgba(14, 165, 233, 0.04); }
+        .form-row-head {
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 8px; margin-bottom: 3px;
+        }
+        .form-row-title { font-size: 0.78rem; font-weight: 900; color: var(--text-primary); flex: 1; }
+        .score-chip {
+            padding: 2px 10px; border-radius: 999px;
+            font-size: 0.62rem; font-weight: 900;
+            white-space: nowrap;
+        }
+        .score-chip.s2 { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .score-chip.s1 { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .score-chip.s0 { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        .form-row-issues {
+            font-size: 0.7rem; font-weight: 700;
+            color: var(--danger);
+            display: flex; align-items: flex-start; gap: 5px;
+            margin-top: 2px; line-height: 1.5;
+        }
+        .form-row-issues i { margin-top: 2px; flex-shrink: 0; font-size: 0.62rem; }
+        .form-row-notes {
+            font-size: 0.65rem; font-weight: 600;
+            color: var(--text-muted);
+            margin-top: 3px;
+            display: flex; align-items: flex-start; gap: 5px;
+            line-height: 1.4;
+        }
+        .form-row-notes i { margin-top: 2px; flex-shrink: 0; font-size: 0.58rem; }
+        .form-row-perfect-msg {
+            font-size: 0.65rem; font-weight: 800;
+            color: var(--success);
+            display: flex; align-items: center; gap: 5px;
+            margin-top: 2px;
+        }
+
+        /* Signature */
+        .signature-area {
+            margin-top: 24px; padding-top: 16px;
+            border-top: 1px solid var(--card-border);
+            display: flex; justify-content: flex-end;
+            position: relative; z-index: 10;
+            page-break-inside: avoid;
+        }
+        .signature-box {
+            text-align: center; width: 220px;
+        }
+        .signature-box .title {
+            font-size: 0.75rem; font-weight: 900;
+            color: var(--text-primary); margin-bottom: 22px;
+        }
+        .signature-box .line {
+            border-top: 1px solid var(--text-secondary);
+            padding-top: 6px;
+            font-size: 0.7rem; font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+           STAMP OVERLAY
+           ============================================ */
+        .stamp-overlay-container {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.4;
+            overflow: hidden;
+        }
+        .report-stamp-box {
+            transform: rotate(-15deg);
+            font-weight: 900;
+            padding: 2.5rem 4rem;
+            border-radius: 3.5rem;
+            text-align: center;
+            white-space: nowrap;
+            user-select: none;
+            line-height: 1.2;
+        }
+        .stamp-success-box {
+            font-size: 4rem;
+            color: #059669 !important;
+            border: 10px dashed #059669 !important;
+            background-color: rgba(220, 252, 231, 0.85) !important;
+            box-shadow: 0 0 40px rgba(5, 150, 105, 0.3);
+        }
+        .stamp-warning-box {
+            font-size: 3.8rem;
+            color: #dc2626 !important;
+            border: 10px dashed #dc2626 !important;
+            background-color: rgba(254, 226, 226, 0.85) !important;
+            box-shadow: 0 0 40px rgba(220, 38, 38, 0.3);
+        }
+
+        /* ============================================
+           PRINT STYLES - Critical for stamps
+           ============================================ */
+        @media print {
+            @page { size: A4; margin: 8mm 10mm; }
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+            body * { visibility: hidden; }
+            #report-print-area, #report-print-area * { visibility: visible; }
+            #report-print-area {
+                position: absolute;
+                left: 0; top: 0; width: 100%;
+                margin: 0 !important; padding: 16px !important;
+                box-shadow: none !important;
+                border: none !important;
+                border-top: 4px solid #0ea5e9 !important;
+                background-color: #ffffff !important;
+                color: #0f172a !important;
+                min-height: auto !important;
+            }
+            #report-print-area .staff-card,
+            #report-print-area .dept-block,
+            #report-print-area .basic-data,
+            #report-print-area .score-bar {
+                background-color: #f8fafc !important;
+                border-color: #e5e7eb !important;
+                page-break-inside: avoid;
+            }
+            #report-print-area .data-cell .val,
+            #report-print-area h1, #report-print-area h2, #report-print-area h3,
+            #report-print-area .staff-head .name,
+            #report-print-area .form-row-title {
+                color: #0f172a !important;
+            }
+            .no-print { display: none !important; }
+            .print-break-inside-avoid { page-break-inside: avoid !important; }
+
+            /* Force stamps visible with exact color */
+            .stamp-overlay-container {
+                position: fixed !important;
+                top: 0 !important; left: 0 !important;
+                width: 100vw !important; height: 100vh !important;
+                z-index: 9999 !important;
+                opacity: 0.4 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .stamp-success-box {
+                color: #059669 !important;
+                border: 10px dashed #059669 !important;
+                background-color: rgba(220, 252, 231, 0.85) !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .stamp-warning-box {
+                color: #dc2626 !important;
+                border: 10px dashed #dc2626 !important;
+                background-color: rgba(254, 226, 226, 0.85) !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .progress-bar-wrap { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .progress-bar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .score-chip.s2 { background: #dcfce7 !important; color: #15803d !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .score-chip.s1 { background: #fef9c3 !important; color: #a16207 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .score-chip.s0 { background: #fee2e2 !important; color: #b91c1c !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+
+        /* Loading */
+        .loading-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .loading-screen.hide { opacity: 0; pointer-events: none; }
+
+        /* Empty / Error states */
+        .empty-state {
+            text-align: center; padding: 60px 20px;
+            background: var(--card-bg); border: 1px dashed var(--card-border);
+            border-radius: 20px;
+        }
+        .empty-state i { font-size: 2.5rem; color: var(--text-muted); margin-bottom: 12px; display: block; opacity: 0.6; }
+        .empty-state h3 { font-size: 1.1rem; font-weight: 900; margin-bottom: 6px; }
+        .empty-state p { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); }
+
+        /* Footer */
+        .footer-shell {
+            max-width: 1400px; margin: 32px auto 24px; padding: 22px 20px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 20px; text-align: center;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        }
+        .footer-brand {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            letter-spacing: 0.35em; font-size: 0.75rem;
+            background: linear-gradient(135deg, #22d3ee, #6366f1);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .footer-text { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+        .credit-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-weight: 800; font-size: 0.7rem; }
+        .credit-indigo { color: #a5b4fc; background: rgba(99, 102, 241, 0.12); }
+        .credit-teal { color: #5eead4; background: rgba(20, 184, 166, 0.12); }
+        html:not(.dark) .credit-indigo { color: #4338ca; background: rgba(99, 102, 241, 0.16); }
+        html:not(.dark) .credit-teal { color: #0f766e; background: rgba(20, 184, 166, 0.16); }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4));
+            border-radius: 10px; border: 2px solid var(--bg);
+        }
+    </style>
+    <link rel="stylesheet" href="../theme-overrides.css" />
+</head>
+<body>
+
+    <div class="loading-screen" id="loadingScreen">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري تحميل التقرير...</p>
+    </div>
+
+    <div class="aurora-bg"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="nav-shell no-print">
+        <header class="nav-inner">
+            <div class="flex items-center gap-3">
+                <div class="logo-dot"></div>
+                <div>
+                    <a href="../dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
+                </div>
+            </div>
+            <nav class="hidden md:flex items-center gap-7">
+                <a href="../dashboard.html" class="nav-link">لوحة التحكم</a>
+                <a href="../about.html" class="nav-link">عن النظام</a>
+                <a href="../security.html" class="nav-link">درع VEXORIS</a>
+                <a href="../courses.html" class="nav-link">دورات تدريبية</a>
+                <a href="../feedback.html" class="nav-link">رأيك يهمنا</a>
+            </nav>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </button>
+                <a href="../dashboard.html" style="padding: 8px 16px; border-radius: 10px; background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    رجوع
+                </a>
+            </div>
+        </header>
+    </div>
+
+    <main class="app-container">
+
+        <!-- ACTIONS BAR -->
+        <div class="report-actions no-print">
+            <div class="report-actions-title">
+                <div class="report-actions-icon"><i class="fa-solid fa-file-contract"></i></div>
+                <div>
+                    <h2>تقرير المراجعة</h2>
+                    <p>Report Viewer · Master Data Sync</p>
+                </div>
+            </div>
+            <div class="report-btns">
+                <button id="btn_toggle_issues" class="rbtn rbtn-filter" onclick="toggleIssuesOnly()">
+                    <i class="fa-solid fa-filter"></i>
+                    <span id="lbl_toggle_issues">عرض المخالفات فقط</span>
+                </button>
+                <a href="./medical-audit.html" class="rbtn rbtn-secondary">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    تقييم جديد
+                </a>
+                <button onclick="window.print()" class="rbtn rbtn-primary">
+                    <i class="fa-solid fa-print"></i>
+                    طباعة
+                </button>
+            </div>
+        </div>
+
+        <!-- REPORT AREA -->
+        <div id="report-print-area" class="report-glass">
+
+            <!-- STAMP OVERLAY (visible only when needed) -->
+            <div id="stamp_container" class="stamp-overlay-container" style="display: none;">
+                <div id="stamp_success" class="report-stamp-box stamp-success-box" style="display: none;">
+                    ملف مطابق بالكامل<br>
+                    <span style="font-size: 2rem; letter-spacing: normal; font-weight: 900; display: block; margin-top: 8px;">FULLY COMPLIANT</span>
+                </div>
+                <div id="stamp_warning" class="report-stamp-box stamp-warning-box" style="display: none;">
+                    ملف يحتاج للمراجعة<br>
+                    <span style="font-size: 1.8rem; letter-spacing: normal; font-weight: 900; display: block; margin-top: 8px;">REQUIRES REVIEW</span>
+                </div>
+            </div>
+
+            <!-- HEADER -->
+            <div class="report-header">
+                <div>
+                    <h1>تقرير مراجعة الملف</h1>
+                    <p>إدارة السجلات الطبية</p>
+                    <div class="auditor-line" id="rep_auditor">القائم بالمراجعة: جاري التحميل...</div>
+                </div>
+                <div class="score-badge">
+                    <div class="pct" id="rep_score_pct">0%</div>
+                    <div class="lbl">نسبة مطابقة الملف</div>
+                </div>
+            </div>
+
+            <!-- BASIC DATA -->
+            <div class="basic-data">
+                <div class="data-cell wide">
+                    <span class="lbl">اسم المريض</span>
+                    <span class="val" id="rep_patientName">--</span>
+                </div>
+                <div class="data-cell">
+                    <span class="lbl">الرقم الطبي</span>
+                    <span class="val" id="rep_medicalId" style="font-family: 'Space Grotesk', monospace;">--</span>
+                </div>
+                <div class="data-cell">
+                    <span class="lbl">رقم الزيارة</span>
+                    <span class="val" id="rep_visitNum" style="font-family: 'Space Grotesk', monospace;">--</span>
+                </div>
+                <div class="data-cell">
+                    <span class="lbl">تاريخ الدخول</span>
+                    <span class="val" id="rep_adminDate">--</span>
+                </div>
+                <div class="data-cell">
+                    <span class="lbl">تاريخ الخروج</span>
+                    <span class="val" id="rep_disDate">--</span>
+                </div>
+                <div class="data-cell">
+                    <span class="lbl">الاستشاري</span>
+                    <span class="val" id="rep_consultant">--</span>
+                </div>
+                <div class="data-cell wide">
+                    <span class="lbl">التخصصات</span>
+                    <span class="val" id="rep_specialties">--</span>
+                </div>
+            </div>
+
+            <!-- SCORE BAR -->
+            <div class="score-bar">
+                <span class="lbl">نقاط مطابقة الملف:</span>
+                <span class="val" id="rep_total_score_text">0 / 0</span>
+            </div>
+
+            <!-- SECTION TITLE -->
+            <div class="section-title-bar">
+                <h2>تفاصيل المراجعة مرتبة حسب الأقسام والأطباء</h2>
+            </div>
+
+            <!-- DETAILS CONTAINER -->
+            <div id="rep_details">
+                <div style="text-align: center; padding: 40px;">
+                    <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--accent);"></i>
+                </div>
+            </div>
+
+            <!-- SIGNATURE -->
+            <div class="signature-area">
+                <div class="signature-box">
+                    <div class="title">مدير إدارة السجلات الطبية</div>
+                    <div class="line">أ/ نادية عادل أحمد</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer-shell no-print">
+        <div class="footer-brand">VEXORIS SYSTEM</div>
+        <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+        <div class="footer-text">
+            تم برمجة النظام وتنفيذه بواسطة
+            <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+            <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+            <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+        </div>
+    </footer>
+
+    <script src="../notify.js"></script>
+
+    <script type="module">
+        import { supabase } from '../supabase-client.js';
+        import { logAudit, AUDIT } from '../audit-log.js';
+        import { ERROR_TRANSLATIONS } from './js/medical-audit-config.js';
+
+        let showIssuesOnlyState = false;
+        let currentReview = null;
+
+        window.toggleTheme = function() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        };
+
+        // ============================================
+        // HELPERS
+        // ============================================
+        function safeParse(s) {
+            if (!s) return [];
+            if (Array.isArray(s)) return s;
+            try {
+                let p = JSON.parse(s);
+                if (typeof p === 'string') p = JSON.parse(p);
+                return Array.isArray(p) ? p : [];
+            } catch(e) { return []; }
+        }
+
+        function getUnitPoints(scoreVal) {
+            if (scoreVal === 'Score 2' || scoreVal === 'مطابق') return 2;
+            if (scoreVal === 'Score 1' || scoreVal === 'مطابق جزئي') return 1;
+            if (scoreVal === 'Score 0' || scoreVal === 'غير مطابق') return 0;
+            return null;
+        }
+
+        function normalizeDepartmentName(deptName) {
+            if (!deptName) return 'القسم الطبي العام';
+            let clean = deptName.trim()
+                .replace(/^(قسم|مستشفى|وحدة|إدارة)\s+/g, '')
+                .replace(/^ال/g, '')
+                .trim();
+
+            if (clean.includes('أطفال') || clean.includes('اطفال')) return 'قسم الأطفال';
+            if (clean.includes('جراحة') || clean.includes('جراحى')) return 'قسم الجراحة';
+            if (clean.includes('باطنة') || clean.includes('باطنيه')) return 'قسم الباطنة';
+            if (clean.includes('تخدير') || clean.includes('تخديرى')) return 'قسم التخدير';
+            if (clean.includes('تمريض')) return 'التمريض';
+            if (clean.includes('عمليات')) return 'قسم العمليات';
+            if (clean.includes('رعاية') || clean.includes('icu')) return 'قسم العناية المركزة (ICU)';
+            if (clean.includes('صيدلي')) return 'قسم الصيدلة الإكلينيكية';
+            if (clean.includes('إداري') || clean.includes('إدارة') || clean.includes('إداريه') || clean.includes('اداري')) return 'الاداريين';
+            return deptName.trim();
+        }
+
+        // ============================================
+        // FETCH DATA
+        // ============================================
+        async function fetchDoctorsMapping() {
+            try {
+                const { data, error } = await supabase
+                    .from('doctors')
+                    .select('name, specialty, department')
+                    .eq('is_active', true);
+                if (error || !data) return {};
+                const mapping = {};
+                data.forEach(d => {
+                    if (d.name) {
+                        mapping[d.name] = {
+                            specialty: d.specialty || 'غير محدد',
+                            department: d.department ? d.department.trim() : 'القسم الطبي العام'
+                        };
+                    }
+                });
+                return mapping;
+            } catch (e) {
+                console.warn('Failed to fetch doctors:', e);
+                return {};
+            }
+        }
+
+        // ============================================
+        // DETERMINE ROLE / DEPARTMENT
+        // ============================================
+        function getDoctorDepartmentAndRole(u, card, generalSpecialty, doctorsMapping) {
+            const name = (u.person || u.otherName || '').trim();
+            const role = (u.role || '').toLowerCase().trim();
+            const roleOriginal = (u.role || '').trim();
+            const formName = (card.text || card.question || '').trim();
+
+            if (role.includes('admin') || role.includes('اداري') || role.includes('إداري')) {
+                return { deptName: 'الاداريين', roleType: roleOriginal || 'إداري' };
+            }
+            if (role.includes('nurse') || role.includes('تمريض') || formName.includes('تمريض') || formName.includes('Nursing')) {
+                return { deptName: 'التمريض', roleType: roleOriginal || 'تمريض' };
+            }
+            if (role.includes('pharmacist') || role.includes('صيدلي') || formName.includes('صيدلي')) {
+                return { deptName: 'قسم الصيدلة الإكلينيكية', roleType: roleOriginal || 'صيدلي' };
+            }
+            if (doctorsMapping[name] && doctorsMapping[name].department) {
+                return {
+                    deptName: doctorsMapping[name].department,
+                    roleType: doctorsMapping[name].specialty || roleOriginal || 'طبيب'
+                };
+            }
+            if (role.includes('تخدير') || formName.includes('تخدير')) {
+                return { deptName: 'قسم التخدير', roleType: roleOriginal || 'طبيب تخدير' };
+            }
+            if (role.includes('doctor') || role.includes('طبيب') || role.includes('اخصائي') || role.includes('استشاري') || role.includes('جراح')) {
+                let targetDept = (generalSpecialty && generalSpecialty !== 'عام' && generalSpecialty !== '--')
+                    ? ('قسم ' + generalSpecialty) : 'القسم الطبي العام';
+                return { deptName: targetDept, roleType: roleOriginal || 'طبيب' };
+            }
+
+            let fallbackDept = (generalSpecialty && generalSpecialty !== 'عام' && generalSpecialty !== '--')
+                ? ('قسم ' + generalSpecialty) : 'القسم الطبي العام';
+            return { deptName: fallbackDept, roleType: roleOriginal || 'طبيب' };
+        }
+
+        // ============================================
+        // TOGGLE ISSUES ONLY
+        // ============================================
+        window.toggleIssuesOnly = function() {
+            showIssuesOnlyState = !showIssuesOnlyState;
+            const btnLbl = document.getElementById('lbl_toggle_issues');
+            const btn = document.getElementById('btn_toggle_issues');
+
+            if (showIssuesOnlyState) {
+                btnLbl.innerText = 'عرض كل النماذج';
+                btn.classList.add('active');
+            } else {
+                btnLbl.innerText = 'عرض المخالفات فقط';
+                btn.classList.remove('active');
+            }
+
+            const cards = document.querySelectorAll('.staff-card-item');
+            cards.forEach(card => {
+                const hasIssue = card.getAttribute('data-has-issue') === 'true';
+                const perfectRows = card.querySelectorAll('.form-row-perfect');
+
+                if (showIssuesOnlyState) {
+                    perfectRows.forEach(row => row.style.display = 'none');
+                    card.style.display = hasIssue ? 'block' : 'none';
+                } else {
+                    perfectRows.forEach(row => row.style.display = 'block');
+                    card.style.display = 'block';
+                }
+            });
+
+            const deptContainers = document.querySelectorAll('.dept-block-container');
+            deptContainers.forEach(deptBox => {
+                if (showIssuesOnlyState) {
+                    const visible = deptBox.querySelectorAll('.staff-card-item[style*="display: block"]');
+                    deptBox.style.display = visible.length === 0 ? 'none' : 'block';
+                } else {
+                    deptBox.style.display = 'block';
+                }
+            });
+        };
+
+        // ============================================
+        // BUILD REPORT VIEW
+        // ============================================
+        function buildReportView(data, doctorsMapping) {
+            document.getElementById('rep_patientName').innerText = data.patient_name || '--';
+            document.getElementById('rep_medicalId').innerText = data.medical_id || '--';
+            document.getElementById('rep_visitNum').innerText = data.visit_number || '--';
+            document.getElementById('rep_adminDate').innerText = data.admission_date || '--';
+            document.getElementById('rep_disDate').innerText = data.discharge_date || '--';
+            document.getElementById('rep_consultant').innerText = data.consultant || '--';
+            document.getElementById('rep_specialties').innerText = data.specialties || '--';
+            document.getElementById('rep_auditor').innerText = 'القائم بالمراجعة: ' + (data.reviewer_name || '--');
+
+            let departmentsMap = {};
+            let grandTotalEarned = 0;
+            let grandTotalMax = 0;
+
+            function addRecord(rawDeptName, roleType, name, formName, scoreVal, issues, notes) {
+                const pt = getUnitPoints(scoreVal);
+                if (pt === null) return;
+                const deptName = normalizeDepartmentName(rawDeptName);
+
+                if (!departmentsMap[deptName]) {
+                    departmentsMap[deptName] = { deptName, staff: {} };
+                }
+                if (!departmentsMap[deptName].staff[name]) {
+                    departmentsMap[deptName].staff[name] = { name, role: roleType, earned: 0, max: 0, forms: [] };
+                }
+
+                departmentsMap[deptName].staff[name].earned += pt;
+                departmentsMap[deptName].staff[name].max += 2;
+                departmentsMap[deptName].staff[name].forms.push({ formName, score: pt, issues, notes });
+            }
+
+            // 1. Administrative / Ward
+            const savedWard = safeParse(data.ward_questions);
+            savedWard.forEach(w => {
+                const name = w.clerk || 'مدخل غير محدد';
+                const formName = 'القسم الإداري (' + (w.qId || w.q) + ')';
+                let noteStr = Array.isArray(w.notes) ? w.notes.join(' / ') : (w.note || '');
+                addRecord('الاداريين', 'إداري', name, formName, w.score, [], noteStr);
+            });
+
+            // 2. Audit questions
+            const savedAudit = safeParse(data.audit_questions);
+            savedAudit.forEach(card => {
+                const formName = (card.text || card.question || '').trim();
+                const units = Array.isArray(card.data) ? card.data : [];
+                units.forEach(u => {
+                    const name = u.person || u.otherName || u.role || 'غير محدد';
+                    const info = getDoctorDepartmentAndRole(u, card, data.specialties, doctorsMapping);
+
+                    let issuesArr = typeof u.issues === 'string' ? u.issues.split(',').filter(s => s) : (Array.isArray(u.issues) ? u.issues : []);
+                    let noteStr = Array.isArray(u.notes) ? u.notes.join(' / ') : (u.note || '');
+                    if (u.noteS2) noteStr += (noteStr ? ' | ' : '') + 'توضيح: ' + u.noteS2;
+
+                    addRecord(info.deptName, info.roleType, name, formName, u.score, issuesArr, noteStr);
+                });
+            });
+
+            let departmentsArray = Object.values(departmentsMap);
+
+            departmentsArray.sort((a, b) => {
+                if (a.deptName === 'الاداريين') return 1;
+                if (b.deptName === 'الاداريين') return -1;
+                if (a.deptName === 'التمريض') return 1;
+                if (b.deptName === 'التمريض') return -1;
+                return 0;
+            });
+
+            let detailsHtml = '';
+
+            departmentsArray.forEach(dept => {
+                let staffArray = Object.values(dept.staff);
+
+                staffArray.forEach(p => {
+                    p.percentage = p.max > 0 ? Math.round((p.earned / p.max) * 100) : 0;
+                    grandTotalEarned += p.earned;
+                    grandTotalMax += p.max;
+                });
+
+                staffArray.sort((a, b) => a.percentage - b.percentage);
+
+                let staffCardsHtml = staffArray.map(p => {
+                    let colorClass = p.percentage >= 80 ? 'var(--success)' : (p.percentage >= 50 ? 'var(--warning)' : 'var(--danger)');
+                    let cardClass = p.percentage >= 80 ? 'perfect' : (p.percentage >= 50 ? 'warning' : 'bad');
+                    let iconClass = p.role === 'إداري' ? 'fa-desktop' : (p.role === 'تمريض' ? 'fa-user-nurse' : 'fa-user-doctor');
+
+                    let personHasIssues = false;
+
+                    let formsHtml = p.forms.map(f => {
+                        let scoreClass = f.score === 2 ? 's2' : (f.score === 1 ? 's1' : 's0');
+                        let translatedIssues = f.issues.map(iss => ERROR_TRANSLATIONS[iss.trim()] || iss.trim());
+                        let issuesHtml = '';
+                        let isPerfectRow = false;
+
+                        if (f.score === 2 && translatedIssues.length === 0) {
+                            isPerfectRow = true;
+                            issuesHtml = '<div class="form-row-perfect-msg"><i class="fa-solid fa-circle-check"></i> نموذج مطابق</div>';
+                        } else if (translatedIssues.length > 0) {
+                            personHasIssues = true;
+                            issuesHtml = `<div class="form-row-issues"><i class="fa-solid fa-circle-exclamation"></i> <span><strong>الأخطاء:</strong> ${translatedIssues.join(' ، ')}</span></div>`;
+                        }
+
+                        let noteHtml = f.notes ? `<div class="form-row-notes"><i class="fa-solid fa-circle-info"></i> <span>${f.notes}</span></div>` : '';
+
+                        let rowClass = isPerfectRow ? 'form-row-perfect' : 'form-row-issue';
+
+                        return `<div class="form-row ${rowClass}">
+                            <div class="form-row-head">
+                                <span class="form-row-title">${f.formName}</span>
+                                <span class="score-chip ${scoreClass}">${f.score} / 2</span>
+                            </div>
+                            ${issuesHtml}
+                            ${noteHtml}
+                        </div>`;
+                    }).join('');
+
+                    return `<div class="staff-card ${cardClass} staff-card-item" data-has-issue="${personHasIssues ? 'true' : 'false'}">
+                        <div class="staff-head">
+                            <div>
+                                <div class="name"><i class="fa-solid ${iconClass}"></i> ${p.name}</div>
+                                <div class="role">${p.role || 'طاقم المستشفى'}</div>
+                            </div>
+                            <div class="staff-score">
+                                <div class="pct" style="color: ${colorClass};">${p.percentage}%</div>
+                                <div class="pts">${p.earned} من ${p.max}</div>
+                            </div>
+                        </div>
+                        <div class="progress-bar-wrap">
+                            <div class="progress-bar" style="width: ${p.percentage}%; background: ${colorClass};"></div>
+                        </div>
+                        <div>${formsHtml}</div>
+                    </div>`;
+                }).join('');
+
+                detailsHtml += `<div class="dept-block dept-block-container">
+                    <div class="dept-block-header">
+                        <div class="dept-block-icon"><i class="fa-solid fa-hospital-user"></i></div>
+                        <h3>${dept.deptName}</h3>
+                    </div>
+                    ${staffCardsHtml}
+                </div>`;
+            });
+
+            const finalPercentage = grandTotalMax > 0 ? Math.round((grandTotalEarned / grandTotalMax) * 100) : 0;
+            const pctEl = document.getElementById('rep_score_pct');
+            pctEl.innerText = finalPercentage + '%';
+            pctEl.className = 'pct ' + (finalPercentage < 50 ? 'bad' : (finalPercentage < 80 ? 'warn' : 'good'));
+
+            // Stamp logic
+            const stampContainer = document.getElementById('stamp_container');
+            const stampSuccess = document.getElementById('stamp_success');
+            const stampWarning = document.getElementById('stamp_warning');
+
+            if (finalPercentage === 100) {
+                stampContainer.style.display = 'flex';
+                stampSuccess.style.display = 'block';
+                stampWarning.style.display = 'none';
+            } else if (finalPercentage < 95) {
+                stampContainer.style.display = 'flex';
+                stampWarning.style.display = 'block';
+                stampSuccess.style.display = 'none';
+            } else {
+                stampContainer.style.display = 'none';
+                stampSuccess.style.display = 'none';
+                stampWarning.style.display = 'none';
+            }
+
+            document.getElementById('rep_total_score_text').innerText = grandTotalEarned + ' / ' + grandTotalMax;
+
+            const detailsEl = document.getElementById('rep_details');
+            if (detailsHtml) {
+                detailsEl.innerHTML = detailsHtml;
+            } else {
+                detailsEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted); font-weight: 800; border: 2px dashed var(--card-border); border-radius: 14px;">لا توجد بيانات تقييم صالحة لعرضها.</div>';
+            }
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        (async () => {
+            try {
+                // 1. Auth check
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    window.location.href = '../login.html';
+                    return;
+                }
+
+                const { data: profile } = await supabase
+                    .from('profiles').select('role, display_name, is_active')
+                    .eq('id', session.user.id).single();
+
+                if (!profile || profile.is_active === false) {
+                    window.location.href = '../login.html';
+                    return;
+                }
+
+                // 2. URL params
+                const urlParams = new URLSearchParams(window.location.search);
+                const reportId = urlParams.get('reportId');
+                const visit = urlParams.get('visit') || '';
+
+                if (!reportId) {
+                    document.getElementById('rep_details').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fa-solid fa-triangle-exclamation" style="color: var(--warning);"></i>
+                            <h3>بيانات مفقودة</h3>
+                            <p>رقم الملف مفقود من الرابط. يرجى العودة لصفحة المراجعة.</p>
+                        </div>`;
+                    document.getElementById('loadingScreen').classList.add('hide');
+                    return;
+                }
+
+                // 3. Fetch review + doctors mapping
+                let query = supabase
+                    .from('medical_file_reviews')
+                    .select('*')
+                    .eq('medical_id', reportId);
+                if (visit) query = query.eq('visit_number', visit);
+
+                const [reviewRes, doctorsMapping] = await Promise.all([
+                    query.order('updated_at', { ascending: false }).limit(1).maybeSingle(),
+                    fetchDoctorsMapping()
+                ]);
+
+                if (reviewRes.error) throw reviewRes.error;
+
+                if (!reviewRes.data) {
+                    document.getElementById('rep_details').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fa-solid fa-file-circle-xmark" style="color: var(--danger);"></i>
+                            <h3>لا يوجد تقرير</h3>
+                            <p>لم يتم العثور على تقرير لهذا الملف/الزيارة.</p>
+                        </div>`;
+                    document.getElementById('loadingScreen').classList.add('hide');
+                    return;
+                }
+
+                currentReview = reviewRes.data;
+
+                // 4. Show partial warning if applicable
+                if (currentReview.is_partial) {
+                    showNotification('تحذير: هذا تقرير مسودة (لم يتم اعتماده نهائياً بعد)', 'warning', '', 6000);
+                }
+
+                // 5. Build report
+                buildReportView(currentReview, doctorsMapping);
+
+                // 6. Log audit
+                await logAudit('medical_report_viewed', {
+                    entityType: 'medical_file',
+                    entityId: `${reportId}/${visit || 'any'}`,
+                    description: 'عرض تقرير مراجعة ملف طبي',
+                    severity: 'info'
+                });
+
+                document.getElementById('loadingScreen').classList.add('hide');
+
+            } catch (err) {
+                console.error('Report load error:', err);
+                document.getElementById('rep_details').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-circle-xmark" style="color: var(--danger);"></i>
+                        <h3>فشل تحميل التقرير</h3>
+                        <p>${err.message || 'حدث خطأ غير متوقع'}</p>
+                    </div>`;
+                document.getElementById('loadingScreen').classList.add('hide');
+            }
+        })();
+    </script>
+
+    <script type="module" src="../session-manager.js"></script>
+</body>
+</html>
