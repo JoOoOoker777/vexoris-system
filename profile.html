@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الشخصي | VEXORIS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+      if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg: #04070f; --card-bg: rgba(15, 23, 42, 0.55);
+            --card-border: rgba(148, 163, 184, 0.12);
+            --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+            --accent: #0ea5e9; --accent-2: #6366f1; --accent-3: #8b5cf6;
+            --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+        }
+        html:not(.dark) {
+            --bg: #f5f8fc; --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(148, 163, 184, 0.28);
+            --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #64748b;
+        }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', system-ui, sans-serif;
+            background: var(--bg); color: var(--text-primary);
+            min-height: 100vh; overflow-x: hidden;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.16) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.14) 0%, transparent 65%);
+        }
+        html:not(.dark) .aurora-bg {
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.07) 0%, transparent 65%);
+        }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+        }
+        .nav-shell { position: sticky; top: 12px; z-index: 50; margin: 12px auto 0; max-width: 1000px; padding: 0 16px; }
+        .nav-inner {
+            background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 18px; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .logo-dot {
+            position: relative; width: 12px; height: 12px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18), 0 0 20px rgba(14, 165, 233, 0.7);
+            flex-shrink: 0;
+        }
+        .logo-dot::before {
+            content: ''; position: absolute; inset: -3px; border-radius: 50%;
+            border: 1px solid rgba(14, 165, 233, 0.5);
+            animation: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes ping { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(2.4); opacity: 0; } }
+        .brand-text {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: 0.18em;
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 40%, #6366f1 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .icon-btn {
+            width: 36px; height: 36px; border-radius: 10px;
+            border: 1px solid var(--card-border); background: transparent; color: var(--accent);
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .icon-btn:hover { background: rgba(14, 165, 233, 0.1); border-color: rgba(14, 165, 233, 0.4); transform: rotate(15deg); }
+        .app-container { max-width: 1000px; margin: 0 auto; padding: 0 16px; }
+
+        /* ===== HERO ===== */
+        .profile-hero {
+            margin-top: 28px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(99, 102, 241, 0.05) 50%, rgba(139, 92, 246, 0.08) 100%);
+            border: 1px solid rgba(14, 165, 233, 0.22);
+            border-radius: 24px; padding: 32px 36px;
+            display: flex; align-items: center; gap: 24px;
+            position: relative; overflow: hidden;
+        }
+        .profile-hero::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, #0ea5e9, #6366f1, transparent);
+        }
+        .hero-avatar {
+            width: 90px; height: 90px; border-radius: 22px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.4rem; color: #fff;
+            flex-shrink: 0; position: relative; overflow: hidden;
+            box-shadow: 0 12px 32px -8px rgba(0,0,0,0.5);
+        }
+        .hero-avatar i {
+            position: relative; z-index: 2;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+        }
+        .hero-avatar::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%);
+            background-size: 200% 100%;
+            animation: shine 4s infinite;
+            z-index: 1;
+        }
+        @keyframes shine { 0% { background-position: -200% 0; } 50%, 100% { background-position: 200% 0; } }
+        .hero-info { flex: 1; }
+        .hero-name { font-size: 1.8rem; font-weight: 900; margin-bottom: 6px; letter-spacing: -0.02em; }
+        .hero-username { font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; color: var(--text-muted); direction: ltr; text-align: right; margin-bottom: 12px; }
+        .hero-role-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 8px;
+            font-size: 0.78rem; font-weight: 800;
+        }
+
+        /* ===== SECTIONS ===== */
+        .profile-section {
+            margin-top: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .section-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--card-border);
+            display: flex; align-items: center; gap: 12px;
+        }
+        .section-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; flex-shrink: 0;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(99, 102, 241, 0.18));
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            color: var(--accent);
+        }
+        .section-title { font-size: 1rem; font-weight: 900; }
+        .section-desc { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+        .section-body { padding: 24px; }
+
+        /* ===== FORM ===== */
+        .form-grid {
+            display: grid; grid-template-columns: 1fr; gap: 16px;
+        }
+        @media (min-width: 640px) { .form-grid { grid-template-columns: 1fr 1fr; } }
+        .form-field { display: flex; flex-direction: column; gap: 6px; }
+        .form-field.full { grid-column: 1 / -1; }
+        .form-field label {
+            font-size: 0.75rem; font-weight: 800;
+            color: var(--text-secondary);
+        }
+        .form-field label .req { color: var(--danger); margin-inline-start: 3px; }
+        .form-field input {
+            width: 100%; padding: 11px 14px;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.85rem; font-weight: 600; font-family: inherit;
+            transition: all 0.2s ease;
+        }
+        html:not(.dark) .form-field input { background: rgba(255, 255, 255, 0.7); }
+        .form-field input:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+        }
+        .form-field input:disabled { opacity: 0.5; cursor: not-allowed; }
+        .form-field .hint {
+            font-size: 0.68rem; font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .btn {
+            padding: 11px 22px; border-radius: 10px;
+            font-family: inherit; font-weight: 800; font-size: 0.82rem;
+            cursor: pointer; transition: all 0.25s ease; border: none;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            color: #fff;
+            box-shadow: 0 6px 18px -6px rgba(14, 165, 233, 0.5);
+        }
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px -6px rgba(99, 102, 241, 0.6);
+        }
+        .btn-secondary {
+            background: transparent; border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+        }
+        .btn-secondary:hover { border-color: var(--text-secondary); background: rgba(148, 163, 184, 0.08); }
+        .btn-danger {
+            background: transparent; border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+        .btn-danger:hover { background: rgba(239, 68, 68, 0.1); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .form-actions {
+            margin-top: 18px; padding-top: 18px;
+            border-top: 1px solid var(--card-border);
+            display: flex; justify-content: flex-end; gap: 10px;
+        }
+
+        /* ===== STATUS PILLS ===== */
+        .status-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 0; border-bottom: 1px solid var(--card-border);
+        }
+        .status-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .status-row:first-child { padding-top: 0; }
+        .status-label { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); }
+        .status-desc { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); margin-top: 2px; }
+        .status-pill {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 12px; border-radius: 6px;
+            font-size: 0.72rem; font-weight: 800;
+        }
+        .status-pill.on { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-pill.off { background: rgba(148, 163, 184, 0.15); color: var(--text-muted); border: 1px solid var(--card-border); }
+        .status-pill.warn { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+        /* ===== DEVICES ===== */
+        .device-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 16px;
+            background: rgba(15, 23, 42, 0.3);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            transition: all 0.2s ease;
+        }
+        html:not(.dark) .device-item { background: rgba(248, 250, 252, 0.6); }
+        .device-item:hover { border-color: var(--accent); }
+        .device-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: rgba(14, 165, 233, 0.1);
+            border: 1px solid rgba(14, 165, 233, 0.25);
+            color: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; flex-shrink: 0;
+        }
+        .device-info { flex: 1; min-width: 0; }
+        .device-name { font-size: 0.85rem; font-weight: 800; color: var(--text-primary); margin-bottom: 2px; }
+        .device-meta { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); }
+        .device-revoke {
+            padding: 6px 12px; border-radius: 7px;
+            background: transparent; border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171; font-size: 0.72rem; font-weight: 800;
+            cursor: pointer; font-family: inherit;
+            transition: all 0.2s ease;
+        }
+        .device-revoke:hover { background: rgba(239, 68, 68, 0.1); border-color: #ef4444; }
+
+        /* ===== ACTIVITY ===== */
+        .activity-item {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px dashed var(--card-border);
+        }
+        .activity-item:last-child { border-bottom: none; }
+        .activity-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .activity-content { flex: 1; min-width: 0; }
+        .activity-title { font-size: 0.82rem; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+        .activity-time { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); font-family: 'Space Grotesk', monospace; }
+
+        /* ===== LOADING ===== */
+        .loading-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .loading-screen.hide { opacity: 0; pointer-events: none; }
+
+        /* ===== FOOTER ===== */
+        .footer-shell {
+            max-width: 1000px; margin: 32px auto 24px; padding: 22px 20px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 20px; text-align: center;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        }
+        .footer-brand {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            letter-spacing: 0.35em; font-size: 0.75rem;
+            background: linear-gradient(135deg, #22d3ee, #6366f1);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .footer-text { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+        .credit-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-weight: 800; font-size: 0.7rem; }
+        .credit-indigo { color: #a5b4fc; background: rgba(99, 102, 241, 0.12); }
+        .credit-teal { color: #5eead4; background: rgba(20, 184, 166, 0.12); }
+        html:not(.dark) .credit-indigo { color: #4338ca; background: rgba(99, 102, 241, 0.16); }
+        html:not(.dark) .credit-teal { color: #0f766e; background: rgba(20, 184, 166, 0.16); }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4));
+            border-radius: 10px; border: 2px solid var(--bg);
+        }
+    </style>
+    <link rel="stylesheet" href="./theme-overrides.css" />
+</head>
+<body>
+
+    <div class="loading-screen" id="loadingScreen">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري التحميل...</p>
+    </div>
+
+    <div class="aurora-bg"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="nav-shell">
+        <header class="nav-inner">
+            <div class="flex items-center gap-3">
+                <div class="logo-dot"></div>
+                <div>
+                    <a href="dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </button>
+                <a href="dashboard.html" style="padding: 8px 16px; border-radius: 10px; background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    رجوع
+                </a>
+            </div>
+        </header>
+    </div>
+
+    <main class="app-container">
+
+        <!-- HERO -->
+        <section class="profile-hero">
+            <div class="hero-avatar" id="heroAvatar"></div>
+            <div class="hero-info">
+                <h1 class="hero-name" id="heroName">...</h1>
+                <div class="hero-username" id="heroUsername">@...</div>
+                <div id="heroRoleBadge"></div>
+            </div>
+        </section>
+
+        <!-- PERSONAL INFO -->
+        <section class="profile-section">
+            <div class="section-header">
+                <div class="section-icon"><i class="fa-solid fa-user"></i></div>
+                <div>
+                    <div class="section-title">المعلومات الشخصية</div>
+                    <div class="section-desc">حدّث بياناتك الشخصية</div>
+                </div>
+            </div>
+            <div class="section-body">
+                <form id="personalInfoForm">
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label>الاسم المعروض</label>
+                            <input type="text" id="fieldDisplayName" placeholder="اسمك الكامل" />
+                        </div>
+                        <div class="form-field">
+                            <label>القسم / الإدارة</label>
+                            <input type="text" id="fieldDepartment" placeholder="القسم الذي تعمل به" />
+                        </div>
+                        <div class="form-field full">
+                            <label>رقم الهاتف</label>
+                            <input type="tel" id="fieldPhone" placeholder="01xxxxxxxxx" />
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="savePersonalBtn">
+                            <i class="fa-solid fa-check"></i>
+                            حفظ التغييرات
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- ACCOUNT SECURITY -->
+        <section class="profile-section">
+            <div class="section-header">
+                <div class="section-icon"><i class="fa-solid fa-lock"></i></div>
+                <div>
+                    <div class="section-title">أمان الحساب</div>
+                    <div class="section-desc">إدارة البريد الإلكتروني وكلمة المرور</div>
+                </div>
+            </div>
+            <div class="section-body">
+                <!-- Email Change -->
+                <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px dashed var(--card-border);">
+                    <label style="font-size:0.85rem; font-weight:800; color: var(--text-primary); display:block; margin-bottom:6px;">البريد الإلكتروني</label>
+                    <div class="form-grid">
+                        <div class="form-field full">
+                            <input type="email" id="fieldEmail" placeholder="name@example.com" style="direction: ltr; text-align: right;" />
+                            <div class="hint">ستحتاج لتأكيد البريد الجديد عبر رابط يُرسل إليه</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; text-align: left;">
+                        <button class="btn btn-secondary" id="changeEmailBtn">
+                            <i class="fa-solid fa-envelope"></i>
+                            تغيير البريد الإلكتروني
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Password Change -->
+                <div>
+                    <label style="font-size:0.85rem; font-weight:800; color: var(--text-primary); display:block; margin-bottom:6px;">كلمة المرور</label>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label>كلمة المرور الجديدة <span class="req">*</span></label>
+                            <input type="password" id="newPassword" placeholder="••••••••" autocomplete="new-password" />
+                        </div>
+                        <div class="form-field">
+                            <label>تأكيد كلمة المرور <span class="req">*</span></label>
+                            <input type="password" id="confirmPassword" placeholder="••••••••" autocomplete="new-password" />
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; text-align: left;">
+                        <button class="btn btn-secondary" id="changePasswordBtn">
+                            <i class="fa-solid fa-key"></i>
+                            تغيير كلمة المرور
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MFA -->
+        <section class="profile-section">
+            <div class="section-header">
+                <div class="section-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <div>
+                    <div class="section-title">المصادقة الثنائية (MFA)</div>
+                    <div class="section-desc">إدارة طريقة التحقق الثانوية</div>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="status-row">
+                    <div>
+                        <div class="status-label">حالة MFA</div>
+                        <div class="status-desc">طريقة التحقق الثانوية المفعلة حالياً</div>
+                    </div>
+                    <div id="mfaStatus"></div>
+                </div>
+                <div class="status-row">
+                    <div>
+                        <div class="status-label">الطريقة الحالية</div>
+                        <div class="status-desc">نوع عامل التحقق المسجل</div>
+                    </div>
+                    <div id="mfaMethod"></div>
+                </div>
+                <div style="margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" id="changeMfaBtn">
+                        <i class="fa-solid fa-rotate"></i>
+                        تغيير طريقة MFA
+                    </button>
+                    <button class="btn btn-danger" id="disableMfaBtn">
+                        <i class="fa-solid fa-shield-slash"></i>
+                        إلغاء تفعيل MFA
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRUSTED DEVICES -->
+        <section class="profile-section">
+            <div class="section-header">
+                <div class="section-icon"><i class="fa-solid fa-mobile-screen"></i></div>
+                <div>
+                    <div class="section-title">الأجهزة الموثوقة</div>
+                    <div class="section-desc">الأجهزة التي تم التحقق منها</div>
+                </div>
+            </div>
+            <div class="section-body">
+                <div id="devicesList">
+                    <div style="text-align:center; padding: 20px; color: var(--text-muted);">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i>
+                        جاري التحميل...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RECENT ACTIVITY -->
+        <section class="profile-section">
+            <div class="section-header">
+                <div class="section-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <div>
+                    <div class="section-title">النشاط الأخير</div>
+                    <div class="section-desc">آخر 10 أحداث في حسابك</div>
+                </div>
+            </div>
+            <div class="section-body">
+                <div id="activityList">
+                    <div style="text-align:center; padding: 20px; color: var(--text-muted);">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i>
+                        جاري التحميل...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer-shell">
+        <div class="footer-brand">VEXORIS SYSTEM</div>
+        <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+        <div class="footer-text">
+            تم برمجة النظام وتنفيذه بواسطة
+            <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+            <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+            <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+        </div>
+    </footer>
+
+    <script src="./notify.js"></script>
+
+    <script type="module">
+        import { supabase } from './supabase-client.js';
+        import { logAudit, AUDIT, AUDIT_LABELS } from './audit-log.js';
+
+        const ROLE_META = {
+            super_admin: { name: 'المطور', color: '#a855f7', bg: 'rgba(168,85,247,0.15)', icon: 'fa-crown' },
+            admin:       { name: 'ادارة السجلات الطبية', color: '#0ea5e9', bg: 'rgba(14,165,233,0.15)', icon: 'fa-user-shield' },
+            manager:     { name: 'المدير الطبي', color: '#6366f1', bg: 'rgba(99,102,241,0.15)', icon: 'fa-user-tie' },
+            auditor:     { name: 'مراجع جودة', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', icon: 'fa-clipboard-check' },
+            senior:      { name: 'رئيس قسم', color: '#10b981', bg: 'rgba(16,185,129,0.15)', icon: 'fa-star' },
+            doctor:      { name: 'طبيب', color: '#14b8a6', bg: 'rgba(20,184,166,0.15)', icon: 'fa-stethoscope' },
+            viewer:      { name: 'مراجع', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)', icon: 'fa-eye' },
+        };
+
+        let currentUser = null;
+        let currentProfile = null;
+
+        window.toggleTheme = function() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        };
+
+        function makeAvatarGradient(color) {
+            return `radial-gradient(circle at 30% 25%, rgba(255,255,255,0.35) 0%, transparent 55%), linear-gradient(135deg, ${color}, ${color}cc)`;
+        }
+
+        function timeAgo(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            if (seconds < 60) return 'الآن';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `منذ ${minutes} دقيقة`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `منذ ${hours} ساعة`;
+            const days = Math.floor(hours / 24);
+            if (days < 30) return `منذ ${days} يوم`;
+            return date.toLocaleDateString('ar-EG');
+        }
+
+        function parseDeviceName(ua) {
+            if (!ua) return 'جهاز غير معروف';
+            let browser = 'متصفح';
+            if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
+            else if (ua.includes('Firefox')) browser = 'Firefox';
+            else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
+            else if (ua.includes('Edg')) browser = 'Edge';
+
+            let os = 'جهاز';
+            if (ua.includes('Windows')) os = 'Windows';
+            else if (ua.includes('Mac')) os = 'Mac';
+            else if (ua.includes('Linux')) os = 'Linux';
+            else if (ua.includes('Android')) os = 'Android';
+            else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+
+            return `${browser} على ${os}`;
+        }
+
+        // ============================================
+        // LOAD PROFILE
+        // ============================================
+        async function loadProfile() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = './login.html';
+                return;
+            }
+
+            currentUser = session.user;
+
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+
+            if (!profile) {
+                showNotification('تعذّر تحميل بيانات الملف الشخصي', 'error');
+                return;
+            }
+
+            currentProfile = profile;
+
+            // Hero
+            const roleInfo = ROLE_META[profile.role] || ROLE_META.viewer;
+            const avatar = document.getElementById('heroAvatar');
+            avatar.innerHTML = `<i class="fa-solid ${roleInfo.icon}"></i>`;
+            avatar.style.background = makeAvatarGradient(roleInfo.color);
+
+            document.getElementById('heroName').textContent = profile.display_name || profile.username;
+            document.getElementById('heroUsername').textContent = '@' + profile.username;
+            document.getElementById('heroRoleBadge').innerHTML = `
+                <span class="hero-role-badge" style="background:${roleInfo.bg}; color:${roleInfo.color}; border:1px solid ${roleInfo.color}80;">
+                    <i class="fa-solid ${roleInfo.icon}"></i>
+                    ${roleInfo.name}
+                </span>
+            `;
+
+            // Personal info form
+            document.getElementById('fieldDisplayName').value = profile.display_name || '';
+            document.getElementById('fieldDepartment').value = profile.department || '';
+            document.getElementById('fieldPhone').value = profile.phone || '';
+
+            // Email field
+            document.getElementById('fieldEmail').value = session.user.email || profile.email || '';
+
+            // MFA status
+            await renderMFA();
+        }
+
+        // ============================================
+        // MFA
+        // ============================================
+        async function renderMFA() {
+            const mfaMethod = currentUser.user_metadata?.mfa_method;
+
+            const statusEl = document.getElementById('mfaStatus');
+            const methodEl = document.getElementById('mfaMethod');
+
+            if (mfaMethod) {
+                statusEl.innerHTML = '<span class="status-pill on"><i class="fa-solid fa-check"></i> مفعّل</span>';
+
+                if (mfaMethod === 'email') {
+                    methodEl.innerHTML = '<span class="status-pill on"><i class="fa-solid fa-envelope"></i> البريد الإلكتروني</span>';
+                } else if (mfaMethod === 'totp') {
+                    methodEl.innerHTML = '<span class="status-pill on"><i class="fa-solid fa-mobile-screen"></i> Google Authenticator</span>';
+                } else {
+                    methodEl.innerHTML = `<span class="status-pill on">${mfaMethod}</span>`;
+                }
+
+                document.getElementById('disableMfaBtn').style.display = 'inline-flex';
+            } else {
+                statusEl.innerHTML = '<span class="status-pill off"><i class="fa-solid fa-xmark"></i> غير مفعّل</span>';
+                methodEl.innerHTML = '<span class="status-pill off">—</span>';
+                document.getElementById('disableMfaBtn').style.display = 'none';
+            }
+        }
+
+        // ============================================
+        // TRUSTED DEVICES
+        // ============================================
+        async function loadDevices() {
+            const { data: devices, error } = await supabase
+                .from('trusted_devices')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .order('last_used_at', { ascending: false });
+
+            const container = document.getElementById('devicesList');
+
+            if (error) {
+                container.innerHTML = `<div style="color: var(--danger); text-align:center; padding: 20px;">حدث خطأ: ${error.message}</div>`;
+                return;
+            }
+
+            if (!devices || devices.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 30px 20px; color: var(--text-muted);">
+                        <i class="fa-solid fa-mobile-screen" style="font-size: 2rem; opacity: 0.3; margin-bottom: 10px; display: block;"></i>
+                        <div style="font-weight: 700;">لا توجد أجهزة موثوقة بعد</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = devices.map(d => `
+                <div class="device-item">
+                    <div class="device-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                    <div class="device-info">
+                        <div class="device-name">${d.device_name || parseDeviceName(d.user_agent)}</div>
+                        <div class="device-meta">آخر استخدام: ${timeAgo(d.last_used_at)}</div>
+                    </div>
+                    <button class="device-revoke" data-device-id="${d.id}">
+                        <i class="fa-solid fa-trash"></i>
+                        إلغاء
+                    </button>
+                </div>
+            `).join('');
+
+            container.querySelectorAll('.device-revoke').forEach(btn => {
+                btn.addEventListener('click', () => revokeDevice(btn.dataset.deviceId));
+            });
+        }
+
+        async function revokeDevice(deviceId) {
+            const confirmed = await window.showConfirm({
+                title: 'إلغاء الجهاز',
+                message: 'هل أنت متأكد؟ سيُطلب منك التحقق من MFA في المرة القادمة من هذا الجهاز.',
+                confirmText: 'إلغاء الجهاز',
+                cancelText: 'تراجع',
+                type: 'danger',
+            });
+            if (!confirmed) return;
+
+            const { error } = await supabase
+                .from('trusted_devices')
+                .delete()
+                .eq('id', deviceId);
+
+            if (error) {
+                showNotification('فشل إلغاء الجهاز: ' + error.message, 'error');
+                return;
+            }
+
+            await logAudit(AUDIT.DEVICE_REVOKED, {
+                entityType: 'device',
+                entityId: deviceId,
+                description: 'تم إلغاء جهاز موثوق',
+                severity: 'warning',
+            });
+
+            showNotification('تم إلغاء الجهاز بنجاح', 'success');
+            await loadDevices();
+        }
+
+        // ============================================
+        // RECENT ACTIVITY
+        // ============================================
+        async function loadActivity() {
+            const { data: logs, error } = await supabase
+                .from('audit_log')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            const container = document.getElementById('activityList');
+
+            if (error) {
+                container.innerHTML = `<div style="color: var(--danger); text-align:center; padding: 20px;">حدث خطأ: ${error.message}</div>`;
+                return;
+            }
+
+            if (!logs || logs.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 30px 20px; color: var(--text-muted);">
+                        <i class="fa-solid fa-clock-rotate-left" style="font-size: 2rem; opacity: 0.3; margin-bottom: 10px; display: block;"></i>
+                        <div style="font-weight: 700;">لا يوجد نشاط مسجل بعد</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = logs.map(log => {
+                const info = AUDIT_LABELS[log.action] || { label: log.action, icon: 'fa-circle-info', color: '#64748b' };
+                return `
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background:${info.color}20; color:${info.color}; border:1px solid ${info.color}40;">
+                            <i class="fa-solid ${info.icon}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">${info.label}${log.description ? ' — ' + log.description : ''}</div>
+                            <div class="activity-time">${timeAgo(log.created_at)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================
+        // PERSONAL INFO SAVE
+        // ============================================
+        document.getElementById('personalInfoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('savePersonalBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحفظ...';
+
+            const displayName = document.getElementById('fieldDisplayName').value.trim();
+            const department = document.getElementById('fieldDepartment').value.trim();
+            const phone = document.getElementById('fieldPhone').value.trim();
+
+            const updates = {};
+            if (displayName !== (currentProfile.display_name || '')) updates.display_name = displayName;
+            if (department !== (currentProfile.department || '')) updates.department = department;
+            if (phone !== (currentProfile.phone || '')) updates.phone = phone;
+
+            if (Object.keys(updates).length === 0) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> حفظ التغييرات';
+                showNotification('لا يوجد تغييرات', 'info');
+                return;
+            }
+
+            const { error } = await supabase
+                .from('profiles')
+                .update(updates)
+                .eq('id', currentUser.id);
+
+            if (error) {
+                showNotification('فشل الحفظ: ' + error.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> حفظ التغييرات';
+                return;
+            }
+
+            await logAudit(AUDIT.PROFILE_UPDATED, {
+                entityType: 'profile',
+                entityId: currentUser.id,
+                description: 'تم تحديث الملف الشخصي',
+                metadata: { changed_fields: Object.keys(updates) },
+                severity: 'info',
+            });
+
+            Object.assign(currentProfile, updates);
+            document.getElementById('heroName').textContent = currentProfile.display_name || currentProfile.username;
+
+            showNotification('تم حفظ التغييرات بنجاح', 'success');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> حفظ التغييرات';
+        });
+
+        // ============================================
+        // EMAIL CHANGE
+        // ============================================
+        document.getElementById('changeEmailBtn').addEventListener('click', async () => {
+            const newEmail = document.getElementById('fieldEmail').value.trim();
+            if (!newEmail || !newEmail.includes('@')) {
+                showNotification('يرجى إدخال بريد إلكتروني صحيح', 'error');
+                return;
+            }
+
+            if (newEmail === currentUser.email) {
+                showNotification('هذا هو بريدك الحالي', 'info');
+                return;
+            }
+
+            const confirmed = await window.showConfirm({
+                title: 'تغيير البريد الإلكتروني',
+                message: `سيتم إرسال رابط تأكيد إلى: ${newEmail}`,
+                confirmText: 'إرسال',
+                cancelText: 'إلغاء',
+                type: 'warning',
+            });
+            if (!confirmed) return;
+
+            const { error } = await supabase.auth.updateUser({ email: newEmail });
+
+            if (error) {
+                showNotification('فشل: ' + error.message, 'error');
+                return;
+            }
+
+            await logAudit(AUDIT.EMAIL_CHANGED, {
+                entityType: 'user',
+                entityId: currentUser.id,
+                description: 'طلب تغيير البريد الإلكتروني',
+                metadata: { new_email: newEmail },
+                severity: 'warning',
+            });
+
+            showNotification('تم إرسال رابط التأكيد للبريد الجديد. تحقق من صندوق الوارد.', 'success', '', 6000);
+        });
+
+        // ============================================
+        // PASSWORD CHANGE
+        // ============================================
+        document.getElementById('changePasswordBtn').addEventListener('click', async () => {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!newPassword || newPassword.length < 8) {
+                showNotification('كلمة المرور يجب أن تكون 8 أحرف على الأقل', 'error');
+                return;
+            }
+
+            if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(newPassword)) {
+                showNotification('كلمة المرور يجب أن تحتوي على: حرف كبير، صغير، رقم، رمز خاص', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showNotification('كلمتا المرور غير متطابقتين', 'error');
+                return;
+            }
+
+            const confirmed = await window.showConfirm({
+                title: 'تغيير كلمة المرور',
+                message: 'هل أنت متأكد من تغيير كلمة المرور؟',
+                confirmText: 'تغيير',
+                cancelText: 'إلغاء',
+                type: 'warning',
+            });
+            if (!confirmed) return;
+
+            const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+            if (error) {
+                showNotification('فشل: ' + error.message, 'error');
+                return;
+            }
+
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+
+            showNotification('تم تغيير كلمة المرور بنجاح', 'success');
+            await loadActivity();
+        });
+
+        // ============================================
+        // MFA ACTIONS
+        // ============================================
+        document.getElementById('changeMfaBtn').addEventListener('click', async () => {
+            const confirmed = await window.showConfirm({
+                title: 'تغيير طريقة MFA',
+                message: 'ستحتاج لتسجيل طريقة MFA جديدة. ستبدأ العملية الآن.',
+                confirmText: 'متابعة',
+                cancelText: 'إلغاء',
+                type: 'warning',
+            });
+            if (!confirmed) return;
+
+            // Clear MFA method to force re-setup
+            await supabase.auth.updateUser({ data: { mfa_method: null, mfa_email: null } });
+
+            window.location.href = './mfa-setup.html';
+        });
+
+        document.getElementById('disableMfaBtn').addEventListener('click', async () => {
+            const confirmed = await window.showConfirm({
+                title: 'إلغاء تفعيل MFA',
+                message: 'تحذير: سيُطلب منك إعادة تفعيل MFA عند الدخول التالي (لأنه إجباري). هل أنت متأكد؟',
+                confirmText: 'إلغاء التفعيل',
+                cancelText: 'تراجع',
+                type: 'danger',
+            });
+            if (!confirmed) return;
+
+            // Remove all factors
+            const { data: factors } = await supabase.auth.mfa.listFactors();
+            const allFactors = factors?.all || [];
+
+            for (const factor of allFactors) {
+                if (factor.status === 'verified') {
+                    await supabase.auth.mfa.unenroll({ factorId: factor.id });
+                }
+            }
+
+            // Clear metadata
+            await supabase.auth.updateUser({ data: { mfa_method: null, mfa_email: null } });
+
+            await logAudit(AUDIT.MFA_DISABLED, {
+                entityType: 'user',
+                entityId: currentUser.id,
+                description: 'تم إلغاء تفعيل MFA',
+                severity: 'critical',
+            });
+
+            showNotification('تم إلغاء MFA. سيُطلب منك إعادة التفعيل عند الدخول التالي.', 'warning', '', 6000);
+            await renderMFA();
+        });
+
+        // ============================================
+        // INIT
+        // ============================================
+        (async () => {
+            await loadProfile();
+            await loadDevices();
+            await loadActivity();
+            document.getElementById('loadingScreen').classList.add('hide');
+        })();
+    </script>
+
+    <script type="module" src="./session-manager.js"></script>
+</body>
+</html>

@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل التدقيق | VEXORIS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+      if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg: #04070f; --card-bg: rgba(15, 23, 42, 0.55);
+            --card-border: rgba(148, 163, 184, 0.12);
+            --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+            --accent: #0ea5e9; --accent-2: #6366f1; --accent-3: #8b5cf6;
+            --danger: #ef4444; --warning: #f59e0b; --success: #10b981;
+        }
+        html:not(.dark) {
+            --bg: #f5f8fc; --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(148, 163, 184, 0.28);
+            --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #64748b;
+        }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', system-ui, sans-serif;
+            background: var(--bg); color: var(--text-primary);
+            min-height: 100vh; overflow-x: hidden;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.16) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.14) 0%, transparent 65%);
+        }
+        html:not(.dark) .aurora-bg {
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.07) 0%, transparent 65%);
+        }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+        }
+        
+        .nav-shell { position: sticky; top: 12px; z-index: 50; margin: 12px auto 0; max-width: 1400px; padding: 0 16px; }
+        .nav-inner {
+            background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 18px; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .logo-dot {
+            position: relative; width: 12px; height: 12px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18), 0 0 20px rgba(14, 165, 233, 0.7);
+            flex-shrink: 0;
+        }
+        .logo-dot::before {
+            content: ''; position: absolute; inset: -3px; border-radius: 50%;
+            border: 1px solid rgba(14, 165, 233, 0.5);
+            animation: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes ping { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(2.4); opacity: 0; } }
+        .brand-text {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: 0.18em;
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 40%, #6366f1 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .nav-link {
+            position: relative; color: var(--text-secondary); font-weight: 600;
+            font-size: 0.875rem; padding: 6px 2px; transition: color 0.3s ease;
+            text-decoration: none;
+        }
+        .nav-link:hover { color: var(--accent); }
+        .icon-btn {
+            width: 36px; height: 36px; border-radius: 10px;
+            border: 1px solid var(--card-border); background: transparent; color: var(--accent);
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .icon-btn:hover { background: rgba(14, 165, 233, 0.1); border-color: rgba(14, 165, 233, 0.4); transform: rotate(15deg); }
+        
+        .app-container { max-width: 1400px; margin: 0 auto; padding: 0 16px; }
+
+        /* Hero */
+        .page-hero {
+            margin-top: 32px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(99, 102, 241, 0.05) 50%, rgba(139, 92, 246, 0.08) 100%);
+            border: 1px solid rgba(14, 165, 233, 0.22);
+            border-radius: 24px; padding: 32px 36px;
+            position: relative; overflow: hidden;
+        }
+        .page-hero::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, #0ea5e9, #6366f1, transparent);
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 6px 14px; border-radius: 999px;
+            background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.3);
+            color: var(--accent); font-size: 0.7rem; font-weight: 800;
+            letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 12px;
+        }
+        .hero-badge .pulse-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent); box-shadow: 0 0 10px var(--accent);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+        .hero-title { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900; margin-bottom: 8px; }
+        .hero-title .grad {
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 35%, #6366f1 70%, #8b5cf6 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); line-height: 1.75; max-width: 720px; }
+
+        /* Stats */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+            margin-top: 24px;
+        }
+        @media (min-width: 768px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+        .stat-card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 16px; padding: 18px; position: relative; overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--stat-color), transparent);
+        }
+        .stat-card:hover { transform: translateY(-3px); border-color: var(--stat-color); box-shadow: 0 12px 24px -12px var(--stat-color); }
+        .stat-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: var(--stat-soft); border: 1px solid var(--stat-color);
+            color: var(--stat-color); display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; margin-bottom: 12px;
+        }
+        .stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 700; line-height: 1; color: var(--stat-color); }
+        .stat-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); margin-top: 4px; }
+
+        /* Filters */
+        .filters-bar {
+            margin-top: 24px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 16px; padding: 16px;
+            display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+        }
+        .search-wrap { flex: 1; min-width: 240px; position: relative; }
+        .search-wrap input {
+            width: 100%; padding: 11px 40px 11px 16px;
+            background: rgba(15, 23, 42, 0.4); border: 1px solid var(--card-border);
+            border-radius: 10px; color: var(--text-primary);
+            font-size: 0.82rem; font-weight: 600; font-family: inherit; transition: all 0.25s;
+        }
+        html:not(.dark) .search-wrap input { background: rgba(255, 255, 255, 0.7); }
+        .search-wrap input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12); }
+        .search-wrap i { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem; pointer-events: none; }
+        
+        .filter-select {
+            padding: 11px 16px; min-width: 160px;
+            background: rgba(15, 23, 42, 0.4); border: 1px solid var(--card-border);
+            border-radius: 10px; color: var(--text-primary);
+            font-size: 0.82rem; font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.25s;
+        }
+        html:not(.dark) .filter-select { background: rgba(255, 255, 255, 0.7); }
+        .filter-select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12); }
+        
+        .btn-export {
+            padding: 11px 20px; border-radius: 10px;
+            background: linear-gradient(135deg, #10b981, #0ea5e9);
+            color: #fff; border: none; font-family: inherit;
+            font-weight: 800; font-size: 0.8rem; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px;
+            transition: all 0.25s ease;
+        }
+        .btn-export:hover { transform: translateY(-1px); box-shadow: 0 6px 18px -6px rgba(16, 185, 129, 0.5); }
+
+        /* Table */
+        .table-wrap {
+            margin-top: 20px; background: var(--card-bg);
+            border: 1px solid var(--card-border); border-radius: 16px;
+            overflow: hidden; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        }
+        .table-scroll { overflow-x: auto; }
+        table.audit-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1000px; }
+        
+        table.audit-table thead th {
+            background: rgba(148, 163, 184, 0.03); padding: 14px 16px;
+            border-bottom: 1px solid var(--card-border);
+            text-align: right; font-size: 0.7rem; font-weight: 800;
+            color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap;
+        }
+        
+        table.audit-table tbody td {
+            padding: 14px 16px; border-bottom: 1px solid var(--card-border);
+            font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);
+            vertical-align: middle;
+        }
+        
+        table.audit-table tbody tr.main-row { transition: background 0.15s ease; cursor: pointer; }
+        table.audit-table tbody tr.main-row:hover { background: rgba(14, 165, 233, 0.04); }
+        table.audit-table tbody tr.main-row.expanded { background: rgba(14, 165, 233, 0.06); }
+        
+        table.audit-table tbody tr.details-row td {
+            padding: 0; border-bottom: 1px solid var(--card-border);
+            background: rgba(15, 23, 42, 0.2);
+        }
+        html:not(.dark) table.audit-table tbody tr.details-row td { background: rgba(248, 250, 252, 0.6); }
+        
+        .details-content {
+            padding: 16px 20px 20px 20px;
+            border-right: 3px solid var(--accent);
+            margin: 0 16px 16px 16px;
+            background: var(--card-bg);
+            border-radius: 0 10px 10px 0;
+            font-family: 'Space Grotesk', monospace;
+            font-size: 0.72rem; line-height: 1.7;
+            color: var(--text-secondary);
+            white-space: pre-wrap; word-break: break-all;
+        }
+        .details-content strong { color: var(--text-primary); }
+
+        /* Cells */
+        .user-cell { display: flex; align-items: center; gap: 10px; }
+        .user-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.2);
+            color: var(--accent); display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; flex-shrink: 0;
+        }
+        .user-info { display: flex; flex-direction: column; gap: 1px; }
+        .user-email { font-size: 0.75rem; font-weight: 700; color: var(--text-primary); direction: ltr; text-align: right; }
+        .user-role { font-size: 0.62rem; font-weight: 700; color: var(--text-muted); }
+
+        .action-cell { display: flex; align-items: center; gap: 8px; }
+        .action-icon {
+            width: 28px; height: 28px; border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; flex-shrink: 0;
+        }
+        .action-label { font-size: 0.78rem; font-weight: 800; color: var(--text-primary); }
+
+        .severity-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 9px; border-radius: 5px;
+            font-size: 0.65rem; font-weight: 800;
+        }
+        .severity-info { background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.3); }
+        .severity-warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .severity-critical { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        .time-cell { font-family: 'Space Grotesk', sans-serif; font-size: 0.72rem; direction: ltr; text-align: right; color: var(--text-muted); }
+        .expand-btn {
+            width: 26px; height: 26px; border-radius: 6px;
+            background: transparent; border: 1px solid var(--card-border);
+            color: var(--text-muted); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .expand-btn:hover { color: var(--accent); border-color: var(--accent); }
+        .main-row.expanded .expand-btn { transform: rotate(180deg); color: var(--accent); border-color: var(--accent); }
+
+        /* Pagination */
+        .pagination {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px; border-top: 1px solid var(--card-border);
+            background: rgba(15, 23, 42, 0.2); flex-wrap: wrap; gap: 10px;
+        }
+        html:not(.dark) .pagination { background: rgba(248, 250, 252, 0.5); }
+        .page-info { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
+        .page-btns { display: flex; gap: 6px; }
+        .page-btn {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: transparent; border: 1px solid var(--card-border);
+            color: var(--text-secondary); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s ease; font-size: 0.75rem; font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+        }
+        .page-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: rgba(14, 165, 233, 0.08); }
+        .page-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* Loading */
+        .loading-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .loading-screen.hide { opacity: 0; pointer-events: none; }
+
+        /* Footer */
+        .footer-shell {
+            max-width: 1400px; margin: 32px auto 24px; padding: 22px 20px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 20px; text-align: center;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        }
+        .footer-brand {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            letter-spacing: 0.35em; font-size: 0.75rem;
+            background: linear-gradient(135deg, #22d3ee, #6366f1);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .footer-text { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+        .credit-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-weight: 800; font-size: 0.7rem; }
+        .credit-indigo { color: #a5b4fc; background: rgba(99, 102, 241, 0.12); }
+        .credit-teal { color: #5eead4; background: rgba(20, 184, 166, 0.12); }
+        html:not(.dark) .credit-indigo { color: #4338ca; background: rgba(99, 102, 241, 0.16); }
+        html:not(.dark) .credit-teal { color: #0f766e; background: rgba(20, 184, 166, 0.16); }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4));
+            border-radius: 10px; border: 2px solid var(--bg);
+        }
+    </style>
+    <link rel="stylesheet" href="../theme-overrides.css" />
+</head>
+<body>
+
+    <div class="loading-screen" id="loadingScreen">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري تحميل سجل التدقيق...</p>
+    </div>
+
+    <div class="aurora-bg"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="nav-shell">
+        <header class="nav-inner">
+            <div class="flex items-center gap-3">
+                <div class="logo-dot"></div>
+                <div>
+                    <a href="../dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
+                </div>
+            </div>
+            <nav class="hidden md:flex items-center gap-7">
+                <a href="../dashboard.html" class="nav-link">لوحة التحكم</a>
+                <a href="../about.html" class="nav-link">عن النظام</a>
+                <a href="../security.html" class="nav-link">درع VEXORIS</a>
+                <a href="../courses.html" class="nav-link">دورات تدريبية</a>
+                <a href="../feedback.html" class="nav-link">رأيك يهمنا</a>
+            </nav>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </button>
+                <a href="../dashboard.html" style="padding: 8px 16px; border-radius: 10px; background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    رجوع
+                </a>
+            </div>
+        </header>
+    </div>
+
+    <main class="app-container">
+        <section class="page-hero">
+            <div class="hero-badge">
+                <span class="pulse-dot"></span>
+                Security &amp; Auditing
+            </div>
+            <h1 class="hero-title">سجل <span class="grad">التدقيق</span></h1>
+            <p class="hero-desc">
+                مراقبة شاملة لجميع حركات النظام. يمكنك تتبع تسجيلات الدخول، تغييرات الصلاحيات، التعديلات على الملفات الشخصية، وأي نشاط مشبوه. السجلات محمية ومتاحة للمسؤولين فقط.
+            </p>
+        </section>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card" style="--stat-color: #0ea5e9; --stat-soft: rgba(14,165,233,0.12);">
+                <div class="stat-icon"><i class="fa-solid fa-list-check"></i></div>
+                <div class="stat-num" id="statTotal">—</div>
+                <div class="stat-label">إجمالي الأحداث</div>
+            </div>
+            <div class="stat-card" style="--stat-color: #ef4444; --stat-soft: rgba(239,68,68,0.12);">
+                <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="stat-num" id="statCritical">—</div>
+                <div class="stat-label">أحداث حرجة</div>
+            </div>
+            <div class="stat-card" style="--stat-color: #10b981; --stat-soft: rgba(16,185,129,0.12);">
+                <div class="stat-icon"><i class="fa-solid fa-calendar-day"></i></div>
+                <div class="stat-num" id="statToday">—</div>
+                <div class="stat-label">أحداث اليوم</div>
+            </div>
+            <div class="stat-card" style="--stat-color: #f59e0b; --stat-soft: rgba(245,158,11,0.12);">
+                <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                <div class="stat-num" id="statUsers">—</div>
+                <div class="stat-label">مستخدمون نشطون</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-bar">
+            <div class="search-wrap">
+                <input type="text" id="searchInput" placeholder="ابحث بالبريد، الوصف، أو اسم الحدث..." />
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <select class="filter-select" id="actionFilter">
+                <option value="">كل الأحداث</option>
+            </select>
+            <select class="filter-select" id="severityFilter">
+                <option value="">كل درجات الخطورة</option>
+                <option value="info">معلومة</option>
+                <option value="warning">تحذير</option>
+                <option value="critical">حرج</option>
+            </select>
+            <button class="btn-export" id="exportBtn">
+                <i class="fa-solid fa-file-csv"></i>
+                تصدير CSV
+            </button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrap">
+            <div class="table-scroll">
+                <table class="audit-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 240px;">المستخدم</th>
+                            <th style="width: 200px;">الحدث</th>
+                            <th>الوصف</th>
+                            <th style="width: 100px;">الخطورة</th>
+                            <th style="width: 160px;">التوقيت</th>
+                            <th style="width: 40px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="logTbody">
+                        <tr><td colspan="6" style="text-align: center; padding: 40px;"><i class="fa-solid fa-circle-notch fa-spin"></i> جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <div class="page-info" id="pageInfo">—</div>
+                <div class="page-btns" id="pageBtns"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer-shell">
+        <div class="footer-brand">VEXORIS SYSTEM</div>
+        <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+        <div class="footer-text">
+            تم برمجة النظام وتنفيذه بواسطة
+            <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+            <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+            <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+        </div>
+    </footer>
+
+    <script src="../notify.js"></script>
+
+    <script type="module">
+        import { supabase } from '../supabase-client.js';
+        import { logAudit, AUDIT, AUDIT_LABELS, SEVERITY_LABELS } from '../audit-log.js';
+
+        // ============================================
+        // STATE
+        // ============================================
+        let currentPage = 1;
+        const PAGE_SIZE = 15;
+        let totalRecords = 0;
+        let totalPages = 1;
+        let currentLogs = [];
+        let currentUserRole = 'viewer';
+
+        window.toggleTheme = function() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        };
+
+        function timeAgo(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            if (seconds < 60) return 'الآن';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `منذ ${minutes} دقيقة`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `منذ ${hours} ساعة`;
+            const days = Math.floor(hours / 24);
+            if (days < 30) return `منذ ${days} يوم`;
+            return date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        // ============================================
+        // LOAD DATA
+        // ============================================
+        async function loadLogs() {
+            const search = document.getElementById('searchInput').value.trim();
+            const action = document.getElementById('actionFilter').value;
+            const severity = document.getElementById('severityFilter').value;
+
+            const from = (currentPage - 1) * PAGE_SIZE;
+            const to = from + PAGE_SIZE - 1;
+
+            let query = supabase
+                .from('audit_log')
+                .select('*', { count: 'exact' });
+
+            // Apply filters
+            if (search) {
+                query = query.or(`user_email.ilike.%${search}%,description.ilike.%${search}%,action.ilike.%${search}%`);
+            }
+            if (action) query = query.eq('action', action);
+            if (severity) query = query.eq('severity', severity);
+
+            // Order and paginate
+            query = query
+                .order('created_at', { ascending: false })
+                .range(from, to);
+
+            const { data, error, count } = await query;
+
+            if (error) {
+                console.error('Load error:', error);
+                showNotification('فشل تحميل السجلات: ' + error.message, 'error');
+                return;
+            }
+
+            currentLogs = data || [];
+            totalRecords = count || 0;
+            totalPages = Math.ceil(totalRecords / PAGE_SIZE) || 1;
+
+            renderTable();
+            renderPagination();
+        }
+
+        // ============================================
+        // LOAD STATS
+        // ============================================
+        async function loadStats() {
+            // Total
+            const { count: total } = await supabase
+                .from('audit_log').select('*', { count: 'exact', head: true });
+            
+            // Critical
+            const { count: critical } = await supabase
+                .from('audit_log').select('*', { count: 'exact', head: true }).eq('severity', 'critical');
+
+            // Today
+            const todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0);
+            const { count: today } = await supabase
+                .from('audit_log').select('*', { count: 'exact', head: true })
+                .gte('created_at', todayStart.toISOString());
+
+            // Unique Users (Approximation using user_email)
+            const { data: users } = await supabase
+                .from('audit_log').select('user_email');
+            const uniqueUsers = new Set((users || []).map(u => u.user_email).filter(Boolean)).size;
+
+            document.getElementById('statTotal').textContent = total || 0;
+            document.getElementById('statCritical').textContent = critical || 0;
+            document.getElementById('statToday').textContent = today || 0;
+            document.getElementById('statUsers').textContent = uniqueUsers || 0;
+        }
+
+        // ============================================
+        // RENDER TABLE
+        // ============================================
+        function renderTable() {
+            const tbody = document.getElementById('logTbody');
+
+            if (currentLogs.length === 0) {
+                tbody.innerHTML = `
+                    <tr><td colspan="6" style="text-align: center; padding: 60px 20px;">
+                        <i class="fa-solid fa-inbox" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 12px; display: block;"></i>
+                        <div style="font-weight: 900; margin-bottom: 6px;">لا توجد سجلات مطابقة</div>
+                        <div style="color: var(--text-secondary); font-size: 0.82rem;">جرّب تغيير الفلاتر أو البحث بكلمات أخرى.</div>
+                    </td></tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = currentLogs.map((log, i) => {
+                const info = AUDIT_LABELS[log.action] || { label: log.action, icon: 'fa-circle-info', color: '#64748b' };
+                const sev = SEVERITY_LABELS[log.severity] || SEVERITY_LABELS.info;
+                
+                // Determine if there are details to show
+                const hasDetails = (log.metadata && Object.keys(log.metadata).length > 0) || log.user_agent;
+                const detailsId = `details-${log.id}`;
+
+                // Format metadata nicely
+                let metadataHtml = '';
+                if (log.metadata && Object.keys(log.metadata).length > 0) {
+                    const cleanMeta = { ...log.metadata };
+                    if (cleanMeta.user_agent) cleanMeta.user_agent = parseDeviceName(cleanMeta.user_agent);
+                    if (cleanMeta.url) cleanMeta.url = cleanMeta.url; // keep URL as is
+                    
+                    metadataHtml += `<strong>التفاصيل:</strong>\n${JSON.stringify(cleanMeta, null, 2)}`;
+                }
+                if (log.user_agent && (!log.metadata || !log.metadata.user_agent)) {
+                    metadataHtml += `\n<strong>الجهاز:</strong> ${parseDeviceName(log.user_agent)}`;
+                }
+
+                return `
+                    <tr class="main-row" data-id="${log.id}" ${hasDetails ? `onclick="toggleDetails('${detailsId}', this)"` : ''}>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-icon"><i class="fa-solid fa-user"></i></div>
+                                <div class="user-info">
+                                    <div class="user-email">${log.user_email || 'غير معروف'}</div>
+                                    <div class="user-role">${log.user_role || '—'}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-cell">
+                                <div class="action-icon" style="background:${info.color}15; color:${info.color}; border:1px solid ${info.color}30;">
+                                    <i class="fa-solid ${info.icon}"></i>
+                                </div>
+                                <span class="action-label">${info.label}</span>
+                            </div>
+                        </td>
+                        <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${log.description || ''}">
+                            ${log.description || '—'}
+                        </td>
+                        <td>
+                            <span class="severity-pill severity-${log.severity}">
+                                ${sev.label}
+                            </span>
+                        </td>
+                        <td class="time-cell">${timeAgo(log.created_at)}<br><span style="font-size:0.6rem; color: var(--text-muted);">${new Date(log.created_at).toLocaleTimeString('ar-EG')}</span></td>
+                        <td>
+                            ${hasDetails ? `<button class="expand-btn"><i class="fa-solid fa-chevron-down"></i></button>` : ''}
+                        </td>
+                    </tr>
+                    ${hasDetails ? `
+                    <tr class="details-row" id="${detailsId}" style="display: none;">
+                        <td colspan="6">
+                            <div class="details-content">${metadataHtml}</div>
+                        </td>
+                    </tr>
+                    ` : ''}
+                `;
+            }).join('');
+        }
+
+        function parseDeviceName(ua) {
+            if (!ua) return 'جهاز غير معروف';
+            let browser = 'متصفح';
+            if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
+            else if (ua.includes('Firefox')) browser = 'Firefox';
+            else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
+            else if (ua.includes('Edg')) browser = 'Edge';
+
+            let os = 'جهاز';
+            if (ua.includes('Windows')) os = 'Windows';
+            else if (ua.includes('Mac')) os = 'Mac';
+            else if (ua.includes('Linux')) os = 'Linux';
+            else if (ua.includes('Android')) os = 'Android';
+            else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+
+            return `${browser} على ${os}`;
+        }
+
+        window.toggleDetails = function(detailsId, rowEl) {
+            const detailsRow = document.getElementById(detailsId);
+            if (!detailsRow) return;
+
+            const isVisible = detailsRow.style.display !== 'none';
+            detailsRow.style.display = isVisible ? 'none' : 'table-row';
+            rowEl.classList.toggle('expanded', !isVisible);
+        };
+
+        // ============================================
+        // PAGINATION
+        // ============================================
+        function renderPagination() {
+            const pageInfo = document.getElementById('pageInfo');
+            const pageBtns = document.getElementById('pageBtns');
+
+            const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+            const endRecord = Math.min(currentPage * PAGE_SIZE, totalRecords);
+
+            pageInfo.innerHTML = `عرض <strong style="color:var(--accent);">${startRecord}-${endRecord}</strong> من إجمالي <strong style="color:var(--accent);">${totalRecords}</strong> سجل`;
+
+            let btnsHtml = '';
+
+            // Prev
+            btnsHtml += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})"><i class="fa-solid fa-chevron-right"></i></button>`;
+
+            // Page numbers (max 5 buttons)
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            if (endPage - startPage < 4) startPage = Math.max(1, endPage - 4);
+
+            for (let i = startPage; i <= endPage; i++) {
+                btnsHtml += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+            }
+
+            // Next
+            btnsHtml += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})"><i class="fa-solid fa-chevron-left"></i></button>`;
+
+            pageBtns.innerHTML = btnsHtml;
+        }
+
+        window.goToPage = function(page) {
+            if (page < 1 || page > totalPages || page === currentPage) return;
+            currentPage = page;
+            loadLogs();
+        };
+
+        // ============================================
+        // EXPORT CSV
+        // ============================================
+        document.getElementById('exportBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('exportBtn');
+            const orig = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري التصدير...';
+
+            // Fetch all logs matching current filters (without pagination)
+            const search = document.getElementById('searchInput').value.trim();
+            const action = document.getElementById('actionFilter').value;
+            const severity = document.getElementById('severityFilter').value;
+
+            let query = supabase.from('audit_log').select('*').order('created_at', { ascending: false });
+            if (search) query = query.or(`user_email.ilike.%${search}%,description.ilike.%${search}%,action.ilike.%${search}%`);
+            if (action) query = query.eq('action', action);
+            if (severity) query = query.eq('severity', severity);
+
+            const { data, error } = await query;
+
+            if (error) {
+                showNotification('فشل التصدير: ' + error.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = orig;
+                return;
+            }
+
+            // Generate CSV
+            const headers = ['التوقيت', 'البريد', 'الدور', 'الحدث', 'الوصف', 'الخطورة', 'الجهاز'];
+            const rows = (data || []).map(log => {
+                const info = AUDIT_LABELS[log.action] || { label: log.action };
+                const sev = SEVERITY_LABELS[log.severity] || { label: log.severity };
+                return [
+                    new Date(log.created_at).toLocaleString('ar-EG'),
+                    log.user_email || '',
+                    log.user_role || '',
+                    info.label,
+                    (log.description || '').replace(/"/g, '""'),
+                    sev.label,
+                    log.user_agent ? parseDeviceName(log.user_agent) : ''
+                ];
+            });
+
+            const csvContent = "\uFEFF" + [
+                headers.join(','),
+                ...rows.map(r => r.map(c => `"${c}"`).join(','))
+            ].join('\n');
+
+            // Download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `audit-log-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            await logAudit(AUDIT.AUDIT_LOG_EXPORTED, {
+                description: `تم تصدير ${data?.length || 0} سجل`,
+                severity: 'info'
+            });
+
+            showNotification('تم تصدير السجل بنجاح', 'success');
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        });
+
+        // ============================================
+        // POPULATE FILTERS
+        // ============================================
+        function populateActionFilter() {
+            const select = document.getElementById('actionFilter');
+            Object.entries(AUDIT_LABELS).forEach(([key, val]) => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = val.label;
+                select.appendChild(opt);
+            });
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        (async () => {
+            // 1. Check auth & role
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = '../login.html';
+                return;
+            }
+
+            const { data: profile } = await supabase
+                .from('profiles').select('role').eq('id', session.user.id).single();
+
+            if (!profile || !['super_admin', 'admin'].includes(profile.role)) {
+                alert('ليس لديك صلاحية الوصول لهذه الصفحة.');
+                window.location.href = '../dashboard.html';
+                return;
+            }
+
+            currentUserRole = profile.role;
+
+            // 2. Setup filters
+            populateActionFilter();
+
+            // 3. Wire events
+            let searchTimeout;
+            document.getElementById('searchInput').addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    currentPage = 1;
+                    loadLogs();
+                }, 400); // Debounce search
+            });
+
+            document.getElementById('actionFilter').addEventListener('change', () => {
+                currentPage = 1;
+                loadLogs();
+            });
+
+            document.getElementById('severityFilter').addEventListener('change', () => {
+                currentPage = 1;
+                loadLogs();
+            });
+
+            // 4. Load data
+            await Promise.all([
+                loadStats(),
+                loadLogs()
+            ]);
+
+            // 5. Hide loading
+            document.getElementById('loadingScreen').classList.add('hide');
+        })();
+    </script>
+</body>
+</html>
