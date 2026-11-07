@@ -1,6 +1,5 @@
 // session-manager.js
-// Shared authentication UI + smart session timeout with lock overlay
-// يُحمّل تلقائياً في كل الصفحات
+// Shared authentication UI + smart session timeout + page zoom control
 
 import { supabase } from './supabase-client.js';
 
@@ -21,9 +20,30 @@ const ROLE_META = {
 // CONFIG
 // ============================================
 const CONFIG = {
-    inactivityMs: 30 * 60 * 1000, // 30 minutes
-    warningMs: 2 * 60 * 1000,      // 2 minutes before lock
+    inactivityMs: 30 * 60 * 1000,
+    warningMs: 2 * 60 * 1000,
 };
+
+// ============================================
+// ZOOM CONFIG
+// ============================================
+const ZOOM_LEVELS = [70, 80, 90, 100, 110, 120, 130, 150];
+const DEFAULT_ZOOM = 80;
+const MIN_ZOOM = ZOOM_LEVELS[0];
+const MAX_ZOOM = ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
+
+function getCurrentZoom() {
+    const saved = sessionStorage.getItem('vexoris_zoom');
+    return saved ? parseInt(saved) : DEFAULT_ZOOM;
+}
+
+function applyZoom(level) {
+    if (window.innerWidth < 768) return level;
+    const clamped = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, level));
+    document.body.style.zoom = clamped / 100;
+    sessionStorage.setItem('vexoris_zoom', clamped);
+    return clamped;
+}
 
 // ============================================
 // HELPERS
@@ -75,7 +95,7 @@ function injectStyles() {
         }
         .vexoris-user-info { display: flex; flex-direction: column; gap: 1px; text-align: right; }
         .vexoris-user-name { font-size: 0.78rem; font-weight: 800; color: #f1f5f9; line-height: 1.1; }
-        html:not(.dark) .vexoris-user-name { color: #0f172a; }
+        html:not(.dark) .vexoris-user-name { color: #0b1220; }
         .vexoris-user-role { font-size: 0.65rem; font-weight: 700; line-height: 1.1; }
         .vexoris-logout-btn {
             width: 36px; height: 36px; border-radius: 10px;
@@ -98,8 +118,92 @@ function injectStyles() {
             padding: 20px;
         }
         .vexoris-lock-overlay.active { display: flex; }
+
+        /* ===== ZOOM WIDGET ===== */
+        #vexorisZoomWidget {
+            display: inline-flex; align-items: center; gap: 1px;
+            background: var(--card-bg, rgba(15,23,42,0.55));
+            border: 1px solid var(--card-border, rgba(148,163,184,0.12));
+            border-radius: 10px; padding: 2px;
+            height: 36px; transition: all 0.25s ease;
+        }
+        #vexorisZoomWidget:hover {
+            border-color: rgba(14, 165, 233, 0.4);
+        }
+        .vz-btn {
+            width: 26px; height: 30px; border: none; background: transparent;
+            color: var(--text-secondary, #94a3b8);
+            border-radius: 7px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.6rem; transition: all 0.2s ease;
+        }
+        .vz-btn:hover {
+            background: rgba(14, 165, 233, 0.12);
+            color: var(--accent, #0ea5e9);
+        }
+        .vz-btn:active {
+            transform: scale(0.9);
+        }
+        .vz-label {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.6rem; font-weight: 700;
+            color: var(--text-primary, #f1f5f9);
+            min-width: 32px; text-align: center;
+            user-select: none; letter-spacing: 0.02em;
+        }
+        @media (max-width: 767px) {
+            #vexorisZoomWidget { display: none !important; }
+        }
     `;
     document.head.appendChild(style);
+}
+
+// ============================================
+// INJECT ZOOM CONTROLS
+// ============================================
+function injectZoomControls() {
+    if (document.getElementById('vexorisZoomWidget')) return;
+    if (window.innerWidth < 768) return; // hide on mobile
+
+    const themeBtn = document.querySelector('.icon-btn[onclick*="toggleTheme"]');
+    if (!themeBtn) return;
+
+    const widget = document.createElement('div');
+    widget.id = 'vexorisZoomWidget';
+    
+    const current = getCurrentZoom();
+    widget.innerHTML = `
+        <button type="button" class="vz-btn" data-zoom="out" title="تصغير" aria-label="تصغير">
+            <i class="fa-solid fa-minus"></i>
+        </button>
+        <span class="vz-label">${current}%</span>
+        <button type="button" class="vz-btn" data-zoom="in" title="تكبير" aria-label="تكبير">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+    `;
+
+    themeBtn.parentNode.insertBefore(widget, themeBtn);
+
+    const label = widget.querySelector('.vz-label');
+
+    widget.querySelectorAll('.vz-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const action = btn.dataset.zoom;
+            const currentLevel = getCurrentZoom();
+            let next;
+
+            if (action === 'in') {
+                next = ZOOM_LEVELS.find(l => l > currentLevel);
+            } else {
+                next = [...ZOOM_LEVELS].reverse().find(l => l < currentLevel);
+            }
+
+            if (next !== undefined && next !== currentLevel) {
+                applyZoom(next);
+                label.textContent = next + '%';
+            }
+        });
+    });
 }
 
 // ============================================
@@ -120,7 +224,6 @@ function replaceHomeWithDashboard() {
     dashLink.href = 'dashboard.html';
     dashLink.className = 'nav-link';
     dashLink.textContent = 'لوحة التحكم';
-
     homeLink.replaceWith(dashLink);
 }
 
@@ -146,7 +249,7 @@ window.vexorisLogout = async function() {
 };
 
 // ============================================
-// HEADER AUTH — Replaces login button with user chip
+// HEADER AUTH
 // ============================================
 async function initHeaderAuth() {
     const { data: { session } } = await supabase.auth.getSession();
@@ -437,10 +540,17 @@ function initSessionTimeout() {
     const { data: { session } } = await supabase.auth.getSession();
 
     if (session) {
+        // Apply saved zoom
+        const savedZoom = sessionStorage.getItem('vexoris_zoom');
+        if (savedZoom && window.innerWidth >= 768) {
+            applyZoom(parseInt(savedZoom));
+        }
+
         replaceHomeWithDashboard();
         await initHeaderAuth();
+        injectZoomControls();
         initSessionTimeout();
     }
 })();
 
-export { initHeaderAuth, initSessionTimeout, replaceHomeWithDashboard };
+export { initHeaderAuth, initSessionTimeout, replaceHomeWithDashboard, injectZoomControls };

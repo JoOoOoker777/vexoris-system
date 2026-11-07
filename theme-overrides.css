@@ -2,22 +2,15 @@
    VEXORIS — Theme Overrides
    ============================================ */
 
-/* ============ 80% SCALE FOR ALL PAGES ============ */
-@media (min-width: 768px) {
-    body {
-        zoom: 0.8;
-    }
-}
-
-/* ============ LIGHT MODE — TOKENS ============ */
+/* ============ LIGHT MODE — TOKENS (ألوان أقوى) ============ */
 html:not(.dark) {
-    --bg: #e8eef5;
-    --card-bg: rgba(255, 255, 255, 0.92);
-    --card-border: rgba(100, 116, 139, 0.22);
-    --card-border-hover: rgba(14, 165, 233, 0.6);
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #64748b;
+    --bg: #e4ebf3;
+    --card-bg: rgba(255, 255, 255, 0.96);
+    --card-border: rgba(100, 116, 139, 0.35);
+    --card-border-hover: rgba(14, 165, 233, 0.7);
+    --text-primary: #0b1220;      /* أغمق، شبه أسود */
+    --text-secondary: #1e293b;     /* رمادي داكن واضح */
+    --text-muted: #334155;         /* أغمق من قبل بكتير */
     --glow: rgba(14, 165, 233, 0.14);
 }
 
@@ -32,19 +25,41 @@ html:not(.dark) .aurora-bg {
 /* ============ LIGHT MODE — GRID ============ */
 html:not(.dark) .grid-overlay {
     background-image:
-        linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+        linear-gradient(to right, rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(15, 23, 42, 0.045) 1px, transparent 1px);
+}
+
+/* ============ LIGHT MODE — TEXT COLOR OVERRIDES ============ */
+html:not(.dark) .card-desc,
+html:not(.dark) .welcome-desc,
+html:not(.dark) .section-sub,
+html:not(.dark) .stat-label,
+html:not(.dark) .footer-text,
+html:not(.dark) .dropdown-email,
+html:not(.dark) .dropdown-item,
+html:not(.dark) .form-field label,
+html:not(.dark) .form-field .hint,
+html:not(.dark) .modal-section-title,
+html:not(.dark) .matrix-subtitle,
+html:not(.dark) .save-bar-info {
+    color: #334155 !important;
+}
+
+html:not(.dark) .welcome-desc,
+html:not(.dark) .card-desc {
+    color: #1e293b !important;
+    font-weight: 600;
 }
 
 /* ============ LIGHT MODE — FOOTER CREDIT BADGES ============ */
 html:not(.dark) .credit-indigo {
     color: #4338ca;
-    background: rgba(99, 102, 241, 0.16);
+    background: rgba(99, 102, 241, 0.18);
     font-weight: 800;
 }
 html:not(.dark) .credit-teal {
     color: #0f766e;
-    background: rgba(20, 184, 166, 0.16);
+    background: rgba(20, 184, 166, 0.18);
     font-weight: 800;
 }
 
@@ -58,14 +73,29 @@ html:not(.dark) .footer-brand {
 
 /* ============ LIGHT MODE — CARDS ============ */
 html:not(.dark) .app-card {
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.92));
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(248, 250, 252, 0.94));
+    box-shadow: 0 4px 12px -4px rgba(15, 23, 42, 0.06);
+}
+
+/* ============ LIGHT MODE — STAT PILLS ============ */
+html:not(.dark) .stat-pill {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(100, 116, 139, 0.25);
 }
 
 /* ============ LIGHT MODE — SECTION-COUNT ============ */
 html:not(.dark) .section-count {
-    background: rgba(14, 165, 233, 0.12);
-    color: #0284c7;
-    border-color: rgba(14, 165, 233, 0.28);
+    background: rgba(14, 165, 233, 0.14);
+    color: #0369a1;
+    border-color: rgba(14, 165, 233, 0.35);
+    font-weight: 800;
+}
+
+/* ============ BASE ZOOM (fallback) ============ */
+@media (min-width: 768px) {
+    body {
+        zoom: 0.8;
+    }
 }
 
 /* ============ SMOOTH TRANSITION ============ */
