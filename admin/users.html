@@ -224,16 +224,23 @@
 
         .user-cell { display: flex; align-items: center; gap: 12px; }
         .user-avatar-sm {
-            width: 38px; height: 38px; border-radius: 10px;
+            width: 40px; height: 40px; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 0.8rem; color: #fff;
+            font-weight: 900; font-size: 1rem; color: #fff;
             flex-shrink: 0; position: relative; overflow: hidden;
+            box-shadow: 0 2px 8px -2px rgba(0,0,0,0.3);
+        }
+        .user-avatar-sm i {
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
         }
         .user-avatar-sm::before {
             content: ''; position: absolute; inset: 0;
             background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
             background-size: 200% 100%;
             animation: shine 4s infinite;
+            z-index: 1;
         }
         @keyframes shine { 0% { background-position: -200% 0; } 50%, 100% { background-position: 200% 0; } }
         .user-cell-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -325,17 +332,24 @@
         }
         .modal-head-left { display: flex; align-items: center; gap: 14px; }
         .modal-avatar {
-            width: 52px; height: 52px; border-radius: 14px;
+            width: 54px; height: 54px; border-radius: 14px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 1.1rem; color: #fff;
+            font-weight: 900; font-size: 1.3rem; color: #fff;
             flex-shrink: 0;
             position: relative; overflow: hidden;
+            box-shadow: 0 4px 12px -2px rgba(0,0,0,0.3);
+        }
+        .modal-avatar i {
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
         }
         .modal-avatar::before {
             content: ''; position: absolute; inset: 0;
             background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
             background-size: 200% 100%;
             animation: shine 4s infinite;
+            z-index: 1;
         }
         .modal-name { font-size: 1.1rem; font-weight: 900; color: var(--text-primary); line-height: 1.2; }
         .modal-username { font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); direction: ltr; }
@@ -506,14 +520,6 @@
             border-radius: 10px; border: 2px solid var(--bg);
         }
         ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
-                .user-avatar-sm i, .modal-avatar i {
-            position: relative;
-            z-index: 2;
-            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));
-        }
-        .user-avatar-sm { font-size: 1rem; }
-        .modal-avatar { font-size: 1.4rem; }
-
     </style>
     <link rel="stylesheet" href="../theme-overrides.css" />
 </head>
@@ -566,7 +572,7 @@
             </div>
             <h1 class="hero-title">إدارة <span class="grad">المستخدمين</span></h1>
             <p class="hero-desc">
-                تحكّم كامل في حسابات المستخدمين. اضغط على أيقونة الإعدادات بجانب أي مستخدم لفتح نافذة التعديل الشاملة التي تتيح تغيير الاسم، البريد، كلمة المرور، الدور، وحالة الحساب — جميع التعديلات تُطبَّق فوراً على كل النظام.
+                تحكّم كامل في حسابات المستخدمين. اضغط على أيقونة الإعدادات بجانب أي مستخدم لفتح نافذة التعديل الشاملة التي تتيح تغيير الاسم، البريد، كلمة المرور، الدور، وحالة الحساب.
             </p>
         </section>
 
@@ -633,7 +639,7 @@
         <div class="modal-card">
             <div class="modal-head">
                 <div class="modal-head-left">
-                    <div class="modal-avatar" id="modalAvatar">؟</div>
+                    <div class="modal-avatar" id="modalAvatar"></div>
                     <div>
                         <div class="modal-name" id="modalName">—</div>
                         <div class="modal-username" id="modalUsername">—</div>
@@ -652,7 +658,6 @@
 
                 <div class="modal-error" id="modalError">—</div>
 
-                <!-- Basic Info -->
                 <div class="modal-section">
                     <div class="modal-section-title">
                         <i class="fa-solid fa-user"></i>
@@ -679,7 +684,6 @@
                     </div>
                 </div>
 
-                <!-- Access -->
                 <div class="modal-section">
                     <div class="modal-section-title">
                         <i class="fa-solid fa-shield-halved"></i>
@@ -701,7 +705,6 @@
                     </div>
                 </div>
 
-                <!-- Security -->
                 <div class="modal-section">
                     <div class="modal-section-title">
                         <i class="fa-solid fa-lock"></i>
@@ -743,20 +746,20 @@
         </div>
     </footer>
 
-    <!-- استدعاء نظام الإشعارات -->
     <script src="../notify.js"></script>
 
     <script type="module">
         import { supabase, SUPABASE_ANON_KEY } from '../supabase-client.js';
 
+        // ✅ ROLE_META مع icon لكل دور
         const ROLE_META = {
-            super_admin: { name: 'المطور',               color: '#a855f7', soft: 'rgba(168,85,247,0.12)' },
-            admin:       { name: 'ادارة السجلات الطبية', color: '#0ea5e9', soft: 'rgba(14,165,233,0.12)' },
-            manager:     { name: 'المدير الطبي',         color: '#6366f1', soft: 'rgba(99,102,241,0.12)' },
-            auditor:     { name: 'مراجع جودة',           color: '#f59e0b', soft: 'rgba(245,158,11,0.12)' },
-            senior:      { name: 'رئيس قسم',             color: '#10b981', soft: 'rgba(16,185,129,0.12)' },
-            doctor:      { name: 'طبيب',                color: '#14b8a6', soft: 'rgba(20,184,166,0.12)' },
-            viewer:      { name: 'مراجع',              color: '#94a3b8', soft: 'rgba(148,163,184,0.12)' },
+            super_admin: { name: 'المطور',                color: '#a855f7', soft: 'rgba(168,85,247,0.12)', icon: 'fa-crown' },
+            admin:       { name: 'ادارة السجلات الطبية',  color: '#0ea5e9', soft: 'rgba(14,165,233,0.12)',  icon: 'fa-user-shield' },
+            manager:     { name: 'المدير الطبي',          color: '#6366f1', soft: 'rgba(99,102,241,0.12)',  icon: 'fa-user-tie' },
+            auditor:     { name: 'مراجع جودة',            color: '#f59e0b', soft: 'rgba(245,158,11,0.12)',  icon: 'fa-clipboard-check' },
+            senior:      { name: 'رئيس قسم',              color: '#10b981', soft: 'rgba(16,185,129,0.12)',  icon: 'fa-star' },
+            doctor:      { name: 'طبيب',                 color: '#14b8a6', soft: 'rgba(20,184,166,0.12)',  icon: 'fa-stethoscope' },
+            viewer:      { name: 'مراجع',               color: '#94a3b8', soft: 'rgba(148,163,184,0.12)', icon: 'fa-eye' },
         };
 
         let allUsers = [];
@@ -770,16 +773,16 @@
             localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
         };
 
+        // ✅ Avatar helpers
         function makeAvatarGradient(color) {
             return `radial-gradient(circle at 30% 25%, rgba(255,255,255,0.35) 0%, transparent 55%), linear-gradient(135deg, ${color}, ${color}cc)`;
         }
+
         function renderAvatarHtml(role) {
             const info = ROLE_META[role] || ROLE_META.viewer;
             return `<i class="fa-solid ${info.icon}"></i>`;
         }
 
-
-        // ============ LOAD USERS ============
         async function loadUsers() {
             const { data, error } = await supabase
                 .from('profiles')
@@ -845,7 +848,10 @@
                     <tr data-id="${u.id}">
                         <td>
                             <div class="user-cell">
-                                <div class="user-avatar-sm" style="background: ${makeAvatarGradient(roleInfo.color)}; color: #fff;">${renderAvatarHtml(u.role)}</div>                                <div class="user-cell-info">
+                                <div class="user-avatar-sm" style="background: ${makeAvatarGradient(roleInfo.color)};">
+                                    ${renderAvatarHtml(u.role)}
+                                </div>
+                                <div class="user-cell-info">
                                     <div class="user-cell-name">${u.display_name || u.username}${isSelf ? ' <span style="font-size:0.6rem;color:var(--accent);">(أنت)</span>' : ''}</div>
                                     <div class="user-cell-username">@${u.username}</div>
                                 </div>
@@ -873,30 +879,26 @@
                 `;
             }).join('');
 
-            // Wire up edit buttons
             tbody.querySelectorAll('[data-edit]').forEach(btn => {
                 btn.addEventListener('click', () => openModal(btn.dataset.edit));
             });
         }
 
-        // ============ MODAL ============
         function openModal(userId) {
             const user = allUsers.find(u => u.id === userId);
             if (!user) return;
 
             editingUser = user;
             const roleInfo = ROLE_META[user.role] || ROLE_META.viewer;
-            
 
-            // Header
+            // ✅ Modal avatar with role icon
             const avatarEl = document.getElementById('modalAvatar');
             avatarEl.innerHTML = renderAvatarHtml(user.role);
             avatarEl.style.background = makeAvatarGradient(roleInfo.color);
-            avatarEl.style.color = '#fff';
+
             document.getElementById('modalName').textContent = user.display_name || user.username;
             document.getElementById('modalUsername').textContent = '@' + user.username;
 
-            // Fields
             document.getElementById('fieldUsername').value = user.username || '';
             document.getElementById('fieldDisplayName').value = user.display_name || '';
             document.getElementById('fieldPhone').value = user.phone || '';
@@ -906,37 +908,21 @@
             document.getElementById('fieldEmail').value = user.email || '';
             document.getElementById('fieldPassword').value = '';
 
-            // Update active text
             document.getElementById('fieldIsActiveText').textContent = user.is_active !== false ? 'نشط' : 'موقوف';
 
-            // Prevent self-edit of role
             const isSelf = user.id === currentUserId;
-            const roleSelect = document.getElementById('fieldRole');
-            const isActiveToggle = document.getElementById('fieldIsActive');
+            document.getElementById('fieldRole').disabled = isSelf;
+            document.getElementById('fieldIsActive').disabled = isSelf;
 
-            if (isSelf) {
-                roleSelect.disabled = true;
-                isActiveToggle.disabled = true;
+            if (user.role === 'super_admin' && currentUserRole !== 'super_admin') {
+                document.getElementById('modalSaveBtn').disabled = true;
+                document.getElementById('modalSaveBtn').title = 'لا يمكن تعديل المطور إلا بواسطة مطور آخر';
             } else {
-                roleSelect.disabled = false;
-                isActiveToggle.disabled = false;
+                document.getElementById('modalSaveBtn').disabled = false;
+                document.getElementById('modalSaveBtn').title = '';
             }
 
-            // Warn if target is super_admin
-            const superAdminField = user.role === 'super_admin';
-            const saveBtn = document.getElementById('modalSaveBtn');
-            if (superAdminField && currentUserRole !== 'super_admin') {
-                saveBtn.disabled = true;
-                saveBtn.title = 'لا يمكن تعديل المطور إلا بواسطة مطور آخر';
-            } else {
-                saveBtn.disabled = false;
-                saveBtn.title = '';
-            }
-
-            // Hide error
             document.getElementById('modalError').classList.remove('show');
-
-            // Show modal
             document.getElementById('editModal').classList.add('open');
         }
 
@@ -945,24 +931,20 @@
             editingUser = null;
         };
 
-        // Close on backdrop click
         document.getElementById('editModal').addEventListener('click', (e) => {
             if (e.target.id === 'editModal') closeModal();
         });
 
-        // Close on Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 if (document.getElementById('editModal').classList.contains('open')) closeModal();
             }
         });
 
-        // Toggle text
         document.getElementById('fieldIsActive').addEventListener('change', (e) => {
             document.getElementById('fieldIsActiveText').textContent = e.target.checked ? 'نشط' : 'موقوف';
         });
 
-        // ============ SAVE ============
         window.saveChanges = async function() {
             if (!editingUser) return;
 
@@ -1040,7 +1022,6 @@
             box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        // ============ INIT ============
         (async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
@@ -1064,7 +1045,6 @@
 
             currentUserRole = profile.role;
 
-            // Populate role filter
             const roleFilter = document.getElementById('roleFilter');
             Object.entries(ROLE_META).forEach(([k, v]) => {
                 const opt = document.createElement('option');
@@ -1073,7 +1053,6 @@
                 roleFilter.appendChild(opt);
             });
 
-            // Populate modal role select
             const roleSelect = document.getElementById('fieldRole');
             Object.entries(ROLE_META).forEach(([k, v]) => {
                 const opt = document.createElement('option');
