@@ -1084,6 +1084,9 @@
             const cfg = CATALOGS[currentTab];
             document.getElementById('crudModalTitle').textContent = `إضافة ${cfg.singular} جديد`;
 
+            // 🔥 إصلاح: نرجّع onclick لـ saveRecord بشكل افتراضي
+            document.getElementById('crudSaveBtn').onclick = () => window.saveRecord();
+
             if (currentTab === 'forms') {
                 await openFormModal(null);
                 return;
@@ -1100,6 +1103,9 @@
             if (!row) return;
 
             document.getElementById('crudModalTitle').textContent = `تعديل ${cfg.singular}`;
+
+            // 🔥 إصلاح: نرجّع onclick لـ saveRecord
+            document.getElementById('crudSaveBtn').onclick = () => window.saveRecord();
 
             if (currentTab === 'forms') {
                 await openFormModal(row);
@@ -1324,11 +1330,14 @@
                 </div>
             `;
 
-            document.getElementById('crudSaveBtn').onclick = saveForm;
+            document.getElementById('crudSaveBtn').onclick = () => saveForm();
             openModal('crudModal');
         }
 
         async function saveForm() {
+            if (currentTab !== 'forms') {
+                return window.saveRecord();
+            }
             const btn = document.getElementById('crudSaveBtn');
             btn.disabled = true;
 
