@@ -2,70 +2,251 @@
 <html lang="ar" dir="rtl" class="dark">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>جاري المصادقة | VEXORIS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+      if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+      }
+    </script>
     <style>
-        body { background: #04070f; color: #f1f5f9; font-family: 'Tajawal', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; margin: 0; }
-        .spinner { border: 4px solid rgba(255,255,255,0.1); border-top-color: #0ea5e9; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        :root {
+            --bg: #04070f;
+            --card-bg: rgba(15, 23, 42, 0.55);
+            --card-border: rgba(148, 163, 184, 0.12);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #0ea5e9;
+        }
+        html:not(.dark) {
+            --bg: #f5f8fc;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(148, 163, 184, 0.28);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: var(--bg); color: var(--text-primary);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            padding: 20px; margin: 0;
+        }
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -2;
+            background: radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.18) 0%, transparent 60%),
+                        radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.16) 0%, transparent 60%);
+        }
+        html:not(.dark) .aurora-bg {
+            background: radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
+                        radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%);
+        }
+        .setup-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 40px 32px;
+            max-width: 480px; width: 100%;
+            box-shadow: 0 30px 60px -30px rgba(14, 165, 233, 0.35);
+            position: relative; overflow: hidden;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .setup-card::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, #0ea5e9, #6366f1, transparent);
+        }
+        .spinner {
+            border: 4px solid rgba(148, 163, 184, 0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            width: 44px; height: 44px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .error { display: none; color: #f87171; background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3); margin-top: 20px; }
+        
+        .icon-box {
+            width: 72px; height: 72px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px; font-size: 2rem;
+        }
+        .icon-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+        .icon-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid rgba(245, 158, 11, 0.3);
+            color: #fbbf24;
+        }
+        .btn-return {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; padding: 14px 24px; border-radius: 12px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            color: var(--text-primary); font-weight: 800; font-size: 0.9rem;
+            text-decoration: none; transition: all 0.3s ease; margin-top: 24px;
+            font-family: inherit;
+        }
+        .btn-return:hover {
+            border-color: var(--accent); color: var(--accent);
+            background: rgba(14, 165, 233, 0.05);
+        }
+        .error-view { display: none; }
     </style>
 </head>
 <body>
-    <div>
-        <div class="spinner" id="spinner"></div>
-        <h2 id="title">جاري التحقق من حسابك...</h2>
-        <p id="subtitle">يرجى الانتظار بينما نقوم بتأمين جلستك.</p>
-        <div class="error" id="errorBox">حدث خطأ أثناء الدخول. يرجى المحاولة مرة أخرى.</div>
+    <div class="aurora-bg"></div>
+
+    <div class="setup-card" id="mainCard">
+        <!-- 1. حالة التحميل -->
+        <div id="loadingView">
+            <div class="spinner"></div>
+            <h2 class="text-xl font-black mb-2">جاري التحقق من حسابك...</h2>
+            <p class="text-sm font-semibold" style="color: var(--text-secondary);">يرجى الانتظار بينما نقوم بتأمين جلستك.</p>
+        </div>
+
+        <!-- 2. حالة الخطأ: الإيميل غير موجود في النظام -->
+        <div id="errorView" class="error-view">
+            <div class="icon-box icon-error"><i class="fa-solid fa-user-xmark"></i></div>
+            <h2 class="text-2xl font-black mb-3 text-red-500">البريد غير مرتبط بحساب</h2>
+            <p class="text-sm font-semibold mb-4" style="color: var(--text-secondary); line-height: 1.8;">
+                عذراً، البريد الإلكتروني <br>
+                <strong id="errorEmail" class="mt-2 mb-2 text-lg" style="color: var(--text-primary); direction: ltr; display: inline-block; padding: 4px 12px; background: rgba(0,0,0,0.2); border-radius: 6px;">example@gmail.com</strong><br>
+                غير موجود في قاعدة بيانات النظام الحالية.
+            </p>
+            <div style="background: rgba(239, 68, 68, 0.05); border: 1px dashed rgba(239, 68, 68, 0.3); padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+                <p class="text-xs font-bold text-red-400">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                    يرجى التواصل مع مسؤول النظام (المطور) لإنشاء حساب لك أو ربط هذا البريد بحسابك الحالي.
+                </p>
+            </div>
+            <a href="./login.html" class="btn-return">
+                <i class="fa-solid fa-arrow-right"></i>
+                العودة لصفحة تسجيل الدخول
+            </a>
+        </div>
+
+        <!-- 3. حالة الخطأ: فشل OAuth أو الجلسة -->
+        <div id="oauthErrorView" class="error-view">
+            <div class="icon-box icon-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h2 class="text-xl font-black mb-3 text-amber-500">فشل الاتصال</h2>
+            <p class="text-sm font-semibold mb-6" style="color: var(--text-secondary); line-height: 1.7;">
+                حدث خطأ أثناء محاولة تسجيل الدخول. قد يكون السبب هو انتهاء الجلسة، رفض الصلاحيات، أو مشكلة في الاتصال بـ Google.
+            </p>
+            <a href="./login.html" class="btn-return">
+                <i class="fa-solid fa-rotate-left"></i>
+                المحاولة مرة أخرى
+            </a>
+        </div>
     </div>
 
     <script type="module">
         import { supabase } from './supabase-client.js';
         import { isDeviceTrusted } from './device-trust.js';
 
+        const loadingView = document.getElementById('loadingView');
+        const errorView = document.getElementById('errorView');
+        const oauthErrorView = document.getElementById('oauthErrorView');
+
+        function showEmailError(email) {
+            loadingView.style.display = 'none';
+            document.getElementById('errorEmail').textContent = email;
+            errorView.style.display = 'block';
+        }
+
+        function showOAuthError() {
+            loadingView.style.display = 'none';
+            oauthErrorView.style.display = 'block';
+        }
+
         (async () => {
-            // 1. التحقق من وجود خطأ في الرابط
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('error')) {
-                document.getElementById('spinner').style.display = 'none';
-                document.getElementById('title').textContent = 'فشل تسجيل الدخول';
-                document.getElementById('subtitle').textContent = urlParams.get('error_description') || 'حدث خطأ غير متوقع.';
-                document.getElementById('errorBox').style.display = 'block';
-                setTimeout(() => window.location.href = './login.html', 3000);
-                return;
-            }
+            try {
+                // 1. التحقق من وجود أخطاء في الرابط (مثل رفض المستخدم أو خطأ من جوجل)
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('error')) {
+                    showOAuthError();
+                    return;
+                }
 
-            // 2. انتظار لحظة لسوبابيس لمعالجة الكود
-            await new Promise(r => setTimeout(r, 800));
+                // 2. انتظار بسيط لـ Supabase لمعالجة الـ Hash
+                await new Promise(r => setTimeout(r, 800));
 
-            const { data: { session }, error } = await supabase.auth.getSession();
-            if (error || !session) {
-                document.getElementById('spinner').style.display = 'none';
-                document.getElementById('title').textContent = 'تعذر إنشاء الجلسة';
-                document.getElementById('errorBox').style.display = 'block';
-                setTimeout(() => window.location.href = './login.html', 3000);
-                return;
-            }
+                const { data: { session }, error: sessionErr } = await supabase.auth.getSession();
+                if (sessionErr || !session) {
+                    showOAuthError();
+                    return;
+                }
 
-            const user = session.user;
-            const meta = user.user_metadata || {};
+                const user = session.user;
+                const email = user.email;
 
-            // 3. توجيه المستخدم بناءً على حالة حسابه
-            if (!meta.password_changed) { 
-                window.location.href = './change-password.html'; 
-                return; 
-            }
-            if (!meta.mfa_method) { 
-                window.location.href = './mfa-setup.html'; 
-                return; 
-            }
+                // 3. البحث عن الإيميل في قاعدة البيانات (جدول profiles)
+                const { data: profile, error: profileErr } = await supabase
+                    .from('profiles')
+                    .select('id, is_active')
+                    .eq('email', email)
+                    .single();
 
-            const { trusted } = await isDeviceTrusted(user.id);
+                // 4. لو الإيميل مش موجود
+                if (profileErr || !profile) {
+                    showEmailError(email);
+                    await supabase.auth.signOut(); // تسجيل الخروج فوراً
+                    return;
+                }
 
-            if (trusted) {
-                sessionStorage.setItem('email_mfa_verified', 'true');
-                window.location.href = './dashboard.html';
-            } else {
-                window.location.href = './mfa-verify.html?reason=new_device_via_google';
+                // 5. لو الحساب موقوف
+                if (profile.is_active === false) {
+                    showEmailError(email); // ممكن تغير النص لاحقاً ليكون "حساب موقوف"
+                    await supabase.auth.signOut();
+                    return;
+                }
+
+                // 6. التحقق من أن الـ ID متطابق (إن جوجل عمل حساب جديد بدل الربط التلقائي)
+                if (user.id !== profile.id) {
+                    console.warn('Auth ID and Profile ID mismatch!');
+                    showEmailError(email); 
+                    await supabase.auth.signOut();
+                    return;
+                }
+
+                // 7. لو كله تمام، نكمل خطوات الـ MFA
+                const meta = user.user_metadata || {};
+
+                if (!meta.password_changed) { 
+                    window.location.href = './change-password.html'; 
+                    return; 
+                }
+                if (!meta.mfa_method) { 
+                    window.location.href = './mfa-setup.html'; 
+                    return; 
+                }
+
+                const { trusted } = await isDeviceTrusted(user.id);
+
+                if (trusted) {
+                    sessionStorage.setItem('email_mfa_verified', 'true');
+                    window.location.href = './dashboard.html';
+                } else {
+                    window.location.href = './mfa-verify.html?reason=new_device_via_google';
+                }
+
+            } catch (err) {
+                console.error('Callback error:', err);
+                showOAuthError();
             }
         })();
     </script>
