@@ -319,23 +319,6 @@
         .save-bar-info { font-size: 0.82rem; font-weight: 700; }
         .save-bar-info strong { color: var(--accent); }
 
-        /* Toast */
-        .toast {
-            position: fixed; top: 100px; left: 50%; transform: translateX(-50%) translateY(-20px);
-            padding: 14px 24px; border-radius: 12px;
-            font-weight: 700; font-size: 0.85rem;
-            z-index: 99998;
-            display: flex; align-items: center; gap: 10px;
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.4);
-            backdrop-filter: blur(20px);
-            opacity: 0; pointer-events: none;
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
-        .toast.success { background: rgba(16, 185, 129, 0.15); color: #5eead4; border: 1px solid rgba(16, 185, 129, 0.3); }
-        .toast.error { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-        .toast.warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-
         /* Loading */
         .loading-screen {
             position: fixed; inset: 0; background: var(--bg); z-index: 999;
@@ -472,7 +455,8 @@
         </div>
     </footer>
 
-    <div class="toast" id="toast"></div>
+    <!-- استدعاء نظام الإشعارات -->
+    <script src="../notify.js"></script>
 
     <script type="module">
         import { supabase } from '../supabase-client.js';
@@ -524,15 +508,6 @@
             html.classList.toggle('dark');
             localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
         };
-
-        function showToast(msg, type = 'success') {
-            const t = document.getElementById('toast');
-            t.className = `toast ${type}`;
-            const icons = { success: 'fa-circle-check', error: 'fa-circle-xmark', warning: 'fa-triangle-exclamation' };
-            t.innerHTML = `<i class="fa-solid ${icons[type]}"></i> ${msg}`;
-            requestAnimationFrame(() => t.classList.add('show'));
-            setTimeout(() => t.classList.remove('show'), 4000);
-        }
 
         function getChangesCount() {
             let n = 0;
@@ -624,7 +599,7 @@
 
             if (error) {
                 console.error('Load error:', error);
-                showToast('فشل تحميل الصلاحيات: ' + error.message, 'error');
+                showNotification('فشل تحميل الصلاحيات: ' + error.message, 'error');
                 return false;
             }
 
@@ -671,7 +646,7 @@
 
             if (error) {
                 console.error('Save error:', error);
-                showToast('فشل الحفظ: ' + error.message, 'error');
+                showNotification('فشل الحفظ: ' + error.message, 'error');
                 return;
             }
 
@@ -685,7 +660,7 @@
                 el.classList.remove('changed');
             });
             updateSaveBar();
-            showToast(`تم حفظ ${n} تغيير بنجاح`, 'success');
+            showNotification(`تم حفظ ${n} تغيير بنجاح`, 'success');
         }
 
         // ============================================
@@ -735,7 +710,7 @@
                 currentPerms = { ...originalPerms };
                 renderMatrix();
                 updateSaveBar();
-                showToast('تم استعادة الحالة الأصلية', 'warning');
+                showNotification('تم استعادة الحالة الأصلية', 'warning');
             });
 
             // 6. Hide loading
