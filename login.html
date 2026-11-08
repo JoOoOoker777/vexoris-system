@@ -319,11 +319,24 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4)); border-radius: 10px; border: 2px solid var(--bg); }
         ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
+        .loading-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .loading-screen.hide { opacity: 0; pointer-events: none; }
     </style>
     <link rel="stylesheet" href="./theme-overrides.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+    <script src="loading-logo.js" defer></script>
+    <script src="loader-buttons.js" defer></script>
+    
 </head>
 <body>
-
+    <div class="loading-screen" id="loadingScreen">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+        <p class="text-sm font-bold" id="loadingText" style="color: var(--text-secondary);">جاري التحميل...</p>
+    </div>
     <div class="scroll-progress" id="scrollProgress"></div>
     <div class="aurora-bg"></div>
     <div class="grid-overlay"></div>
@@ -676,19 +689,14 @@
         (async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
-                // التحقق من اكتمال التهيئة
                 const meta = session.user.user_metadata || {};
-                if (!meta.password_changed) {
-                    window.location.href = './change-password.html';
-                    return;
-                }
-                if (!meta.mfa_method) {
-                    window.location.href = './mfa-setup.html';
-                    return;
-                }
-                // جلسة كاملة → الداشبورد
+                if (!meta.password_changed) { window.location.href = './change-password.html'; return; }
+                if (!meta.mfa_method)       { window.location.href = './mfa-setup.html'; return; }
                 window.location.href = './dashboard.html';
+                return;
             }
+            // ✅ مفيش session → أخفي اللودر وأظهر الصفحة
+            document.getElementById('loadingScreen').classList.add('hide');
         })();
      </script>
     <script src="./notify.js"></script>
