@@ -130,11 +130,23 @@
             from { opacity: 0; transform: translateY(-8px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .loading-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .loading-screen.hide { opacity: 0; pointer-events: none; }
     </style>
     <link rel="stylesheet" href="./theme-overrides.css" />
-</head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+    <script src="loading-logo.js" defer></script>
+    <script src="loader-buttons.js" defer></script>
 <body>
     <div class="aurora-bg"></div>
+    <div class="loading-screen" id="loadingScreen">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري التحميل...</p>
+    </div>
 
     <div class="setup-card">
         <!-- 🔥 تنبيه الجهاز الجديد -->
@@ -229,6 +241,7 @@
             }
 
             document.getElementById('loadingView').style.display = 'none';
+            document.getElementById('loadingScreen').classList.add('hide');
 
             // 🔥 إظهار تنبيه الجهاز الجديد إذا لزم
             if (isNewDevice) {

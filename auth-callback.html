@@ -106,15 +106,29 @@
             background: rgba(14, 165, 233, 0.05);
         }
         .error-view { display: none; }
+        .loading-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .loading-screen.hide { opacity: 0; pointer-events: none; }
     </style>
+    <link rel="stylesheet" href="./theme-overrides.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+    <script src="loading-logo.js" defer></script>
+    <script src="loader-buttons.js" defer></script>
 </head>
 <body>
     <div class="aurora-bg"></div>
+    <div class="loading-screen" id="loadingScreen">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري التحقق...</p>
+    </div>
 
     <div class="setup-card" id="mainCard">
         <!-- 1. حالة التحميل -->
         <div id="loadingView">
-            <div class="spinner"></div>
+            <div class="vx-btn-spinner lg" style="margin: 0 auto 20px;"></div>
             <h2 class="text-xl font-black mb-2">جاري التحقق من حسابك...</h2>
             <p class="text-sm font-semibold" style="color: var(--text-secondary);">يرجى الانتظار بينما نقوم بتأمين جلستك.</p>
         </div>
@@ -163,12 +177,14 @@
         const oauthErrorView = document.getElementById('oauthErrorView');
 
         function showEmailError(email) {
+            document.getElementById('loadingScreen').classList.add('hide');
             loadingView.style.display = 'none';
             document.getElementById('errorEmail').textContent = email;
             errorView.style.display = 'block';
         }
 
         function showOAuthError() {
+            document.getElementById('loadingScreen').classList.add('hide'); 
             loadingView.style.display = 'none';
             oauthErrorView.style.display = 'block';
         }
