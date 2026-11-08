@@ -67,6 +67,8 @@
                 linear-gradient(to right, rgba(15, 23, 42, 0.045) 1px, transparent 1px),
                 linear-gradient(to bottom, rgba(15, 23, 42, 0.045) 1px, transparent 1px);
         }
+
+        /* NAV */
         .nav-shell { position: sticky; top: 12px; z-index: 50; margin: 12px auto 0; max-width: 1400px; padding: 0 16px; }
         .nav-inner {
             background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
@@ -94,8 +96,7 @@
         }
         .nav-link {
             position: relative; color: var(--text-secondary); font-weight: 600;
-            font-size: 0.875rem; padding: 6px 2px; transition: color 0.3s ease;
-            text-decoration: none;
+            font-size: 0.875rem; padding: 6px 2px; transition: color 0.3s ease; text-decoration: none;
         }
         .nav-link:hover { color: var(--accent); }
         .icon-btn {
@@ -105,13 +106,19 @@
             cursor: pointer; transition: all 0.25s ease;
         }
         .icon-btn:hover { background: rgba(14, 165, 233, 0.1); border-color: rgba(14, 165, 233, 0.4); transform: rotate(15deg); }
-        .app-container { max-width: 1400px; margin: 0 auto; padding: 0 16px; }
 
+        /* LAYOUT */
+        .app-container { max-width: 1400px; margin: 0 auto; padding: 0 16px; }
+        .content-narrow { max-width: 80%; margin-left: auto; margin-right: auto; }
+        @media (max-width: 1200px) { .content-narrow { max-width: 95%; } }
+        @media (max-width: 768px)  { .content-narrow { max-width: 100%; } }
+
+        /* HERO */
         .page-hero {
             margin-top: 24px;
             background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(99, 102, 241, 0.05) 50%, rgba(139, 92, 246, 0.08) 100%);
             border: 1px solid rgba(14, 165, 233, 0.22);
-            border-radius: 24px; padding: 24px 32px;
+            border-radius: 24px; padding: 22px 28px;
             position: relative; overflow: hidden;
         }
         .page-hero::before {
@@ -131,43 +138,41 @@
             animation: pulse 2s ease-in-out infinite;
         }
         @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
-        .hero-title { font-size: clamp(1.2rem, 2.4vw, 1.65rem); font-weight: 900; }
+        .hero-title { font-size: clamp(1.2rem, 2.4vw, 1.6rem); font-weight: 900; }
         .hero-title .grad {
             background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 35%, #6366f1 70%, #8b5cf6 100%);
             -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .hero-desc { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-top: 4px; max-width: 540px; }
+        .hero-desc { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-top: 4px; max-width: 560px; line-height: 1.6; }
 
-        .glass-panel {
-            background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid var(--card-border);
-        }
-
+        /* FORM CARDS */
         .form-card {
             background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 20px; overflow: hidden; margin-top: 20px;
+            border-radius: 18px; overflow: hidden; margin-top: 16px;
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            transition: border-color 0.25s;
         }
+        .form-card:hover { border-color: rgba(14, 165, 233, 0.25); }
         .form-card-header {
-            padding: 14px 22px; border-bottom: 1px solid var(--card-border);
+            padding: 12px 20px; border-bottom: 1px solid var(--card-border);
             background: linear-gradient(90deg, rgba(14, 165, 233, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%);
-            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
         }
-        .form-card-header h2 { flex: 1; font-size: 0.92rem; font-weight: 900; letter-spacing: -0.01em; }
+        .form-card-header h2 { flex: 1; font-size: 0.88rem; font-weight: 900; letter-spacing: -0.01em; }
         .form-card-icon {
-            width: 34px; height: 34px; border-radius: 9px;
+            width: 32px; height: 32px; border-radius: 9px;
             background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(99, 102, 241, 0.15));
             border: 1px solid rgba(14, 165, 233, 0.3);
             display: flex; align-items: center; justify-content: center;
-            color: var(--accent); font-size: 0.8rem; flex-shrink: 0;
+            color: var(--accent); font-size: 0.75rem; flex-shrink: 0;
         }
-        .form-card-body { padding: 20px 22px; }
+        .form-card-body { padding: 18px 20px; }
 
+        /* FIELDS */
         .f-label {
-            display: block; font-size: 0.66rem; font-weight: 800;
+            display: block; font-size: 0.64rem; font-weight: 800;
             color: var(--text-secondary); text-transform: uppercase;
-            letter-spacing: 0.04em; margin-bottom: 5px;
+            letter-spacing: 0.05em; margin-bottom: 5px;
         }
         .f-label .req { color: var(--danger); }
         .f-input, .f-select, .f-textarea {
@@ -184,12 +189,13 @@
         .f-textarea { resize: vertical; min-height: 60px; line-height: 1.6; }
         .f-input::placeholder, .f-textarea::placeholder { color: var(--text-muted); font-weight: 500; }
 
+        /* PILLS */
         .pill-group { display: flex; gap: 6px; flex-wrap: wrap; }
         .pill {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 6px 10px;
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 12px;
             background: var(--input-bg); border: 1px solid var(--card-border);
-            border-radius: 7px; font-size: 0.72rem; font-weight: 700;
+            border-radius: 8px; font-size: 0.72rem; font-weight: 700;
             color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease;
         }
         .pill:hover { border-color: var(--accent); color: var(--accent); }
@@ -200,6 +206,7 @@
             box-shadow: 0 4px 12px -4px rgba(14, 165, 233, 0.5);
         }
 
+        /* CHECKBOX GRID */
         .cb-grid {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
             padding: 12px; background: rgba(15, 23, 42, 0.25);
@@ -208,16 +215,17 @@
         }
         html:not(.dark) .cb-grid { background: rgba(248, 250, 252, 0.5); }
         .cb-item {
-            display: flex; align-items: center; gap: 6px;
-            font-size: 0.72rem; font-weight: 700;
+            display: flex; align-items: center; gap: 7px;
+            font-size: 0.72rem; font-weight: 600;
             color: var(--text-secondary); cursor: pointer;
-            padding: 4px 6px; border-radius: 6px; transition: all 0.15s;
+            padding: 5px 8px; border-radius: 7px;
+            border: 1px solid transparent; transition: all 0.15s ease;
         }
-        .cb-item:hover { background: rgba(14, 165, 233, 0.06); }
-        .cb-item input[type="checkbox"] {
-            width: 14px; height: 14px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0;
-        }
+        .cb-item:hover { background: rgba(14, 165, 233, 0.06); border-color: rgba(14, 165, 233, 0.2); }
+        .cb-item:has(input:checked) { background: rgba(14, 165, 233, 0.1); border-color: rgba(14, 165, 233, 0.35); color: var(--text-primary); }
+        .cb-item input[type="checkbox"] { width: 14px; height: 14px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
 
+        /* SERVICES GRID */
         .serv-grid {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
             padding: 14px; background: rgba(15, 23, 42, 0.25);
@@ -225,8 +233,8 @@
         }
         html:not(.dark) .serv-grid { background: rgba(248, 250, 252, 0.5); }
         @media (min-width: 768px) { .serv-grid { grid-template-columns: repeat(4, 1fr); } }
-        .serv-grid .cb-item { font-size: 0.78rem; }
 
+        /* SEARCH BAR */
         .search-bar {
             margin-top: 16px; padding: 14px;
             background: rgba(14, 165, 233, 0.04);
@@ -236,6 +244,7 @@
         }
         .search-bar .f-group { flex: 1; min-width: 160px; }
 
+        /* BUTTONS */
         .btn {
             display: inline-flex; align-items: center; justify-content: center; gap: 7px;
             padding: 9px 20px; border-radius: 10px;
@@ -244,18 +253,11 @@
             border: none; text-decoration: none;
         }
         .btn-primary {
-            background: linear-gradient(135deg, #0ea5e9, #6366f1);
-            color: #fff;
+            background: linear-gradient(135deg, #0ea5e9, #6366f1); color: #fff;
             box-shadow: 0 6px 18px -6px rgba(14, 165, 233, 0.5);
         }
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 24px -6px rgba(99, 102, 241, 0.6);
-        }
-        .btn-secondary {
-            background: transparent; border: 1px solid var(--card-border);
-            color: var(--text-secondary);
-        }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 24px -6px rgba(99, 102, 241, 0.6); }
+        .btn-secondary { background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); }
         .btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: rgba(14, 165, 233, 0.06); }
         .btn-success {
             background: linear-gradient(135deg, #10b981, #0ea5e9); color: #fff;
@@ -264,6 +266,7 @@
         .btn-success:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 24px -6px rgba(16, 185, 129, 0.6); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
+        /* FLOATING SAVE */
         .floating-save {
             position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 40;
             background: linear-gradient(135deg, #10b981, #0ea5e9); color: #fff;
@@ -284,14 +287,17 @@
 
         .divider-line { height: 1px; background: var(--card-border); margin: 14px 0; }
 
+        /* QUESTION CARD */
         .question-card {
             background: var(--card-bg); border: 1px solid var(--card-border);
             border-top: 3px solid var(--accent); border-radius: 16px;
             overflow: hidden; margin-bottom: 14px;
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             display: none;
+            transition: border-color 0.25s;
         }
         .question-card.visible { display: block; }
+        .question-card:hover { border-color: rgba(14, 165, 233, 0.25); border-top-color: var(--accent); }
         .question-header {
             padding: 12px 18px; background: rgba(148, 163, 184, 0.04);
             border-bottom: 1px solid var(--card-border);
@@ -299,38 +305,96 @@
             flex-wrap: wrap;
         }
         .question-title {
-            font-size: 0.85rem; font-weight: 900;
-            color: var(--text-primary);
+            font-size: 0.85rem; font-weight: 900; color: var(--text-primary);
             display: flex; align-items: center; gap: 8px; flex: 1;
         }
         .question-num {
-            width: 22px; height: 22px; border-radius: 6px;
+            width: 24px; height: 24px; border-radius: 6px;
             background: linear-gradient(135deg, #0ea5e9, #6366f1);
             color: #fff; display: flex; align-items: center; justify-content: center;
-            font-family: 'Space Grotesk', sans-serif; font-size: 0.62rem; font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif; font-size: 0.65rem; font-weight: 700;
             flex-shrink: 0;
         }
         .question-body { padding: 16px 18px; }
 
+        /* ASSESSMENT UNIT */
         .assess-unit {
-            background: rgba(15, 23, 42, 0.25);
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.15));
             border: 1px solid var(--card-border);
-            border-radius: 13px; padding: 14px; margin-bottom: 12px;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 12px;
             transition: all 0.25s ease;
         }
-        html:not(.dark) .assess-unit { background: rgba(248, 250, 252, 0.5); }
-        .assess-unit:hover { border-color: rgba(14, 165, 233, 0.3); }
+        .assess-unit:last-child { margin-bottom: 0; }
+        html:not(.dark) .assess-unit {
+            background: linear-gradient(145deg, rgba(248, 250, 252, 0.7), rgba(241, 245, 249, 0.5));
+        }
+        .assess-unit:hover {
+            border-color: rgba(14, 165, 233, 0.3);
+            box-shadow: 0 4px 16px -8px rgba(14, 165, 233, 0.15);
+        }
         .assess-unit-head {
             display: flex; align-items: center; justify-content: space-between;
-            padding-bottom: 10px; margin-bottom: 12px;
+            padding-bottom: 10px; margin-bottom: 14px;
             border-bottom: 1px dashed var(--card-border);
         }
         .assess-unit-num {
             display: inline-flex; align-items: center; gap: 6px;
-            font-size: 0.68rem; font-weight: 800;
+            font-size: 0.66rem; font-weight: 800;
             color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;
         }
         .assess-unit-actions { display: flex; gap: 6px; }
+
+        /* ROWS */
+        .assess-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .assess-row:last-child { margin-bottom: 0; }
+        .assess-row-single { margin-bottom: 12px; }
+        .assess-row-single:last-child { margin-bottom: 0; }
+
+        .assess-unit [id^="cont_unit_"] { display: flex; flex-direction: column; gap: 4px; }
+        .assess-unit [id^="cont_unit_"].hidden-logic { display: none !important; }
+
+        /* ISSUES */
+        .issues-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 12px 14px;
+            background: rgba(148, 163, 184, 0.04);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+        }
+        .issue-category-title {
+            font-size: 0.66rem; font-weight: 900;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 0 6px;
+            user-select: none;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 4px;
+            transition: color 0.2s;
+        }
+        .issue-category-title:hover { color: #22d3ee; }
+        .issue-category-title i { font-size: 0.6rem; transition: transform 0.2s; }
+
+        .issue-items-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px 10px;
+            padding: 4px 0 6px;
+        }
+        @media (max-width: 900px) { .issue-items-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 500px) { .issue-items-grid { grid-template-columns: 1fr; } }
+
         .mini-btn {
             padding: 4px 10px; border-radius: 6px;
             background: transparent; border: 1px solid var(--card-border);
@@ -344,6 +408,7 @@
 
         .hidden-logic { display: none !important; }
 
+        /* LOADING */
         .loading-screen {
             position: fixed; inset: 0; background: var(--bg); z-index: 999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -351,6 +416,7 @@
         }
         .loading-screen.hide { opacity: 0; pointer-events: none; }
 
+        /* FOOTER */
         .footer-shell {
             max-width: 1400px; margin: 32px auto 24px; padding: 22px 20px;
             background: var(--card-bg); border: 1px solid var(--card-border);
@@ -424,177 +490,164 @@
     </div>
 
     <main class="app-container">
+        <div class="content-narrow">
 
-        <section class="page-hero no-print">
-            <div class="hero-badge">
-                <span class="pulse-dot"></span>
-                Medical File Audit
-            </div>
-            <h1 class="hero-title">مراجعة <span class="grad">الملفات الطبية</span></h1>
-            <p class="hero-desc">
-                أدخل بيانات الملف الطبي، وأضف التقييمات لكل نموذج. النظام يخفي ويُظهر النماذج تلقائياً حسب التخصص والخدمات وحالة الملف.
-            </p>
-        </section>
-
-        <!-- SEARCH BAR -->
-        <div class="search-bar no-print">
-            <div class="f-group">
-                <label class="f-label">الرقم الطبي (Medical ID)</label>
-                <div style="position: relative;">
-                    <i class="fa-solid fa-magnifying-glass" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color: var(--accent); font-size: 0.8rem; pointer-events: none;"></i>
-                    <input type="text" id="searchFile" class="f-input" style="padding-right: 34px;" placeholder="ابحث بالرقم..." />
+            <section class="page-hero no-print">
+                <div class="hero-badge">
+                    <span class="pulse-dot"></span>
+                    Medical File Audit
                 </div>
-            </div>
-            <div class="f-group">
-                <label class="f-label">رقم الزيارة</label>
-                <div style="position: relative;">
-                    <i class="fa-solid fa-hashtag" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color: var(--text-muted); font-size: 0.8rem; pointer-events: none;"></i>
-                    <input type="text" id="searchVisit" class="f-input" style="padding-right: 34px;" placeholder="الزيارة..." />
-                </div>
-            </div>
-            <button class="btn btn-primary" onclick="handleSearch()">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                استدعاء
-            </button>
-        </div>
+                <h1 class="hero-title">مراجعة <span class="grad">الملفات الطبية</span></h1>
+                <p class="hero-desc">
+                    أدخل بيانات الملف الطبي، وأضف التقييمات لكل نموذج. النظام يخفي ويُظهر النماذج تلقائياً حسب التخصص والخدمات وحالة الملف.
+                </p>
+            </section>
 
-        <!-- BASIC DATA -->
-        <div class="form-card">
-            <div class="form-card-header">
-                <div class="form-card-icon"><i class="fa-solid fa-folder-open"></i></div>
-                <h2>البيانات الأساسية</h2>
-                <button class="mini-btn" onclick="savePartial()">
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    مسودة
+            <div class="search-bar no-print">
+                <div class="f-group">
+                    <label class="f-label">الرقم الطبي (Medical ID)</label>
+                    <div style="position: relative;">
+                        <i class="fa-solid fa-magnifying-glass" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color: var(--accent); font-size: 0.8rem; pointer-events: none;"></i>
+                        <input type="text" id="searchFile" class="f-input" style="padding-right: 34px;" placeholder="ابحث بالرقم..." />
+                    </div>
+                </div>
+                <div class="f-group">
+                    <label class="f-label">رقم الزيارة</label>
+                    <div style="position: relative;">
+                        <i class="fa-solid fa-hashtag" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color: var(--text-muted); font-size: 0.8rem; pointer-events: none;"></i>
+                        <input type="text" id="searchVisit" class="f-input" style="padding-right: 34px;" placeholder="الزيارة..." />
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="handleSearch()">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    استدعاء
                 </button>
             </div>
-            <div class="form-card-body">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
-                    <div>
-                        <label class="f-label">اسم المريض <span class="req">*</span></label>
-                        <input type="text" id="patientName" class="f-input" placeholder="الاسم الكامل" />
-                    </div>
-                    <div>
-                        <label class="f-label">الرقم الطبي <span class="req">*</span></label>
-                        <input type="text" id="medicalId" class="f-input" placeholder="Medical ID" style="font-family: 'Space Grotesk', monospace;" />
-                    </div>
-                    <div>
-                        <label class="f-label">تاريخ الدخول <span class="req">*</span></label>
-                        <input type="date" id="admissionDate" class="f-input" />
-                    </div>
-                    <div id="div_discharge_date" class="hidden-logic">
-                        <label class="f-label">تاريخ الخروج <span class="req">*</span></label>
-                        <input type="date" id="dischargeDate" class="f-input" style="color: var(--accent);" />
-                    </div>
+
+            <div class="form-card">
+                <div class="form-card-header">
+                    <div class="form-card-icon"><i class="fa-solid fa-folder-open"></i></div>
+                    <h2>البيانات الأساسية</h2>
+                    <button class="mini-btn" onclick="savePartial()">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        مسودة
+                    </button>
                 </div>
+                <div class="form-card-body">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+                        <div>
+                            <label class="f-label">اسم المريض <span class="req">*</span></label>
+                            <input type="text" id="patientName" class="f-input" placeholder="الاسم الكامل" />
+                        </div>
+                        <div>
+                            <label class="f-label">الرقم الطبي <span class="req">*</span></label>
+                            <input type="text" id="medicalId" class="f-input" placeholder="Medical ID" style="font-family: 'Space Grotesk', monospace;" />
+                        </div>
+                        <div>
+                            <label class="f-label">تاريخ الدخول <span class="req">*</span></label>
+                            <input type="date" id="admissionDate" class="f-input" />
+                        </div>
+                        <div id="div_discharge_date" class="hidden-logic">
+                            <label class="f-label">تاريخ الخروج <span class="req">*</span></label>
+                            <input type="date" id="dischargeDate" class="f-input" style="color: var(--accent);" />
+                        </div>
+                    </div>
 
-                <div class="divider-line"></div>
+                    <div class="divider-line"></div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
+                        <div>
+                            <label class="f-label">حالة الملف</label>
+                            <div class="pill-group">
+                                <label class="pill"><input type="radio" name="caseStatus" value="Open" onchange="handleGlobalLogic()" checked> مفتوحة</label>
+                                <label class="pill"><input type="radio" name="caseStatus" value="Closed" onchange="handleGlobalLogic()"> تم الخروج</label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="f-label">رقم الزيارة <span class="req">*</span></label>
+                            <input type="text" id="visitNumber" class="f-input" placeholder="Visit #" style="font-family: 'Space Grotesk', monospace;" />
+                        </div>
+                        <div>
+                            <label class="f-label">مكان الدخول</label>
+                            <div class="pill-group" id="admissionTypePills"></div>
+                        </div>
+                    </div>
+
+                    <div class="divider-line"></div>
+
                     <div>
-                        <label class="f-label">حالة الملف</label>
-                        <div class="pill-group">
-                            <label class="pill"><input type="radio" name="caseStatus" value="Open" onchange="handleGlobalLogic()" checked> مفتوحة</label>
-                            <label class="pill"><input type="radio" name="caseStatus" value="Closed" onchange="handleGlobalLogic()"> تم الخروج</label>
+                        <label class="f-label">حركة الملف</label>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                            <input type="text" id="mov_type" class="f-input" placeholder="مكان الدخول" readonly style="opacity: 0.7; cursor: not-allowed; background: rgba(148,163,184,0.1);" />
+                            <input type="text" id="mov_floor1" class="f-input" placeholder="المحطة 1" />
+                            <input type="text" id="mov_floor2" class="f-input" placeholder="المحطة 2" />
+                            <input type="text" id="mov_discharge" class="f-input" placeholder="نقطة الخروج" />
                         </div>
                     </div>
-                    <div>
-                        <label class="f-label">رقم الزيارة <span class="req">*</span></label>
-                        <input type="text" id="visitNumber" class="f-input" placeholder="Visit #" style="font-family: 'Space Grotesk', monospace;" />
-                    </div>
-                    <div>
-                        <label class="f-label">مكان الدخول</label>
-                        <div class="pill-group" id="admissionTypePills">
-                            <!-- populated from DB -->
-                        </div>
-                    </div>
-                </div>
 
-                <div class="divider-line"></div>
+                    <div class="divider-line"></div>
 
-                <div>
-                    <label class="f-label">حركة الملف</label>
-                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
-                        <input type="text" id="mov_type" class="f-input" placeholder="مكان الدخول" readonly style="opacity: 0.7; cursor: not-allowed; background: rgba(148,163,184,0.1);" />
-                        <input type="text" id="mov_floor1" class="f-input" placeholder="المحطة 1" />
-                        <input type="text" id="mov_floor2" class="f-input" placeholder="المحطة 2" />
-                        <input type="text" id="mov_discharge" class="f-input" placeholder="نقطة الخروج" />
-                    </div>
-                </div>
-
-                <div class="divider-line"></div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-                    <div>
-                        <label class="f-label">الاستشاري المسؤول <span class="req">*</span></label>
-                        <div style="position: relative;">
-                            <i class="fa-solid fa-user-md" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color: var(--accent); opacity: 0.7; font-size: 0.8rem; pointer-events: none;"></i>
-                            <input list="doctorsList" id="consultantInput" class="f-input" style="padding-right: 34px;" onchange="handleCard1T8(this)" placeholder="اختر الطبيب..." />
-                            <datalist id="doctorsList"></datalist>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <div>
+                            <label class="f-label">الاستشاري المسؤول <span class="req">*</span></label>
+                            <div style="position: relative;">
+                                <i class="fa-solid fa-user-md" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color: var(--accent); opacity: 0.7; font-size: 0.8rem; pointer-events: none;"></i>
+                                <input list="doctorsList" id="consultantInput" class="f-input" style="padding-right: 34px;" onchange="handleCard1T8(this)" placeholder="اختر الطبيب..." />
+                                <datalist id="doctorsList"></datalist>
+                            </div>
+                            <div id="consultantSpecialty" style="display: none; margin-top: 8px; padding: 4px 10px; border-radius: 999px; background: rgba(14,165,233,0.1); color: var(--accent); font-size: 0.68rem; font-weight: 800; display: inline-flex; align-items: center; gap: 5px;"></div>
+                            <div id="t8_manual_div" class="hidden-logic" style="margin-top: 8px; padding: 10px; border-radius: 10px; background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.2);">
+                                <span style="font-size: 0.62rem; color: #f59e0b; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 6px;">طبيب غير مسجل</span>
+                                <input type="text" id="t8_manual_input" class="f-input" placeholder="اكتب الاسم الكامل..." />
+                            </div>
                         </div>
-                        <div id="consultantSpecialty" style="display: none; margin-top: 8px; padding: 4px 10px; border-radius: 999px; background: rgba(14,165,233,0.1); color: var(--accent); font-size: 0.68rem; font-weight: 800; display: inline-flex; align-items: center; gap: 5px;"></div>
-                        <div id="t8_manual_div" class="hidden-logic" style="margin-top: 8px; padding: 10px; border-radius: 10px; background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.2);">
-                            <span style="font-size: 0.62rem; color: #f59e0b; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 6px;">طبيب غير مسجل</span>
-                            <input type="text" id="t8_manual_input" class="f-input" placeholder="اكتب الاسم الكامل..." />
-                        </div>
-                    </div>
-                    <div>
-                        <label class="f-label">التخصصات <span class="req">*</span></label>
-                        <div class="cb-grid" id="specialtiesList">
-                            <!-- populated from DB -->
-                        </div>
-                        <div id="dayCaseDeptContainer" class="hidden-logic" style="margin-top: 10px; padding: 10px; background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.25); border-radius: 10px;">
-                            <label class="f-label" style="color: #10b981;">القسم الرئيسي لليوم الواحد <span class="req">*</span></label>
-                            <select id="dayCaseDept" class="f-select">
-                                <option value="">-- اختر القسم --</option>
-                            </select>
+                        <div>
+                            <label class="f-label">التخصصات <span class="req">*</span></label>
+                            <div class="cb-grid" id="specialtiesList"></div>
+                            <div id="dayCaseDeptContainer" class="hidden-logic" style="margin-top: 10px; padding: 10px; background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.25); border-radius: 10px;">
+                                <label class="f-label" style="color: #10b981;">القسم الرئيسي لليوم الواحد <span class="req">*</span></label>
+                                <select id="dayCaseDept" class="f-select">
+                                    <option value="">-- اختر القسم --</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SERVICES -->
-        <div class="form-card">
-            <div class="form-card-header">
-                <div class="form-card-icon"><i class="fa-solid fa-notes-medical"></i></div>
-                <h2>الإجراءات والخدمات</h2>
-            </div>
-            <div class="form-card-body">
-                <div class="serv-grid" id="servicesList">
-                    <!-- populated from DB -->
                 </div>
             </div>
-        </div>
 
-        <!-- WARD CLERKS -->
-        <div class="form-card">
-            <div class="form-card-header">
-                <div class="form-card-icon"><i class="fa-solid fa-users-gear"></i></div>
-                <h2>مدخلو البيانات (Ward Clerk)</h2>
-            </div>
-            <div class="form-card-body">
-                <div id="wardQContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
-                    <!-- populated from DB -->
+            <div class="form-card">
+                <div class="form-card-header">
+                    <div class="form-card-icon"><i class="fa-solid fa-notes-medical"></i></div>
+                    <h2>الإجراءات والخدمات</h2>
+                </div>
+                <div class="form-card-body">
+                    <div class="serv-grid" id="servicesList"></div>
                 </div>
             </div>
-        </div>
 
-        <!-- AUDIT QUESTIONS CONTAINER -->
-        <div id="qContainer" style="margin-top: 20px;">
-            <!-- populated dynamically from form_catalog -->
-        </div>
+            <div class="form-card">
+                <div class="form-card-header">
+                    <div class="form-card-icon"><i class="fa-solid fa-users-gear"></i></div>
+                    <h2>مدخلو البيانات (Ward Clerk)</h2>
+                </div>
+                <div class="form-card-body">
+                    <div id="wardQContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;"></div>
+                </div>
+            </div>
 
-        <!-- SUBMIT BUTTONS -->
-        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 24px; margin-bottom: 30px; flex-wrap: wrap;" class="no-print">
-            <button class="btn btn-primary" id="submitBtn" onclick="generateReport()" style="padding: 12px 30px; font-size: 0.88rem;">
-                <i class="fa-solid fa-paper-plane"></i>
-                اعتماد وإرسال
-            </button>
-            <button class="btn btn-success hidden-logic" id="btnOpenReport" onclick="redirectToFinalReport()" style="padding: 12px 30px; font-size: 0.88rem;">
-                <i class="fa-solid fa-file-contract"></i>
-                فتح التقرير
-            </button>
+            <div id="qContainer" style="margin-top: 20px;"></div>
+
+            <div style="display: flex; justify-content: center; gap: 12px; margin-top: 24px; margin-bottom: 30px; flex-wrap: wrap;" class="no-print">
+                <button class="btn btn-primary" id="submitBtn" onclick="generateReport()" style="padding: 12px 30px; font-size: 0.88rem;">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    اعتماد وإرسال
+                </button>
+                <button class="btn btn-success hidden-logic" id="btnOpenReport" onclick="redirectToFinalReport()" style="padding: 12px 30px; font-size: 0.88rem;">
+                    <i class="fa-solid fa-file-contract"></i>
+                    فتح التقرير
+                </button>
+            </div>
+
         </div>
     </main>
 
@@ -619,7 +672,6 @@
     <script type="module">
         import { supabase } from '../supabase-client.js';
         import { logAudit, AUDIT } from '../audit-log.js';
-        // 🔥 لم نعد نحتاج MARS_CONFIG — كل شيء من DB
 
         // ============================================
         // STATE
@@ -630,7 +682,6 @@
         let cardCloneCounter = 0;
         let finalReportUrl = '';
 
-        // البيانات المحمّلة من DB
         let DOCTORS = [];
         let CLERKS = [];
         let SPECIALTIES = [];
@@ -640,9 +691,9 @@
         let CASE_STATUSES = [];
         let SCORES = [];
         let ROLES = [];
-        let ISSUE_CATEGORIES = [];       // [{id, name, items: [{code, label}]}]
-        let ISSUES_BY_CODE = {};         // { code: label }
-        let FORMS = [];                  // [{id, text, requires_date, specialties:[ids], services:[ids], daycases:[ids], exclusions:[{kind,id}]}]
+        let ISSUE_CATEGORIES = [];
+        let ISSUES_BY_CODE = {};
+        let FORMS = [];
 
         // ============================================
         // HELPERS
@@ -662,8 +713,13 @@
             } catch(e) { return []; }
         }
 
+        function escapeHtml(s) {
+            if (!s) return '';
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
         // ============================================
-        // LOAD DATA FROM DB
+        // LOAD DATA
         // ============================================
         async function loadAllCatalogData() {
             document.getElementById('loadingText').textContent = 'جاري تحميل البيانات المرجعية...';
@@ -696,22 +752,19 @@
             CASE_STATUSES = caseStatusesRes.data || [];
             SCORES = scoresRes.data || [];
             ROLES = rolesRes.data || [];
-            ISSUE_CATEGORIES = issueCatsRes.data || [];
+            const rawCats = issueCatsRes.data || [];
             const allIssues = issuesRes.data || [];
             FORMS = formsRes.data || [];
 
-            // Map issues by code
             ISSUES_BY_CODE = {};
             allIssues.forEach(i => { ISSUES_BY_CODE[i.code] = i.label; });
 
-            // Group issues by category
-            ISSUE_CATEGORIES = ISSUE_CATEGORIES.map(cat => ({
+            ISSUE_CATEGORIES = rawCats.map(cat => ({
                 id: cat.id,
                 name: cat.name,
                 items: allIssues.filter(i => i.category_id === cat.id)
             })).filter(c => c.items.length > 0);
 
-            // Load form mappings
             if (FORMS.length > 0) {
                 const formIds = FORMS.map(f => f.id);
                 const [specRes, servRes, dayRes, exclRes] = await Promise.all([
@@ -730,7 +783,7 @@
                 }));
             }
 
-            console.log('[Load] Loaded:', {
+            console.log('[Load]', {
                 doctors: DOCTORS.length, clerks: CLERKS.length,
                 specialties: SPECIALTIES.length, services: SERVICES.length,
                 daycases: DAYCASES.length, forms: FORMS.length,
@@ -739,53 +792,45 @@
         }
 
         // ============================================
-        // BUILD UI FROM DB
+        // BUILD UI
         // ============================================
         function buildUI() {
-            // 1. Doctors datalist
             document.getElementById('doctorsList').innerHTML =
                 DOCTORS.map(d => `<option value="${escapeHtml(d.name)}">`).join('') +
                 `<option value="غير موجود">`;
 
-            // 2. Specialties checkboxes
-            const specContainer = document.getElementById('specialtiesList');
             const allSpecials = [
                 ...SPECIALTIES.map(s => ({ id: 'spec_' + s.id, name: s.name })),
                 ...DAYCASES.map(d => ({ id: 'day_' + d.id, name: d.name }))
             ];
-            specContainer.innerHTML = allSpecials.map(s =>
-                `<label class="cb-item"><input type="checkbox" name="caseSpecialty" value="${s.id}" data-name="${escapeHtml(s.name)}" onchange="handleGlobalLogic()"> ${escapeHtml(s.name)}</label>`
+            document.getElementById('specialtiesList').innerHTML = allSpecials.map(s =>
+                `<label class="cb-item"><input type="checkbox" name="caseSpecialty" value="${s.id}" data-name="${escapeHtml(s.name)}" onchange="handleGlobalLogic()"> <span>${escapeHtml(s.name)}</span></label>`
             ).join('');
 
-            // 3. Services checkboxes
-            const servContainer = document.getElementById('servicesList');
-            servContainer.innerHTML = SERVICES.map(s =>
-                `<label class="cb-item"><input type="checkbox" name="addServ" value="${s.id}" data-name="${escapeHtml(s.name)}" onchange="handleGlobalLogic()"> ${escapeHtml(s.name)}</label>`
+            document.getElementById('servicesList').innerHTML = SERVICES.map(s =>
+                `<label class="cb-item"><input type="checkbox" name="addServ" value="${s.id}" data-name="${escapeHtml(s.name)}" onchange="handleGlobalLogic()"> <span>${escapeHtml(s.name)}</span></label>`
             ).join('');
 
-            // 4. Admission types pills
-            const admContainer = document.getElementById('admissionTypePills');
-            admContainer.innerHTML = ADMISSION_TYPES.map(a =>
+            document.getElementById('admissionTypePills').innerHTML = ADMISSION_TYPES.map(a =>
                 `<label class="pill"><input type="radio" name="admissionType" value="${a.id}" data-name="${escapeHtml(a.name)}" onchange="handleGlobalLogic()"> ${escapeHtml(a.name)}</label>`
             ).join('');
 
-            // 5. Day case dept dropdown
             const dayDept = document.getElementById('dayCaseDept');
             dayDept.innerHTML = `<option value="">-- اختر القسم --</option>` +
                 SPECIALTIES.map(s => `<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)}</option>`).join('');
         }
 
         // ============================================
-        // HTML BUILDERS
+        // BUILD TEMPLATE HTML
         // ============================================
         function buildTemplateHtml(type, qId, unitId, isWard = false) {
             const pre = `unit_${qId}_${unitId}`;
             const fid = `${pre}_${type}`;
-            let h = `<div id="cont_${fid}" class="w-full transition-all duration-300`;
+            let h = `<div id="cont_${fid}"`;
 
-            if (['T3', 'T5', 'T6', 'T7'].includes(type)) h += ' hidden-logic';
-            if (isWard && type === 'T7') h = h.replace(' hidden-logic', '');
-            h += `">`;
+            if (['T3', 'T5', 'T6', 'T7'].includes(type)) h += ` class="hidden-logic"`;
+            if (isWard && type === 'T7') h = `<div id="cont_${fid}"`;
+            h += `>`;
 
             if (type === 'T1') {
                 h += `<label class="f-label">التاريخ</label>
@@ -795,7 +840,7 @@
                 h += `<label class="f-label">التقييم</label>
                       <select name="${fid}" id="sel_${fid}" class="f-select" onchange="handleLocalLogic('T2',this,'${qId}','${unitId}')">
                         <option value="" disabled selected>اختر التقييم...</option>
-                        ${SCORES.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}
+                        ${SCORES.map(o => `<option value="${o.value}">${escapeHtml(o.label)}</option>`).join('')}
                       </select>`;
             }
             else if (type === 'T3' || type === 'T8') {
@@ -805,7 +850,7 @@
                         ${DOCTORS.map(x => `<option value="${escapeHtml(x.name)}">`).join('')}
                         <option value="غير موجود">
                       </datalist>
-                      <div id="spec_${fid}" class="text-[10px] font-black mt-1.5 hidden-logic flex items-center gap-1 opacity-90 px-2" style="color: var(--accent);">
+                      <div id="spec_${fid}" class="hidden-logic" style="font-size: 0.62rem; font-weight: 800; color: var(--accent); padding: 4px 8px; margin-top: 4px; background: rgba(14,165,233,0.08); border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">
                         <i class="fa-solid fa-tag"></i> <span class="spec-text"></span>
                       </div>`;
             }
@@ -818,30 +863,30 @@
                       </datalist>`;
             }
             else if (type === 'T4') {
-                h += `<div class="w-full mt-2">
-                        <div style="padding: 12px; background: rgba(15,23,42,0.2); border-radius: 10px; border: 1px solid var(--card-border);">
-                          <div style="font-size: 0.62rem; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;">الأخطاء المرصودة</div>`;
-
+                h += `<label class="f-label" style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                        <i class="fa-solid fa-triangle-exclamation" style="color: var(--danger); font-size: 0.72rem;"></i>
+                        الأخطاء المرصودة
+                      </label>`;
+                h += `<div class="issues-container">`;
                 if (ISSUE_CATEGORIES.length === 0) {
-                    h += `<div style="text-align: center; padding: 10px; color: var(--text-muted); font-size: 0.72rem;">لا توجد أخطاء مسجلة في الكاتالوج</div>`;
+                    h += `<div style="text-align: center; padding: 12px; color: var(--text-muted); font-size: 0.72rem;">لا توجد أخطاء مسجلة في الكاتالوج</div>`;
                 } else {
-                    ISSUE_CATEGORIES.forEach((group, idx) => {
-                        h += `<div style="margin-bottom: ${idx === ISSUE_CATEGORIES.length - 1 ? '0' : '10px'};">
-                                <div onclick="this.nextElementSibling.classList.toggle('hidden-logic'); this.querySelector('i').style.transform = this.nextElementSibling.classList.contains('hidden-logic') ? 'rotate(0deg)' : 'rotate(-90deg)';"
-                                     style="font-size: 0.7rem; font-weight: 900; color: var(--accent); padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid var(--card-border); cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none;">
-                                  <i class="fa-solid fa-caret-left" style="transition: transform 0.2s;"></i> ${escapeHtml(group.name)}
-                                </div>
-                                <div class="hidden-logic" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 8px;">`;
+                    ISSUE_CATEGORIES.forEach((group) => {
+                        h += `<div class="issue-category-title" onclick="toggleIssueCategory(this)">
+                                <i class="fa-solid fa-chevron-left"></i>
+                                ${escapeHtml(group.name)}
+                              </div>
+                              <div class="issue-items-grid">`;
                         group.items.forEach(o => {
-                            h += `<label class="cb-item" style="font-size: 0.68rem;">
+                            h += `<label class="cb-item">
                                     <input type="checkbox" name="${fid}" value="${o.code}" onchange="handleLocalLogic('T4',this,'${qId}','${unitId}')">
-                                    ${escapeHtml(o.label)}
+                                    <span>${escapeHtml(o.label)}</span>
                                   </label>`;
                         });
-                        h += `</div></div>`;
+                        h += `</div>`;
                     });
                 }
-                h += `</div></div>`;
+                h += `</div>`;
             }
             else if (type === 'T5') {
                 h += `<label class="f-label">الاسم / ملاحظة</label>
@@ -852,7 +897,8 @@
                       <textarea name="${fid}" class="f-textarea" maxlength="3000" placeholder="اكتب الأخطاء بدقة..."></textarea>`;
             }
             else if (type === 'T9') {
-                h += `<div class="pill-group">`;
+                h += `<label class="f-label">الدور</label>
+                      <div class="pill-group">`;
                 ROLES.forEach(o => {
                     h += `<label class="pill" style="font-size: 0.68rem;"><input type="radio" name="${fid}" value="${o.code}" onchange="handleLocalLogic('T9',this,'${qId}','${unitId}')"> ${escapeHtml(o.name)}</label>`;
                 });
@@ -863,36 +909,57 @@
             return h;
         }
 
+        // ============================================
+        // BUILD ASSESSMENT UNIT
+        // ============================================
         function buildAssessmentUnitHtml(qId, unitId, deletable, hasDate, isWard) {
-            return `
+            let html = `
             <div id="unit-${qId}-${unitId}" class="assess-unit">
                 <div class="assess-unit-head">
                     <span class="assess-unit-num">
                         <i class="fa-solid fa-id-badge"></i>
-                        تقييم فردي #${unitId.replace('A','')}
+                        تقييم #${unitId.replace('A','')}
                     </span>
                     <div class="assess-unit-actions">
                         ${!isWard ? `<button type="button" class="mini-btn" onclick="cloneAssessmentUnit('${qId}')"><i class="fa-solid fa-user-plus"></i> إضافة</button>` : ''}
                         ${deletable ? `<button type="button" class="mini-btn danger" onclick="document.getElementById('unit-${qId}-${unitId}').remove()"><i class="fa-solid fa-trash"></i> حذف</button>` : ''}
                     </div>
-                </div>
-                <div style="display: grid; grid-template-columns: ${hasDate ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 10px; margin-bottom: 12px;">
-                    ${hasDate ? `<div>${buildTemplateHtml('T1', qId, unitId)}</div>` : ''}
-                    <div>${buildTemplateHtml('T2', qId, unitId)}</div>
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-end;">
-                        ${!isWard ? buildTemplateHtml('T9', qId, unitId) : ''}
-                        ${buildTemplateHtml('T3', qId, unitId, isWard)}
-                        ${buildTemplateHtml('T7', qId, unitId, isWard)}
-                        ${buildTemplateHtml('T5', qId, unitId, isWard)}
+                </div>`;
+
+            if (isWard) {
+                html += `
+                    <div class="assess-row">
+                        ${buildTemplateHtml('T2', qId, unitId)}
+                        ${buildTemplateHtml('T7', qId, unitId, true)}
                     </div>
-                </div>
-                ${!isWard ? buildTemplateHtml('T4', qId, unitId) : ''}
-                <div style="margin-top: 10px;">${buildTemplateHtml('T6', qId, unitId)}</div>
-            </div>`;
+                    <div class="assess-row-single">
+                        ${buildTemplateHtml('T6', qId, unitId)}
+                    </div>`;
+            } else {
+                html += `
+                    <div class="assess-row">
+                        ${hasDate ? buildTemplateHtml('T1', qId, unitId) : ''}
+                        ${buildTemplateHtml('T2', qId, unitId)}
+                        ${buildTemplateHtml('T9', qId, unitId)}
+                    </div>
+                    <div class="assess-row">
+                        ${buildTemplateHtml('T3', qId, unitId)}
+                        ${buildTemplateHtml('T5', qId, unitId)}
+                    </div>
+                    <div class="assess-row-single">
+                        ${buildTemplateHtml('T4', qId, unitId)}
+                    </div>
+                    <div class="assess-row-single">
+                        ${buildTemplateHtml('T6', qId, unitId)}
+                    </div>`;
+            }
+
+            html += `</div>`;
+            return html;
         }
 
         // ============================================
-        // RENDER (from DB)
+        // RENDER
         // ============================================
         function renderQuestions() {
             const c = document.getElementById('qContainer');
@@ -953,6 +1020,18 @@
         }
 
         // ============================================
+        // TOGGLE ISSUE CATEGORY
+        // ============================================
+        window.toggleIssueCategory = function(el) {
+            const icon = el.querySelector('i');
+            const grid = el.nextElementSibling;
+            if (!grid) return;
+            const isHidden = grid.style.display === 'none';
+            grid.style.display = isHidden ? 'grid' : 'none';
+            icon.style.transform = isHidden ? 'rotate(-90deg)' : 'rotate(0deg)';
+        };
+
+        // ============================================
         // LOCAL LOGIC
         // ============================================
         window.handleLocalLogic = function(type, el, qId, unitId) {
@@ -966,7 +1045,7 @@
                     if (doc && doc.specialty) {
                         specDiv.querySelector('.spec-text').innerText = doc.specialty;
                         specDiv.classList.remove('hidden-logic');
-                        specDiv.style.display = 'flex';
+                        specDiv.style.display = 'inline-flex';
                     } else {
                         specDiv.classList.add('hidden-logic');
                     }
@@ -986,12 +1065,7 @@
                 const t7 = document.getElementById(`cont_${pre}_T7`);
                 const t5 = document.getElementById(`cont_${pre}_T5`);
 
-                // نبحث عن الـ code بدل value
-                const selectedLabel = el.parentElement.textContent.trim();
-                const isDoctor = selectedLabel === 'طبيب';
-                const isNurseOrAdmin = selectedLabel === 'تمريض' || selectedLabel === 'إداري';
-
-                if (isDoctor) {
+                if (val === 'doctor') {
                     if (t3) t3.classList.remove('hidden-logic');
                     if (t7) t7.classList.add('hidden-logic');
                     if (t5) t5.classList.add('hidden-logic');
@@ -999,7 +1073,7 @@
                     if (t7) t7.classList.remove('hidden-logic');
                     if (t3) t3.classList.add('hidden-logic');
                     if (t5) t5.classList.add('hidden-logic');
-                } else if (isNurseOrAdmin || val === 'nurse' || val === 'admin') {
+                } else if (val === 'nurse' || val === 'admin') {
                     if (t5) t5.classList.remove('hidden-logic');
                     if (t3) t3.classList.add('hidden-logic');
                     if (t7) t7.classList.add('hidden-logic');
@@ -1061,21 +1135,18 @@
         };
 
         // ============================================
-        // GLOBAL LOGIC (show/hide forms)
+        // GLOBAL LOGIC
         // ============================================
         window.handleGlobalLogic = function() {
-            document.querySelectorAll('#qContainer .question-card').forEach(c => {
-                c.classList.remove('visible');
-            });
+            document.querySelectorAll('#qContainer .question-card').forEach(c => c.classList.remove('visible'));
 
             const specChecks = Array.from(document.querySelectorAll('input[name="caseSpecialty"]:checked')).map(x => x.value);
             const servChecks = Array.from(document.querySelectorAll('input[name="addServ"]:checked')).map(x => x.value);
 
-            // Daycase detection (IDs starting with day_)
             const dayCaseIds = specChecks.filter(v => v.startsWith('day_')).map(v => v.replace('day_', ''));
             const regularSpecIds = specChecks.filter(v => v.startsWith('spec_')).map(v => v.replace('spec_', ''));
-
             const isDayCase = dayCaseIds.length > 0;
+
             const dayCaseContainer = document.getElementById('dayCaseDeptContainer');
             if (isDayCase) {
                 dayCaseContainer.classList.remove('hidden-logic');
@@ -1093,27 +1164,21 @@
 
             const caseStatusEl = document.querySelector('input[name="caseStatus"]:checked');
             const caseStatusName = caseStatusEl?.value || '';
-            const caseStatusLabel = CASE_STATUSES.find(c => c.name === caseStatusName)?.name || caseStatusName;
 
             const disDateDiv = document.getElementById('div_discharge_date');
             if (caseStatusName === 'Open') disDateDiv?.classList.add('hidden-logic');
             else if (caseStatusName === 'Closed') disDateDiv?.classList.remove('hidden-logic');
 
-            // Show/hide forms based on mappings
             FORMS.forEach(f => {
-                const card = document.getElementById(`card-F${FORMS.indexOf(f) + 1}`);
+                const idx = FORMS.indexOf(f);
+                const card = document.getElementById(`card-F${idx + 1}`);
                 if (!card) return;
 
                 let shouldShow = false;
-
-                // المطابقة بالتخصص
                 if (f.specialties.some(id => regularSpecIds.includes(id))) shouldShow = true;
-                // المطابقة بالخدمة
                 if (f.services.some(id => servChecks.includes(id))) shouldShow = true;
-                // المطابقة باليوم الواحد
                 if (f.daycases.some(id => dayCaseIds.includes(id))) shouldShow = true;
 
-                // تطبيق الاستثناءات
                 if (shouldShow && admType) {
                     const excluded = f.exclusions.some(e => e.kind === 'admission_type' && e.id === admType);
                     if (excluded) shouldShow = false;
@@ -1224,14 +1289,12 @@
                     return;
                 }
 
-                // Fill basic data
                 document.getElementById('patientName').value = data.patient_name || '';
                 document.getElementById('medicalId').value = data.medical_id || '';
                 document.getElementById('admissionDate').value = data.admission_date || '';
                 document.getElementById('dischargeDate').value = data.discharge_date || '';
                 document.getElementById('visitNumber').value = data.visit_number || '';
 
-                // Movement
                 const movParts = (data.movement || '').split(' -> ');
                 document.getElementById('mov_type').value = movParts[0] || '';
                 document.getElementById('mov_floor1').value = movParts[1] || '';
@@ -1249,7 +1312,6 @@
                     if (rb) rb.checked = true;
                 }
 
-                // Specialties + Services
                 document.querySelectorAll('input[name="caseSpecialty"]').forEach(cb => cb.checked = false);
                 document.querySelectorAll('input[name="addServ"]').forEach(cb => cb.checked = false);
 
@@ -1272,7 +1334,6 @@
                 handleGlobalLogic();
                 handleCard1T8(document.getElementById('consultantInput'));
 
-                // Load ward questions
                 const wardData = safeParse(data.ward_questions);
                 wardData.forEach((w, i) => {
                     const selects = document.querySelectorAll('#wardQContainer select[name$="_T2"]');
@@ -1289,7 +1350,6 @@
                     }
                 });
 
-                // Load audit questions
                 const auditData = safeParse(data.audit_questions);
                 const clearedCards = new Set();
 
@@ -1409,7 +1469,6 @@
                 audit_questions: [],
             };
 
-            // Ward
             document.querySelectorAll('#wardQContainer > div').forEach((div, i) => {
                 const selectEl = div.querySelector('select[name^="unit_W"]');
                 if (!selectEl) return;
@@ -1423,7 +1482,6 @@
                 });
             });
 
-            // Audit
             document.querySelectorAll('#qContainer .question-card.visible').forEach(card => {
                 const qId = card.id.replace('card-', '');
                 const titleEl = card.querySelector('.question-title span:last-child');
@@ -1559,14 +1617,6 @@
         window.redirectToFinalReport = function() {
             if (finalReportUrl) window.location.href = finalReportUrl;
         };
-
-        // ============================================
-        // ESCAPE
-        // ============================================
-        function escapeHtml(s) {
-            if (!s) return '';
-            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-        }
 
         // ============================================
         // INIT
