@@ -689,11 +689,24 @@
             border-radius: 10px; border: 2px solid var(--bg);
         }
         ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
+        .loading-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .loading-screen.hide { opacity: 0; pointer-events: none; }
     </style>
 </head>
 <link rel="stylesheet" href="./theme-overrides.css" />
-<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+<script src="loading-logo.js" defer></script>
+<script src="loader-buttons.js" defer></script>
 
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري التحميل...</p>
+    </div>
     <div class="scroll-progress" id="scrollProgress"></div>
     <div class="aurora-bg"></div>
     <div class="grid-overlay"></div>
@@ -1222,6 +1235,14 @@
             const random = String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0');
             return `VX-${prefix}-${year}-${random}`;
         }
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loadingScreen')?.classList.add('hide');
+            }, 400);
+        });
+        setTimeout(() => {
+            document.getElementById('loadingScreen')?.classList.add('hide');
+        }, 2000);
     </script>
     <script type="module" src="./session-manager.js"></script>
 
