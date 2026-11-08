@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم الشاملة | VEXORIS</title>
+    <title>قوائم النظام | VEXORIS</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -560,7 +560,7 @@
 
             <!-- SIDEBAR -->
             <aside class="tabs-sidebar">
-                <div class="tabs-sidebar-title">الكاتالوجات</div>
+                <div class="tabs-sidebar-title">قوائم النظام</div>
                 <div id="tabsList"></div>
             </aside>
 
@@ -606,7 +606,7 @@
         </div>
     </main>
 
-    <!-- ===== GENERIC CRUD MODAL ===== -->
+    <!-- GENERIC CRUD MODAL -->
     <div class="modal-overlay" id="crudModal">
         <div class="modal-card wide">
             <div class="modal-head">
@@ -623,7 +623,7 @@
         </div>
     </div>
 
-    <!-- ===== IMPORT MODAL ===== -->
+    <!-- IMPORT MODAL -->
     <div class="modal-overlay" id="importModal">
         <div class="modal-card wide">
             <div class="modal-head">
@@ -667,7 +667,7 @@
         
         import { supabase } from '../supabase-client.js';
         import { logAudit } from '../audit-log.js';
-// 🔥 Fallback لو notify.js مش متحمل
+
         if (typeof window.showNotification !== 'function') {
             console.warn('[catalogs] notify.js not loaded — using fallback');
             window.showNotification = function(msg, type = 'info') {
@@ -847,8 +847,24 @@
                 importable: true,
                 csvColumns: ['name', 'specialty', 'department']
             },
-            ward_clerks: {
-                title: 'مدخلو البيانات',
+            // ✅ التمريض — بعد الأطباء مباشرةً
+            nurses: {
+                title: 'التمريض',
+                subtitle: 'Nurses',
+                icon: 'fa-user-nurse',
+                table: 'nurses',
+                singular: 'ممرض/ة',
+                order: 'name',
+                fields: [
+                    { name: 'name', label: 'اسم الممرض/ة', type: 'text', required: true, placeholder: 'مثل: أحمد محمود' },
+                    { name: 'department', label: 'القسم', type: 'text', placeholder: 'مثل: قسم الطوارئ' }
+                ],
+                columns: ['name', 'department', 'is_active'],
+                importable: true,
+                csvColumns: ['name', 'department']
+            },
+            'ward_clerks': {
+                title: 'مدخلين البيانات',
                 subtitle: 'Ward Clerks',
                 icon: 'fa-users-gear',
                 table: 'ward_clerks',
@@ -980,7 +996,6 @@
             }
             currentData = data || [];
 
-            // Load relation labels for issues
             if (currentTab === 'issues') {
                 const { data: cats } = await supabase.from('issue_category_catalog').select('id, name');
                 const catMap = {};
@@ -988,7 +1003,6 @@
                 currentData = currentData.map(d => ({ ...d, category_name: catMap[d.category_id] || '—' }));
             }
 
-            // Load mappings for forms
             if (currentTab === 'forms') {
                 const formIds = currentData.map(f => f.id);
                 if (formIds.length > 0) {
@@ -1099,7 +1113,6 @@
             const cfg = CATALOGS[currentTab];
             document.getElementById('crudModalTitle').textContent = `إضافة ${cfg.singular} جديد`;
 
-            // 🔥 إصلاح: نرجّع onclick لـ saveRecord بشكل افتراضي
             document.getElementById('crudSaveBtn').onclick = () => window.saveRecord();
 
             if (currentTab === 'forms') {
@@ -1119,7 +1132,6 @@
 
             document.getElementById('crudModalTitle').textContent = `تعديل ${cfg.singular}`;
 
-            // 🔥 إصلاح: نرجّع onclick لـ saveRecord
             document.getElementById('crudSaveBtn').onclick = () => window.saveRecord();
 
             if (currentTab === 'forms') {
@@ -1178,7 +1190,6 @@
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحفظ...';
 
             try {
-                // 1. جمع البيانات
                 const payload = {};
                 for (const field of cfg.fields) {
                     const el = document.getElementById(`fld-${field.name}`);
@@ -1198,7 +1209,6 @@
 
                 console.log('[saveRecord] Payload:', payload);
 
-                // 2. حفظ في Supabase
                 let error;
                 if (editingId) {
                     ({ error } = await supabase.from(cfg.table).update(payload).eq('id', editingId));
@@ -1217,18 +1227,15 @@
 
                 console.log('[saveRecord] ✅ Saved to database');
 
-                // 3. إشعار النجاح — مباشرة بعد الحفظ
                 if (window.showNotification) {
                     showNotification(editingId ? 'تم التحديث بنجاح' : 'تمت الإضافة بنجاح', 'success');
                 } else {
                     alert(editingId ? 'تم التحديث بنجاح' : 'تمت الإضافة بنجاح');
                 }
 
-                // 4. إغلاق الموديول — قبل أي عملية تانية
                 closeModal('crudModal');
                 console.log('[saveRecord] ✅ Modal closed');
 
-                // 5. تسجيل في Audit (لا يكسر العملية لو فشل)
                 try {
                     await logAudit(editingId ? 'catalog_updated' : 'catalog_created', {
                         entityType: cfg.table,
@@ -1239,7 +1246,6 @@
                     console.warn('[saveRecord] Audit log failed (ignored):', auditErr);
                 }
 
-                // 6. تحديث العداد + الجدول
                 try {
                     await loadCounts();
                     await switchTab(currentTab);
@@ -1424,7 +1430,6 @@
                     formId = data.id;
                 }
 
-                // Clear mappings
                 await Promise.all([
                     supabase.from('form_specialty_map').delete().eq('form_id', formId),
                     supabase.from('form_service_map').delete().eq('form_id', formId),
@@ -1432,7 +1437,6 @@
                     supabase.from('form_exclusion_map').delete().eq('form_id', formId)
                 ]);
 
-                // Insert new mappings
                 const getChecked = (boxId) => Array.from(document.querySelectorAll(`#${boxId} input:checked`)).map(x => x.value);
 
                 const specIds = getChecked('specsBox');

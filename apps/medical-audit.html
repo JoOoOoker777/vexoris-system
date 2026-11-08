@@ -266,9 +266,7 @@
         .btn-success:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 24px -6px rgba(16, 185, 129, 0.6); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-        /* ============================================
-           FLOATING SAVE — RIGHT SIDE, NEW IDENTITY
-           ============================================ */
+        /* FLOATING SAVE */
         .floating-save {
             position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 40;
             background: linear-gradient(160deg, rgba(14,165,233,0.95) 0%, rgba(99,102,241,0.95) 60%, rgba(139,92,246,0.95) 100%);
@@ -398,9 +396,6 @@
             border: 1px solid var(--card-border);
             border-radius: 10px;
         }
-        /* ============================================
-           ISSUE CATEGORY TITLE — CENTERED & BOLDER
-           ============================================ */
         .issue-category-title {
             font-size: 0.78rem;
             font-weight: 900;
@@ -422,9 +417,6 @@
         .issue-category-title:hover { color: var(--accent); }
         .issue-category-title i { font-size: 0.7rem; transition: transform 0.2s; color: var(--accent); }
 
-        /* ============================================
-           ISSUE GRID — 4 COLUMNS
-           ============================================ */
         .issue-items-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -456,9 +448,7 @@
         }
         .loading-screen.hide { opacity: 0; pointer-events: none; }
 
-        /* ============================================
-           QUICK ADD MODAL
-           ============================================ */
+        /* MODAL */
         .modal-overlay {
             position: fixed; inset: 0; z-index: 200;
             background: rgba(4,7,15,0.65); backdrop-filter: blur(6px);
@@ -728,9 +718,7 @@
         <span>حفظ</span>
     </button>
 
-    <!-- ============================================
-         QUICK ADD MODAL (DOCTORS / CLERKS)
-         ============================================ -->
+    <!-- QUICK ADD MODAL (DOCTORS / CLERKS / NURSES) -->
     <div class="modal-overlay" id="quickAddModal">
         <div class="modal-card">
             <div class="modal-head">
@@ -757,6 +745,16 @@
                     <div>
                         <label class="f-label">اسم المدخل <span class="req">*</span></label>
                         <input type="text" id="qaClerkName" class="f-input" placeholder="الاسم الكامل" />
+                    </div>
+                </div>
+                <div id="quickAddNurseFields" class="hidden-logic">
+                    <div>
+                        <label class="f-label">اسم الممرض/ة <span class="req">*</span></label>
+                        <input type="text" id="qaNurseName" class="f-input" placeholder="الاسم الكامل" />
+                    </div>
+                    <div>
+                        <label class="f-label">القسم</label>
+                        <input type="text" id="qaNurseDepartment" class="f-input" placeholder="القسم (اختياري)" />
                     </div>
                 </div>
             </div>
@@ -797,6 +795,7 @@
 
         let DOCTORS = [];
         let CLERKS = [];
+        let NURSES = [];
         let SPECIALTIES = [];
         let SERVICES = [];
         let DAYCASES = [];
@@ -838,12 +837,13 @@
             document.getElementById('loadingText').textContent = 'جاري تحميل البيانات المرجعية...';
 
             const [
-                doctorsRes, clerksRes, specialtiesRes, servicesRes,
+                doctorsRes, clerksRes, nursesRes, specialtiesRes, servicesRes,
                 daycasesRes, admissionTypesRes, caseStatusesRes,
                 scoresRes, rolesRes, issueCatsRes, issuesRes, formsRes
             ] = await Promise.all([
                 supabase.from('doctors').select('id, name, specialty, department').eq('is_active', true).order('name'),
                 supabase.from('ward_clerks').select('id, name').eq('is_active', true).order('name'),
+                supabase.from('nurses').select('id, name, department').eq('is_active', true).order('name'),
                 supabase.from('specialty_catalog').select('id, name').eq('is_active', true).order('order_index'),
                 supabase.from('service_catalog').select('id, name').eq('is_active', true).order('order_index'),
                 supabase.from('daycase_catalog').select('id, name').eq('is_active', true).order('order_index'),
@@ -858,6 +858,7 @@
 
             DOCTORS = doctorsRes.data || [];
             CLERKS = clerksRes.data || [];
+            NURSES = nursesRes.data || [];
             SPECIALTIES = specialtiesRes.data || [];
             SERVICES = servicesRes.data || [];
             DAYCASES = daycasesRes.data || [];
@@ -897,7 +898,7 @@
             }
 
             console.log('[Load]', {
-                doctors: DOCTORS.length, clerks: CLERKS.length,
+                doctors: DOCTORS.length, clerks: CLERKS.length, nurses: NURSES.length,
                 specialties: SPECIALTIES.length, services: SERVICES.length,
                 daycases: DAYCASES.length, forms: FORMS.length,
                 issueCategories: ISSUE_CATEGORIES.length
@@ -1002,8 +1003,9 @@
                 h += `</div>`;
             }
             else if (type === 'T5') {
-                h += `<label class="f-label">الاسم / ملاحظة</label>
-                      <input type="text" name="${fid}" class="f-input" placeholder="الاسم أو الملاحظة..." onchange="handleLocalLogic('T5',this,'${qId}','${unitId}')">`;
+                // T5 — multipurpose: text (otherName/notes) OR nurse datalist (when role=nurse)
+                h += `<label class="f-label" id="lbl_${fid}">الاسم / ملاحظة</label>
+                      <input type="text" name="${fid}" id="in_${fid}" class="f-input" placeholder="الاسم أو الملاحظة..." onchange="handleLocalLogic('T5',this,'${qId}','${unitId}')" data-t5-mode="text">`;
             }
             else if (type === 'T6') {
                 h += `<label class="f-label" style="color: var(--danger);">توضيح الأخطاء</label>
@@ -1145,7 +1147,7 @@
         };
 
         // ============================================
-        // QUICK ADD MODAL — DOCTORS / CLERKS
+        // QUICK ADD MODAL — DOCTORS / CLERKS / NURSES
         // ============================================
         function populateQuickAddSpecialties() {
             const dl = document.getElementById('qaSpecialtyList');
@@ -1160,22 +1162,32 @@
             const title = document.getElementById('quickAddTitle');
             const docFields = document.getElementById('quickAddDoctorFields');
             const clerkFields = document.getElementById('quickAddClerkFields');
+            const nurseFields = document.getElementById('quickAddNurseFields');
+
+            // hide all
+            docFields.classList.add('hidden-logic');
+            clerkFields.classList.add('hidden-logic');
+            nurseFields.classList.add('hidden-logic');
 
             if (kind === 'doctor') {
                 title.textContent = 'إضافة طبيب جديد';
                 docFields.classList.remove('hidden-logic');
-                clerkFields.classList.add('hidden-logic');
                 document.getElementById('qaDoctorName').value = '';
                 document.getElementById('qaDoctorSpecialty').value = '';
                 document.getElementById('qaDoctorDepartment').value = '';
                 populateQuickAddSpecialties();
                 setTimeout(() => document.getElementById('qaDoctorName').focus(), 60);
-            } else {
+            } else if (kind === 'clerk') {
                 title.textContent = 'إضافة مدخل بيانات جديد';
-                docFields.classList.add('hidden-logic');
                 clerkFields.classList.remove('hidden-logic');
                 document.getElementById('qaClerkName').value = '';
                 setTimeout(() => document.getElementById('qaClerkName').focus(), 60);
+            } else if (kind === 'nurse') {
+                title.textContent = 'إضافة ممرض/ة جديد';
+                nurseFields.classList.remove('hidden-logic');
+                document.getElementById('qaNurseName').value = '';
+                document.getElementById('qaNurseDepartment').value = '';
+                setTimeout(() => document.getElementById('qaNurseName').focus(), 60);
             }
 
             modal.classList.add('open');
@@ -1213,6 +1225,12 @@
             });
         }
 
+        function refreshNurseDatalists() {
+            document.querySelectorAll('datalist[id^="dl_nurse_"]').forEach(dl => {
+                dl.innerHTML = NURSES.map(n => `<option value="${escapeHtml(n.name)}">`).join('') + `<option value="غير موجود">`;
+            });
+        }
+
         window.saveQuickAdd = async function() {
             const ctx = pendingAddContext;
             if (!ctx) return;
@@ -1242,7 +1260,7 @@
                     DOCTORS.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
                     refreshDoctorDatalists();
                     addedName = data.name;
-                } else {
+                } else if (ctx.kind === 'clerk') {
                     const name = document.getElementById('qaClerkName').value.trim();
                     if (!name) { showNotification('يرجى إدخال اسم المدخل', 'warning'); return; }
                     if (CLERKS.some(c => c.name === name)) { showNotification('هذا المدخل موجود بالفعل', 'warning'); return; }
@@ -1257,13 +1275,30 @@
                     CLERKS.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
                     refreshClerkDatalists();
                     addedName = data.name;
+                } else if (ctx.kind === 'nurse') {
+                    const name = document.getElementById('qaNurseName').value.trim();
+                    const department = document.getElementById('qaNurseDepartment').value.trim();
+
+                    if (!name) { showNotification('يرجى إدخال اسم الممرض/ة', 'warning'); return; }
+                    if (NURSES.some(n => n.name === name)) { showNotification('هذا الاسم موجود بالفعل', 'warning'); return; }
+
+                    const { data, error } = await supabase.from('nurses')
+                        .insert({ name, department: department || null })
+                        .select('id, name, department')
+                        .single();
+                    if (error) throw error;
+
+                    NURSES.push(data);
+                    NURSES.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+                    refreshNurseDatalists();
+                    addedName = data.name;
                 }
 
                 if (ctx.targetInput) {
                     ctx.targetInput.value = addedName;
                     if (ctx.fieldType === 'consultant') {
                         window.handleCard1T8(ctx.targetInput);
-                    } else if (ctx.fieldType === 'T3' || ctx.fieldType === 'T7' || ctx.fieldType === 'T8') {
+                    } else if (['T3', 'T5', 'T7', 'T8'].includes(ctx.fieldType)) {
                         window.handleLocalLogic(ctx.fieldType, ctx.targetInput, ctx.qId, ctx.unitId);
                     }
                 }
@@ -1272,7 +1307,7 @@
                 await logAudit('quick_add_' + ctx.kind, {
                     entityType: ctx.kind,
                     entityId: addedName,
-                    description: `إضافة ${ctx.kind === 'doctor' ? 'طبيب' : 'مدخل بيانات'} جديد من واجهة المراجعة`,
+                    description: `إضافة ${ctx.kind === 'doctor' ? 'طبيب' : ctx.kind === 'nurse' ? 'ممرض/ة' : 'مدخل بيانات'} جديد من واجهة المراجعة`,
                     severity: 'info'
                 });
 
@@ -1287,11 +1322,49 @@
         };
 
         // ============================================
+        // T5 MODE HELPERS
+        // ============================================
+        function setT5Mode(pre, mode) {
+            const inp = document.getElementById(`in_${pre}_T5`);
+            const lbl = document.getElementById(`lbl_${pre}_T5`);
+            if (!inp) return;
+
+            if (mode === 'nurse') {
+                let dl = document.getElementById(`dl_nurse_${pre}`);
+                if (!dl) {
+                    dl = document.createElement('datalist');
+                    dl.id = `dl_nurse_${pre}`;
+                    dl.innerHTML = NURSES.map(n => `<option value="${escapeHtml(n.name)}">`).join('') + `<option value="غير موجود">`;
+                    inp.parentElement.appendChild(dl);
+                }
+                inp.setAttribute('list', `dl_nurse_${pre}`);
+                inp.dataset.t5Mode = 'nurse';
+                inp.placeholder = 'اسم الممرض/ة...';
+                if (lbl) lbl.textContent = 'اسم الممرض/ة';
+            } else {
+                inp.removeAttribute('list');
+                inp.dataset.t5Mode = 'text';
+                inp.placeholder = 'الاسم أو الملاحظة...';
+                if (lbl) lbl.textContent = 'الاسم / ملاحظة';
+            }
+        }
+
+        // ============================================
         // LOCAL LOGIC
         // ============================================
         window.handleLocalLogic = function(type, el, qId, unitId) {
             const pre = `unit_${qId}_${unitId}`;
             const val = el.value;
+
+            // T5 — text OR nurse datalist
+            if (type === 'T5') {
+                if (el.dataset.t5Mode === 'nurse' && val === 'غير موجود') {
+                    window.openQuickAddModal('nurse', {
+                        kind: 'nurse', targetInput: el, fieldType: 'T5', qId, unitId
+                    });
+                }
+                return;
+            }
 
             // T7 — Ward Clerk
             if (type === 'T7') {
@@ -1336,14 +1409,22 @@
                     if (t3) t3.classList.remove('hidden-logic');
                     if (t7) t7.classList.add('hidden-logic');
                     if (t5) t5.classList.add('hidden-logic');
+                    setT5Mode(pre, 'text');
                 } else if (val === 'Ward Clerk') {
                     if (t7) t7.classList.remove('hidden-logic');
                     if (t3) t3.classList.add('hidden-logic');
                     if (t5) t5.classList.add('hidden-logic');
-                } else if (val === 'nurse' || val === 'admin') {
+                    setT5Mode(pre, 'text');
+                } else if (val === 'nurse') {
                     if (t5) t5.classList.remove('hidden-logic');
                     if (t3) t3.classList.add('hidden-logic');
                     if (t7) t7.classList.add('hidden-logic');
+                    setT5Mode(pre, 'nurse');
+                } else if (val === 'admin') {
+                    if (t5) t5.classList.remove('hidden-logic');
+                    if (t3) t3.classList.add('hidden-logic');
+                    if (t7) t7.classList.add('hidden-logic');
+                    setT5Mode(pre, 'text');
                 }
             }
 
@@ -1537,7 +1618,7 @@
         };
 
         // ============================================
-        // NAV GUARD — CONFIRM ON HEADER TAB CLICK
+        // NAV GUARD
         // ============================================
         function setupNavGuard() {
             document.querySelectorAll('.nav-inner a').forEach(a => {
@@ -1853,7 +1934,7 @@
         };
 
         // ============================================
-        // SUBMIT — SAVE REVIEW
+        // SUBMIT
         // ============================================
         window.generateReport = async function() {
             const data = collectAllData();
@@ -1958,7 +2039,6 @@
                 handleGlobalLogic();
                 setupNavGuard();
 
-                // Modal overlay click to close
                 document.getElementById('quickAddModal')?.addEventListener('click', (e) => {
                     if (e.target.id === 'quickAddModal') window.closeQuickAddModal();
                 });
