@@ -832,7 +832,8 @@
                     { name: 'order_index', label: 'الترتيب', type: 'number', default: 0 }
                 ],
                 columns: ['code', 'label', 'category_name', 'order_index', 'is_active'],
-                importable: false
+                importable: true,
+                csvColumns: ['text', 'specialties', 'services', 'daycases', 'exclusion_admission_types', 'exclusion_case_statuses', 'requires_date', 'order_index']
             },
             doctors: {
                 title: 'الأطباء',
@@ -894,7 +895,8 @@
                     { name: 'order_index', label: 'الترتيب', type: 'number', default: 0 }
                 ],
                 columns: ['text', 'requires_date', 'specialties_count', 'services_count', 'order_index', 'is_active'],
-                importable: false
+                importable: true,
+                csvColumns: ['text', 'specialties', 'services', 'daycases', 'exclusion_admission_types', 'exclusion_case_statuses', 'requires_date', 'order_index']
             }
         };
 
@@ -1548,6 +1550,7 @@
         }
 
         window.executeImport = async function() {
+            if (currentTab === 'forms') return importForms();
             const btn = document.getElementById('importSaveBtn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الاستيراد...';
@@ -1604,6 +1607,197 @@
             XLSX.writeFile(wb, `${currentTab}_${new Date().toISOString().split('T')[0]}.xlsx`);
             showNotification('تم التصدير', 'success');
         };
+        async function importForms() {
+            const btn = document.getElementById('importSaveBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الاستيراد...';
+
+            // Load catalogs for name→id lookup
+            const [
+                { data: specs }, { data: servs }, { data: days },
+                { data: admTypes }, { data: caseStatuses }
+            ] = await Promise.all([
+                supabase.from('specialty_catalog').select('id, name'),
+                supabase.from('service_catalog').select('id, name'),
+                supabase.from('daycase_catalog').select('id, name'),
+                supabase.from('admission_type_catalog').select('id, name'),
+                supabase.from('case_status_catalog').select('id, name')
+            ]);
+
+            const specMap   = Object.fromEntries((specs||[]).map(x => [x.name.trim(), x.id]));
+            const servMap   = Object.fromEntries((servs||[]).map(x => [x.name.trim(), x.id]));
+            const dayMap    = Object.fromEntries((days||[]).map(x => [x.name.trim(), x.id]));
+            const admMap    = Object.fromEntries((admTypes||[]).map(x => [x.name.trim(), x.id]));
+            const statusMap = Object.fromEntries((caseStatuses||[]).map(x => [x.name.trim(), x.id]));
+
+            const splitNames = v => v ? String(v).split(',').map(s => s.trim()).filter(Boolean) : [];
+            const parseBool  = v => v === true || String(v).toUpperCase() === 'TRUE' || v === 1 || v === '1';
+
+            let success = 0, failed = 0;
+            const warnings = [];
+
+            for (const row of importRows) {
+                const text = String(row.text || '').trim();
+                if (!text) { failed++; continue; }
+
+                try {
+                    // 1. Upsert form
+                    const { data: form, error: formErr } = await supabase
+                        .from('form_catalog')
+                        .upsert({
+                            text,
+                            requires_date: parseBool(row.requires_date),
+                            order_index: parseInt(row.order_index) || 0
+                        }, { onConflict: 'text' })
+                        .select('id')
+                        .single();
+
+                    if (formErr) throw formErr;
+                    const formId = form.id;
+
+                    // 2. Delete old mappings
+                    await Promise.all([
+                        supabase.from('form_specialty_map').delete().eq('form_id', formId),
+                        supabase.from('form_service_map').delete().eq('form_id', formId),
+                        supabase.from('form_daycase_map').delete().eq('form_id', formId),
+                        supabase.from('form_exclusion_map').delete().eq('form_id', formId)
+                    ]);
+
+                    // 3. Specialties
+                    const specNames = splitNames(row.specialties);
+                    const specIds = [], missSpec = [];
+                    specNames.forEach(n => specMap[n] ? specIds.push(specMap[n]) : missSpec.push(n));
+                    if (specIds.length) {
+                        await supabase.from('form_specialty_map').insert(
+                            specIds.map(sid => ({ form_id: formId, specialty_id: sid }))
+                        );
+                    }
+                    if (missSpec.length) warnings.push(`${text}: تخصصات غير موجودة [${missSpec.join(', ')}]`);
+
+                    // 4. Services
+                    const servNames = splitNames(row.services);
+                    const servIds = [], missServ = [];
+                    servNames.forEach(n => servMap[n] ? servIds.push(servMap[n]) : missServ.push(n));
+                    if (servIds.length) {
+                        await supabase.from('form_service_map').insert(
+                            servIds.map(sid => ({ form_id: formId, service_id: sid }))
+                        );
+                    }
+                    if (missServ.length) warnings.push(`${text}: خدمات غير موجودة [${missServ.join(', ')}]`);
+
+                    // 5. Daycases
+                    const dayNames = splitNames(row.daycases);
+                    const dayIds = [], missDay = [];
+                    dayNames.forEach(n => dayMap[n] ? dayIds.push(dayMap[n]) : missDay.push(n));
+                    if (dayIds.length) {
+                        await supabase.from('form_daycase_map').insert(
+                            dayIds.map(did => ({ form_id: formId, daycase_id: did }))
+                        );
+                    }
+                    if (missDay.length) warnings.push(`${text}: أنواع يوم واحد غير موجودة [${missDay.join(', ')}]`);
+
+                    // 6. Exclusions - admission types
+                    const exclAdmNames = splitNames(row.exclusion_admission_types);
+                    const exclAdmIds = [], missExclAdm = [];
+                    exclAdmNames.forEach(n => admMap[n] ? exclAdmIds.push(admMap[n]) : missExclAdm.push(n));
+                    if (exclAdmIds.length) {
+                        await supabase.from('form_exclusion_map').insert(
+                            exclAdmIds.map(id => ({ form_id: formId, exclusion_kind: 'admission_type', exclusion_id: id }))
+                        );
+                    }
+                    if (missExclAdm.length) warnings.push(`${text}: استثناءات أنواع دخول غير موجودة [${missExclAdm.join(', ')}]`);
+
+                    // 7. Exclusions - case statuses
+                    const exclStatusNames = splitNames(row.exclusion_case_statuses);
+                    const exclStatusIds = [], missExclStatus = [];
+                    exclStatusNames.forEach(n => statusMap[n] ? exclStatusIds.push(statusMap[n]) : missExclStatus.push(n));
+                    if (exclStatusIds.length) {
+                        await supabase.from('form_exclusion_map').insert(
+                            exclStatusIds.map(id => ({ form_id: formId, exclusion_kind: 'case_status', exclusion_id: id }))
+                        );
+                    }
+                    if (missExclStatus.length) warnings.push(`${text}: استثناءات حالات ملف غير موجودة [${missExclStatus.join(', ')}]`);
+
+                    success++;
+                } catch (err) {
+                    console.error('[importForms] Row error:', row, err);
+                    failed++;
+                }
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-upload"></i> استيراد';
+
+            let msg = `تم استيراد ${success} نموذج بنجاح`;
+            if (failed) msg += `، فشل ${failed}`;
+            if (warnings.length) msg += ` — تحذيرات: ${warnings.length}`;
+
+            showNotification(msg, success > 0 ? 'success' : 'error');
+
+            if (warnings.length) {
+                console.warn('[importForms] Warnings:', warnings);
+                setTimeout(() => {
+                    showNotification('تحذيرات: ' + warnings.slice(0, 5).join(' | '), 'warning', '', 10000);
+                }, 1500);
+            }
+
+            closeModal('importModal');
+            await loadCounts();
+            await switchTab('forms');
+        }
+        async function exportForms() {
+            if (!currentData.length) {
+                showNotification('لا توجد بيانات للتصدير', 'info');
+                return;
+            }
+
+            const formIds = currentData.map(f => f.id);
+
+            const [specRes, servRes, dayRes, exclRes, specCat, servCat, dayCat, admCat, statusCat] = await Promise.all([
+                supabase.from('form_specialty_map').select('form_id, specialty_id').in('form_id', formIds),
+                supabase.from('form_service_map').select('form_id, service_id').in('form_id', formIds),
+                supabase.from('form_daycase_map').select('form_id, daycase_id').in('form_id', formIds),
+                supabase.from('form_exclusion_map').select('*').in('form_id', formIds),
+                supabase.from('specialty_catalog').select('id, name'),
+                supabase.from('service_catalog').select('id, name'),
+                supabase.from('daycase_catalog').select('id, name'),
+                supabase.from('admission_type_catalog').select('id, name'),
+                supabase.from('case_status_catalog').select('id, name')
+            ]);
+
+            const makeMap = arr => Object.fromEntries((arr||[]).map(x => [x.id, x.name]));
+            const specName = makeMap(specCat.data);
+            const servName = makeMap(servCat.data);
+            const dayName  = makeMap(dayCat.data);
+            const admName  = makeMap(admCat.data);
+            const statusNm = makeMap(statusCat.data);
+
+            const exportData = currentData.map(f => {
+                const specs = (specRes.data||[]).filter(x => x.form_id === f.id).map(x => specName[x.specialty_id]).filter(Boolean);
+                const servs = (servRes.data||[]).filter(x => x.form_id === f.id).map(x => servName[x.service_id]).filter(Boolean);
+                const days  = (dayRes.data||[]).filter(x => x.form_id === f.id).map(x => dayName[x.daycase_id]).filter(Boolean);
+                const excl  = (exclRes.data||[]).filter(x => x.form_id === f.id);
+                const exclAdm    = excl.filter(e => e.exclusion_kind === 'admission_type').map(e => admName[e.exclusion_id]).filter(Boolean);
+                const exclStatus = excl.filter(e => e.exclusion_kind === 'case_status').map(e => statusNm[e.exclusion_id]).filter(Boolean);
+
+                return {
+                    text: f.text,
+                    specialties: specs.join(', '),
+                    services: servs.join(', '),
+                    daycases: days.join(', '),
+                    exclusion_admission_types: exclAdm.join(', '),
+                    exclusion_case_statuses: exclStatus.join(', '),
+                    requires_date: f.requires_date ? 'TRUE' : 'FALSE',
+                    order_index: f.order_index ?? 0
+                };
+            });
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Forms');
+            XLSX.writeFile(wb, `forms_${new Date().toISOString().split('T')[0]}.xlsx`);
+            showNotification('تم التصدير', 'success');
+        }
     </script>
 
     <script type="module" src="../session-manager.js"></script>
