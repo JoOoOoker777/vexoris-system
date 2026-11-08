@@ -69,8 +69,7 @@
         }
         .nav-shell { position: sticky; top: 12px; z-index: 50; margin: 12px auto 0; max-width: 1400px; padding: 0 16px; }
         .nav-inner {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px) saturate(180%);
+            background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid var(--card-border);
             border-radius: 18px; padding: 10px 20px;
@@ -108,15 +107,12 @@
         .icon-btn:hover { background: rgba(14, 165, 233, 0.1); border-color: rgba(14, 165, 233, 0.4); transform: rotate(15deg); }
         .app-container { max-width: 1400px; margin: 0 auto; padding: 0 16px; }
 
-        /* Page Hero */
         .page-hero {
             margin-top: 24px;
             background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(99, 102, 241, 0.05) 50%, rgba(139, 92, 246, 0.08) 100%);
             border: 1px solid rgba(14, 165, 233, 0.22);
             border-radius: 24px; padding: 24px 32px;
             position: relative; overflow: hidden;
-            display: flex; align-items: center; justify-content: space-between; gap: 20px;
-            flex-wrap: wrap;
         }
         .page-hero::before {
             content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
@@ -142,34 +138,23 @@
         }
         .hero-desc { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-top: 4px; max-width: 540px; }
 
-        /* Glass Panels */
         .glass-panel {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px) saturate(180%);
+            background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid var(--card-border);
         }
 
-        /* Form Section Card */
         .form-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            overflow: hidden;
-            margin-top: 20px;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 20px; overflow: hidden; margin-top: 20px;
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         }
         .form-card-header {
-            padding: 14px 22px;
-            border-bottom: 1px solid var(--card-border);
+            padding: 14px 22px; border-bottom: 1px solid var(--card-border);
             background: linear-gradient(90deg, rgba(14, 165, 233, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%);
-            display: flex; align-items: center; gap: 12px;
-            flex-wrap: wrap;
+            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
         }
-        .form-card-header h2 {
-            flex: 1; font-size: 0.92rem; font-weight: 900; letter-spacing: -0.01em;
-        }
+        .form-card-header h2 { flex: 1; font-size: 0.92rem; font-weight: 900; letter-spacing: -0.01em; }
         .form-card-icon {
             width: 34px; height: 34px; border-radius: 9px;
             background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(99, 102, 241, 0.15));
@@ -179,7 +164,6 @@
         }
         .form-card-body { padding: 20px 22px; }
 
-        /* Labels & Inputs */
         .f-label {
             display: block; font-size: 0.66rem; font-weight: 800;
             color: var(--text-secondary); text-transform: uppercase;
@@ -188,10 +172,8 @@
         .f-label .req { color: var(--danger); }
         .f-input, .f-select, .f-textarea {
             width: 100%; padding: 9px 12px;
-            background: var(--input-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 9px;
-            color: var(--text-primary);
+            background: var(--input-bg); border: 1px solid var(--card-border);
+            border-radius: 9px; color: var(--text-primary);
             font-size: 0.8rem; font-weight: 600; font-family: inherit;
             transition: all 0.2s ease;
         }
@@ -202,17 +184,13 @@
         .f-textarea { resize: vertical; min-height: 60px; line-height: 1.6; }
         .f-input::placeholder, .f-textarea::placeholder { color: var(--text-muted); font-weight: 500; }
 
-        /* Radio Pills */
         .pill-group { display: flex; gap: 6px; flex-wrap: wrap; }
         .pill {
             display: inline-flex; align-items: center; gap: 5px;
             padding: 6px 10px;
-            background: var(--input-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 7px;
-            font-size: 0.72rem; font-weight: 700;
-            color: var(--text-secondary);
-            cursor: pointer; transition: all 0.2s ease;
+            background: var(--input-bg); border: 1px solid var(--card-border);
+            border-radius: 7px; font-size: 0.72rem; font-weight: 700;
+            color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease;
         }
         .pill:hover { border-color: var(--accent); color: var(--accent); }
         .pill input { display: none; }
@@ -222,44 +200,35 @@
             box-shadow: 0 4px 12px -4px rgba(14, 165, 233, 0.5);
         }
 
-        /* Checkbox Grid */
         .cb-grid {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
-            padding: 12px;
-            background: rgba(15, 23, 42, 0.25);
-            border: 1px solid var(--card-border);
-            border-radius: 11px;
+            padding: 12px; background: rgba(15, 23, 42, 0.25);
+            border: 1px solid var(--card-border); border-radius: 11px;
             max-height: 200px; overflow-y: auto;
         }
         html:not(.dark) .cb-grid { background: rgba(248, 250, 252, 0.5); }
         .cb-item {
             display: flex; align-items: center; gap: 6px;
             font-size: 0.72rem; font-weight: 700;
-            color: var(--text-secondary);
-            cursor: pointer; padding: 4px 6px;
-            border-radius: 6px;
-            transition: all 0.15s ease;
+            color: var(--text-secondary); cursor: pointer;
+            padding: 4px 6px; border-radius: 6px; transition: all 0.15s;
         }
         .cb-item:hover { background: rgba(14, 165, 233, 0.06); }
         .cb-item input[type="checkbox"] {
             width: 14px; height: 14px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0;
         }
 
-        /* Service checkboxes */
         .serv-grid {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
-            padding: 14px;
-            background: rgba(15, 23, 42, 0.25);
+            padding: 14px; background: rgba(15, 23, 42, 0.25);
             border: 1px solid var(--card-border); border-radius: 11px;
         }
         html:not(.dark) .serv-grid { background: rgba(248, 250, 252, 0.5); }
         @media (min-width: 768px) { .serv-grid { grid-template-columns: repeat(4, 1fr); } }
         .serv-grid .cb-item { font-size: 0.78rem; }
 
-        /* Search Bar */
         .search-bar {
-            margin-top: 16px;
-            padding: 14px;
+            margin-top: 16px; padding: 14px;
             background: rgba(14, 165, 233, 0.04);
             border: 1px solid rgba(14, 165, 233, 0.2);
             border-radius: 14px;
@@ -267,7 +236,6 @@
         }
         .search-bar .f-group { flex: 1; min-width: 160px; }
 
-        /* Buttons */
         .btn {
             display: inline-flex; align-items: center; justify-content: center; gap: 7px;
             padding: 9px 20px; border-radius: 10px;
@@ -290,64 +258,42 @@
         }
         .btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: rgba(14, 165, 233, 0.06); }
         .btn-success {
-            background: linear-gradient(135deg, #10b981, #0ea5e9);
-            color: #fff;
+            background: linear-gradient(135deg, #10b981, #0ea5e9); color: #fff;
             box-shadow: 0 6px 18px -6px rgba(16, 185, 129, 0.5);
         }
         .btn-success:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 24px -6px rgba(16, 185, 129, 0.6); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-        /* Floating Save Button */
         .floating-save {
-            position: fixed;
-            left: 0; top: 50%;
-            transform: translateY(-50%);
-            z-index: 40;
-            background: linear-gradient(135deg, #10b981, #0ea5e9);
-            color: #fff;
-            padding: 16px 10px;
-            border-radius: 0 14px 14px 0;
-            border: none;
+            position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 40;
+            background: linear-gradient(135deg, #10b981, #0ea5e9); color: #fff;
+            padding: 16px 10px; border-radius: 0 14px 14px 0; border: none;
             cursor: pointer;
             box-shadow: 4px 0 24px -6px rgba(16, 185, 129, 0.5);
             display: flex; flex-direction: column; align-items: center; gap: 6px;
-            font-family: inherit;
-            transition: all 0.3s ease;
+            font-family: inherit; transition: all 0.3s ease;
         }
         .floating-save:hover { padding-left: 16px; }
         .floating-save i { font-size: 1.1rem; }
         .floating-save span {
             font-size: 0.62rem; font-weight: 900;
             letter-spacing: 0.08em; text-transform: uppercase;
-            writing-mode: vertical-lr;
-            transform: rotate(180deg);
+            writing-mode: vertical-lr; transform: rotate(180deg);
         }
-        @media (max-width: 767px) {
-            .floating-save { display: none; }
-        }
+        @media (max-width: 767px) { .floating-save { display: none; } }
 
-        /* Section Divider */
-        .divider-line {
-            height: 1px; background: var(--card-border);
-            margin: 14px 0;
-        }
+        .divider-line { height: 1px; background: var(--card-border); margin: 14px 0; }
 
-        /* Audit Question Cards */
         .question-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-top: 3px solid var(--accent);
-            border-radius: 16px;
-            overflow: hidden;
-            margin-bottom: 14px;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-top: 3px solid var(--accent); border-radius: 16px;
+            overflow: hidden; margin-bottom: 14px;
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             display: none;
         }
         .question-card.visible { display: block; }
         .question-header {
-            padding: 12px 18px;
-            background: rgba(148, 163, 184, 0.04);
+            padding: 12px 18px; background: rgba(148, 163, 184, 0.04);
             border-bottom: 1px solid var(--card-border);
             display: flex; align-items: center; justify-content: space-between; gap: 10px;
             flex-wrap: wrap;
@@ -355,8 +301,7 @@
         .question-title {
             font-size: 0.85rem; font-weight: 900;
             color: var(--text-primary);
-            display: flex; align-items: center; gap: 8px;
-            flex: 1;
+            display: flex; align-items: center; gap: 8px; flex: 1;
         }
         .question-num {
             width: 22px; height: 22px; border-radius: 6px;
@@ -367,13 +312,10 @@
         }
         .question-body { padding: 16px 18px; }
 
-        /* Assessment Unit */
         .assess-unit {
             background: rgba(15, 23, 42, 0.25);
             border: 1px solid var(--card-border);
-            border-radius: 13px;
-            padding: 14px;
-            margin-bottom: 12px;
+            border-radius: 13px; padding: 14px; margin-bottom: 12px;
             transition: all 0.25s ease;
         }
         html:not(.dark) .assess-unit { background: rgba(248, 250, 252, 0.5); }
@@ -386,8 +328,7 @@
         .assess-unit-num {
             display: inline-flex; align-items: center; gap: 6px;
             font-size: 0.68rem; font-weight: 800;
-            color: var(--text-muted); text-transform: uppercase;
-            letter-spacing: 0.08em;
+            color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;
         }
         .assess-unit-actions { display: flex; gap: 6px; }
         .mini-btn {
@@ -401,10 +342,8 @@
         .mini-btn:hover { border-color: var(--accent); color: var(--accent); }
         .mini-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
 
-        /* Hidden utility */
         .hidden-logic { display: none !important; }
 
-        /* Loading */
         .loading-screen {
             position: fixed; inset: 0; background: var(--bg); z-index: 999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -412,7 +351,6 @@
         }
         .loading-screen.hide { opacity: 0; pointer-events: none; }
 
-        /* Footer */
         .footer-shell {
             max-width: 1400px; margin: 32px auto 24px; padding: 22px 20px;
             background: var(--card-bg); border: 1px solid var(--card-border);
@@ -449,7 +387,7 @@
 
     <div class="loading-screen" id="loadingScreen">
         <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
-        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري تحميل واجهة المراجعة...</p>
+        <p class="text-sm font-bold" id="loadingText" style="color: var(--text-secondary);">جاري تحميل واجهة المراجعة...</p>
     </div>
 
     <div class="aurora-bg"></div>
@@ -487,18 +425,15 @@
 
     <main class="app-container">
 
-        <!-- PAGE HERO -->
         <section class="page-hero no-print">
-            <div>
-                <div class="hero-badge">
-                    <span class="pulse-dot"></span>
-                    Medical File Audit
-                </div>
-                <h1 class="hero-title">مراجعة <span class="grad">الملفات الطبية</span></h1>
-                <p class="hero-desc">
-                    أدخل بيانات الملف الطبي، وأضف التقييمات لكل نموذج. النظام يخفي ويُظهر النماذج تلقائياً حسب التخصص والخدمات وحالة الملف.
-                </p>
+            <div class="hero-badge">
+                <span class="pulse-dot"></span>
+                Medical File Audit
             </div>
+            <h1 class="hero-title">مراجعة <span class="grad">الملفات الطبية</span></h1>
+            <p class="hero-desc">
+                أدخل بيانات الملف الطبي، وأضف التقييمات لكل نموذج. النظام يخفي ويُظهر النماذج تلقائياً حسب التخصص والخدمات وحالة الملف.
+            </p>
         </section>
 
         <!-- SEARCH BAR -->
@@ -569,10 +504,8 @@
                     </div>
                     <div>
                         <label class="f-label">مكان الدخول</label>
-                        <div class="pill-group">
-                            <label class="pill"><input type="radio" name="admissionType" value="طوارئ" onchange="handleGlobalLogic()"> طوارئ</label>
-                            <label class="pill"><input type="radio" name="admissionType" value="عيادات" onchange="handleGlobalLogic()"> عيادات</label>
-                            <label class="pill"><input type="radio" name="admissionType" value="مكتب الدخول" onchange="handleGlobalLogic()"> مكتب دخول</label>
+                        <div class="pill-group" id="admissionTypePills">
+                            <!-- populated from DB -->
                         </div>
                     </div>
                 </div>
@@ -608,20 +541,12 @@
                     <div>
                         <label class="f-label">التخصصات <span class="req">*</span></label>
                         <div class="cb-grid" id="specialtiesList">
-                            <!-- Populated by JS -->
+                            <!-- populated from DB -->
                         </div>
                         <div id="dayCaseDeptContainer" class="hidden-logic" style="margin-top: 10px; padding: 10px; background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.25); border-radius: 10px;">
                             <label class="f-label" style="color: #10b981;">القسم الرئيسي لليوم الواحد <span class="req">*</span></label>
                             <select id="dayCaseDept" class="f-select">
                                 <option value="">-- اختر القسم --</option>
-                                <option value="جراحة">جراحة</option>
-                                <option value="عظام">عظام</option>
-                                <option value="مسالك">مسالك</option>
-                                <option value="مخ واعصاب">مخ واعصاب</option>
-                                <option value="نساء وتوليد">نساء وتوليد</option>
-                                <option value="أطفال">أطفال</option>
-                                <option value="رعاية مركزة">رعاية مركزة</option>
-                                <option value="باطنة">باطنة</option>
                             </select>
                         </div>
                     </div>
@@ -637,7 +562,7 @@
             </div>
             <div class="form-card-body">
                 <div class="serv-grid" id="servicesList">
-                    <!-- Populated by JS -->
+                    <!-- populated from DB -->
                 </div>
             </div>
         </div>
@@ -650,14 +575,14 @@
             </div>
             <div class="form-card-body">
                 <div id="wardQContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
-                    <!-- Populated by JS -->
+                    <!-- populated from DB -->
                 </div>
             </div>
         </div>
 
         <!-- AUDIT QUESTIONS CONTAINER -->
         <div id="qContainer" style="margin-top: 20px;">
-            <!-- Populated dynamically -->
+            <!-- populated dynamically from form_catalog -->
         </div>
 
         <!-- SUBMIT BUTTONS -->
@@ -673,13 +598,11 @@
         </div>
     </main>
 
-    <!-- FLOATING SAVE BUTTON -->
     <button class="floating-save no-print" onclick="savePartial()" title="حفظ جزئي">
         <i class="fa-solid fa-floppy-disk"></i>
         <span>حفظ</span>
     </button>
 
-    <!-- FOOTER -->
     <footer class="footer-shell">
         <div class="footer-brand">VEXORIS SYSTEM</div>
         <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
@@ -696,14 +619,7 @@
     <script type="module">
         import { supabase } from '../supabase-client.js';
         import { logAudit, AUDIT } from '../audit-log.js';
-        import {
-            MARS_CONFIG,
-            DATE_REQUIRED_QS,
-            ISSUE_CATEGORIES,
-            ROLES,
-            SCORE_OPTIONS,
-            ERROR_TRANSLATIONS
-        } from './js/medical-audit-config.js';
+        // 🔥 لم نعد نحتاج MARS_CONFIG — كل شيء من DB
 
         // ============================================
         // STATE
@@ -713,10 +629,20 @@
         let unitCounter = 0;
         let cardCloneCounter = 0;
         let finalReportUrl = '';
+
+        // البيانات المحمّلة من DB
         let DOCTORS = [];
         let CLERKS = [];
-        let AUDIT_QUESTIONS = [];
-        let initialized = false;
+        let SPECIALTIES = [];
+        let SERVICES = [];
+        let DAYCASES = [];
+        let ADMISSION_TYPES = [];
+        let CASE_STATUSES = [];
+        let SCORES = [];
+        let ROLES = [];
+        let ISSUE_CATEGORIES = [];       // [{id, name, items: [{code, label}]}]
+        let ISSUES_BY_CODE = {};         // { code: label }
+        let FORMS = [];                  // [{id, text, requires_date, specialties:[ids], services:[ids], daycases:[ids], exclusions:[{kind,id}]}]
 
         // ============================================
         // HELPERS
@@ -736,11 +662,117 @@
             } catch(e) { return []; }
         }
 
-        function getInitials(name) {
-            if (!name) return '?';
-            const parts = name.trim().split(/\s+/);
-            if (parts.length === 1) return parts[0].slice(0, 2);
-            return parts[0][0] + (parts[1]?.[0] || '');
+        // ============================================
+        // LOAD DATA FROM DB
+        // ============================================
+        async function loadAllCatalogData() {
+            document.getElementById('loadingText').textContent = 'جاري تحميل البيانات المرجعية...';
+
+            const [
+                doctorsRes, clerksRes, specialtiesRes, servicesRes,
+                daycasesRes, admissionTypesRes, caseStatusesRes,
+                scoresRes, rolesRes, issueCatsRes, issuesRes, formsRes
+            ] = await Promise.all([
+                supabase.from('doctors').select('id, name, specialty, department').eq('is_active', true).order('name'),
+                supabase.from('ward_clerks').select('id, name').eq('is_active', true).order('name'),
+                supabase.from('specialty_catalog').select('id, name').eq('is_active', true).order('order_index'),
+                supabase.from('service_catalog').select('id, name').eq('is_active', true).order('order_index'),
+                supabase.from('daycase_catalog').select('id, name').eq('is_active', true).order('order_index'),
+                supabase.from('admission_type_catalog').select('id, name').eq('is_active', true).order('order_index'),
+                supabase.from('case_status_catalog').select('id, name').eq('is_active', true).order('order_index'),
+                supabase.from('score_catalog').select('value, label, points').eq('is_active', true).order('order_index'),
+                supabase.from('role_catalog').select('code, name').eq('is_active', true).order('order_index'),
+                supabase.from('issue_category_catalog').select('id, name').eq('is_active', true).order('order_index'),
+                supabase.from('issue_catalog').select('code, label, category_id').eq('is_active', true).order('order_index'),
+                supabase.from('form_catalog').select('id, text, requires_date').eq('is_active', true).order('order_index')
+            ]);
+
+            DOCTORS = doctorsRes.data || [];
+            CLERKS = clerksRes.data || [];
+            SPECIALTIES = specialtiesRes.data || [];
+            SERVICES = servicesRes.data || [];
+            DAYCASES = daycasesRes.data || [];
+            ADMISSION_TYPES = admissionTypesRes.data || [];
+            CASE_STATUSES = caseStatusesRes.data || [];
+            SCORES = scoresRes.data || [];
+            ROLES = rolesRes.data || [];
+            ISSUE_CATEGORIES = issueCatsRes.data || [];
+            const allIssues = issuesRes.data || [];
+            FORMS = formsRes.data || [];
+
+            // Map issues by code
+            ISSUES_BY_CODE = {};
+            allIssues.forEach(i => { ISSUES_BY_CODE[i.code] = i.label; });
+
+            // Group issues by category
+            ISSUE_CATEGORIES = ISSUE_CATEGORIES.map(cat => ({
+                id: cat.id,
+                name: cat.name,
+                items: allIssues.filter(i => i.category_id === cat.id)
+            })).filter(c => c.items.length > 0);
+
+            // Load form mappings
+            if (FORMS.length > 0) {
+                const formIds = FORMS.map(f => f.id);
+                const [specRes, servRes, dayRes, exclRes] = await Promise.all([
+                    supabase.from('form_specialty_map').select('form_id, specialty_id').in('form_id', formIds),
+                    supabase.from('form_service_map').select('form_id, service_id').in('form_id', formIds),
+                    supabase.from('form_daycase_map').select('form_id, daycase_id').in('form_id', formIds),
+                    supabase.from('form_exclusion_map').select('form_id, exclusion_kind, exclusion_id').in('form_id', formIds)
+                ]);
+
+                FORMS = FORMS.map(f => ({
+                    ...f,
+                    specialties: (specRes.data || []).filter(x => x.form_id === f.id).map(x => x.specialty_id),
+                    services: (servRes.data || []).filter(x => x.form_id === f.id).map(x => x.service_id),
+                    daycases: (dayRes.data || []).filter(x => x.form_id === f.id).map(x => x.daycase_id),
+                    exclusions: (exclRes.data || []).filter(x => x.form_id === f.id).map(x => ({ kind: x.exclusion_kind, id: x.exclusion_id }))
+                }));
+            }
+
+            console.log('[Load] Loaded:', {
+                doctors: DOCTORS.length, clerks: CLERKS.length,
+                specialties: SPECIALTIES.length, services: SERVICES.length,
+                daycases: DAYCASES.length, forms: FORMS.length,
+                issueCategories: ISSUE_CATEGORIES.length
+            });
+        }
+
+        // ============================================
+        // BUILD UI FROM DB
+        // ============================================
+        function buildUI() {
+            // 1. Doctors datalist
+            document.getElementById('doctorsList').innerHTML =
+                DOCTORS.map(d => `<option value="${escapeHtml(d.name)}">`).join('') +
+                `<option value="غير موجود">`;
+
+            // 2. Specialties checkboxes
+            const specContainer = document.getElementById('specialtiesList');
+            const allSpecials = [
+                ...SPECIALTIES.map(s => ({ id: 'spec_' + s.id, name: s.name })),
+                ...DAYCASES.map(d => ({ id: 'day_' + d.id, name: d.name }))
+            ];
+            specContainer.innerHTML = allSpecials.map(s =>
+                `<label class="cb-item"><input type="checkbox" name="caseSpecialty" value="${s.id}" data-name="${escapeHtml(s.name)}" onchange="handleGlobalLogic()"> ${escapeHtml(s.name)}</label>`
+            ).join('');
+
+            // 3. Services checkboxes
+            const servContainer = document.getElementById('servicesList');
+            servContainer.innerHTML = SERVICES.map(s =>
+                `<label class="cb-item"><input type="checkbox" name="addServ" value="${s.id}" data-name="${escapeHtml(s.name)}" onchange="handleGlobalLogic()"> ${escapeHtml(s.name)}</label>`
+            ).join('');
+
+            // 4. Admission types pills
+            const admContainer = document.getElementById('admissionTypePills');
+            admContainer.innerHTML = ADMISSION_TYPES.map(a =>
+                `<label class="pill"><input type="radio" name="admissionType" value="${a.id}" data-name="${escapeHtml(a.name)}" onchange="handleGlobalLogic()"> ${escapeHtml(a.name)}</label>`
+            ).join('');
+
+            // 5. Day case dept dropdown
+            const dayDept = document.getElementById('dayCaseDept');
+            dayDept.innerHTML = `<option value="">-- اختر القسم --</option>` +
+                SPECIALTIES.map(s => `<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)}</option>`).join('');
         }
 
         // ============================================
@@ -763,15 +795,14 @@
                 h += `<label class="f-label">التقييم</label>
                       <select name="${fid}" id="sel_${fid}" class="f-select" onchange="handleLocalLogic('T2',this,'${qId}','${unitId}')">
                         <option value="" disabled selected>اختر التقييم...</option>
-                        ${SCORE_OPTIONS.map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
+                        ${SCORES.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}
                       </select>`;
             }
             else if (type === 'T3' || type === 'T8') {
-                const list = type === 'T8' ? DOCTORS : DOCTORS;
                 h += `<label class="f-label">${type === 'T8' ? 'الاستشاري' : 'الطبيب'}</label>
                       <input list="l_${fid}" id="in_${fid}" name="${fid}" class="f-input" placeholder="اسم الطبيب..." onchange="handleLocalLogic('${type}',this,'${qId}','${unitId}')">
                       <datalist id="l_${fid}">
-                        ${list.map(x => `<option value="${x.name}">`).join('')}
+                        ${DOCTORS.map(x => `<option value="${escapeHtml(x.name)}">`).join('')}
                         <option value="غير موجود">
                       </datalist>
                       <div id="spec_${fid}" class="text-[10px] font-black mt-1.5 hidden-logic flex items-center gap-1 opacity-90 px-2" style="color: var(--accent);">
@@ -782,7 +813,7 @@
                 h += `<label class="f-label">المدخل</label>
                       <input list="l_${fid}" name="${fid}" class="f-input" placeholder="اسم المدخل..." onchange="handleLocalLogic('T7',this,'${qId}','${unitId}')">
                       <datalist id="l_${fid}">
-                        ${CLERKS.map(c => `<option value="${c.name}">`).join('')}
+                        ${CLERKS.map(c => `<option value="${escapeHtml(c.name)}">`).join('')}
                         <option value="غير موجود">
                       </datalist>`;
             }
@@ -790,21 +821,26 @@
                 h += `<div class="w-full mt-2">
                         <div style="padding: 12px; background: rgba(15,23,42,0.2); border-radius: 10px; border: 1px solid var(--card-border);">
                           <div style="font-size: 0.62rem; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;">الأخطاء المرصودة</div>`;
-                ISSUE_CATEGORIES.forEach((group, idx) => {
-                    h += `<div style="margin-bottom: ${idx === ISSUE_CATEGORIES.length - 1 ? '0' : '10px'};">
-                            <div onclick="this.nextElementSibling.classList.toggle('hidden-logic'); this.querySelector('i').style.transform = this.nextElementSibling.classList.contains('hidden-logic') ? 'rotate(0deg)' : 'rotate(-90deg)';"
-                                 style="font-size: 0.7rem; font-weight: 900; color: var(--accent); padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid var(--card-border); cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none;">
-                              <i class="fa-solid fa-caret-left" style="transition: transform 0.2s;"></i> ${group.category}
-                            </div>
-                            <div class="hidden-logic" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 8px;">`;
-                    group.items.forEach(o => {
-                        h += `<label class="cb-item" style="font-size: 0.68rem;">
-                                <input type="checkbox" name="${fid}" value="${o.value}" onchange="handleLocalLogic('T4',this,'${qId}','${unitId}')">
-                                ${o.text}
-                              </label>`;
+
+                if (ISSUE_CATEGORIES.length === 0) {
+                    h += `<div style="text-align: center; padding: 10px; color: var(--text-muted); font-size: 0.72rem;">لا توجد أخطاء مسجلة في الكاتالوج</div>`;
+                } else {
+                    ISSUE_CATEGORIES.forEach((group, idx) => {
+                        h += `<div style="margin-bottom: ${idx === ISSUE_CATEGORIES.length - 1 ? '0' : '10px'};">
+                                <div onclick="this.nextElementSibling.classList.toggle('hidden-logic'); this.querySelector('i').style.transform = this.nextElementSibling.classList.contains('hidden-logic') ? 'rotate(0deg)' : 'rotate(-90deg)';"
+                                     style="font-size: 0.7rem; font-weight: 900; color: var(--accent); padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid var(--card-border); cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none;">
+                                  <i class="fa-solid fa-caret-left" style="transition: transform 0.2s;"></i> ${escapeHtml(group.name)}
+                                </div>
+                                <div class="hidden-logic" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 8px;">`;
+                        group.items.forEach(o => {
+                            h += `<label class="cb-item" style="font-size: 0.68rem;">
+                                    <input type="checkbox" name="${fid}" value="${o.code}" onchange="handleLocalLogic('T4',this,'${qId}','${unitId}')">
+                                    ${escapeHtml(o.label)}
+                                  </label>`;
+                        });
+                        h += `</div></div>`;
                     });
-                    h += `</div></div>`;
-                });
+                }
                 h += `</div></div>`;
             }
             else if (type === 'T5') {
@@ -818,7 +854,7 @@
             else if (type === 'T9') {
                 h += `<div class="pill-group">`;
                 ROLES.forEach(o => {
-                    h += `<label class="pill" style="font-size: 0.68rem;"><input type="radio" name="${fid}" value="${o.value}" onchange="handleLocalLogic('T9',this,'${qId}','${unitId}')"> ${o.text}</label>`;
+                    h += `<label class="pill" style="font-size: 0.68rem;"><input type="radio" name="${fid}" value="${o.code}" onchange="handleLocalLogic('T9',this,'${qId}','${unitId}')"> ${escapeHtml(o.name)}</label>`;
                 });
                 h += `</div>`;
             }
@@ -856,61 +892,39 @@
         }
 
         // ============================================
-        // RENDER
+        // RENDER (from DB)
         // ============================================
-        function populateSpecialtiesServices() {
-            // Specialties
-            const specContainer = document.getElementById('specialtiesList');
-            const allSpecials = [...Object.keys(MARS_CONFIG.specialties), ...Object.keys(MARS_CONFIG.dayCase)];
-            specContainer.innerHTML = allSpecials.map(s => 
-                `<label class="cb-item"><input type="checkbox" name="caseSpecialty" value="${s}" onchange="handleGlobalLogic()"> ${s}</label>`
-            ).join('');
-
-            // Services
-            const servContainer = document.getElementById('servicesList');
-            const allServices = Object.keys(MARS_CONFIG.services);
-            servContainer.innerHTML = allServices.map(s => 
-                `<label class="cb-item"><input type="checkbox" name="addServ" value="${s}" onchange="handleGlobalLogic()"> ${s}</label>`
-            ).join('');
-
-            // Doctors datalist
-            document.getElementById('doctorsList').innerHTML = 
-                DOCTORS.map(d => `<option value="${d.name}">`).join('') + `<option value="غير موجود">`;
-        }
-
         function renderQuestions() {
             const c = document.getElementById('qContainer');
             c.innerHTML = '';
             unitCounter = 0;
 
-            if (!AUDIT_QUESTIONS || AUDIT_QUESTIONS.length === 0) {
+            if (FORMS.length === 0) {
                 c.innerHTML = `<div style="padding: 40px; text-align: center; background: var(--card-bg); border: 1px dashed var(--card-border); border-radius: 14px; color: var(--text-muted);">
                     <i class="fa-solid fa-inbox" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.4; display: block;"></i>
-                    <div style="font-weight: 900; margin-bottom: 6px;">لا توجد أسئلة مراجعة مسجلة</div>
-                    <div style="font-size: 0.8rem;">يرجى إضافة الأسئلة في جدول <code>audit_questions</code> من قاعدة البيانات.</div>
+                    <div style="font-weight: 900; margin-bottom: 6px;">لا توجد نماذج مسجلة</div>
+                    <div style="font-size: 0.8rem;">يرجى إضافة النماذج من <a href="../admin/catalogs.html" style="color: var(--accent); text-decoration: underline;">إدارة الأنظمة العامة</a></div>
                 </div>`;
                 return;
             }
 
-            AUDIT_QUESTIONS.forEach((q, index) => {
-                const qId = `Q${index + 1}`;
+            FORMS.forEach((f, index) => {
+                const qId = `F${index + 1}`;
                 const unitId = `A${++unitCounter}`;
-                const qText = (q.text || '').trim();
-                const hasDate = DATE_REQUIRED_QS.includes(qText);
 
                 const card = `
-                    <div class="question-card" id="card-${qId}">
+                    <div class="question-card" id="card-${qId}" data-form-id="${f.id}">
                         <div class="question-header">
                             <div class="question-title">
                                 <span class="question-num">${index + 1}</span>
-                                <span>${qText}</span>
+                                <span>${escapeHtml(f.text)}</span>
                             </div>
                             <button type="button" class="mini-btn" onclick="cloneQuestion('${qId}')">
                                 <i class="fa-solid fa-copy"></i> تكرار
                             </button>
                         </div>
                         <div class="question-body" id="unit-container-${qId}">
-                            ${buildAssessmentUnitHtml(qId, unitId, false, hasDate, false)}
+                            ${buildAssessmentUnitHtml(qId, unitId, false, f.requires_date, false)}
                         </div>
                     </div>`;
                 c.insertAdjacentHTML('beforeend', card);
@@ -939,7 +953,7 @@
         }
 
         // ============================================
-        // LOCAL LOGIC (within a unit)
+        // LOCAL LOGIC
         // ============================================
         window.handleLocalLogic = function(type, el, qId, unitId) {
             const pre = `unit_${qId}_${unitId}`;
@@ -957,7 +971,6 @@
                         specDiv.classList.add('hidden-logic');
                     }
                 }
-                // Show manual input if "غير موجود"
                 if (type === 'T3') {
                     const t5 = document.getElementById(`cont_${pre}_T5`);
                     if (val === 'غير موجود') {
@@ -973,7 +986,12 @@
                 const t7 = document.getElementById(`cont_${pre}_T7`);
                 const t5 = document.getElementById(`cont_${pre}_T5`);
 
-                if (val === 'doctor') {
+                // نبحث عن الـ code بدل value
+                const selectedLabel = el.parentElement.textContent.trim();
+                const isDoctor = selectedLabel === 'طبيب';
+                const isNurseOrAdmin = selectedLabel === 'تمريض' || selectedLabel === 'إداري';
+
+                if (isDoctor) {
                     if (t3) t3.classList.remove('hidden-logic');
                     if (t7) t7.classList.add('hidden-logic');
                     if (t5) t5.classList.add('hidden-logic');
@@ -981,7 +999,7 @@
                     if (t7) t7.classList.remove('hidden-logic');
                     if (t3) t3.classList.add('hidden-logic');
                     if (t5) t5.classList.add('hidden-logic');
-                } else if (val === 'nurse' || val === 'admin') {
+                } else if (isNurseOrAdmin || val === 'nurse' || val === 'admin') {
                     if (t5) t5.classList.remove('hidden-logic');
                     if (t3) t3.classList.add('hidden-logic');
                     if (t7) t7.classList.add('hidden-logic');
@@ -1043,7 +1061,7 @@
         };
 
         // ============================================
-        // GLOBAL LOGIC (show/hide cards)
+        // GLOBAL LOGIC (show/hide forms)
         // ============================================
         window.handleGlobalLogic = function() {
             document.querySelectorAll('#qContainer .question-card').forEach(c => {
@@ -1053,55 +1071,59 @@
             const specChecks = Array.from(document.querySelectorAll('input[name="caseSpecialty"]:checked')).map(x => x.value);
             const servChecks = Array.from(document.querySelectorAll('input[name="addServ"]:checked')).map(x => x.value);
 
-            const isDayCaseAdult = specChecks.includes('حالة يوم واحد كبار');
-            const isDayCasePed = specChecks.includes('حالة يوم واحد أطفال');
+            // Daycase detection (IDs starting with day_)
+            const dayCaseIds = specChecks.filter(v => v.startsWith('day_')).map(v => v.replace('day_', ''));
+            const regularSpecIds = specChecks.filter(v => v.startsWith('spec_')).map(v => v.replace('spec_', ''));
+
+            const isDayCase = dayCaseIds.length > 0;
             const dayCaseContainer = document.getElementById('dayCaseDeptContainer');
-            if (isDayCaseAdult || isDayCasePed) {
+            if (isDayCase) {
                 dayCaseContainer.classList.remove('hidden-logic');
             } else {
                 dayCaseContainer.classList.add('hidden-logic');
                 document.getElementById('dayCaseDept').value = '';
             }
 
-            const admType = document.querySelector('input[name="admissionType"]:checked')?.value;
-            if (admType) {
-                document.getElementById('mov_type').value = admType;
+            const admTypeEl = document.querySelector('input[name="admissionType"]:checked');
+            const admType = admTypeEl?.value;
+            const admTypeName = admTypeEl?.dataset.name || '';
+            if (admTypeName) {
+                document.getElementById('mov_type').value = admTypeName;
             }
 
-            const caseStatus = document.querySelector('input[name="caseStatus"]:checked')?.value;
+            const caseStatusEl = document.querySelector('input[name="caseStatus"]:checked');
+            const caseStatusName = caseStatusEl?.value || '';
+            const caseStatusLabel = CASE_STATUSES.find(c => c.name === caseStatusName)?.name || caseStatusName;
+
             const disDateDiv = document.getElementById('div_discharge_date');
-            if (caseStatus === 'Open') disDateDiv?.classList.add('hidden-logic');
-            else if (caseStatus === 'Closed') disDateDiv?.classList.remove('hidden-logic');
+            if (caseStatusName === 'Open') disDateDiv?.classList.add('hidden-logic');
+            else if (caseStatusName === 'Closed') disDateDiv?.classList.remove('hidden-logic');
 
-            // Collect forms to show
-            let toShow = [];
-            specChecks.forEach(s => {
-                if (MARS_CONFIG.specialties[s]) toShow.push(...MARS_CONFIG.specialties[s]);
-                if (MARS_CONFIG.dayCase[s]) toShow.push(...MARS_CONFIG.dayCase[s]);
-            });
-            servChecks.forEach(s => {
-                if (MARS_CONFIG.services[s]) toShow.push(...MARS_CONFIG.services[s]);
-            });
+            // Show/hide forms based on mappings
+            FORMS.forEach(f => {
+                const card = document.getElementById(`card-F${FORMS.indexOf(f) + 1}`);
+                if (!card) return;
 
-            toShow = [...new Set(toShow)];
+                let shouldShow = false;
 
-            // Apply exclusions
-            let finalShow = [];
-            toShow.forEach(form => {
-                let show = true;
-                if (admType && MARS_CONFIG.exclusions[admType]?.includes(form)) show = false;
-                if (caseStatus && MARS_CONFIG.exclusions[caseStatus]?.includes(form)) show = false;
-                if (show) finalShow.push(form);
-            });
+                // المطابقة بالتخصص
+                if (f.specialties.some(id => regularSpecIds.includes(id))) shouldShow = true;
+                // المطابقة بالخدمة
+                if (f.services.some(id => servChecks.includes(id))) shouldShow = true;
+                // المطابقة باليوم الواحد
+                if (f.daycases.some(id => dayCaseIds.includes(id))) shouldShow = true;
 
-            // Show matching cards
-            document.querySelectorAll('#qContainer .question-card').forEach(card => {
-                const titleEl = card.querySelector('.question-title span:last-child');
-                if (!titleEl) return;
-                const title = titleEl.textContent.trim().replace(/\s+/g, ' ');
-                if (finalShow.includes(title)) {
-                    card.classList.add('visible');
+                // تطبيق الاستثناءات
+                if (shouldShow && admType) {
+                    const excluded = f.exclusions.some(e => e.kind === 'admission_type' && e.id === admType);
+                    if (excluded) shouldShow = false;
                 }
+                if (shouldShow && caseStatusEl) {
+                    const excluded = f.exclusions.some(e => e.kind === 'case_status' && e.id === caseStatusEl.value);
+                    if (excluded) shouldShow = false;
+                }
+
+                if (shouldShow) card.classList.add('visible');
             });
         };
 
@@ -1113,15 +1135,17 @@
             if (!orig) return;
             const newQId = `${originalQId}_C${++cardCloneCounter}`;
             const titleText = orig.querySelector('.question-title span:last-child').textContent.trim();
-            const hasDate = DATE_REQUIRED_QS.includes(titleText);
+            const formId = orig.dataset.formId;
+            const form = FORMS.find(f => f.id === formId);
+            const requiresDate = form?.requires_date || false;
             const newUnitId = `A${++unitCounter}`;
 
             const html = `
-                <div class="question-card visible" id="card-${newQId}" style="border-top-color: var(--warning);">
+                <div class="question-card visible" id="card-${newQId}" data-form-id="${formId}" style="border-top-color: var(--warning);">
                     <div class="question-header" style="background: rgba(245,158,11,0.05);">
                         <div class="question-title">
                             <i class="fa-solid fa-copy" style="color: var(--warning);"></i>
-                            <span>${titleText}</span>
+                            <span>${escapeHtml(titleText)}</span>
                             <span style="font-size: 0.6rem; background: var(--warning); color: #fff; padding: 1px 8px; border-radius: 999px; font-weight: 900;">نسخة مكررة</span>
                         </div>
                         <div style="display: flex; gap: 6px;">
@@ -1130,7 +1154,7 @@
                         </div>
                     </div>
                     <div class="question-body" id="unit-container-${newQId}">
-                        ${buildAssessmentUnitHtml(newQId, newUnitId, false, hasDate, false)}
+                        ${buildAssessmentUnitHtml(newQId, newUnitId, false, requiresDate, false)}
                     </div>
                 </div>`;
             orig.insertAdjacentHTML('afterend', html);
@@ -1140,7 +1164,9 @@
             const container = document.getElementById(`unit-container-${qId}`);
             if (!container) return;
             const newUnitId = `A${++unitCounter}`;
-            const hasDate = container.innerHTML.includes('type="date"');
+            const formId = document.querySelector(`#card-${qId}`)?.dataset.formId;
+            const form = FORMS.find(f => f.id === formId);
+            const hasDate = form?.requires_date || false;
             container.insertAdjacentHTML('beforeend', buildAssessmentUnitHtml(qId, newUnitId, true, hasDate, false));
             showNotification('تمت إضافة تقييم جديد', 'success');
         };
@@ -1155,7 +1181,7 @@
             const found = DOCTORS.find(d => d.name === val);
 
             if (found && found.specialty) {
-                specDiv.innerHTML = `<i class="fa-solid fa-tag"></i> التخصص: ${found.specialty}`;
+                specDiv.innerHTML = `<i class="fa-solid fa-tag"></i> التخصص: ${escapeHtml(found.specialty)}`;
                 specDiv.classList.remove('hidden-logic');
                 specDiv.style.display = 'inline-flex';
             } else {
@@ -1183,9 +1209,6 @@
                 return;
             }
 
-            const submitBtn = document.querySelector('#searchFile');
-            submitBtn.disabled = true;
-
             try {
                 let query = supabase.from('medical_file_reviews')
                     .select('*')
@@ -1201,41 +1224,47 @@
                     return;
                 }
 
-                // Fill the form
+                // Fill basic data
                 document.getElementById('patientName').value = data.patient_name || '';
                 document.getElementById('medicalId').value = data.medical_id || '';
                 document.getElementById('admissionDate').value = data.admission_date || '';
                 document.getElementById('dischargeDate').value = data.discharge_date || '';
                 document.getElementById('visitNumber').value = data.visit_number || '';
-                document.getElementById('movement' in data ? 'mov_type' : 'mov_type').value = (data.movement || '').split(' -> ')[0] || '';
-                document.getElementById('mov_floor1').value = (data.movement || '').split(' -> ')[1] || '';
-                document.getElementById('mov_floor2').value = (data.movement || '').split(' -> ')[2] || '';
-                document.getElementById('mov_discharge').value = (data.movement || '').split(' -> ')[3] || '';
+
+                // Movement
+                const movParts = (data.movement || '').split(' -> ');
+                document.getElementById('mov_type').value = movParts[0] || '';
+                document.getElementById('mov_floor1').value = movParts[1] || '';
+                document.getElementById('mov_floor2').value = movParts[2] || '';
+                document.getElementById('mov_discharge').value = movParts[3] || '';
+
                 document.getElementById('consultantInput').value = data.consultant || '';
 
                 if (data.case_status) {
-                    document.querySelector(`input[name="caseStatus"][value="${data.case_status}"]`)?.click();
+                    const rb = document.querySelector(`input[name="caseStatus"][value="${data.case_status}"]`);
+                    if (rb) rb.checked = true;
                 }
                 if (data.admission_type) {
-                    document.querySelector(`input[name="admissionType"][value="${data.admission_type}"]`)?.click();
+                    const rb = document.querySelector(`input[name="admissionType"][data-name="${data.admission_type}"]`);
+                    if (rb) rb.checked = true;
                 }
 
-                // Specialties
+                // Specialties + Services
                 document.querySelectorAll('input[name="caseSpecialty"]').forEach(cb => cb.checked = false);
+                document.querySelectorAll('input[name="addServ"]').forEach(cb => cb.checked = false);
+
                 if (data.specialties) {
                     data.specialties.split(',').forEach(s => {
-                        let sp = s.trim();
-                        if (sp.includes(' - ')) sp = sp.split(' - ')[0].trim();
-                        const cb = document.querySelector(`input[name="caseSpecialty"][value="${sp}"]`);
+                        let sp = s.trim().split(' - ')[0].trim();
+                        const cb = Array.from(document.querySelectorAll('input[name="caseSpecialty"]'))
+                            .find(x => x.dataset.name === sp);
                         if (cb) cb.checked = true;
                     });
                 }
-
-                // Services
-                document.querySelectorAll('input[name="addServ"]').forEach(cb => cb.checked = false);
                 if (data.services) {
                     data.services.split(',').forEach(s => {
-                        const cb = document.querySelector(`input[name="addServ"][value="${s.trim()}"]`);
+                        const cb = Array.from(document.querySelectorAll('input[name="addServ"]'))
+                            .find(x => x.dataset.name === s.trim());
                         if (cb) cb.checked = true;
                     });
                 }
@@ -1260,33 +1289,36 @@
                     }
                 });
 
-                // Load audit questions - simplified approach
+                // Load audit questions
                 const auditData = safeParse(data.audit_questions);
                 const clearedCards = new Set();
 
                 auditData.forEach(savedCard => {
-                    const qTitle = (savedCard.text || savedCard.question || '').trim();
+                    const formId = savedCard.formId;
+                    const qTitle = (savedCard.text || '').trim();
                     if (!qTitle || !savedCard.data) return;
 
                     const primaryCard = Array.from(document.querySelectorAll('#qContainer .question-card')).find(c => {
                         if (c.id.includes('_C')) return false;
+                        if (formId && c.dataset.formId === formId) return true;
                         const titleEl = c.querySelector('.question-title span:last-child');
-                        if (!titleEl) return false;
-                        return titleEl.textContent.trim().replace(/\s+/g, ' ') === qTitle.replace(/\s+/g, ' ');
+                        return titleEl && titleEl.textContent.trim() === qTitle;
                     });
 
                     if (primaryCard) {
                         const targetQId = primaryCard.id.replace('card-', '');
                         const container = document.getElementById(`unit-container-${targetQId}`);
+                        if (!container) return;
 
                         if (!clearedCards.has(primaryCard.id)) {
                             container.innerHTML = '';
                             clearedCards.add(primaryCard.id);
                         }
 
-                        const hasDate = DATE_REQUIRED_QS.includes(qTitle);
+                        const form = FORMS.find(f => f.id === primaryCard.dataset.formId);
+                        const hasDate = form?.requires_date || false;
 
-                        savedCard.data.forEach((sUnit, idx) => {
+                        savedCard.data.forEach((sUnit) => {
                             if (!sUnit.score && !sUnit.person && !sUnit.role && !sUnit.date) return;
 
                             const nUnitId = `A${++unitCounter}`;
@@ -1345,8 +1377,6 @@
             } catch (err) {
                 console.error('Search error:', err);
                 showNotification('فشل البحث: ' + err.message, 'error');
-            } finally {
-                submitBtn.disabled = false;
             }
         };
 
@@ -1357,9 +1387,10 @@
             const errorSep = /[.\-_\/\\،,]+/;
             const dayCaseDept = document.getElementById('dayCaseDept').value;
 
-            const specialties = Array.from(document.querySelectorAll('input[name="caseSpecialty"]:checked')).map(e => {
-                if (e.value.includes('يوم واحد') && dayCaseDept) return `${e.value} - ${dayCaseDept}`;
-                return e.value;
+            const specNames = Array.from(document.querySelectorAll('input[name="caseSpecialty"]:checked')).map(e => {
+                const n = e.dataset.name;
+                if (n.includes('يوم واحد') && dayCaseDept) return `${n} - ${dayCaseDept}`;
+                return n;
             }).join(', ');
 
             const data = {
@@ -1369,11 +1400,11 @@
                 admission_date: document.getElementById('admissionDate').value || null,
                 discharge_date: document.getElementById('dischargeDate').value || null,
                 case_status: document.querySelector('input[name="caseStatus"]:checked')?.value || null,
-                admission_type: document.querySelector('input[name="admissionType"]:checked')?.value || null,
+                admission_type: document.querySelector('input[name="admissionType"]:checked')?.dataset.name || null,
                 movement: `${document.getElementById('mov_type').value} -> ${document.getElementById('mov_floor1').value} -> ${document.getElementById('mov_floor2').value} -> ${document.getElementById('mov_discharge').value}`,
                 consultant: document.getElementById('t8_manual_input')?.value || document.getElementById('consultantInput').value,
-                specialties,
-                services: Array.from(document.querySelectorAll('input[name="addServ"]:checked')).map(e => e.value).join(', '),
+                specialties: specNames,
+                services: Array.from(document.querySelectorAll('input[name="addServ"]:checked')).map(e => e.dataset.name).join(', '),
                 ward_questions: [],
                 audit_questions: [],
             };
@@ -1397,6 +1428,7 @@
                 const qId = card.id.replace('card-', '');
                 const titleEl = card.querySelector('.question-title span:last-child');
                 const qText = titleEl ? titleEl.textContent.trim() : '';
+                const formId = card.dataset.formId;
                 const units = [];
 
                 card.querySelectorAll('[id^="unit-"]').forEach(uDiv => {
@@ -1416,7 +1448,7 @@
                     });
                 });
 
-                data.audit_questions.push({ qId, text: qText, data: units });
+                data.audit_questions.push({ qId, formId, text: qText, data: units });
             });
 
             return data;
@@ -1462,7 +1494,7 @@
         };
 
         // ============================================
-        // GENERATE REPORT (Final Submit)
+        // SUBMIT
         // ============================================
         window.generateReport = async function() {
             const data = collectAllData();
@@ -1482,7 +1514,7 @@
 
             const confirmed = await window.showConfirm({
                 title: 'اعتماد التقرير',
-                message: 'هل أنت متأكد من اعتماد التقرير نهائياً؟ لن تتمكن من تعديله بعد ذلك إلا بإذن من المسؤول.',
+                message: 'هل أنت متأكد من اعتماد التقرير نهائياً؟',
                 confirmText: 'اعتماد وإرسال',
                 cancelText: 'إلغاء',
                 type: 'warning'
@@ -1494,13 +1526,13 @@
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الاعتماد...';
 
             try {
-                const { data: saved, error } = await supabase.from('medical_file_reviews').upsert({
+                const { error } = await supabase.from('medical_file_reviews').upsert({
                     ...data,
                     is_partial: false,
                     reviewer_id: currentUser.id,
                     reviewer_name: currentReviewer,
                     updated_at: new Date().toISOString(),
-                }, { onConflict: 'medical_id,visit_number' }).select().single();
+                }, { onConflict: 'medical_id,visit_number' });
 
                 if (error) throw error;
 
@@ -1529,11 +1561,18 @@
         };
 
         // ============================================
+        // ESCAPE
+        // ============================================
+        function escapeHtml(s) {
+            if (!s) return '';
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // ============================================
         // INIT
         // ============================================
         (async () => {
             try {
-                // 1. Auth
                 const { data: { session } } = await supabase.auth.getSession();
                 if (!session) {
                     window.location.href = '../login.html';
@@ -1541,7 +1580,6 @@
                 }
                 currentUser = session.user;
 
-                // 2. Fetch profile
                 const { data: profile } = await supabase
                     .from('profiles').select('display_name, username, role, is_active')
                     .eq('id', currentUser.id).single();
@@ -1553,7 +1591,6 @@
                     return;
                 }
 
-                // Check access
                 const allowedRoles = ['super_admin', 'admin', 'manager', 'auditor', 'senior', 'doctor'];
                 if (!allowedRoles.includes(profile.role)) {
                     showNotification('ليس لديك صلاحية استخدام هذه الواجهة', 'error');
@@ -1563,34 +1600,13 @@
 
                 currentReviewer = profile.display_name || profile.username || 'مستخدم';
 
-                // 3. Load data
-                const [doctorsRes, clerksRes, questionsRes] = await Promise.all([
-                    supabase.from('doctors').select('*').eq('is_active', true).order('name'),
-                    supabase.from('ward_clerks').select('*').eq('is_active', true).order('name'),
-                    supabase.from('audit_questions').select('*').eq('is_active', true).order('order_index')
-                ]);
-
-                DOCTORS = doctorsRes.data || [];
-                CLERKS = clerksRes.data || [];
-                AUDIT_QUESTIONS = questionsRes.data || [];
-
-                // 4. Build UI
-                populateSpecialtiesServices();
+                await loadAllCatalogData();
+                buildUI();
                 renderQuestions();
                 renderWardQuestions();
                 handleGlobalLogic();
 
-                initialized = true;
                 document.getElementById('loadingScreen').classList.add('hide');
-
-                // Show warnings if empty
-                if (DOCTORS.length === 0) {
-                    console.warn('[medical-audit] No doctors found. Add rows to `doctors` table.');
-                }
-                if (AUDIT_QUESTIONS.length === 0) {
-                    console.warn('[medical-audit] No audit questions found. Add rows to `audit_questions` table.');
-                }
-
             } catch (err) {
                 console.error('Init error:', err);
                 showNotification('فشل تحميل الواجهة: ' + err.message, 'error');
