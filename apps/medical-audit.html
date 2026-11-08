@@ -266,22 +266,50 @@
         .btn-success:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 24px -6px rgba(16, 185, 129, 0.6); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-        /* FLOATING SAVE */
+        /* ============================================
+           FLOATING SAVE — RIGHT SIDE, NEW IDENTITY
+           ============================================ */
         .floating-save {
-            position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 40;
-            background: linear-gradient(135deg, #10b981, #0ea5e9); color: #fff;
-            padding: 16px 10px; border-radius: 0 14px 14px 0; border: none;
+            position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 40;
+            background: linear-gradient(160deg, rgba(14,165,233,0.95) 0%, rgba(99,102,241,0.95) 60%, rgba(139,92,246,0.95) 100%);
+            color: #fff;
+            padding: 20px 12px; border-radius: 18px 0 0 18px;
+            border: 1px solid rgba(14,165,233,0.5); border-right: none;
             cursor: pointer;
-            box-shadow: 4px 0 24px -6px rgba(16, 185, 129, 0.5);
-            display: flex; flex-direction: column; align-items: center; gap: 6px;
-            font-family: inherit; transition: all 0.3s ease;
+            box-shadow: -8px 0 32px -10px rgba(14,165,233,0.65), inset 0 0 24px rgba(255,255,255,0.08);
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            font-family: inherit; transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+            overflow: hidden;
         }
-        .floating-save:hover { padding-left: 16px; }
-        .floating-save i { font-size: 1.1rem; }
+        .floating-save::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+        .floating-save:hover::before { transform: translateX(100%); }
+        .floating-save:hover {
+            padding-right: 18px;
+            box-shadow: -10px 0 40px -10px rgba(99,102,241,0.8), inset 0 0 28px rgba(255,255,255,0.12);
+        }
+        .floating-save i {
+            font-size: 1.2rem; position: relative; z-index: 1;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+        }
         .floating-save span {
             font-size: 0.62rem; font-weight: 900;
-            letter-spacing: 0.08em; text-transform: uppercase;
+            letter-spacing: 0.14em; text-transform: uppercase;
             writing-mode: vertical-lr; transform: rotate(180deg);
+            position: relative; z-index: 1;
+        }
+        html:not(.dark) .floating-save {
+            background: linear-gradient(160deg, #0ea5e9 0%, #6366f1 60%, #8b5cf6 100%);
+            box-shadow: -8px 0 32px -10px rgba(14,165,233,0.55);
+            border-color: rgba(14,165,233,0.6);
+        }
+        html:not(.dark) .floating-save:hover {
+            box-shadow: -10px 0 40px -10px rgba(99,102,241,0.65);
         }
         @media (max-width: 767px) { .floating-save { display: none; } }
 
@@ -370,30 +398,42 @@
             border: 1px solid var(--card-border);
             border-radius: 10px;
         }
+        /* ============================================
+           ISSUE CATEGORY TITLE — CENTERED & BOLDER
+           ============================================ */
         .issue-category-title {
-            font-size: 0.66rem; font-weight: 900;
-            color: var(--accent);
+            font-size: 0.78rem;
+            font-weight: 900;
+            color: var(--text-primary);
             text-transform: uppercase;
             letter-spacing: 0.06em;
             cursor: pointer;
-            display: flex; align-items: center; gap: 6px;
-            padding: 8px 0 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 0 8px;
             user-select: none;
             border-bottom: 1px solid var(--card-border);
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             transition: color 0.2s;
+            text-align: center;
         }
-        .issue-category-title:hover { color: #22d3ee; }
-        .issue-category-title i { font-size: 0.6rem; transition: transform 0.2s; }
+        .issue-category-title:hover { color: var(--accent); }
+        .issue-category-title i { font-size: 0.7rem; transition: transform 0.2s; color: var(--accent); }
 
+        /* ============================================
+           ISSUE GRID — 4 COLUMNS
+           ============================================ */
         .issue-items-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 4px 10px;
             padding: 4px 0 6px;
         }
-        @media (max-width: 900px) { .issue-items-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 500px) { .issue-items-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 1100px) { .issue-items-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 850px)  { .issue-items-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 520px)  { .issue-items-grid { grid-template-columns: 1fr; } }
 
         .mini-btn {
             padding: 4px 10px; border-radius: 6px;
@@ -415,6 +455,38 @@
             transition: opacity 0.5s ease;
         }
         .loading-screen.hide { opacity: 0; pointer-events: none; }
+
+        /* ============================================
+           QUICK ADD MODAL
+           ============================================ */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 200;
+            background: rgba(4,7,15,0.65); backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: none; align-items: center; justify-content: center; padding: 16px;
+        }
+        .modal-overlay.open { display: flex; }
+        html:not(.dark) .modal-overlay { background: rgba(15,23,42,0.35); }
+        .modal-card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 20px; max-width: 460px; width: 100%;
+            max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 20px 60px -20px rgba(0,0,0,0.5);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+        }
+        .modal-head {
+            padding: 18px 22px; border-bottom: 1px solid var(--card-border);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .modal-body {
+            padding: 20px 22px;
+            display: flex; flex-direction: column; gap: 14px;
+        }
+        .modal-foot {
+            padding: 16px 22px; border-top: 1px solid var(--card-border);
+            display: flex; justify-content: flex-end; gap: 10px;
+        }
 
         /* FOOTER */
         .footer-shell {
@@ -639,8 +711,8 @@
 
             <div style="display: flex; justify-content: center; gap: 12px; margin-top: 24px; margin-bottom: 30px; flex-wrap: wrap;" class="no-print">
                 <button class="btn btn-primary" id="submitBtn" onclick="generateReport()" style="padding: 12px 30px; font-size: 0.88rem;">
-                    <i class="fa-solid fa-paper-plane"></i>
-                    اعتماد وإرسال
+                    <i class="fa-solid fa-circle-check"></i>
+                    حفظ المراجعة
                 </button>
                 <button class="btn btn-success hidden-logic" id="btnOpenReport" onclick="redirectToFinalReport()" style="padding: 12px 30px; font-size: 0.88rem;">
                     <i class="fa-solid fa-file-contract"></i>
@@ -655,6 +727,45 @@
         <i class="fa-solid fa-floppy-disk"></i>
         <span>حفظ</span>
     </button>
+
+    <!-- ============================================
+         QUICK ADD MODAL (DOCTORS / CLERKS)
+         ============================================ -->
+    <div class="modal-overlay" id="quickAddModal">
+        <div class="modal-card">
+            <div class="modal-head">
+                <div class="form-card-icon"><i class="fa-solid fa-user-plus"></i></div>
+                <h3 id="quickAddTitle" style="font-size: 1rem; font-weight: 900;">إضافة سريعة</h3>
+            </div>
+            <div class="modal-body">
+                <div id="quickAddDoctorFields">
+                    <div>
+                        <label class="f-label">اسم الطبيب <span class="req">*</span></label>
+                        <input type="text" id="qaDoctorName" class="f-input" placeholder="الاسم الكامل" />
+                    </div>
+                    <div>
+                        <label class="f-label">التخصص <span class="req">*</span></label>
+                        <input list="qaSpecialtyList" id="qaDoctorSpecialty" class="f-input" placeholder="التخصص..." />
+                        <datalist id="qaSpecialtyList"></datalist>
+                    </div>
+                    <div>
+                        <label class="f-label">القسم</label>
+                        <input type="text" id="qaDoctorDepartment" class="f-input" placeholder="القسم (اختياري)" />
+                    </div>
+                </div>
+                <div id="quickAddClerkFields" class="hidden-logic">
+                    <div>
+                        <label class="f-label">اسم المدخل <span class="req">*</span></label>
+                        <input type="text" id="qaClerkName" class="f-input" placeholder="الاسم الكامل" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-foot">
+                <button class="btn btn-secondary" onclick="closeQuickAddModal()">إلغاء</button>
+                <button class="btn btn-primary" id="qaSaveBtn" onclick="saveQuickAdd()">إضافة</button>
+            </div>
+        </div>
+    </div>
 
     <footer class="footer-shell">
         <div class="footer-brand">VEXORIS SYSTEM</div>
@@ -681,6 +792,8 @@
         let unitCounter = 0;
         let cardCloneCounter = 0;
         let finalReportUrl = '';
+        let pendingAddContext = null;
+        let navGuardBusy = false;
 
         let DOCTORS = [];
         let CLERKS = [];
@@ -1032,13 +1145,171 @@
         };
 
         // ============================================
+        // QUICK ADD MODAL — DOCTORS / CLERKS
+        // ============================================
+        function populateQuickAddSpecialties() {
+            const dl = document.getElementById('qaSpecialtyList');
+            if (dl) dl.innerHTML = SPECIALTIES.map(s => `<option value="${escapeHtml(s.name)}">`).join('');
+        }
+
+        window.openQuickAddModal = function(kind, context) {
+            const modal = document.getElementById('quickAddModal');
+            if (modal.classList.contains('open')) return;
+
+            pendingAddContext = context;
+            const title = document.getElementById('quickAddTitle');
+            const docFields = document.getElementById('quickAddDoctorFields');
+            const clerkFields = document.getElementById('quickAddClerkFields');
+
+            if (kind === 'doctor') {
+                title.textContent = 'إضافة طبيب جديد';
+                docFields.classList.remove('hidden-logic');
+                clerkFields.classList.add('hidden-logic');
+                document.getElementById('qaDoctorName').value = '';
+                document.getElementById('qaDoctorSpecialty').value = '';
+                document.getElementById('qaDoctorDepartment').value = '';
+                populateQuickAddSpecialties();
+                setTimeout(() => document.getElementById('qaDoctorName').focus(), 60);
+            } else {
+                title.textContent = 'إضافة مدخل بيانات جديد';
+                docFields.classList.add('hidden-logic');
+                clerkFields.classList.remove('hidden-logic');
+                document.getElementById('qaClerkName').value = '';
+                setTimeout(() => document.getElementById('qaClerkName').focus(), 60);
+            }
+
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeQuickAddModal = function() {
+            const ctx = pendingAddContext;
+            if (ctx && ctx.targetInput && ctx.targetInput.value === 'غير موجود') {
+                ctx.targetInput.value = '';
+                if (ctx.fieldType === 'consultant') {
+                    window.handleCard1T8(ctx.targetInput);
+                } else if (ctx.fieldType) {
+                    window.handleLocalLogic(ctx.fieldType, ctx.targetInput, ctx.qId, ctx.unitId);
+                }
+            }
+            document.getElementById('quickAddModal').classList.remove('open');
+            document.body.style.overflow = '';
+            pendingAddContext = null;
+        };
+
+        function refreshDoctorDatalists() {
+            const main = document.getElementById('doctorsList');
+            if (main) {
+                main.innerHTML = DOCTORS.map(d => `<option value="${escapeHtml(d.name)}">`).join('') + `<option value="غير موجود">`;
+            }
+            document.querySelectorAll('datalist[id^="l_unit_"][id$="_T3"], datalist[id^="l_unit_"][id$="_T8"]').forEach(dl => {
+                dl.innerHTML = DOCTORS.map(d => `<option value="${escapeHtml(d.name)}">`).join('') + `<option value="غير موجود">`;
+            });
+        }
+
+        function refreshClerkDatalists() {
+            document.querySelectorAll('datalist[id^="l_unit_"][id$="_T7"]').forEach(dl => {
+                dl.innerHTML = CLERKS.map(c => `<option value="${escapeHtml(c.name)}">`).join('') + `<option value="غير موجود">`;
+            });
+        }
+
+        window.saveQuickAdd = async function() {
+            const ctx = pendingAddContext;
+            if (!ctx) return;
+
+            const btn = document.getElementById('qaSaveBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الإضافة...';
+            let addedName = '';
+
+            try {
+                if (ctx.kind === 'doctor') {
+                    const name = document.getElementById('qaDoctorName').value.trim();
+                    const specialty = document.getElementById('qaDoctorSpecialty').value.trim();
+                    const department = document.getElementById('qaDoctorDepartment').value.trim();
+
+                    if (!name) { showNotification('يرجى إدخال اسم الطبيب', 'warning'); return; }
+                    if (!specialty) { showNotification('يرجى إدخال التخصص', 'warning'); return; }
+                    if (DOCTORS.some(d => d.name === name)) { showNotification('هذا الطبيب موجود بالفعل', 'warning'); return; }
+
+                    const { data, error } = await supabase.from('doctors')
+                        .insert({ name, specialty, department: department || null })
+                        .select('id, name, specialty, department')
+                        .single();
+                    if (error) throw error;
+
+                    DOCTORS.push(data);
+                    DOCTORS.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+                    refreshDoctorDatalists();
+                    addedName = data.name;
+                } else {
+                    const name = document.getElementById('qaClerkName').value.trim();
+                    if (!name) { showNotification('يرجى إدخال اسم المدخل', 'warning'); return; }
+                    if (CLERKS.some(c => c.name === name)) { showNotification('هذا المدخل موجود بالفعل', 'warning'); return; }
+
+                    const { data, error } = await supabase.from('ward_clerks')
+                        .insert({ name })
+                        .select('id, name')
+                        .single();
+                    if (error) throw error;
+
+                    CLERKS.push(data);
+                    CLERKS.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+                    refreshClerkDatalists();
+                    addedName = data.name;
+                }
+
+                if (ctx.targetInput) {
+                    ctx.targetInput.value = addedName;
+                    if (ctx.fieldType === 'consultant') {
+                        window.handleCard1T8(ctx.targetInput);
+                    } else if (ctx.fieldType === 'T3' || ctx.fieldType === 'T7' || ctx.fieldType === 'T8') {
+                        window.handleLocalLogic(ctx.fieldType, ctx.targetInput, ctx.qId, ctx.unitId);
+                    }
+                }
+
+                showNotification('تمت الإضافة بنجاح', 'success');
+                await logAudit('quick_add_' + ctx.kind, {
+                    entityType: ctx.kind,
+                    entityId: addedName,
+                    description: `إضافة ${ctx.kind === 'doctor' ? 'طبيب' : 'مدخل بيانات'} جديد من واجهة المراجعة`,
+                    severity: 'info'
+                });
+
+                window.closeQuickAddModal();
+            } catch (err) {
+                console.error('Quick add error:', err);
+                showNotification('فشل الإضافة: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'إضافة';
+            }
+        };
+
+        // ============================================
         // LOCAL LOGIC
         // ============================================
         window.handleLocalLogic = function(type, el, qId, unitId) {
             const pre = `unit_${qId}_${unitId}`;
             const val = el.value;
 
+            // T7 — Ward Clerk
+            if (type === 'T7') {
+                if (val === 'غير موجود') {
+                    window.openQuickAddModal('clerk', {
+                        kind: 'clerk', targetInput: el, fieldType: 'T7', qId, unitId
+                    });
+                }
+                return;
+            }
+
             if (type === 'T3' || type === 'T8') {
+                if (val === 'غير موجود') {
+                    window.openQuickAddModal('doctor', {
+                        kind: 'doctor', targetInput: el, fieldType: type, qId, unitId
+                    });
+                    return;
+                }
                 const specDiv = document.getElementById(`spec_${pre}_${type}`);
                 if (specDiv) {
                     const doc = DOCTORS.find(d => d.name === val.trim());
@@ -1052,11 +1323,7 @@
                 }
                 if (type === 'T3') {
                     const t5 = document.getElementById(`cont_${pre}_T5`);
-                    if (val === 'غير موجود') {
-                        if (t5) t5.classList.remove('hidden-logic');
-                    } else {
-                        if (t5) t5.classList.add('hidden-logic');
-                    }
+                    if (t5) t5.classList.add('hidden-logic');
                 }
             }
 
@@ -1243,6 +1510,14 @@
             const manualDiv = document.getElementById('t8_manual_div');
             const specDiv = document.getElementById('consultantSpecialty');
             const val = select.value.trim();
+
+            if (val === 'غير موجود') {
+                window.openQuickAddModal('doctor', {
+                    kind: 'doctor', targetInput: select, fieldType: 'consultant'
+                });
+                return;
+            }
+
             const found = DOCTORS.find(d => d.name === val);
 
             if (found && found.specialty) {
@@ -1253,14 +1528,40 @@
                 specDiv.classList.add('hidden-logic');
             }
 
-            if ((!found && val !== '') || val === 'غير موجود') {
+            if (!found && val !== '') {
                 manualDiv.classList.remove('hidden-logic');
-                document.getElementById('t8_manual_input').value = (val === 'غير موجود') ? '' : val;
-                if (val === 'غير موجود') document.getElementById('t8_manual_input').focus();
+                document.getElementById('t8_manual_input').value = val;
             } else {
                 manualDiv.classList.add('hidden-logic');
             }
         };
+
+        // ============================================
+        // NAV GUARD — CONFIRM ON HEADER TAB CLICK
+        // ============================================
+        function setupNavGuard() {
+            document.querySelectorAll('.nav-inner a').forEach(a => {
+                a.addEventListener('click', async (e) => {
+                    const href = a.getAttribute('href');
+                    if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+                    e.preventDefault();
+                    if (navGuardBusy) return;
+                    navGuardBusy = true;
+                    try {
+                        const ok = await window.showConfirm({
+                            title: 'مغادرة الصفحة',
+                            message: 'هل قمت بحفظ البيانات؟ سيتم فقدان أي تغييرات غير محفوظة إذا غادرت الصفحة الآن.',
+                            confirmText: 'متابعة الخروج',
+                            cancelText: 'البقاء في الصفحة',
+                            type: 'warning'
+                        });
+                        if (ok) window.location.href = href;
+                    } finally {
+                        navGuardBusy = false;
+                    }
+                });
+            });
+        }
 
         // ============================================
         // SEARCH
@@ -1552,7 +1853,7 @@
         };
 
         // ============================================
-        // SUBMIT
+        // SUBMIT — SAVE REVIEW
         // ============================================
         window.generateReport = async function() {
             const data = collectAllData();
@@ -1571,9 +1872,9 @@
             }
 
             const confirmed = await window.showConfirm({
-                title: 'اعتماد التقرير',
-                message: 'هل أنت متأكد من اعتماد التقرير نهائياً؟',
-                confirmText: 'اعتماد وإرسال',
+                title: 'حفظ المراجعة',
+                message: 'هل أنت متأكد من حفظ المراجعة نهائياً؟',
+                confirmText: 'حفظ المراجعة',
                 cancelText: 'إلغاء',
                 type: 'warning'
             });
@@ -1581,7 +1882,7 @@
 
             const btn = document.getElementById('submitBtn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الاعتماد...';
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري حفظ المراجعة...';
 
             try {
                 const { error } = await supabase.from('medical_file_reviews').upsert({
@@ -1597,20 +1898,20 @@
                 finalReportUrl = `./medical-audit-report.html?reportId=${encodeURIComponent(data.medical_id)}&visit=${encodeURIComponent(data.visit_number)}`;
                 document.getElementById('btnOpenReport').classList.remove('hidden-logic');
 
-                showNotification('تم الاعتماد بنجاح! جاري التوجيه للتقرير...', 'success');
+                showNotification('تم حفظ المراجعة بنجاح! جاري التوجيه للتقرير...', 'success');
                 await logAudit('medical_record_submitted', {
                     entityType: 'medical_file',
                     entityId: `${data.medical_id}/${data.visit_number}`,
-                    description: 'اعتماد نهائي لمراجعة ملف طبي',
+                    description: 'حفظ نهائي لمراجعة ملف طبي',
                     severity: 'info'
                 });
 
                 setTimeout(() => { window.location.href = finalReportUrl; }, 1500);
             } catch (err) {
                 console.error('Submit error:', err);
-                showNotification('فشل الاعتماد: ' + err.message, 'error');
+                showNotification('فشل حفظ المراجعة: ' + err.message, 'error');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> اعتماد وإرسال';
+                btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> حفظ المراجعة';
             }
         };
 
@@ -1655,6 +1956,12 @@
                 renderQuestions();
                 renderWardQuestions();
                 handleGlobalLogic();
+                setupNavGuard();
+
+                // Modal overlay click to close
+                document.getElementById('quickAddModal')?.addEventListener('click', (e) => {
+                    if (e.target.id === 'quickAddModal') window.closeQuickAddModal();
+                });
 
                 document.getElementById('loadingScreen').classList.add('hide');
             } catch (err) {
