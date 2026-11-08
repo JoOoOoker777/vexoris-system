@@ -1,11 +1,9 @@
-// loading-logo.js — VEXORIS Lottie Loader
-// يستبدل أي .loading-screen أو #loadingScreen بمشغل Lottie
+// loading-logo.js — VEXORIS Lottie Loader (v2 — Cleaned + Cropped)
 (function () {
     'use strict';
     if (window.__vexorisLoaderLoaded) return;
     window.__vexorisLoaderLoaded = true;
 
-    // اكتشاف مسار ملف Lottie بناءً على مكان الـ script نفسه
     function getLoaderPath() {
         const scripts = document.getElementsByTagName('script');
         for (let s of scripts) {
@@ -14,6 +12,64 @@
             }
         }
         return '/assets/loader.json';
+    }
+
+    // يمسح الخلفيات المدمجة (مستطيلات مغطية الكانفس)
+    function stripBackgroundLayers(data) {
+        if (!data.layers) return data;
+        data.layers = data.layers.filter(layer => {
+            if (layer.ty !== 4 || !layer.shapes) return true;
+            for (const shape of layer.shapes) {
+                if (shape.ty === 'rc' && shape.s && shape.s.a === 0) {
+                    const size = shape.s.k;
+                    if (Array.isArray(size) &&
+                        size[0] >= data.w * 0.85 &&
+                        size[1] >= data.h * 0.85) {
+                        return false; // دي خلفية — استبعدها
+                    }
+                }
+            }
+            return true;
+        });
+        return data;
+    }
+
+    async function loadCleanLottie(container) {
+        try {
+            const res = await fetch(getLoaderPath());
+            if (!res.ok) throw new Error('Failed to fetch loader.json: ' + res.status);
+            let data = await res.json();
+
+            data = stripBackgroundLayers(data);
+
+            const anim = window.lottie.loadAnimation({
+                container,
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                animationData: data,
+                rendererSettings: {
+                    preserveAspectRatio: 'xMidYMid slice',
+                    progressiveLoad: true
+                }
+            });
+
+            // قص viewBox على المحتوى الفعلي (VEXORIS في نص الكانفس)
+            anim.addEventListener('DOMLoaded', () => {
+                const svg = container.querySelector('svg');
+                if (svg) {
+                    svg.setAttribute('viewBox', '180 210 440 140');
+                    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+                    svg.style.width = '100%';
+                    svg.style.height = '100%';
+                    svg.style.display = 'block';
+                }
+            });
+
+        } catch (e) {
+            console.error('[VEXORIS Loader] Lottie failed:', e);
+            fallback(container);
+        }
     }
 
     function replaceLoadingScreens() {
@@ -28,8 +84,8 @@
                 : 'جاري التحميل...';
 
             screen.innerHTML = `
-                <div class="vex-loader-wrap" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
-                    <div id="vex-lottie-player" style="width:140px;height:140px;"></div>
+                <div class="vex-loader-wrap" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">
+                    <div id="vex-lottie-player" style="width:260px;height:100px;"></div>
                     <p id="loadingText" style="
                         font-family:'Tajawal',sans-serif;
                         font-size:0.78rem;
@@ -44,18 +100,7 @@
             const player = screen.querySelector('#vex-lottie-player');
 
             if (window.lottie && player) {
-                try {
-                    window.lottie.loadAnimation({
-                        container: player,
-                        renderer: 'svg',
-                        loop: true,
-                        autoplay: true,
-                        path: getLoaderPath()
-                    });
-                } catch (e) {
-                    console.warn('[VEXORIS Loader] Lottie error:', e);
-                    fallback(player);
-                }
+                loadCleanLottie(player);
             } else {
                 console.warn('[VEXORIS Loader] lottie library not loaded');
                 fallback(player);
@@ -67,7 +112,7 @@
         if (!container) return;
         container.innerHTML =
             '<i class="fa-solid fa-circle-notch fa-spin" ' +
-            'style="font-size:2.6rem;color:#0ea5e9;display:block;text-align:center;line-height:140px;"></i>';
+            'style="font-size:2.6rem;color:#0ea5e9;display:block;text-align:center;line-height:100px;"></i>';
     }
 
     if (document.readyState === 'loading') {
