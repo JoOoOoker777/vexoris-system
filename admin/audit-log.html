@@ -333,6 +333,129 @@
             background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4));
             border-radius: 10px; border: 2px solid var(--bg);
         }
+        /* ============ BULK ACTIONS ============ */
+        .danger-bar {
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+            margin-top: 12px; padding: 12px 16px;
+            background: rgba(239, 68, 68, 0.04);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+        }
+        .danger-bar .danger-label {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.72rem; font-weight: 800; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.06em;
+        }
+
+        .btn-danger {
+            padding: 9px 14px; border-radius: 9px;
+            background: rgba(239, 68, 68, 0.1); color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            font-family: inherit; font-weight: 800; font-size: 0.76rem;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+            transition: all 0.2s;
+        }
+        .btn-danger:hover { background: rgba(239, 68, 68, 0.18); border-color: var(--danger); }
+        .btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .bulk-toolbar {
+            display: none; margin-top: 12px; padding: 12px 18px;
+            background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(99,102,241,0.05));
+            border: 1px solid rgba(14,165,233,0.3);
+            border-radius: 12px;
+            align-items: center; gap: 12px; flex-wrap: wrap;
+        }
+        .bulk-toolbar.active { display: flex; }
+        .bulk-info {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.85rem; font-weight: 800; color: var(--accent);
+        }
+        .bulk-actions { display: flex; gap: 6px; margin-inline-start: auto; flex-wrap: wrap; }
+
+        .bulk-btn {
+            padding: 7px 14px; border-radius: 8px;
+            font-family: inherit; font-weight: 800; font-size: 0.72rem;
+            cursor: pointer; border: 1px solid var(--card-border);
+            background: transparent; color: var(--text-secondary);
+            display: inline-flex; align-items: center; gap: 5px;
+            transition: all 0.2s;
+        }
+        .bulk-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+        .bulk-btn.danger { color: var(--danger); border-color: rgba(239,68,68,0.3); }
+        .bulk-btn.danger:hover:not(:disabled) { background: rgba(239,68,68,0.1); border-color: var(--danger); }
+        .bulk-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .checkbox-cell { text-align: center; width: 40px; }
+        .checkbox-cell input[type="checkbox"] {
+            width: 16px; height: 16px;
+            accent-color: var(--accent); cursor: pointer;
+        }
+        #selectAllCb { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+        .main-row.selected { background: rgba(14, 165, 233, 0.08) !important; }
+
+        /* ============ MODAL ============ */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 200;
+            background: rgba(4, 7, 15, 0.75);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+
+        .modal-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 18px; width: 100%; max-width: 500px;
+            max-height: 90vh; overflow: hidden;
+            display: flex; flex-direction: column;
+            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
+        }
+        .modal-head {
+            padding: 16px 20px; border-bottom: 1px solid var(--card-border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .modal-head h3 { font-size: 1rem; font-weight: 900; display: flex; align-items: center; gap: 8px; }
+        .modal-head .close-x {
+            width: 30px; height: 30px; border-radius: 8px;
+            border: 1px solid var(--card-border); background: transparent;
+            color: var(--text-secondary);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .modal-head .close-x:hover { border-color: var(--danger); color: var(--danger); }
+        .modal-body { padding: 18px 20px; overflow-y: auto; }
+        .modal-foot {
+            padding: 14px 20px; border-top: 1px solid var(--card-border);
+            display: flex; justify-content: flex-end; gap: 8px;
+            background: rgba(15, 23, 42, 0.2);
+        }
+        html:not(.dark) .modal-foot { background: rgba(248, 250, 252, 0.5); }
+
+        .delete-all-warning {
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 10px; padding: 14px; margin-bottom: 14px;
+            color: var(--danger); font-size: 0.82rem;
+            font-weight: 700; line-height: 1.7;
+        }
+
+        .f-group { margin-bottom: 14px; }
+        .f-label {
+            display: block; font-size: 0.72rem; font-weight: 800;
+            color: var(--text-secondary); margin-bottom: 6px;
+        }
+        .f-input {
+            width: 100%; padding: 10px 14px;
+            background: rgba(15,23,42,0.4);
+            border: 1px solid var(--card-border);
+            border-radius: 9px;
+            color: var(--text-primary); font-size: 0.85rem;
+            font-weight: 600; font-family: inherit; transition: all 0.2s;
+        }
+        html:not(.dark) .f-input { background: rgba(255,255,255,0.7); }
+        .f-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14,165,233,0.12); }
     </style>
     <link rel="stylesheet" href="../theme-overrides.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
@@ -436,12 +559,51 @@
             </button>
         </div>
 
+        <!-- ✅ Danger actions bar -->
+        <div class="danger-bar">
+            <div class="danger-label">
+                <i class="fa-solid fa-shield-halved"></i>
+                إجراءات حساسة
+            </div>
+            <select id="bulkSeveritySelect" class="filter-select" style="max-width: 180px; padding: 8px 12px;">
+                <option value="">حذف حسب الخطورة</option>
+                <option value="info">معلومات (info)</option>
+                <option value="warning">تحذيرات (warning)</option>
+                <option value="critical">حرجة (critical)</option>
+            </select>
+            <button class="btn-danger" onclick="handleDeleteBySeverity()">
+                <i class="fa-solid fa-broom"></i> تنفيذ الحذف
+            </button>
+            <button class="btn-danger" id="btnDeleteAll" onclick="openDeleteAllModal()" style="display: none; margin-inline-start: auto;">
+                <i class="fa-solid fa-fire"></i> حذف كل السجلات
+            </button>
+        </div>
+
+        <!-- ✅ Bulk selection toolbar -->
+        <div class="bulk-toolbar" id="bulkToolbar">
+            <div class="bulk-info">
+                <i class="fa-solid fa-check-square"></i>
+                <span id="bulkCount">0</span> سجل محدد
+            </div>
+            <div class="bulk-actions">
+                <button class="bulk-btn danger" onclick="deleteSelected()">
+                    <i class="fa-solid fa-trash"></i> حذف المحدد
+                </button>
+                <button class="bulk-btn" onclick="clearSelection()">
+                    <i class="fa-solid fa-xmark"></i> إلغاء التحديد
+                </button>
+            </div>
+        </div>
+
         <!-- Table -->
         <div class="table-wrap">
             <div class="table-scroll">
                 <table class="audit-table">
                     <thead>
                         <tr>
+                            <th style="width: 40px; text-align: center;">
+                                <input type="checkbox" id="selectAllCb" onchange="toggleSelectAll(this)" />
+                            </th>
                             <th style="width: 240px;">المستخدم</th>
                             <th style="width: 200px;">الحدث</th>
                             <th>الوصف</th>
@@ -462,7 +624,36 @@
             </div>
         </div>
     </main>
-
+        <!-- DELETE ALL MODAL -->
+        <div class="modal-overlay" id="deleteAllModal">
+            <div class="modal-card">
+                <div class="modal-head">
+                    <h3>
+                        <i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i>
+                        حذف كل السجلات
+                    </h3>
+                    <button class="close-x" onclick="closeDeleteAllModal()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="delete-all-warning">
+                        ⚠️ تحذير: هذه العملية ستؤدي إلى حذف <strong>كل سجلات التدقيق نهائيًا</strong>، ولا يمكن التراجع عنها.
+                        سيتم إضافة سجل واحد فقط يوضح من قام بالحذف ومتى.
+                    </div>
+                    <div class="f-group" style="margin-bottom: 0;">
+                        <label class="f-label">
+                            اكتب <code style="background: rgba(239,68,68,0.15); padding: 2px 8px; border-radius: 5px; color: var(--danger);">DELETE ALL</code> للتأكيد:
+                        </label>
+                        <input type="text" id="deleteAllInput" class="f-input" oninput="checkDeleteAllInput()" placeholder="DELETE ALL" style="direction: ltr; text-align: left; font-family: 'Space Grotesk', monospace; letter-spacing: 0.1em;" />
+                    </div>
+                </div>
+                <div class="modal-foot">
+                    <button class="bulk-btn" onclick="closeDeleteAllModal()">إلغاء</button>
+                    <button class="bulk-btn danger" id="deleteAllConfirmBtn" onclick="confirmDeleteAll()" disabled>
+                        <i class="fa-solid fa-fire"></i> حذف نهائي
+                    </button>
+                </div>
+            </div>
+        </div>
     <footer class="footer-shell">
         <div class="footer-brand">VEXORIS SYSTEM</div>
         <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
@@ -509,11 +700,198 @@
             if (days < 30) return `منذ ${days} يوم`;
             return date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' });
         }
+        // ============================================
+        // SELECTION
+        // ============================================
+        let selectedIds = new Set();
 
+        window.toggleSelect = function(id, el) {
+            if (el.checked) selectedIds.add(String(id));
+            else selectedIds.delete(String(id));
+            updateBulkToolbar();
+        };
+
+        window.toggleSelectAll = function(el) {
+            document.querySelectorAll('.row-checkbox').forEach(cb => {
+                cb.checked = el.checked;
+                const id = String(cb.dataset.id);
+                if (el.checked) selectedIds.add(id);
+                else selectedIds.delete(id);
+            });
+            updateBulkToolbar();
+        };
+
+        function updateBulkToolbar() {
+            const toolbar = document.getElementById('bulkToolbar');
+            const countEl = document.getElementById('bulkCount');
+            if (selectedIds.size > 0) {
+                toolbar.classList.add('active');
+                countEl.textContent = selectedIds.size;
+            } else {
+                toolbar.classList.remove('active');
+            }
+            document.querySelectorAll('.main-row').forEach(row => {
+                const cb = row.querySelector('.row-checkbox');
+                if (cb && cb.checked) row.classList.add('selected');
+                else row.classList.remove('selected');
+            });
+        }
+
+        window.clearSelection = function() {
+            selectedIds.clear();
+            document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+            const sa = document.getElementById('selectAllCb');
+            if (sa) sa.checked = false;
+            updateBulkToolbar();
+        };
+
+        // ============================================
+        // DELETE OPERATIONS
+        // ============================================
+        window.deleteSelected = async function() {
+            if (selectedIds.size === 0) return;
+            const ids = Array.from(selectedIds);
+
+            const criticalCount = currentLogs.filter(l =>
+                selectedIds.has(String(l.id)) && l.severity === 'critical'
+            ).length;
+
+            if (criticalCount > 0 && currentUserRole !== 'super_admin') {
+                showNotification(`لا تملك صلاحية حذف ${criticalCount} سجل حرج`, 'error');
+                return;
+            }
+
+            const ok = await window.showConfirm({
+                title: 'حذف نهائي',
+                message: `هل أنت متأكد من حذف ${ids.length} سجل نهائيًا؟ لا يمكن التراجع.`,
+                confirmText: 'حذف نهائي',
+                cancelText: 'إلغاء',
+                type: 'danger'
+            });
+            if (!ok) return;
+
+            try {
+                const { error } = await supabase.from('audit_log').delete().in('id', ids);
+                if (error) throw error;
+
+                await logAudit('audit_log_bulk_deleted', {
+                    description: `حذف ${ids.length} سجل يدويًا`,
+                    severity: 'critical',
+                    metadata: { count: ids.length, ids }
+                });
+
+                showNotification(`تم حذف ${ids.length} سجل`, 'success');
+                clearSelection();
+                await Promise.all([loadStats(), loadLogs()]);
+            } catch (err) {
+                showNotification('فشل الحذف: ' + err.message, 'error');
+            }
+        };
+
+        window.handleDeleteBySeverity = async function() {
+            const sel = document.getElementById('bulkSeveritySelect');
+            const severity = sel.value;
+            if (!severity) {
+                showNotification('اختر درجة الخطورة أولًا', 'warning');
+                return;
+            }
+
+            if (severity === 'critical' && currentUserRole !== 'super_admin') {
+                showNotification('لا تملك صلاحية حذف السجلات الحرجة', 'error');
+                return;
+            }
+
+            const { count, error: countErr } = await supabase
+                .from('audit_log')
+                .select('*', { count: 'exact', head: true })
+                .eq('severity', severity);
+
+            if (countErr) { showNotification('فشل الاستعلام', 'error'); return; }
+            if (!count) { showNotification('لا توجد سجلات بهذه الخطورة', 'info'); return; }
+
+            const sevLabel = SEVERITY_LABELS[severity]?.label || severity;
+            const ok = await window.showConfirm({
+                title: 'حذف جماعي',
+                message: `سيتم حذف ${count} سجل بخطورة "${sevLabel}" نهائيًا. متأكد؟`,
+                confirmText: 'حذف نهائي',
+                cancelText: 'إلغاء',
+                type: 'danger'
+            });
+            if (!ok) return;
+
+            try {
+                const { error } = await supabase.from('audit_log').delete().eq('severity', severity);
+                if (error) throw error;
+
+                await logAudit('audit_log_bulk_deleted', {
+                    description: `حذف جماعي: ${count} سجل بخطورة ${sevLabel}`,
+                    severity: 'critical',
+                    metadata: { count, severity }
+                });
+
+                showNotification(`تم حذف ${count} سجل`, 'success');
+                sel.value = '';
+                clearSelection();
+                await Promise.all([loadStats(), loadLogs()]);
+            } catch (err) {
+                showNotification('فشل الحذف: ' + err.message, 'error');
+            }
+        };
+
+        window.openDeleteAllModal = function() {
+            if (currentUserRole !== 'super_admin') {
+                showNotification('هذه العملية متاحة لـ Super Admin فقط', 'error');
+                return;
+            }
+            document.getElementById('deleteAllInput').value = '';
+            document.getElementById('deleteAllConfirmBtn').disabled = true;
+            document.getElementById('deleteAllModal').classList.add('open');
+        };
+
+        window.closeDeleteAllModal = function() {
+            document.getElementById('deleteAllModal').classList.remove('open');
+        };
+
+        window.checkDeleteAllInput = function() {
+            const val = document.getElementById('deleteAllInput').value.trim();
+            document.getElementById('deleteAllConfirmBtn').disabled = (val !== 'DELETE ALL');
+        };
+
+        window.confirmDeleteAll = async function() {
+            const val = document.getElementById('deleteAllInput').value.trim();
+            if (val !== 'DELETE ALL') return;
+
+            const btn = document.getElementById('deleteAllConfirmBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحذف...';
+
+            try {
+                const { count } = await supabase.from('audit_log').select('*', { count: 'exact', head: true });
+                const { error } = await supabase.from('audit_log').delete().gte('id', 0);
+                if (error) throw error;
+
+                await logAudit('audit_log_bulk_deleted', {
+                    description: `حذف كلي: ${count || '?'} سجل`,
+                    severity: 'critical',
+                    metadata: { count, action: 'delete_all' }
+                });
+
+                showNotification(`تم حذف ${count || 0} سجل نهائيًا`, 'success');
+                closeDeleteAllModal();
+                clearSelection();
+                await Promise.all([loadStats(), loadLogs()]);
+            } catch (err) {
+                showNotification('فشل الحذف الكلي: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-fire"></i> حذف نهائي';
+            }
+        };
         // ============================================
         // LOAD DATA
         // ============================================
         async function loadLogs() {
+            clearSelection();
             const search = document.getElementById('searchInput').value.trim();
             const action = document.getElementById('actionFilter').value;
             const severity = document.getElementById('severityFilter').value;
@@ -591,7 +969,7 @@
 
             if (currentLogs.length === 0) {
                 tbody.innerHTML = `
-                    <tr><td colspan="6" style="text-align: center; padding: 60px 20px;">
+                    <tr><td colspan="7" style="text-align: center; padding: 60px 20px;">
                         <i class="fa-solid fa-inbox" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 12px; display: block;"></i>
                         <div style="font-weight: 900; margin-bottom: 6px;">لا توجد سجلات مطابقة</div>
                         <div style="color: var(--text-secondary); font-size: 0.82rem;">جرّب تغيير الفلاتر أو البحث بكلمات أخرى.</div>
@@ -603,18 +981,13 @@
             tbody.innerHTML = currentLogs.map((log, i) => {
                 const info = AUDIT_LABELS[log.action] || { label: log.action, icon: 'fa-circle-info', color: '#64748b' };
                 const sev = SEVERITY_LABELS[log.severity] || SEVERITY_LABELS.info;
-                
-                // Determine if there are details to show
                 const hasDetails = (log.metadata && Object.keys(log.metadata).length > 0) || log.user_agent;
                 const detailsId = `details-${log.id}`;
 
-                // Format metadata nicely
                 let metadataHtml = '';
                 if (log.metadata && Object.keys(log.metadata).length > 0) {
                     const cleanMeta = { ...log.metadata };
                     if (cleanMeta.user_agent) cleanMeta.user_agent = parseDeviceName(cleanMeta.user_agent);
-                    if (cleanMeta.url) cleanMeta.url = cleanMeta.url; // keep URL as is
-                    
                     metadataHtml += `<strong>التفاصيل:</strong>\n${JSON.stringify(cleanMeta, null, 2)}`;
                 }
                 if (log.user_agent && (!log.metadata || !log.metadata.user_agent)) {
@@ -623,6 +996,12 @@
 
                 return `
                     <tr class="main-row" data-id="${log.id}" ${hasDetails ? `onclick="toggleDetails('${detailsId}', this)"` : ''}>
+                        <td class="checkbox-cell">
+                            <input type="checkbox" class="row-checkbox" data-id="${log.id}"
+                                onclick="event.stopPropagation();"
+                                onchange="toggleSelect('${log.id}', this)"
+                                ${selectedIds.has(String(log.id)) ? 'checked' : ''} />
+                        </td>
                         <td>
                             <div class="user-cell">
                                 <div class="user-icon"><i class="fa-solid fa-user"></i></div>
@@ -644,18 +1023,19 @@
                             ${log.description || '—'}
                         </td>
                         <td>
-                            <span class="severity-pill severity-${log.severity}">
-                                ${sev.label}
-                            </span>
+                            <span class="severity-pill severity-${log.severity}">${sev.label}</span>
                         </td>
-                        <td class="time-cell">${timeAgo(log.created_at)}<br><span style="font-size:0.6rem; color: var(--text-muted);">${new Date(log.created_at).toLocaleTimeString('ar-EG')}</span></td>
+                        <td class="time-cell">
+                            ${timeAgo(log.created_at)}<br>
+                            <span style="font-size:0.6rem; color: var(--text-muted);">${new Date(log.created_at).toLocaleTimeString('ar-EG')}</span>
+                        </td>
                         <td>
                             ${hasDetails ? `<button class="expand-btn"><i class="fa-solid fa-chevron-down"></i></button>` : ''}
                         </td>
                     </tr>
                     ${hasDetails ? `
                     <tr class="details-row" id="${detailsId}" style="display: none;">
-                        <td colspan="6">
+                        <td colspan="7">
                             <div class="details-content">${metadataHtml}</div>
                         </td>
                     </tr>
@@ -833,6 +1213,10 @@
             }
 
             currentUserRole = profile.role;
+            if (currentUserRole === 'super_admin') {
+                const btnAll = document.getElementById('btnDeleteAll');
+                if (btnAll) btnAll.style.display = 'inline-flex';
+            }
 
             // 2. Setup filters
             populateActionFilter();
