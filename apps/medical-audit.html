@@ -820,6 +820,8 @@
 
         function safeParse(s) {
             if (!s) return [];
+            if (Array.isArray(s)) return s;              // ← JSONB already parsed as array
+            if (typeof s === 'object') return [s];       // ← safety net
             try {
                 let p = JSON.parse(s);
                 if (typeof p === 'string') p = JSON.parse(p);
@@ -990,14 +992,15 @@
                     ISSUE_CATEGORIES.forEach((group) => {
                         h += `<div class="issue-category-title" onclick="toggleIssueCategory(this)">
                                 <i class="fa-solid fa-chevron-left"></i>
-                                ${escapeHtml(group.name)}
-                              </div>
-                              <div class="issue-items-grid">`;
+                                <span>${escapeHtml(group.name)}</span>
+                                <span class="issue-count-badge" style="display:none; background: var(--danger); color: #fff; font-size: 0.6rem; padding: 1px 7px; border-radius: 999px; font-weight: 900; min-width: 18px; justify-content: center;">0</span>
+                            </div>
+                            <div class="issue-items-grid" style="display: none;">`;
                         group.items.forEach(o => {
                             h += `<label class="cb-item">
                                     <input type="checkbox" name="${fid}" value="${o.code}" onchange="handleLocalLogic('T4',this,'${qId}','${unitId}')">
                                     <span>${escapeHtml(o.label)}</span>
-                                  </label>`;
+                                </label>`;
                         });
                         h += `</div>`;
                     });
@@ -1082,6 +1085,7 @@
             const c = document.getElementById('qContainer');
             c.innerHTML = '';
             unitCounter = 0;
+            cardCloneCounter = 0;
 
             if (FORMS.length === 0) {
                 c.innerHTML = `<div style="padding: 40px; text-align: center; background: var(--card-bg); border: 1px dashed var(--card-border); border-radius: 14px; color: var(--text-muted);">
@@ -1143,9 +1147,9 @@
             const icon = el.querySelector('i');
             const grid = el.nextElementSibling;
             if (!grid) return;
-            const isHidden = grid.style.display === 'none';
-            grid.style.display = isHidden ? 'grid' : 'none';
-            icon.style.transform = isHidden ? 'rotate(-90deg)' : 'rotate(0deg)';
+            const isClosed = grid.style.display === 'none' || grid.style.display === '';
+            grid.style.display = isClosed ? 'grid' : 'none';
+            icon.style.transform = isClosed ? 'rotate(-90deg)' : 'rotate(0deg)';
         };
 
         // ============================================
@@ -1481,6 +1485,22 @@
                 } else {
                     if (t6) t6.classList.add('hidden-logic');
                 }
+                const grid = el.closest('.issue-items-grid');
+                if (grid) {
+                    const titleEl = grid.previousElementSibling;
+                    if (titleEl && titleEl.classList.contains('issue-category-title')) {
+                        const checkedCount = grid.querySelectorAll('input[type="checkbox"]:checked').length;
+                        const badge = titleEl.querySelector('.issue-count-badge');
+                        if (badge) {
+                            if (checkedCount > 0) {
+                                badge.textContent = checkedCount;
+                                badge.style.display = 'inline-flex';
+                            } else {
+                                badge.style.display = 'none';
+                            }
+                        }
+                    }
+                }
             }
         };
 
@@ -1538,7 +1558,13 @@
                     if (excluded) shouldShow = false;
                 }
 
-                if (shouldShow) card.classList.add('visible');
+                if (shouldShow) {
+                    card.classList.add('visible');
+                    // ✅ خلي أي clones تابعة للنموذج ده تظهر كمان
+                    const primaryQId = card.id.replace('card-', '');
+                    document.querySelectorAll(`#qContainer .question-card[id^="card-${primaryQId}_C"]`)
+                        .forEach(clone => clone.classList.add('visible'));
+                }
             });
         };
 
@@ -1547,9 +1573,10 @@
         // ============================================
         window.cloneQuestion = function(originalQId) {
             const orig = document.getElementById(`card-${originalQId}`);
-            if (!orig) return;
+            if (!orig) return null;
+
             const newQId = `${originalQId}_C${++cardCloneCounter}`;
-            const titleText = orig.querySelector('.question-title span:last-child').textContent.trim();
+            const titleText = orig.querySelector('.question-title span:not(.question-num)')?.textContent.trim() || '';
             const formId = orig.dataset.formId;
             const form = FORMS.find(f => f.id === formId);
             const requiresDate = form?.requires_date || false;
@@ -1572,7 +1599,13 @@
                         ${buildAssessmentUnitHtml(newQId, newUnitId, false, requiresDate, false)}
                     </div>
                 </div>`;
-            orig.insertAdjacentHTML('afterend', html);
+
+            // ✅ لصق الجديد بعد آخر clone موجود (لو فيه)، وإلا بعد الأصلي — عشان الترتيب يفضل صح
+            const existingClones = Array.from(document.querySelectorAll(`#qContainer .question-card[id^="card-${originalQId}_C"]`));
+            const insertAfter = existingClones.length > 0 ? existingClones[existingClones.length - 1] : orig;
+            insertAfter.insertAdjacentHTML('afterend', html);
+
+            return newQId;
         };
 
         window.cloneAssessmentUnit = function(qId) {
@@ -1645,7 +1678,104 @@
                 });
             });
         }
+        
 
+        function refreshAllIssueBadges() {
+            document.querySelectorAll('.issue-items-grid').forEach(grid => {
+                const titleEl = grid.previousElementSibling;
+                if (!titleEl || !titleEl.classList.contains('issue-category-title')) return;
+                const checked = grid.querySelectorAll('input[type="checkbox"]:checked').length;
+                const badge = titleEl.querySelector('.issue-count-badge');
+                if (badge) {
+                    if (checked > 0) {
+                        badge.textContent = checked;
+                        badge.style.display = 'inline-flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        function fillUnitsInto(container, qId, hasDate, units) {
+            if (!container) return;
+            container.innerHTML = '';
+
+            // فلترة الـ units الفاضية
+            const validUnits = (units || []).filter(u =>
+                u && (u.score || u.person || u.role || u.date || u.otherName ||
+                    (Array.isArray(u.issues) && u.issues.length > 0) ||
+                    (Array.isArray(u.notes) && u.notes.length > 0) || u.note)
+            );
+
+            if (validUnits.length === 0) {
+                const newUnitId = `A${++unitCounter}`;
+                container.insertAdjacentHTML('beforeend', buildAssessmentUnitHtml(qId, newUnitId, false, hasDate, false));
+                return;
+            }
+
+            validUnits.forEach((sUnit, idx) => {
+                const nUnitId = `A${++unitCounter}`;
+                container.insertAdjacentHTML('beforeend', buildAssessmentUnitHtml(qId, nUnitId, idx > 0, hasDate, false));
+                const pre = `unit_${qId}_${nUnitId}`;
+
+                const setField = (sel, v) => {
+                    const el = document.querySelector(sel);
+                    if (el && v !== undefined && v !== null) {
+                        if (el.tagName === 'SELECT') {
+                            Array.from(el.options).forEach(opt => {
+                                if (opt.value.trim().toLowerCase() === String(v).trim().toLowerCase()) el.value = opt.value;
+                            });
+                        } else {
+                            el.value = v;
+                        }
+                    }
+                    return el;
+                };
+
+                // T1 — date
+                if (sUnit.date) setField(`input[name="${pre}_T1"]`, String(sUnit.date).split('T')[0]);
+
+                // T9 — role
+                if (sUnit.role) {
+                    const rEl = document.querySelector(`input[name="${pre}_T9"][value="${sUnit.role}"]`);
+                    if (rEl) { rEl.checked = true; window.handleLocalLogic('T9', rEl, qId, nUnitId); }
+                }
+
+                // T2 — score
+                const sT2 = setField(`select[name="${pre}_T2"]`, sUnit.score || 'NA');
+                if (sT2) window.handleLocalLogic('T2', sT2, qId, nUnitId);
+
+                // T3 / T7 / T5 — person fields
+                setField(`input[name="${pre}_T3"]`, sUnit.person || '');
+                setField(`input[name="${pre}_T7"]`, sUnit.person || '');
+                setField(`input[name="${pre}_T5"]`, sUnit.otherName || sUnit.person || '');
+
+                // T6 — notes
+                const noteTxt = Array.isArray(sUnit.notes) ? sUnit.notes.join(' / ') : (sUnit.note || '');
+                setField(`textarea[name="${pre}_T6"]`, noteTxt);
+
+                // T4 — issues
+                const issues = Array.isArray(sUnit.issues)
+                    ? sUnit.issues
+                    : (sUnit.issues || '').split(',').map(s => s.trim()).filter(Boolean);
+
+                const specials = ['missingForm', 'emptyForm'];
+                const hasSpecial = issues.some(i => specials.includes(i));
+
+                if (hasSpecial) {
+                    // لو فيه missingForm/emptyForm، بس ده اللي بيتحط (بيقفل الباقي حسب منطق النظام)
+                    const special = issues.find(i => specials.includes(i));
+                    const cb = document.querySelector(`input[name="${pre}_T4"][value="${special}"]`);
+                    if (cb) { cb.checked = true; window.handleLocalLogic('T4', cb, qId, nUnitId); }
+                } else {
+                    issues.forEach(issue => {
+                        const cb = document.querySelector(`input[name="${pre}_T4"][value="${issue}"]`);
+                        if (cb) { cb.checked = true; window.handleLocalLogic('T4', cb, qId, nUnitId); }
+                    });
+                }
+            });
+        }
         // ============================================
         // SEARCH
         // ============================================
@@ -1737,78 +1867,58 @@
                 const auditData = safeParse(data.audit_questions);
                 const clearedCards = new Set();
 
-                auditData.forEach(savedCard => {
-                    const formId = savedCard.formId;
-                    const qTitle = (savedCard.text || '').trim();
-                    if (!qTitle || !savedCard.data) return;
-
-                    const primaryCard = Array.from(document.querySelectorAll('#qContainer .question-card')).find(c => {
-                        if (c.id.includes('_C')) return false;
-                        if (formId && c.dataset.formId === formId) return true;
-                        const titleEl = c.querySelector('.question-title span:last-child');
-                        return titleEl && titleEl.textContent.trim() === qTitle;
-                    });
-
-                    if (primaryCard) {
-                        const targetQId = primaryCard.id.replace('card-', '');
-                        const container = document.getElementById(`unit-container-${targetQId}`);
-                        if (!container) return;
-
-                        if (!clearedCards.has(primaryCard.id)) {
-                            container.innerHTML = '';
-                            clearedCards.add(primaryCard.id);
-                        }
-
-                        const form = FORMS.find(f => f.id === primaryCard.dataset.formId);
-                        const hasDate = form?.requires_date || false;
-
-                        savedCard.data.forEach((sUnit) => {
-                            if (!sUnit.score && !sUnit.person && !sUnit.role && !sUnit.date) return;
-
-                            const nUnitId = `A${++unitCounter}`;
-                            container.insertAdjacentHTML('beforeend', buildAssessmentUnitHtml(targetQId, nUnitId, container.children.length > 0, hasDate, false));
-                            const pre = `unit_${targetQId}_${nUnitId}`;
-
-                            const setField = (sel, v) => {
-                                const el = document.querySelector(sel);
-                                if (el && v !== undefined && v !== null) {
-                                    if (el.tagName === 'SELECT') {
-                                        Array.from(el.options).forEach(opt => {
-                                            if (opt.value.trim().toLowerCase() === String(v).trim().toLowerCase()) el.value = opt.value;
-                                        });
-                                    } else {
-                                        el.value = v;
-                                    }
-                                }
-                                return el;
-                            };
-
-                            if (sUnit.date) setField(`input[name="${pre}_T1"]`, sUnit.date.split('T')[0]);
-                            if (sUnit.role) {
-                                const rEl = document.querySelector(`input[name="${pre}_T9"][value="${sUnit.role}"]`);
-                                if (rEl) { rEl.checked = true; handleLocalLogic('T9', rEl, targetQId, nUnitId); }
-                            }
-
-                            const sT2 = setField(`select[name="${pre}_T2"]`, sUnit.score || 'NA');
-                            if (sT2) handleLocalLogic('T2', sT2, targetQId, nUnitId);
-
-                            setField(`input[name="${pre}_T3"]`, sUnit.person || '');
-                            setField(`input[name="${pre}_T7"]`, sUnit.person || '');
-                            setField(`input[name="${pre}_T5"]`, sUnit.otherName || sUnit.person || '');
-
-                            const noteTxt = Array.isArray(sUnit.notes) ? sUnit.notes.join(' / ') : (sUnit.note || '');
-                            setField(`textarea[name="${pre}_T6"]`, noteTxt);
-
-                            const issues = Array.isArray(sUnit.issues) ? sUnit.issues : (sUnit.issues || '').split(',').map(s => s.trim()).filter(Boolean);
-                            issues.forEach(issue => {
-                                const cb = document.querySelector(`input[name="${pre}_T4"][value="${issue}"]`);
-                                if (cb) { cb.checked = true; handleLocalLogic('T4', cb, targetQId, nUnitId); }
-                            });
-                        });
-
-                        primaryCard.classList.add('visible');
+                const groupedByForm = new Map();
+                auditData.forEach(entry => {
+                    if (!entry || !entry.data) return;
+                    const key = entry.formId || entry.qId;
+                    if (!key) return;
+                    if (!groupedByForm.has(key)) {
+                        groupedByForm.set(key, { formId: entry.formId, primary: null, clones: [] });
+                    }
+                    const g = groupedByForm.get(key);
+                    if (entry.qId && entry.qId.includes('_C')) {
+                        g.clones.push(entry);
+                    } else {
+                        g.primary = entry;
                     }
                 });
+
+                // 2) لكل form: املأ الـ primary، واعمل recreate لكل clone
+                groupedByForm.forEach(({ formId, primary, clones }) => {
+                    // لاقي الكارت الأصلي
+                    let primaryCard = null;
+                    if (formId) {
+                        primaryCard = Array.from(document.querySelectorAll('#qContainer .question-card'))
+                            .find(c => !c.id.includes('_C') && c.dataset.formId === formId);
+                    }
+                    if (!primaryCard && primary?.qId) {
+                        primaryCard = document.getElementById(`card-${primary.qId}`);
+                    }
+                    if (!primaryCard) return;
+
+                    const targetQId = primaryCard.id.replace('card-', '');
+                    const container = document.getElementById(`unit-container-${targetQId}`);
+                    if (!container) return;
+
+                    const form = FORMS.find(f => f.id === formId);
+                    const hasDate = form?.requires_date || false;
+
+                    // 2a) املأ الكارت الأصلي
+                    fillUnitsInto(container, targetQId, hasDate, primary?.data || []);
+                    primaryCard.classList.add('visible');
+
+                    // 2b) أعد إنشاء الـ clones بنفس ترتيب الحفظ
+                    (clones || []).forEach(clone => {
+                        const newQId = window.cloneQuestion(targetQId);
+                        if (!newQId) return;
+                        const newCloneCard = document.getElementById(`card-${newQId}`);
+                        const cloneContainer = document.getElementById(`unit-container-${newQId}`);
+                        if (!newCloneCard || !cloneContainer) return;
+                        fillUnitsInto(cloneContainer, newQId, hasDate, clone.data || []);
+                        newCloneCard.classList.add('visible');
+                    });
+                });
+
 
                 showNotification('تم استدعاء الملف بنجاح', 'success');
                 await logAudit('medical_record_searched', {
@@ -1822,6 +1932,7 @@
                 console.error('Search error:', err);
                 showNotification('فشل البحث: ' + err.message, 'error');
             }
+            refreshAllIssueBadges();
         };
 
         // ============================================
@@ -1868,9 +1979,10 @@
 
             document.querySelectorAll('#qContainer .question-card.visible').forEach(card => {
                 const qId = card.id.replace('card-', '');
-                const titleEl = card.querySelector('.question-title span:last-child');
-                const qText = titleEl ? titleEl.textContent.trim() : '';
                 const formId = card.dataset.formId;
+                const formRecord = FORMS.find(f => f.id === formId);
+                const titleEl = card.querySelector('.question-title span:not(.question-num)');
+                const qText = formRecord?.text || (titleEl ? titleEl.textContent.trim() : '');
                 const units = [];
 
                 card.querySelectorAll('[id^="unit-"]').forEach(uDiv => {
