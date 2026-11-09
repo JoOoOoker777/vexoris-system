@@ -1447,18 +1447,20 @@
             if (appId === currentAppId) return;
             currentAppId = appId;
 
-            // فلترة التابات المتاحة
             const visibleKeys = appId === 'shared'
                 ? SHARED_KEYS
                 : [...SHARED_KEYS, ...APP_SPECIFIC_KEYS];
 
-            // لو التاب الحالي مش في القائمة، اختر أول واحد
             if (!visibleKeys.includes(currentTab)) {
                 currentTab = visibleKeys[0];
             }
 
             renderAppsBar();
             renderSidebarTabs(visibleKeys);
+
+            // ✅ جديد: أعد تحميل العدادات بعد بناء السايدبار من جديد
+            await loadCounts();
+
             document.querySelectorAll('.tab-item').forEach(t => 
                 t.classList.toggle('active', t.dataset.tab === currentTab)
             );
