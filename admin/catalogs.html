@@ -506,6 +506,120 @@
             background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4));
             border-radius: 8px; border: 2px solid var(--bg);
         }
+        /* ============================================ */
+        /* APPS BAR — شريط التطبيقات العلوي */
+        /* ============================================ */
+        .apps-bar {
+            margin-top: 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 8px;
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            overflow-x: auto;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .apps-bar::-webkit-scrollbar { height: 4px; }
+
+        .app-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            background: transparent;
+            border: 1px solid transparent;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        .app-tab:hover { background: rgba(14,165,233,0.06); color: var(--accent); }
+        .app-tab.active {
+            background: linear-gradient(135deg, rgba(14,165,233,0.15), rgba(99,102,241,0.1));
+            color: var(--accent);
+            border-color: rgba(14,165,233,0.35);
+            font-weight: 900;
+        }
+        .app-tab i { font-size: 0.85rem; }
+
+        .app-tab.app-manage {
+            margin-inline-start: auto;
+            border: 1px dashed var(--card-border);
+            color: var(--text-muted);
+        }
+        .app-tab.app-manage:hover { border-color: var(--accent); color: var(--accent); border-style: solid; }
+        .app-tab.shared-tab.active { 
+            background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(14,165,233,0.1));
+            border-color: rgba(16,185,129,0.4);
+            color: var(--success);
+        }
+
+        /* ============================================ */
+        /* APPS MANAGEMENT GRID */
+        /* ============================================ */
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .app-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 16px;
+            position: relative;
+            transition: all 0.25s ease;
+        }
+        .app-card::before {
+            content: '';
+            position: absolute; top: 0; right: 0; left: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            border-radius: 14px 14px 0 0;
+        }
+        .app-card:hover {
+            border-color: rgba(14,165,233,0.4);
+            box-shadow: 0 8px 24px -10px rgba(14,165,233,0.3);
+        }
+        .app-card-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+        .app-card-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: linear-gradient(135deg, rgba(14,165,233,0.15), rgba(99,102,241,0.1));
+            border: 1px solid rgba(14,165,233,0.3);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .app-card-info { flex: 1; min-width: 0; }
+        .app-card-name { font-size: 0.92rem; font-weight: 900; color: var(--text-primary); margin-bottom: 2px; }
+        .app-card-id {
+            font-family: 'Space Grotesk', monospace;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            background: rgba(148,163,184,0.08);
+            padding: 1px 6px; border-radius: 4px;
+            display: inline-block;
+        }
+        .app-card-desc { font-size: 0.72rem; color: var(--text-secondary); font-weight: 600; margin-bottom: 10px; line-height: 1.6; }
+        .app-card-actions { display: flex; gap: 6px; align-items: center; margin-top: 10px; }
+        .app-card-stat {
+            margin-inline-start: auto;
+            font-size: 0.68rem; font-weight: 800;
+            color: var(--text-muted);
+        }
+        .app-badge {
+            font-size: 0.6rem; font-weight: 900;
+            padding: 2px 8px; border-radius: 5px;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .app-badge.active { background: rgba(16,185,129,0.15); color: var(--success); }
+        .app-badge.inactive { background: rgba(148,163,184,0.15); color: var(--text-muted); }
     </style>
     <link rel="stylesheet" href="../theme-overrides.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
@@ -560,6 +674,8 @@
         </section>
 
         <div class="catalogs-layout">
+            <div class="apps-bar" id="appsBar">
+            </div>
 
             <!-- SIDEBAR -->
             <aside class="tabs-sidebar">
@@ -658,7 +774,72 @@
             </div>
         </div>
     </div>
+    <!-- APP MANAGEMENT MODAL -->
+    <div class="modal-overlay" id="appManageModal">
+        <div class="modal-card wide">
+            <div class="modal-head">
+                <h3>
+                    <i class="fa-solid fa-cubes" style="color: var(--accent);"></i>
+                    إدارة التطبيقات
+                </h3>
+                <button class="close-x" onclick="closeModal('appManageModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <p style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">
+                        التطبيقات المتاحة في النظام. كل تطبيق له النماذج والأخطاء الخاصة به، بينما القوائم المشتركة (تخصصات، أطباء...) تكون متاحة للجميع.
+                    </p>
+                    <button class="cbtn cbtn-primary" onclick="openAppEditModal(null)" style="margin-inline-start: 12px; white-space: nowrap;">
+                        <i class="fa-solid fa-plus"></i> تطبيق جديد
+                    </button>
+                </div>
+                <div class="apps-grid" id="appsGrid"></div>
+            </div>
+            <div class="modal-foot">
+                <button class="cbtn cbtn-secondary" onclick="closeModal('appManageModal')">إغلاق</button>
+            </div>
+        </div>
+    </div>
 
+    <!-- APP EDIT MODAL -->
+    <div class="modal-overlay" id="appEditModal">
+        <div class="modal-card">
+            <div class="modal-head">
+                <h3 id="appEditTitle">تطبيق جديد</h3>
+                <button class="close-x" onclick="closeModal('appEditModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="f-group">
+                    <label class="f-label">معرّف التطبيق (كود إنجليزي) <span class="req">*</span></label>
+                    <input type="text" class="f-input" id="app-id" placeholder="مثل: emergency-review" style="font-family: 'Space Grotesk', monospace;" dir="ltr" />
+                    <div class="f-hint">حروف إنجليزية صغيرة، أرقام، وشرطات فقط. لا يمكن تغييره بعد الإنشاء.</div>
+                </div>
+                <div class="f-group">
+                    <label class="f-label">الاسم بالعربي <span class="req">*</span></label>
+                    <input type="text" class="f-input" id="app-name" placeholder="مثل: مراجعة الطوارئ" />
+                </div>
+                <div class="f-group">
+                    <label class="f-label">وصف قصير</label>
+                    <input type="text" class="f-input" id="app-description" placeholder="وصف يظهر تحت الاسم" />
+                </div>
+                <div class="f-group">
+                    <label class="f-label">أيقونة Font Awesome</label>
+                    <input type="text" class="f-input" id="app-icon" placeholder="fa-cube" style="font-family: 'Space Grotesk', monospace;" dir="ltr" value="fa-cube" />
+                    <div class="f-hint">مثل: fa-file-medical, fa-truck-medical, fa-notes-medical</div>
+                </div>
+                <div class="f-group">
+                    <label class="f-label">الترتيب</label>
+                    <input type="number" class="f-input" id="app-order_index" value="0" />
+                </div>
+            </div>
+            <div class="modal-foot">
+                <button class="cbtn cbtn-secondary" onclick="closeModal('appEditModal')">إلغاء</button>
+                <button class="cbtn cbtn-primary" id="appSaveBtn" onclick="saveApp()">
+                    <i class="fa-solid fa-check"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
     <footer class="footer-shell">
         <div class="footer-brand">VEXORIS SYSTEM</div>
         <div class="footer-text">جميع حقوق النشر والطباعة محفوظة لإدارة السجلات الطبية 2025 ©</div>
@@ -905,15 +1086,173 @@
         // ============================================
         let currentUser = null;
         let currentTab = 'specialties';
+        let currentAppId = 'medical-audit';
+        let APPS = []; 
         let currentData = [];
         let editingId = null;
+        let editingAppId = null;
         let importRows = [];
         let cachedOptions = {};
         let counts = {};
+        const APP_SPECIFIC_KEYS = ['forms', 'issue_categories', 'issues'];
+        const SHARED_KEYS = ['specialties', 'services', 'admission_types', 'case_statuses', 'daycase_types', 'roles', 'scores', 'doctors', 'nurses', 'ward_clerks'];
+        // ============================================
+        // APPS MANAGEMENT
+        // ============================================
+        window.openAppsManagement = async function() {
+            if (currentUserRole !== 'super_admin' && currentUserRole !== 'admin') {
+                showNotification('ليس لديك صلاحية', 'error');
+                return;
+            }
+            await loadApps();
+            renderAppsGrid();
+            document.getElementById('appManageModal').classList.add('open');
+        };
 
-        // ============================================
-        // INIT
-        // ============================================
+        function renderAppsGrid() {
+            const grid = document.getElementById('appsGrid');
+            if (!grid) return;
+
+            if (APPS.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">
+                    <i class="fa-solid fa-inbox" style="font-size: 2rem; opacity: 0.3; margin-bottom: 8px; display: block;"></i>
+                    <div style="font-weight: 800;">لا توجد تطبيقات بعد</div>
+                </div>`;
+                return;
+            }
+
+            grid.innerHTML = APPS.map(app => `
+                <div class="app-card">
+                    <div class="app-card-head">
+                        <div class="app-card-icon"><i class="fa-solid ${app.icon || 'fa-cube'}"></i></div>
+                        <div class="app-card-info">
+                            <div class="app-card-name">${escapeHtml(app.name)}</div>
+                            <span class="app-card-id">${escapeHtml(app.id)}</span>
+                            <span class="app-badge ${app.is_active ? 'active' : 'inactive'}" style="margin-inline-start: 6px;">
+                                ${app.is_active ? 'نشط' : 'موقوف'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="app-card-desc">${escapeHtml(app.description || '—')}</div>
+                    <div class="app-card-actions">
+                        <button class="row-action" onclick="openAppEditModal('${app.id}')" title="تعديل">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="row-action ${app.is_active ? 'delete' : ''}" 
+                                onclick="toggleAppActive('${app.id}', ${!app.is_active})" 
+                                title="${app.is_active ? 'إيقاف' : 'تفعيل'}">
+                            <i class="fa-solid ${app.is_active ? 'fa-ban' : 'fa-check'}"></i>
+                        </button>
+                        <span class="app-card-stat">
+                            <i class="fa-solid fa-file-lines"></i> ${counts.forms || 0}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.openAppEditModal = function(appId) {
+            editingAppId = appId || null;
+            const app = appId ? APPS.find(a => a.id === appId) : null;
+
+            document.getElementById('appEditTitle').textContent = app ? 'تعديل التطبيق' : 'تطبيق جديد';
+            document.getElementById('app-id').value = app ? app.id : '';
+            document.getElementById('app-id').disabled = !!app;  // لا يمكن تغيير ID بعد الإنشاء
+            document.getElementById('app-name').value = app ? app.name : '';
+            document.getElementById('app-description').value = app?.description || '';
+            document.getElementById('app-icon').value = app?.icon || 'fa-cube';
+            document.getElementById('app-order_index').value = app?.order_index ?? 0;
+
+            document.getElementById('appEditModal').classList.add('open');
+        };
+
+        window.saveApp = async function() {
+            const btn = document.getElementById('appSaveBtn');
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحفظ...';
+
+            try {
+                const id = document.getElementById('app-id').value.trim();
+                const name = document.getElementById('app-name').value.trim();
+                const description = document.getElementById('app-description').value.trim();
+                const icon = document.getElementById('app-icon').value.trim() || 'fa-cube';
+                const order_index = parseInt(document.getElementById('app-order_index').value) || 0;
+
+                if (!id || !name) {
+                    showNotification('ID والاسم مطلوبان', 'warning');
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                    return;
+                }
+
+                if (!/^[a-z0-9-]+$/.test(id)) {
+                    showNotification('ID يجب أن يحتوي حروف إنجليزية صغيرة وأرقام وشرطات فقط', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                    return;
+                }
+
+                const payload = { id, name, description: description || null, icon, order_index };
+
+                let error;
+                if (editingAppId) {
+                    ({ error } = await supabase.from('apps').update(payload).eq('id', editingAppId));
+                } else {
+                    ({ error } = await supabase.from('apps').insert(payload));
+                }
+
+                if (error) throw error;
+
+                await logAudit(editingAppId ? 'app_updated' : 'app_created', {
+                    entityType: 'app',
+                    entityId: id,
+                    description: name,
+                    severity: 'warning'
+                });
+
+                showNotification(editingAppId ? 'تم التحديث' : 'تمت الإضافة', 'success');
+                closeModal('appEditModal');
+                await loadApps();
+                renderAppsBar();
+                renderAppsGrid();
+            } catch (err) {
+                showNotification('فشل الحفظ: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }
+        };
+
+        window.toggleAppActive = async function(appId, newState) {
+            const app = APPS.find(a => a.id === appId);
+            if (!app) return;
+
+            if (!newState) {
+                const ok = await window.showConfirm({
+                    title: 'إيقاف التطبيق',
+                    message: `سيتم إيقاف "${app.name}". البيانات لن تُحذف، لكن التطبيق لن يظهر في شريط التطبيقات.`,
+                    confirmText: 'إيقاف',
+                    type: 'warning'
+                });
+                if (!ok) return;
+            }
+
+            const { error } = await supabase.from('apps').update({ is_active: newState }).eq('id', appId);
+            if (error) { showNotification('فشل: ' + error.message, 'error'); return; }
+
+            await logAudit(newState ? 'app_updated' : 'app_deactivated', {
+                entityType: 'app',
+                entityId: appId,
+                description: `${app.name}: ${newState ? 'تفعيل' : 'إيقاف'}`,
+                severity: 'warning'
+            });
+
+            showNotification(newState ? 'تم التفعيل' : 'تم الإيقاف', 'success');
+            await loadApps();
+            renderAppsBar();
+            renderAppsGrid();
+        };
         (async () => {
             try {
                 const { data: { session } } = await supabase.auth.getSession();
@@ -932,15 +1271,33 @@
                     return;
                 }
 
-                renderTabs();
+                // ✅ جديد: currentUserRole مهم لإدارة التطبيقات
+                window.currentUserRole = profile.role;
+
+                // 1) حمّل التطبيقات أولاً
+                await loadApps();
+
+                // 2) اختر أول تطبيق نشط كـ default
+                const firstApp = APPS.find(a => a.is_active) || APPS[0];
+                if (firstApp) currentAppId = firstApp.id;
+
+                // 3) ارسم شريط التطبيقات + السايدبار
+                renderAppsBar();
+                renderSidebarTabs();
+
+                // 4) حمّل العدّادات
                 await loadCounts();
-                await switchTab('specialties');
+
+                // 5) اختر أول تاب
+                await switchTab(currentTab);
+
                 document.getElementById('loadingScreen').classList.add('hide');
             } catch (err) {
                 console.error(err);
                 showNotification('خطأ: ' + err.message, 'error');
             }
         })();
+
 
         // ============================================
         // TABS
@@ -957,8 +1314,17 @@
         }
 
         async function loadCounts() {
-            await Promise.all(Object.entries(CATALOGS).map(async ([key, cfg]) => {
-                const { count } = await supabase.from(cfg.table).select('*', { count: 'exact', head: true });
+            const visibleKeys = currentAppId === 'shared'
+                ? SHARED_KEYS
+                : [...SHARED_KEYS, ...APP_SPECIFIC_KEYS];
+
+            await Promise.all(visibleKeys.filter(k => CATALOGS[k]).map(async (key) => {
+                const cfg = CATALOGS[key];
+                let query = supabase.from(cfg.table).select('*', { count: 'exact', head: true });
+                if (APP_SPECIFIC_KEYS.includes(key) && currentAppId !== 'shared') {
+                    query = query.eq('app_id', currentAppId);
+                }
+                const { count } = await query;
                 counts[key] = count || 0;
                 const el = document.getElementById(`count-${key}`);
                 if (el) el.textContent = count || 0;
@@ -992,6 +1358,12 @@
         async function loadData() {
             const cfg = CATALOGS[currentTab];
             let query = supabase.from(cfg.table).select('*');
+
+            // فلترة بـ app_id للجداول الخاصة
+            if (APP_SPECIFIC_KEYS.includes(currentTab) && currentAppId !== 'shared') {
+                query = query.eq('app_id', currentAppId);
+            }
+
             if (cfg.order) query = query.order(cfg.order, { ascending: true });
             const { data, error } = await query;
 
@@ -1002,7 +1374,12 @@
             currentData = data || [];
 
             if (currentTab === 'issues') {
-                const { data: cats } = await supabase.from('issue_category_catalog').select('id, name');
+                // اجلب التصنيفات الخاصة بنفس التطبيق فقط
+                let catQuery = supabase.from('issue_category_catalog').select('id, name');
+                if (currentAppId !== 'shared') {
+                    catQuery = catQuery.eq('app_id', currentAppId);
+                }
+                const { data: cats } = await catQuery;
                 const catMap = {};
                 (cats || []).forEach(c => catMap[c.id] = c.name);
                 currentData = currentData.map(d => ({ ...d, category_name: catMap[d.category_id] || '—' }));
@@ -1027,6 +1404,90 @@
             }
         }
 
+        // ============================================
+        // APPS
+        // ============================================
+        async function loadApps() {
+            const { data, error } = await supabase
+                .from('apps')
+                .select('*')
+                .order('order_index', { ascending: true });
+            if (error) {
+                console.error('[apps] load error:', error);
+                return;
+            }
+            APPS = data || [];
+        }
+
+        function renderAppsBar() {
+            const bar = document.getElementById('appsBar');
+            if (!bar) return;
+
+            const appTabs = APPS.filter(a => a.is_active).map(a => `
+                <div class="app-tab ${currentAppId === a.id ? 'active' : ''}" onclick="switchApp('${a.id}')">
+                    <i class="fa-solid ${a.icon || 'fa-cube'}"></i>
+                    <span>${escapeHtml(a.name)}</span>
+                </div>
+            `).join('');
+
+            bar.innerHTML = `
+                ${appTabs}
+                <div class="app-tab shared-tab ${currentAppId === 'shared' ? 'active' : ''}" onclick="switchApp('shared')">
+                    <i class="fa-solid fa-share-nodes"></i>
+                    <span>القوائم المشتركة</span>
+                </div>
+                <div class="app-tab app-manage" onclick="openAppsManagement()">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>إدارة التطبيقات</span>
+                </div>
+            `;
+        }
+
+        window.switchApp = async function(appId) {
+            if (appId === currentAppId) return;
+            currentAppId = appId;
+
+            // فلترة التابات المتاحة
+            const visibleKeys = appId === 'shared'
+                ? SHARED_KEYS
+                : [...SHARED_KEYS, ...APP_SPECIFIC_KEYS];
+
+            // لو التاب الحالي مش في القائمة، اختر أول واحد
+            if (!visibleKeys.includes(currentTab)) {
+                currentTab = visibleKeys[0];
+            }
+
+            renderAppsBar();
+            renderSidebarTabs(visibleKeys);
+            document.querySelectorAll('.tab-item').forEach(t => 
+                t.classList.toggle('active', t.dataset.tab === currentTab)
+            );
+            document.getElementById('searchInput').value = '';
+
+            await switchTab(currentTab);
+        };
+
+        function renderSidebarTabs(visibleKeys = null) {
+            if (!visibleKeys) {
+                visibleKeys = currentAppId === 'shared'
+                    ? SHARED_KEYS
+                    : [...SHARED_KEYS, ...APP_SPECIFIC_KEYS];
+            }
+
+            const list = document.getElementById('tabsList');
+            const keys = visibleKeys.filter(k => CATALOGS[k]);
+
+            list.innerHTML = keys.map(key => {
+                const cfg = CATALOGS[key];
+                return `
+                    <div class="tab-item ${key === currentTab ? 'active' : ''}" data-tab="${key}" onclick="switchTab('${key}')">
+                        <div class="tab-icon"><i class="fa-solid ${cfg.icon}"></i></div>
+                        <span>${cfg.title}</span>
+                        <span class="tab-count" id="count-${key}">0</span>
+                    </div>
+                `;
+            }).join('');
+        }
         // ============================================
         // TABLE RENDER
         // ============================================
@@ -1193,7 +1654,15 @@
             const originalHTML = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحفظ...';
-
+            if (APP_SPECIFIC_KEYS.includes(currentTab)) {
+                if (currentAppId === 'shared') {
+                    showNotification('لا يمكن إضافة عنصر خاص من قائمة "المشتركة"', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                    return;
+                }
+                payload.app_id = currentAppId;
+            }
             try {
                 const payload = {};
                 for (const field of cfg.fields) {
@@ -1212,7 +1681,18 @@
                     }
                 }
 
+                if (APP_SPECIFIC_KEYS.includes(currentTab)) {
+                    if (currentAppId === 'shared') {
+                        showNotification('لا يمكن إضافة عنصر خاص من قائمة "المشتركة"', 'error');
+                        btn.disabled = false;
+                        btn.innerHTML = originalHTML;
+                        return;
+                    }
+                    payload.app_id = currentAppId;
+                }
+
                 console.log('[saveRecord] Payload:', payload);
+
 
                 let error;
                 if (editingId) {
@@ -1423,7 +1903,13 @@
                     return;
                 }
 
-                const payload = { text, order_index, requires_date };
+                if (currentAppId === 'shared') {
+                    showNotification('لا يمكن إضافة نموذج من قائمة "المشتركة"', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                    return;
+                }
+                const payload = { text, order_index, requires_date, app_id: currentAppId };
 
                 let formId = editingId;
                 if (editingId) {
@@ -1644,10 +2130,11 @@
                     // 1. Upsert form
                     const { data: form, error: formErr } = await supabase
                         .from('form_catalog')
-                        .upsert({
+                       .upsert({
                             text,
                             requires_date: parseBool(row.requires_date),
-                            order_index: parseInt(row.order_index) || 0
+                            order_index: parseInt(row.order_index) || 0,
+                            app_id: currentAppId === 'shared' ? 'medical-audit' : currentAppId
                         }, { onConflict: 'text' })
                         .select('id')
                         .single();

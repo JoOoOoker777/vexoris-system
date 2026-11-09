@@ -995,9 +995,9 @@
                 supabase.from('case_status_catalog').select('id, name').eq('is_active', true).order('order_index'),
                 supabase.from('score_catalog').select('value, label, points').eq('is_active', true).order('order_index'),
                 supabase.from('role_catalog').select('code, name').eq('is_active', true).order('order_index'),
-                supabase.from('issue_category_catalog').select('id, name').eq('is_active', true).order('order_index'),
-                supabase.from('issue_catalog').select('code, label, category_id').eq('is_active', true).order('order_index'),
-                supabase.from('form_catalog').select('id, text, requires_date').eq('is_active', true).order('order_index')
+                supabase.from('issue_category_catalog').select('id, name').eq('is_active', true).eq('app_id', 'medical-audit').order('order_index'),
+                supabase.from('issue_catalog').select('code, label, category_id').eq('is_active', true).eq('app_id', 'medical-audit').order('order_index'),
+                supabase.from('form_catalog').select('id, text, requires_date').eq('is_active', true).eq('app_id', 'medical-audit').order('order_index')
             ]);
 
             DOCTORS = doctorsRes.data || [];
