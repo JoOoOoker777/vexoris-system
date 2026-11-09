@@ -673,9 +673,9 @@
             <p class="hero-desc">أضف، عدّل، احذف، واستورد أي بيانات في النظام من مكان واحد — بدون كتابة كود.</p>
         </section>
 
+        <div class="apps-bar" id="appsBar"></div>
+
         <div class="catalogs-layout">
-            <div class="apps-bar" id="appsBar">
-            </div>
 
             <!-- SIDEBAR -->
             <aside class="tabs-sidebar">
@@ -1100,8 +1100,8 @@
         // APPS MANAGEMENT
         // ============================================
         window.openAppsManagement = async function() {
-            if (currentUserRole !== 'super_admin' && currentUserRole !== 'admin') {
-                showNotification('ليس لديك صلاحية', 'error');
+
+            if (window.currentUserRole !== 'super_admin' && window.currentUserRole !== 'admin') {                showNotification('ليس لديك صلاحية', 'error');
                 return;
             }
             await loadApps();
@@ -1654,15 +1654,6 @@
             const originalHTML = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحفظ...';
-            if (APP_SPECIFIC_KEYS.includes(currentTab)) {
-                if (currentAppId === 'shared') {
-                    showNotification('لا يمكن إضافة عنصر خاص من قائمة "المشتركة"', 'error');
-                    btn.disabled = false;
-                    btn.innerHTML = originalHTML;
-                    return;
-                }
-                payload.app_id = currentAppId;
-            }
             try {
                 const payload = {};
                 for (const field of cfg.fields) {
