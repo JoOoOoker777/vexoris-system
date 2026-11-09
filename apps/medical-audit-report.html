@@ -732,9 +732,12 @@
             document.getElementById('rep_discharge_date').innerText = data.discharge_date || 'لم يخرج بعد';
             
             // تاريخ المراجعة
-            const revDate = data.updated_at ? new Date(data.updated_at) : new Date();
-            document.getElementById('rep_review_date').innerText = revDate.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
+            const revDateRaw = data.reviewed_at || data.updated_at;
+            const revDate = revDateRaw ? new Date(revDateRaw) : new Date();
+            document.getElementById('rep_review_date').innerText = revDate.toLocaleDateString('ar-EG', { 
+                year: 'numeric', month: 'short', day: 'numeric', 
+                hour: '2-digit', minute: '2-digit' 
+            });
             // تخصص الاستشاري
             let specStr = '--';
             if (data.consultant && doctorsMapping[data.consultant] && doctorsMapping[data.consultant].specialty) {

@@ -2161,13 +2161,38 @@
             btn.disabled = true;
 
             try {
-                const { error } = await supabase.from('medical_file_reviews').upsert({
+                // 1) هات السجل الموجود (لو فيه) عشان نحافظ على المراجع الأصلي
+                const { data: existing, error: fetchErr } = await supabase
+                    .from('medical_file_reviews')
+                    .select('reviewer_id, reviewer_name, reviewed_at')
+                    .eq('medical_id', data.medical_id)
+                    .eq('visit_number', data.visit_number)
+                    .maybeSingle();
+
+                if (fetchErr) throw fetchErr;
+
+                // 2) ابنِ الـ payload
+                const payload = {
                     ...data,
                     is_partial: true,
-                    reviewer_id: currentUser.id,
-                    reviewer_name: currentReviewer,
                     updated_at: new Date().toISOString(),
-                }, { onConflict: 'medical_id,visit_number' });
+                };
+
+                if (existing) {
+                    // تعديل لسجل موجود → نحافظ على المراجع الأصلي
+                    payload.reviewer_id = existing.reviewer_id;
+                    payload.reviewer_name = existing.reviewer_name;
+                    payload.reviewed_at = existing.reviewed_at;
+                } else {
+                    // أول حفظ → نحفظ المراجع الحالي والتاريخ
+                    payload.reviewer_id = currentUser.id;
+                    payload.reviewer_name = currentReviewer;
+                    payload.reviewed_at = new Date().toISOString();
+                }
+
+                const { error } = await supabase
+                    .from('medical_file_reviews')
+                    .upsert(payload, { onConflict: 'medical_id,visit_number' });
 
                 if (error) throw error;
 
@@ -2219,13 +2244,38 @@
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري حفظ المراجعة...';
 
             try {
-                const { error } = await supabase.from('medical_file_reviews').upsert({
+                // 1) هات السجل الموجود
+                const { data: existing, error: fetchErr } = await supabase
+                    .from('medical_file_reviews')
+                    .select('reviewer_id, reviewer_name, reviewed_at')
+                    .eq('medical_id', data.medical_id)
+                    .eq('visit_number', data.visit_number)
+                    .maybeSingle();
+
+                if (fetchErr) throw fetchErr;
+
+                // 2) ابنِ الـ payload
+                const payload = {
                     ...data,
                     is_partial: false,
-                    reviewer_id: currentUser.id,
-                    reviewer_name: currentReviewer,
                     updated_at: new Date().toISOString(),
-                }, { onConflict: 'medical_id,visit_number' });
+                };
+
+                if (existing) {
+                    // تعديل لسجل موجود → نحافظ على المراجع الأصلي وتاريخه
+                    payload.reviewer_id = existing.reviewer_id;
+                    payload.reviewer_name = existing.reviewer_name;
+                    payload.reviewed_at = existing.reviewed_at;
+                } else {
+                    // أول حفظ نهائي → نحفظ المراجع الحالي
+                    payload.reviewer_id = currentUser.id;
+                    payload.reviewer_name = currentReviewer;
+                    payload.reviewed_at = new Date().toISOString();
+                }
+
+                const { error } = await supabase
+                    .from('medical_file_reviews')
+                    .upsert(payload, { onConflict: 'medical_id,visit_number' });
 
                 if (error) throw error;
 
