@@ -520,7 +520,16 @@
                 return Array.isArray(p) ? p : [];
             } catch(e) { return []; }
         }
-
+        function getScoreLabel(scoreVal, pt) {
+            if (scoreVal === 'Score 2' || scoreVal === 'مطابق') return 'مطابق';
+            if (scoreVal === 'Score 1' || scoreVal === 'مطابق جزئي') return 'مطابق جزئي';
+            if (scoreVal === 'Score 0' || scoreVal === 'غير مطابق') return 'غير مطابق';
+            if (scoreVal === 'NA' || scoreVal === 'غير منطبق') return 'غير منطبق';
+            if (pt === 2) return 'مطابق';
+            if (pt === 1) return 'مطابق جزئي';
+            if (pt === 0) return 'غير مطابق';
+            return '--';
+        }
         function getUnitPoints(scoreVal) {
             if (scoreVal === 'Score 2' || scoreVal === 'مطابق') return 2;
             if (scoreVal === 'Score 1' || scoreVal === 'مطابق جزئي') return 1;
@@ -620,7 +629,7 @@
                 const isPerfect = (pt === 2 && issues.length === 0 && !isMissing);
                 const isIncomplete = !isMissing && !isPerfect;
 
-                const record = { formName, score: pt, issues, notes, roleType };
+                const record = { formName, score: pt, scoreLabel: getScoreLabel(scoreVal, pt), issues, notes, roleType };
 
                 if (isMissing) {
                     if (!missingMap[deptName]) missingMap[deptName] = {};
@@ -646,7 +655,8 @@
             const savedWard = safeParse(data.ward_questions);
             savedWard.forEach(w => {
                 let noteStr = Array.isArray(w.notes) ? w.notes.join(' / ') : (w.note || '');
-                addRecord('الاداريين', 'إداري', w.clerk || 'مدخل غير محدد', 'القسم الإداري (' + (w.qId || w.q) + ')', w.score, [], noteStr);
+                const formDisplay = w.qText || w.qId || w.q || 'تقييم إداري';
+                addRecord('الاداريين', 'إداري', w.clerk || 'مدخل غير محدد', formDisplay, w.score, [], noteStr);
             });
 
             const savedAudit = safeParse(data.audit_questions);
@@ -719,7 +729,7 @@
                             html += `<div class="form-row">
                                 <div class="form-row-head">
                                     <span class="form-row-title">${f.formName}</span>
-                                    <span class="score-chip s${f.score}" style="padding:2px 8px; border-radius:6px; font-size:0.7rem; font-weight:900; background:${f.score===2?'rgba(16,185,129,0.1)':(f.score===1?'rgba(245,158,11,0.1)':'rgba(239,68,68,0.1)')}; color:${f.score===2?'var(--success)':(f.score===1?'var(--warning)':'var(--danger)')};">${f.score} / 2</span>
+                                    <span class="score-chip s${f.score}" style="padding:2px 8px; border-radius:6px; font-size:0.7rem; font-weight:900; background:${f.score===2?'rgba(16,185,129,0.1)':(f.score===1?'rgba(245,158,11,0.1)':'rgba(239,68,68,0.1)')}; color:${f.score===2?'var(--success)':(f.score===1?'var(--warning)':'var(--danger)')};">${f.scoreLabel || (f.score + ' / 2')}</span>
                                 </div>
                                 ${f.notes ? `<div class="notes-box"><i class="fa-solid fa-pen-to-square"></i> <span>${f.notes}</span></div>` : ''}
                                 ${issuesHtml ? `<ul class="issues-list">${issuesHtml}</ul>` : ''}
