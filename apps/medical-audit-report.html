@@ -308,6 +308,119 @@
         ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(14, 165, 233, 0.4); border-radius: 10px; }
+        /* ============================================
+   DYNAMIC FONT SCALING + PRINT OPTIMIZATION
+   ============================================ */
+        :root { --font-scale: 1; }
+        body.scale-xl { --font-scale: 1.15; }   /* ≤10 items */
+        body.scale-lg { --font-scale: 1.08; }   /* ≤25 items */
+        body.scale-md { --font-scale: 1.00; }   /* ≤50 items (default) */
+        body.scale-sm { --font-scale: 0.92; }   /* >50 items (compressed, ≥14px) */
+
+        /* --- Font sizes — clamped min 14px in all modes --- */
+        .staff-head .name        { font-size: clamp(16px, calc(16px * var(--font-scale)), 20px); }
+        .staff-head .role        { font-size: clamp(14px, calc(14px * var(--font-scale)), 16px); }
+        .staff-pct-badge         { font-size: clamp(14px, calc(14px * var(--font-scale)), 16px); }
+        .form-row-title          { font-size: clamp(14px, calc(15px * var(--font-scale)), 18px); }
+        .notes-box               { font-size: clamp(14px, calc(15px * var(--font-scale)), 17px); }
+        .issues-list li          { font-size: clamp(14px, calc(15px * var(--font-scale)), 17px); }
+        .score-chip              { font-size: clamp(14px, calc(14px * var(--font-scale)), 16px) !important; }
+        .perfect-item            { font-size: clamp(14px, calc(15px * var(--font-scale)), 17px); }
+        .dept-block h3           { font-size: clamp(16px, calc(17px * var(--font-scale)), 20px); }
+        .report-section-title h2 { font-size: clamp(17px, calc(19px * var(--font-scale)), 22px); }
+
+        /* --- Compact spacing (applies on-screen + print) --- */
+        .staff-card { padding: 10px; margin-bottom: 8px; border-radius: 10px; }
+        .form-row { padding: 8px; margin-bottom: 6px; border-radius: 8px; }
+        .form-row-head { margin-bottom: 6px; }
+        .notes-box { padding: 6px 10px; margin-bottom: 6px; }
+        .issues-list li { margin-bottom: 3px; }
+
+        /* --- Section header repetition (via <thead>) --- */
+        .section-table { width: 100%; border-collapse: collapse; border: none; margin: 0; }
+        .section-table thead, .section-table tbody,
+        .section-table tr, .section-table th, .section-table td {
+            border: none; padding: 0; margin: 0;
+        }
+        .section-thead {
+            text-align: right; font-weight: normal; background: transparent;
+            vertical-align: top; padding: 0 0 12px 0 !important;
+        }
+        .section-thead .report-section-title { margin-bottom: 0 !important; }
+
+        /* --- Section-specific numbered form rows --- */
+        .section-missing { counter-reset: c-missing; }
+        .section-missing .form-row { counter-increment: c-missing; }
+        .section-missing .form-row .form-row-title::before {
+            content: "#" counter(c-missing);
+            display: inline-block;
+            background: rgba(239,68,68,0.15);
+            color: var(--danger);
+            padding: 1px 8px; border-radius: 6px;
+            font-size: 0.85em; margin-left: 6px; font-weight: 900;
+        }
+        .section-incomplete { counter-reset: c-incomplete; }
+        .section-incomplete .form-row { counter-increment: c-incomplete; }
+        .section-incomplete .form-row .form-row-title::before {
+            content: "#" counter(c-incomplete);
+            display: inline-block;
+            background: rgba(245,158,11,0.15);
+            color: var(--warning);
+            padding: 1px 8px; border-radius: 6px;
+            font-size: 0.85em; margin-left: 6px; font-weight: 900;
+        }
+
+        /* --- Print-specific --- */
+        @media print {
+            @page {
+                size: A4;
+                margin: 10mm 10mm 18mm 10mm;
+                @bottom-center {
+                    content: "صفحة " counter(page) " من " counter(pages);
+                    font-family: 'Tajawal', sans-serif;
+                    font-size: 11px;
+                    color: #555;
+                }
+            }
+
+            /* Never break cards — pull to next page instead */
+            .staff-card {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .form-row {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            /* Keep staff-head glued to first form-row */
+            .staff-head {
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+            /* Keep dept title with first staff card */
+            .dept-block h3 {
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+            /* Each section starts on a new page */
+            .report-section { page-break-before: always; }
+            /* Remove double break that causes blank page */
+            .cover-page { page-break-after: auto !important; }
+
+            /* Tighter print spacing */
+            .staff-card { padding: 6px; margin-bottom: 4px; }
+            .form-row { padding: 4px 6px; margin-bottom: 3px; }
+            .notes-box { padding: 4px 6px; margin-bottom: 3px; }
+            .issues-list li { margin-bottom: 1px; }
+            .dept-block { margin-bottom: 10px; }
+
+            /* Print color fix */
+            .overall-circle, .circle-missing, .circle-incomplete, .circle-perfect,
+            .staff-pct-badge, .score-chip {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
     </style>
     <link rel="stylesheet" href="../theme-overrides.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
@@ -439,21 +552,37 @@
             </div>
 
             <!-- MISSING SECTION -->
-            <div class="report-section" id="section_missing" style="display:none;">
-                <div class="report-section-title missing">
-                    <i class="fa-solid fa-circle-xmark"></i>
-                    <h2>الخطوة 1: نماذج مفقودة (يجب إضافتها للملف)</h2>
-                </div>
-                <div id="missing_details"></div>
+            <div class="report-section section-missing" id="section_missing" style="display:none;">
+                <table class="section-table">
+                    <thead>
+                        <tr><th class="section-thead">
+                            <div class="report-section-title missing">
+                                <i class="fa-solid fa-circle-xmark"></i>
+                                <h2>الخطوة 1: نماذج مفقودة (يجب إضافتها للملف)</h2>
+                            </div>
+                        </th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><div id="missing_details"></div></td></tr>
+                    </tbody>
+                </table>
             </div>
 
             <!-- INCOMPLETE SECTION -->
-            <div class="report-section" id="section_incomplete" style="display:none;">
-                <div class="report-section-title incomplete">
-                    <i class="fa-solid fa-circle-exclamation"></i>
-                    <h2>الخطوة 2: نماذج ناقصة (تحتاج استكمال)</h2>
-                </div>
-                <div id="incomplete_details"></div>
+            <div class="report-section section-incomplete" id="section_incomplete" style="display:none;">
+                <table class="section-table">
+                    <thead>
+                        <tr><th class="section-thead">
+                            <div class="report-section-title incomplete">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                <h2>الخطوة 2: نماذج ناقصة (تحتاج استكمال)</h2>
+                            </div>
+                        </th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><div id="incomplete_details"></div></td></tr>
+                    </tbody>
+                </table>
             </div>
 
             <!-- PERFECT SECTION -->
@@ -520,6 +649,20 @@
                 return Array.isArray(p) ? p : [];
             } catch(e) { return []; }
         }
+        function applyFontScaling() {
+            const totalItems = document.querySelectorAll('.form-row').length;
+            const body = document.body;
+            body.classList.remove('scale-xl', 'scale-lg', 'scale-md', 'scale-sm');
+
+            let mode;
+            if (totalItems <= 10) { body.classList.add('scale-xl'); mode = 'XL'; }
+            else if (totalItems <= 25) { body.classList.add('scale-lg'); mode = 'LG'; }
+            else if (totalItems <= 50) { body.classList.add('scale-md'); mode = 'MD'; }
+            else { body.classList.add('scale-sm'); mode = 'SM'; }
+
+            console.log(`[Font Scale] ${totalItems} items → ${mode}`);
+        }
+
         function getScoreLabel(scoreVal, pt) {
             if (scoreVal === 'Score 2' || scoreVal === 'مطابق') return 'مطابق';
             if (scoreVal === 'Score 1' || scoreVal === 'مطابق جزئي') return 'مطابق جزئي';
@@ -752,6 +895,8 @@
                     `<span class="perfect-item"><i class="fa-solid fa-check"></i> ${name}</span>`
                 ).join('');
             }
+         applyFontScaling();
+
         }
 
         // INIT
