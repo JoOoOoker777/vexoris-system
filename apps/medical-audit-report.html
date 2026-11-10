@@ -735,8 +735,7 @@
             const revDateRaw = data.reviewed_at || data.updated_at;
             const revDate = revDateRaw ? new Date(revDateRaw) : new Date();
             document.getElementById('rep_review_date').innerText = revDate.toLocaleDateString('ar-EG', { 
-                year: 'numeric', month: 'short', day: 'numeric', 
-                hour: '2-digit', minute: '2-digit' 
+                year: 'numeric', month: 'short', day: 'numeric'
             });
             // تخصص الاستشاري
             let specStr = '--';
