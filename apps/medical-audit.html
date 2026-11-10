@@ -1837,11 +1837,20 @@
             container.innerHTML = '';
 
             // فلترة الـ units الفاضية
-            const validUnits = (units || []).filter(u =>
-                u && (u.score || u.person || u.role || u.date || u.otherName ||
-                    (Array.isArray(u.issues) && u.issues.length > 0) ||
-                    (Array.isArray(u.notes) && u.notes.length > 0) || u.note)
-            );
+            const hasContent = (u) => {
+                if (!u) return false;
+                if (u.score || u.person || u.role || u.date || u.otherName || u.note) return true;
+                if (u.issues) {
+                    if (Array.isArray(u.issues) && u.issues.length > 0) return true;
+                    if (typeof u.issues === 'string' && u.issues.trim()) return true;
+                }
+                if (u.notes) {
+                    if (Array.isArray(u.notes) && u.notes.length > 0) return true;
+                    if (typeof u.notes === 'string' && u.notes.trim()) return true;
+                }
+                return false;
+            };
+            const validUnits = (units || []).filter(hasContent);
 
             if (validUnits.length === 0) {
                 const newUnitId = `A${++unitCounter}`;
@@ -1887,7 +1896,12 @@
                 setField(`input[name="${pre}_T5"]`, sUnit.otherName || sUnit.person || '');
 
                 // T6 — notes
-                const noteTxt = Array.isArray(sUnit.notes) ? sUnit.notes.join(' / ') : (sUnit.note || '');
+                let noteTxt = '';
+                if (Array.isArray(sUnit.notes)) noteTxt = sUnit.notes.join(' / ');
+                else if (typeof sUnit.notes === 'string') noteTxt = sUnit.notes;
+                else if (Array.isArray(sUnit.note)) noteTxt = sUnit.note.join(' / ');
+                else if (typeof sUnit.note === 'string') noteTxt = sUnit.note;
+                setField(`textarea[name="${pre}_T6"]`, noteTxt);
                 setField(`textarea[name="${pre}_T6"]`, noteTxt);
 
                 // T4 — issues
@@ -1966,10 +1980,24 @@
 
                 if (data.specialties) {
                     data.specialties.split(',').forEach(s => {
-                        let sp = s.trim().split(' - ')[0].trim();
+                        const parts = s.trim().split(' - ');
+                        const sp = parts[0].trim();
+                        const dept = parts[1]?.trim();
                         const cb = Array.from(document.querySelectorAll('input[name="caseSpecialty"]'))
                             .find(x => x.dataset.name === sp);
-                        if (cb) cb.checked = true;
+                        if (cb) {
+                            cb.checked = true;
+                            if (dept) {
+                                const deptSelect = document.getElementById('dayCaseDept');
+                                if (deptSelect) {
+                                    deptSelect.value = dept;
+                                    if (deptSelect.value !== dept) {
+                                        deptSelect.add(new Option(dept, dept));
+                                        deptSelect.value = dept;
+                                    }
+                                }
+                            }
+                        }
                     });
                 }
                 if (data.services) {
@@ -1995,7 +2023,14 @@
                         if (clerkInput) clerkInput.value = w.clerk || '';
 
                         const notesTA = document.querySelector(`textarea[name="unit_W${i+1}_${actualUnitId}_T6"]`);
-                        if (notesTA) notesTA.value = Array.isArray(w.notes) ? w.notes.join(' / ') : (w.note || '');
+                        if (notesTA) {
+                            let nTxt = '';
+                            if (Array.isArray(w.notes)) nTxt = w.notes.join(' / ');
+                            else if (typeof w.notes === 'string') nTxt = w.notes;
+                            else if (Array.isArray(w.note)) nTxt = w.note.join(' / ');
+                            else if (typeof w.note === 'string') nTxt = w.note;
+                            notesTA.value = nTxt;
+                        }
                     }
                 });
 

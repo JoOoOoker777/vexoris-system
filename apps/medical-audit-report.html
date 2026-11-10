@@ -812,7 +812,11 @@
                     const name = u.person || u.otherName || u.role || 'غير محدد';
                     const info = getDoctorDepartmentAndRole(u, card, data.specialties, doctorsMapping);
                     let issuesArr = typeof u.issues === 'string' ? u.issues.split(',').filter(s => s) : (Array.isArray(u.issues) ? u.issues : []);
-                    let noteStr = Array.isArray(u.notes) ? u.notes.join(' / ') : (u.note || '');
+                    let noteStr = '';
+                    if (Array.isArray(u.notes)) noteStr = u.notes.join(' / ');
+                    else if (typeof u.notes === 'string') noteStr = u.notes;
+                    else if (Array.isArray(u.note)) noteStr = u.note.join(' / ');
+                    else if (typeof u.note === 'string') noteStr = u.note;
                     addRecord(info.deptName, info.roleType, name, formName, u.score, issuesArr, noteStr);
                 });
             });
