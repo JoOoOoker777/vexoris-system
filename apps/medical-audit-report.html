@@ -799,9 +799,18 @@
             // --- جمع البيانات ---
             const savedWard = safeParse(data.ward_questions);
             savedWard.forEach(w => {
-                let noteStr = Array.isArray(w.notes) ? w.notes.join(' / ') : (w.note || '');
-                const formDisplay = w.qText || w.qId || w.q || 'تقييم إداري';
-                addRecord('الاداريين', 'إداري', w.clerk || 'مدخل غير محدد', formDisplay, w.score, [], noteStr);
+                const _wAll = [];
+                const _pushW = (v) => {
+                    if (!v) return;
+                    if (Array.isArray(v)) _wAll.push(...v.filter(Boolean));
+                    else if (typeof v === 'string' && v.trim()) _wAll.push(v.trim());
+                };
+                _pushW(w.notes);
+                _pushW(w.note);
+                _pushW(w.notes2);
+                _pushW(w.noteS2);
+                let noteStr = _wAll.filter(Boolean).join(' / ');
+                ...
             });
 
             const savedAudit = safeParse(data.audit_questions);
@@ -813,10 +822,21 @@
                     const info = getDoctorDepartmentAndRole(u, card, data.specialties, doctorsMapping);
                     let issuesArr = typeof u.issues === 'string' ? u.issues.split(',').filter(s => s) : (Array.isArray(u.issues) ? u.issues : []);
                     let noteStr = '';
-                    if (Array.isArray(u.notes)) noteStr = u.notes.join(' / ');
-                    else if (typeof u.notes === 'string') noteStr = u.notes;
-                    else if (Array.isArray(u.note)) noteStr = u.note.join(' / ');
-                    else if (typeof u.note === 'string') noteStr = u.note;
+                    const _notesAll = [];
+                    const _pushN = (v) => {
+                        if (!v) return;
+                        if (Array.isArray(v)) _notesAll.push(...v.filter(Boolean));
+                        else if (typeof v === 'string' && v.trim()) _notesAll.push(v.trim());
+                    };
+                    _pushN(u.notes);
+                    _pushN(u.note);
+                    _pushN(u.notes2);
+                    _pushN(u.noteS2);
+                    _pushN(u.note2);
+                    _pushN(u.notes_2);
+                    _pushN(u.note_s2);
+                    noteStr = _notesAll.filter(Boolean).join(' / ');
+
                     addRecord(info.deptName, info.roleType, name, formName, u.score, issuesArr, noteStr);
                 });
             });
