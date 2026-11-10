@@ -70,48 +70,68 @@ window.logout = async function() {
   const displayName = session.user.user_metadata?.display_name || profile.username || 'مستخدم';
   const email = session.user.email || profile.email || '';
 
-  // Populate header
-  document.getElementById('navUserName').textContent = displayName;
-  document.getElementById('navUserRole').textContent = roleInfo.name;
-  document.getElementById('navUserRole').style.color = roleInfo.color;
+  // Populate header safely (using ?. to avoid null errors)
+  const navUserName = document.getElementById('navUserName');
+  if (navUserName) navUserName.textContent = displayName;
+  
+  const navUserRole = document.getElementById('navUserRole');
+  if (navUserRole) {
+    navUserRole.textContent = roleInfo.name;
+    navUserRole.style.color = roleInfo.color;
+  }
+  
   renderAvatar(document.getElementById('userAvatar'), role);
   renderAvatar(document.getElementById('dropdownAvatar'), role);
-  document.getElementById('dropdownName').textContent = displayName;
-  document.getElementById('dropdownEmail').textContent = email;
+  
+  const dropdownName = document.getElementById('dropdownName');
+  if (dropdownName) dropdownName.textContent = displayName;
+  
+  const dropdownEmail = document.getElementById('dropdownEmail');
+  if (dropdownEmail) dropdownEmail.textContent = email;
+  
   const badge = document.getElementById('dropdownRoleBadge');
-  badge.innerHTML = `<i class="fa-solid ${roleInfo.icon}"></i> ${roleInfo.name}`;
-  badge.style.background = roleInfo.bg || `${roleInfo.color}22`;
-  badge.style.color = roleInfo.color;
+  if (badge) {
+    badge.innerHTML = `<i class="fa-solid ${roleInfo.icon}"></i> ${roleInfo.name}`;
+    badge.style.background = roleInfo.bg || `${roleInfo.color}22`;
+    badge.style.color = roleInfo.color;
+  }
 
   // User chip toggle
   const chip = document.getElementById('userChip');
   const dd = document.getElementById('userDropdown');
-  chip.addEventListener('click', (e) => {
-    e.stopPropagation();
-    dd.classList.toggle('open');
-    chip.classList.toggle('open');
-  });
-  document.addEventListener('click', (e) => {
-    if (!dd.contains(e.target) && !chip.contains(e.target)) {
-      dd.classList.remove('open');
-      chip.classList.remove('open');
-    }
-  });
+  if (chip && dd) {
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dd.classList.toggle('open');
+      chip.classList.toggle('open');
+    });
+    document.addEventListener('click', (e) => {
+      if (!dd.contains(e.target) && !chip.contains(e.target)) {
+        dd.classList.remove('open');
+        chip.classList.remove('open');
+      }
+    });
+  }
 
   // Scroll progress
   const sp = document.getElementById('scrollProgress');
-  window.addEventListener('scroll', () => {
-    const h = document.documentElement.scrollHeight - window.innerHeight;
-    if (h > 0) sp.style.width = (scrollY / h * 100) + '%';
-  }, { passive: true });
+  if (sp) {
+    window.addEventListener('scroll', () => {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      if (h > 0) sp.style.width = (scrollY / h * 100) + '%';
+    }, { passive: true });
+  }
 
   await loadData();
 })();
 
 // ─── LOAD DATA ───
 async function loadData() {
-  document.getElementById('loadingText').textContent = 'جاري تحميل المؤشرات...';
-  document.getElementById('loadingScreen').classList.remove('hide');
+  const loadingText = document.getElementById('loadingText');
+  if (loadingText) loadingText.textContent = 'جاري تحميل المؤشرات...';
+  
+  const loadingScreen = document.getElementById('loadingScreen');
+  if (loadingScreen) loadingScreen.classList.remove('hide');
 
   const { data, error } = await supabase.rpc('get_analytics', {
     p_start_date: currentFilter.start || null,
@@ -121,21 +141,26 @@ async function loadData() {
 
   if (error) {
     console.error('Analytics error:', error);
-    document.getElementById('loadingScreen').classList.add('hide');
+    if (loadingScreen) loadingScreen.classList.add('hide');
     if (window.showNotification) showNotification('فشل تحميل التحليلات: ' + error.message, 'error');
     return;
   }
 
   DATA = data || { doctors:[], nurses:[], clerks:[], departments:[], forms:[] };
-  renderKPI();
-  renderHeatmap();
-  renderRadar();
-  renderDistribution();
-  renderTopForms();
-  renderEntities();
-  updateActiveFilter();
+  
+  try {
+    renderKPI();
+    renderHeatmap();
+    renderRadar();
+    renderDistribution();
+    renderTopForms();
+    renderEntities();
+    updateActiveFilter();
+  } catch (err) {
+    console.error("Render error: ", err);
+  }
 
-  document.getElementById('loadingScreen').classList.add('hide');
+  if (loadingScreen) loadingScreen.classList.add('hide');
 }
 
 // ─── KPI HERO ───
@@ -148,32 +173,43 @@ function renderKPI() {
   const topDept = (DATA.departments||[]).slice().sort((a,b) => b.percentage - a.percentage)[0];
   const activeDoctors = (DATA.doctors||[]).filter(d => d.count > 0).length;
 
-  document.getElementById('kpiOverall').textContent = overallPct + '%';
-  document.getElementById('kpiCount').textContent = totalCount.toLocaleString('ar-EG');
-  document.getElementById('kpiTopDept').textContent = topDept ? topDept.name : '—';
-  document.getElementById('kpiActive').textContent = activeDoctors;
+  const kpiOverall = document.getElementById('kpiOverall');
+  if (kpiOverall) kpiOverall.textContent = overallPct + '%';
+  
+  const kpiCount = document.getElementById('kpiCount');
+  if (kpiCount) kpiCount.textContent = totalCount.toLocaleString('ar-EG');
+  
+  const kpiTopDept = document.getElementById('kpiTopDept');
+  if (kpiTopDept) kpiTopDept.textContent = topDept ? topDept.name : '—';
+  
+  const kpiActive = document.getElementById('kpiActive');
+  if (kpiActive) kpiActive.textContent = activeDoctors;
 
-  // Sparklines (mocked trend from top items)
   const topDeptPcts = (DATA.departments||[]).slice(0, 8).map(d => d.percentage);
   drawSparkline('sparkOverall', [65, 72, 78, 82, 85, overallPct], '#0ea5e9');
   drawSparkline('sparkCount', [30, 45, 52, 60, 68, 75], '#6366f1');
   drawSparkline('sparkTopDept', topDeptPcts.length ? topDeptPcts : [70,75,80,85,90], '#10b981');
   drawSparkline('sparkActive', [activeDoctors*0.6, activeDoctors*0.8, activeDoctors*0.9, activeDoctors], '#f59e0b');
 
-  // Trend chips
-  document.getElementById('trendOverall').innerHTML = overallPct >= 85
-    ? '<span style="background:rgba(16,185,129,0.15);color:#10b981;padding:3px 8px;border-radius:6px;">↑ جيد</span>'
-    : '<span style="background:rgba(245,158,11,0.15);color:#f59e0b;padding:3px 8px;border-radius:6px;">→ متوسط</span>';
-  document.getElementById('trendCount').innerHTML = `<span style="background:rgba(99,102,241,0.15);color:#6366f1;padding:3px 8px;border-radius:6px;">${totalCount} تقييم</span>`;
+  const trendOverall = document.getElementById('trendOverall');
+  if (trendOverall) {
+    trendOverall.innerHTML = overallPct >= 85
+      ? '<span style="background:rgba(16,185,129,0.15);color:#10b981;padding:3px 8px;border-radius:6px;">↑ جيد</span>'
+      : '<span style="background:rgba(245,158,11,0.15);color:#f59e0b;padding:3px 8px;border-radius:6px;">→ متوسط</span>';
+  }
+  
+  const trendCount = document.getElementById('trendCount');
+  if (trendCount) trendCount.innerHTML = `<span style="background:rgba(99,102,241,0.15);color:#6366f1;padding:3px 8px;border-radius:6px;">${totalCount} تقييم</span>`;
 }
 
 // ─── HEATMAP ───
 function renderHeatmap() {
   const container = document.getElementById('heatmapContainer');
+  if (!container) return;
+  
   const depts = (DATA.departments||[]).slice(0, 8);
   if (!depts.length) { container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px;">لا توجد بيانات</p>'; return; }
 
-  // Mock months (since we don't have per-month breakdown yet)
   const months = ['الشهر 1', 'الشهر 2', 'الشهر 3'];
   let html = `<div class="heatmap-row" style="--cols:${months.length};">
     <div></div>${months.map(m => `<div class="heatmap-header">${m}</div>`).join('')}
@@ -183,9 +219,7 @@ function renderHeatmap() {
     html += `<div class="heatmap-row" style="--cols:${months.length};">
       <div class="heatmap-label" title="${esc(d.name)}">${esc(d.name)}</div>`;
     months.forEach((_, i) => {
-      // Vary the value slightly to simulate trend
       const pct = Math.max(0, Math.min(100, d.percentage + (i - 1) * 3));
-      const meta = kpiMeta(pct);
       const bg = pct >= 90 ? '#10b981' : pct >= 75 ? '#f59e0b' : '#ef4444';
       html += `<div class="heatmap-cell" style="background:${bg}aa;" title="${esc(d.name)} — ${months[i]}: ${pct}%">${pct}%</div>`;
     });
@@ -236,7 +270,8 @@ window.switchTab = function(tab) {
 document.querySelectorAll('.ent-tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
 
 window.filterEntities = function() {
-  searchTerm = document.getElementById('entitySearch').value.toLowerCase();
+  const searchEl = document.getElementById('entitySearch');
+  searchTerm = searchEl ? searchEl.value.toLowerCase() : '';
   renderEntities();
 };
 
@@ -250,15 +285,19 @@ function getTabList() {
 }
 
 function renderEntities() {
+  const tbody = document.getElementById('entitiesTbody');
+  if (!tbody) return;
+
   let list = getTabList().slice();
   if (searchTerm) list = list.filter(x => (x.name || '').toLowerCase().includes(searchTerm));
 
-  const sort = document.getElementById('entitySort').value;
+  const sortEl = document.getElementById('entitySort');
+  const sort = sortEl ? sortEl.value : 'percentage';
+  
   if (sort === 'percentage') list.sort((a,b) => b.percentage - a.percentage);
   else if (sort === 'count') list.sort((a,b) => b.count - a.count);
   else if (sort === 'name') list.sort((a,b) => (a.name||'').localeCompare(b.name||'', 'ar'));
 
-  const tbody = document.getElementById('entitiesTbody');
   if (!list.length) {
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);">لا توجد بيانات</td></tr>';
     return;
@@ -293,7 +332,9 @@ window.showDetails = function(tab, key) {
   if (!item) return;
   currentModal = { tab, item };
 
-  document.querySelector('#modalItemName span').textContent = item.name + (item.specialty ? ` (${item.specialty})` : '');
+  const modalTitle = document.querySelector('#modalItemName span');
+  if (modalTitle) modalTitle.textContent = item.name + (item.specialty ? ` (${item.specialty})` : '');
+  
   const meta = kpiMeta(item.percentage || 0);
   const errors = item.top_errors || [];
 
@@ -321,17 +362,29 @@ window.showDetails = function(tab, key) {
     html += `</div>`;
   }
 
-  document.getElementById('modalBody').innerHTML = html;
-  document.getElementById('detailsModal').classList.remove('hidden');
+  const modalBody = document.getElementById('modalBody');
+  if (modalBody) modalBody.innerHTML = html;
+  
+  const modal = document.getElementById('detailsModal');
+  if (modal) modal.classList.remove('hidden');
 };
 
-window.closeModal = function() { document.getElementById('detailsModal').classList.add('hidden'); currentModal = null; };
+window.closeModal = function() { 
+  const modal = document.getElementById('detailsModal');
+  if (modal) modal.classList.add('hidden'); 
+  currentModal = null; 
+};
 
 // ─── FILTERS ───
 window.applyDateFilter = function() {
-  const start = document.getElementById('startDate').value;
-  const end = document.getElementById('endDate').value;
-  const dateType = document.getElementById('dateFilterType').value;
+  const startEl = document.getElementById('startDate');
+  const endEl = document.getElementById('endDate');
+  const typeEl = document.getElementById('dateFilterType');
+
+  const start = startEl ? startEl.value : '';
+  const end = endEl ? endEl.value : '';
+  const dateType = typeEl ? typeEl.value : 'discharge';
+
   if (!start && !end) {
     if (window.showNotification) showNotification('يرجى اختيار تاريخ واحد على الأقل', 'warning');
     return;
@@ -346,18 +399,26 @@ window.applyDateFilter = function() {
 };
 
 window.clearDateFilter = function() {
-  document.getElementById('startDate').value = '';
-  document.getElementById('endDate').value = '';
-  document.getElementById('dateFilterType').value = 'discharge';
+  const startEl = document.getElementById('startDate');
+  const endEl = document.getElementById('endDate');
+  const typeEl = document.getElementById('dateFilterType');
+
+  if (startEl) startEl.value = '';
+  if (endEl) endEl.value = '';
+  if (typeEl) typeEl.value = 'discharge';
+  
   currentFilter = { start:null, end:null, dateType:'discharge', label:'الكل' };
   loadData();
 };
 
 function updateActiveFilter() {
   const div = document.getElementById('activeFilter');
+  if (!div) return;
+  
   if (currentFilter.label !== 'الكل') {
     div.classList.remove('hidden');
-    document.getElementById('activeFilterText').textContent = currentFilter.label;
+    const textEl = document.getElementById('activeFilterText');
+    if (textEl) textEl.textContent = currentFilter.label;
   } else {
     div.classList.add('hidden');
   }
