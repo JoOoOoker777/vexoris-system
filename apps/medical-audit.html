@@ -1896,13 +1896,20 @@
                 setField(`input[name="${pre}_T5"]`, sUnit.otherName || sUnit.person || '');
 
                 // T6 — notes
-                let noteTxt = '';
-                if (Array.isArray(sUnit.notes)) noteTxt = sUnit.notes.join(' / ');
-                else if (typeof sUnit.notes === 'string') noteTxt = sUnit.notes;
-                else if (Array.isArray(sUnit.note)) noteTxt = sUnit.note.join(' / ');
-                else if (typeof sUnit.note === 'string') noteTxt = sUnit.note;
-                setField(`textarea[name="${pre}_T6"]`, noteTxt);
-                setField(`textarea[name="${pre}_T6"]`, noteTxt);
+                let allNotes = [];
+                const pushNote = (v) => {
+                    if (!v) return;
+                    if (Array.isArray(v)) allNotes.push(...v.filter(Boolean));
+                    else if (typeof v === 'string' && v.trim()) allNotes.push(v.trim());
+                };
+                pushNote(sUnit.notes);
+                pushNote(sUnit.note);
+                pushNote(sUnit.notes2);
+                pushNote(sUnit.noteS2);
+                pushNote(sUnit.note2);
+                pushNote(sUnit.notes_2);
+                pushNote(sUnit.note_s2);
+                setField(`textarea[name="${pre}_T6"]`, allNotes.filter(Boolean).join(' / '));
 
                 // T4 — issues
                 const issues = Array.isArray(sUnit.issues)
