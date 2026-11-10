@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة المؤشرات | VEXORIS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = { darkMode: 'class' };
+if (localStorage.getItem('theme') === 'light') document.documentElement.classList.remove('dark');
+</script>
+<link rel="stylesheet" href="../theme-overrides.css">
+<link rel="stylesheet" href="css/analytics.css">
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="../loading-logo.js" defer></script>
+</head>
+<body>
+<div class="loading-screen" id="loadingScreen">
+  <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+  <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري تحميل المؤشرات...</p>
+</div>
+
+<div class="aurora-bg"></div>
+<div class="grid-overlay"></div>
+
+<div class="nav-shell no-print">
+  <header class="nav-inner">
+    <div class="flex items-center gap-3">
+      <div class="logo-dot"></div>
+      <div>
+        <a href="../dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+        <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Analytics Dashboard</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="toggleTheme()" class="icon-btn"><i class="fa-solid fa-moon"></i></button>
+      <a href="../dashboard.html" class="rbtn rbtn-secondary"><i class="fa-solid fa-arrow-right"></i> رجوع</a>
+    </div>
+  </header>
+</div>
+
+<main class="app-container">
+  <div class="content-narrow">
+
+    <section class="page-hero">
+      <div class="hero-badge"><span class="pulse-dot"></span> Medical Analytics</div>
+      <h1 class="hero-title">لوحة <span class="grad">القيادة والمؤشرات</span></h1>
+      <p class="hero-desc">تحليل أداء الأقسام والأطباء والتمريض والإداريين والنماذج — بيانات حية من قاعدة Supabase.</p>
+    </section>
+
+    <div class="filter-card">
+      <div class="filter-grid">
+        <div><label class="f-label">نوع التاريخ</label>
+          <select id="dateFilterType" class="f-select">
+            <option value="discharge">تاريخ الخروج</option>
+            <option value="timestamp">تاريخ التقييم</option>
+          </select>
+        </div>
+        <div><label class="f-label">من تاريخ</label><input type="date" id="startDate" class="f-input"></div>
+        <div><label class="f-label">إلى تاريخ</label><input type="date" id="endDate" class="f-input"></div>
+        <div style="display:flex;align-items:flex-end;">
+          <button class="btn btn-primary" onclick="applyDateFilter()"><i class="fa-solid fa-filter"></i> تطبيق</button>
+        </div>
+      </div>
+      <div id="activeFilter" class="active-filter hidden">
+        <i class="fa-solid fa-filter"></i>
+        <span id="activeFilterText"></span>
+        <button onclick="clearDateFilter()"><i class="fa-solid fa-circle-xmark"></i></button>
+      </div>
+    </div>
+
+    <div class="search-card">
+      <div style="position:relative;flex:1;">
+        <i class="fa-solid fa-magnifying-glass" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--accent);"></i>
+        <input type="text" id="searchInput" class="f-input" style="padding-right:40px;"
+               placeholder="ابحث باسم الطبيب / القسم / النموذج..." onkeyup="filterCards()">
+      </div>
+      <button class="btn btn-secondary" onclick="loadAnalytics()"><i class="fa-solid fa-rotate"></i> تحديث</button>
+    </div>
+
+    <div class="tabs-container" id="tabsContainer">
+      <button class="tab-btn active" data-tab="departments" onclick="switchTab('departments', this)"><i class="fa-solid fa-building-user"></i> الأقسام</button>
+      <button class="tab-btn" data-tab="doctors" onclick="switchTab('doctors', this)"><i class="fa-solid fa-user-doctor"></i> الأطباء</button>
+      <button class="tab-btn" data-tab="nurses" onclick="switchTab('nurses', this)"><i class="fa-solid fa-user-nurse"></i> التمريض</button>
+      <button class="tab-btn" data-tab="clerks" onclick="switchTab('clerks', this)"><i class="fa-solid fa-keyboard"></i> الإداريين</button>
+      <button class="tab-btn" data-tab="forms" onclick="switchTab('forms', this)"><i class="fa-solid fa-file-signature"></i> النماذج</button>
+    </div>
+
+    <div id="doctorsSubTabs" class="sub-tabs hidden"></div>
+
+    <div class="toolbar">
+      <div class="sort-wrap">
+        <i class="fa-solid fa-arrow-down-a-z"></i>
+        <label>ترتيب حسب:</label>
+        <select id="sortBy" onchange="applySorting()">
+          <option value="percentage">مؤشر الأداء %</option>
+          <option value="count">عدد التقييمات</option>
+        </select>
+      </div>
+      <div class="export-btns no-print">
+        <button class="btn-export excel" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> Excel</button>
+        <button class="btn-export pdf" onclick="exportToPDF()"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+        <button class="btn-export compare" id="compareToggleBtn" onclick="toggleComparisonSection()"><i class="fa-solid fa-chart-line"></i> مقارنة 3 أشهر</button>
+      </div>
+    </div>
+
+    <div id="comparisonSection" class="comparison-section hidden">
+      <h3><i class="fa-solid fa-code-compare"></i> مقارنة الأداء لثلاثة أشهر</h3>
+      <div class="comparison-grid">
+        <div><label class="f-label">نوع المقارنة</label>
+          <select id="compareType3" class="f-select" onchange="updateThreeMonthsDropdowns()">
+            <option value="departments">الأقسام</option>
+            <option value="forms">النماذج</option>
+            <option value="doctors">الأطباء</option>
+          </select>
+        </div>
+        <div><label class="f-label">العنصر</label><select id="compareItem3" class="f-select"></select></div>
+        <div><label class="f-label">نوع التاريخ</label>
+          <select id="compareDateType3" class="f-select">
+            <option value="discharge">تاريخ الخروج</option>
+            <option value="timestamp">تاريخ التقييم</option>
+          </select>
+        </div>
+        <div><label class="f-label">الشهر الأول</label><input type="month" id="compareMonth1_3" class="f-input"></div>
+        <div><label class="f-label">الشهر الثاني</label><input type="month" id="compareMonth2_3" class="f-input"></div>
+        <div><label class="f-label">الشهر الثالث</label><input type="month" id="compareMonth3_3" class="f-input"></div>
+        <div style="grid-column:1/-1;text-align:center;margin-top:12px;">
+          <button class="btn btn-primary" onclick="performThreeMonthsComparison()"><i class="fa-solid fa-play"></i> بدء المقارنة</button>
+        </div>
+      </div>
+      <div id="threeMonthsResult" class="three-months-result hidden"></div>
+    </div>
+
+    <div id="cardsContainer" class="cards-grid"></div>
+  </div>
+</main>
+
+<div id="detailsModal" class="modal-overlay hidden">
+  <div class="modal-backdrop" onclick="closeModal()"></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="modalItemName"><i class="fa-solid fa-circle-info"></i> <span></span></h3>
+      <div style="display:flex;gap:8px;">
+        <button onclick="exportModalToPDF()" class="icon-btn"><i class="fa-solid fa-file-pdf"></i></button>
+        <button onclick="closeModal()" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+    <div class="modal-body" id="modalItemDetails"></div>
+  </div>
+</div>
+
+<script src="../notify.js"></script>
+<script type="module" src="js/analytics-core.js"></script>
+<script type="module" src="../session-manager.js"></script>
+</body>
+</html>
