@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة المؤشرات | VEXORIS</title>
+<title>لوحة المؤشرات | VEXORIS System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -13,25 +13,29 @@
 tailwind.config = { darkMode: 'class' };
 if (localStorage.getItem('theme') === 'light') document.documentElement.classList.remove('dark');
 </script>
-<link rel="stylesheet" href="../theme-overrides.css">
-<link rel="stylesheet" href="css/analytics.css">
+<link rel="stylesheet" href="../theme-overrides.css" />
+<link rel="stylesheet" href="css/analytics.css" />
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
 <script src="../loading-logo.js" defer></script>
+<script src="../loader-buttons.js" defer></script>
 </head>
 <body>
+
 <div class="loading-screen" id="loadingScreen">
   <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
-  <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري تحميل المؤشرات...</p>
+  <p class="text-sm font-bold" id="loadingText" style="color: var(--text-secondary);">جاري تحميل لوحة المؤشرات...</p>
 </div>
 
+<div class="scroll-progress" id="scrollProgress"></div>
 <div class="aurora-bg"></div>
 <div class="grid-overlay"></div>
 
-<div class="nav-shell no-print">
+<!-- ═══════════ HEADER (same as dashboard.html) ═══════════ -->
+<div class="nav-shell">
   <header class="nav-inner">
     <div class="flex items-center gap-3">
       <div class="logo-dot"></div>
@@ -40,110 +44,225 @@ if (localStorage.getItem('theme') === 'light') document.documentElement.classLis
         <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Analytics Dashboard</p>
       </div>
     </div>
+    <nav class="hidden md:flex items-center gap-7">
+      <a href="../dashboard.html" class="nav-link">لوحة التحكم</a>
+      <a href="../about.html" class="nav-link">عن النظام</a>
+      <a href="../security.html" class="nav-link">درع VEXORIS</a>
+      <a href="../courses.html" class="nav-link">دورات تدريبية</a>
+      <a href="../feedback.html" class="nav-link">رأيك يهمنا</a>
+    </nav>
     <div class="flex items-center gap-2">
-      <button onclick="toggleTheme()" class="icon-btn"><i class="fa-solid fa-moon"></i></button>
-      <a href="../dashboard.html" class="rbtn rbtn-secondary"><i class="fa-solid fa-arrow-right"></i> رجوع</a>
+      <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم" aria-label="تبديل الثيم">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+      </button>
+      <button class="user-chip" id="userChip" aria-label="قائمة المستخدم">
+        <div class="user-avatar" id="userAvatar"></div>
+        <div class="user-info">
+          <span class="user-name" id="navUserName">...</span>
+          <span class="user-role" id="navUserRole" style="color: var(--accent);">...</span>
+        </div>
+        <i class="fa-solid fa-chevron-down user-chip-arrow"></i>
+      </button>
+      <button onclick="logout()" class="icon-btn logout-btn" title="تسجيل الخروج">
+        <i class="fa-solid fa-power-off"></i>
+      </button>
     </div>
   </header>
 </div>
 
-<main class="app-container">
-  <div class="content-narrow">
+<div class="user-dropdown" id="userDropdown">
+  <div class="dropdown-profile">
+    <div class="dropdown-avatar-lg" id="dropdownAvatar"></div>
+    <div>
+      <div class="dropdown-name" id="dropdownName">...</div>
+      <div class="dropdown-email" id="dropdownEmail">...</div>
+      <div class="dropdown-role-badge" id="dropdownRoleBadge"></div>
+    </div>
+  </div>
+  <div class="dropdown-divider"></div>
+  <button class="dropdown-item" onclick="location.href='../profile.html'">
+    <i class="fa-solid fa-user-pen"></i> إدارة الملف الشخصي
+  </button>
+  <button class="dropdown-item" onclick="location.href='../change-password.html'">
+    <i class="fa-solid fa-key"></i> تغيير كلمة المرور
+  </button>
+</div>
 
-    <section class="page-hero">
-      <div class="hero-badge"><span class="pulse-dot"></span> Medical Analytics</div>
-      <h1 class="hero-title">لوحة <span class="grad">القيادة والمؤشرات</span></h1>
-      <p class="hero-desc">تحليل أداء الأقسام والأطباء والتمريض والإداريين والنماذج — بيانات حية من قاعدة Supabase.</p>
-    </section>
+<!-- ═══════════ MAIN ═══════════ -->
+<main class="dash-shell">
 
-    <div class="filter-card">
-      <div class="filter-grid">
-        <div><label class="f-label">نوع التاريخ</label>
-          <select id="dateFilterType" class="f-select">
-            <option value="discharge">تاريخ الخروج</option>
-            <option value="timestamp">تاريخ التقييم</option>
-          </select>
+  <!-- HERO + KPI -->
+  <section class="analytics-hero">
+    <div class="hero-badge"><span class="pulse-dot"></span> Live Analytics</div>
+    <h1 class="hero-title">لوحة <span class="grad">المؤشرات والتحليلات</span></h1>
+    <p class="hero-desc">مراقبة أداء الأقسام والأطباء والتمريض والنماذج — بيانات حية مستخرجة من قاعدة VEXORIS.</p>
+
+    <div class="kpi-hero-grid" id="kpiHeroGrid">
+      <div class="kpi-hero-card" data-kpi="overall">
+        <div class="kpi-hero-head">
+          <div class="kpi-hero-icon"><i class="fa-solid fa-gauge-high"></i></div>
+          <div class="kpi-hero-trend" id="trendOverall"></div>
         </div>
-        <div><label class="f-label">من تاريخ</label><input type="date" id="startDate" class="f-input"></div>
-        <div><label class="f-label">إلى تاريخ</label><input type="date" id="endDate" class="f-input"></div>
-        <div style="display:flex;align-items:flex-end;">
-          <button class="btn btn-primary" onclick="applyDateFilter()"><i class="fa-solid fa-filter"></i> تطبيق</button>
+        <div class="kpi-hero-value" id="kpiOverall">—</div>
+        <div class="kpi-hero-label">مؤشر الأداء الإجمالي</div>
+        <svg class="kpi-spark" id="sparkOverall" viewBox="0 0 100 30" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="kpi-hero-card" data-kpi="count">
+        <div class="kpi-hero-head">
+          <div class="kpi-hero-icon" style="background:rgba(99,102,241,0.15);color:#6366f1;"><i class="fa-solid fa-clipboard-check"></i></div>
+          <div class="kpi-hero-trend" id="trendCount"></div>
         </div>
+        <div class="kpi-hero-value" id="kpiCount">—</div>
+        <div class="kpi-hero-label">إجمالي التقييمات</div>
+        <svg class="kpi-spark" id="sparkCount" viewBox="0 0 100 30" preserveAspectRatio="none"></svg>
       </div>
-      <div id="activeFilter" class="active-filter hidden">
-        <i class="fa-solid fa-filter"></i>
-        <span id="activeFilterText"></span>
-        <button onclick="clearDateFilter()"><i class="fa-solid fa-circle-xmark"></i></button>
+      <div class="kpi-hero-card" data-kpi="topDept">
+        <div class="kpi-hero-head">
+          <div class="kpi-hero-icon" style="background:rgba(16,185,129,0.15);color:#10b981;"><i class="fa-solid fa-trophy"></i></div>
+        </div>
+        <div class="kpi-hero-value" id="kpiTopDept">—</div>
+        <div class="kpi-hero-label">أعلى قسم أداءً</div>
+        <svg class="kpi-spark" id="sparkTopDept" viewBox="0 0 100 30" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="kpi-hero-card" data-kpi="active">
+        <div class="kpi-hero-head">
+          <div class="kpi-hero-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;"><i class="fa-solid fa-user-doctor"></i></div>
+        </div>
+        <div class="kpi-hero-value" id="kpiActive">—</div>
+        <div class="kpi-hero-label">أطباء نشطون</div>
+        <svg class="kpi-spark" id="sparkActive" viewBox="0 0 100 30" preserveAspectRatio="none"></svg>
       </div>
     </div>
+  </section>
 
-    <div class="search-card">
-      <div style="position:relative;flex:1;">
-        <i class="fa-solid fa-magnifying-glass" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--accent);"></i>
-        <input type="text" id="searchInput" class="f-input" style="padding-right:40px;"
-               placeholder="ابحث باسم الطبيب / القسم / النموذج..." onkeyup="filterCards()">
-      </div>
-      <button class="btn btn-secondary" onclick="loadAnalytics()"><i class="fa-solid fa-rotate"></i> تحديث</button>
-    </div>
-
-    <div class="tabs-container" id="tabsContainer">
-      <button class="tab-btn active" data-tab="departments" onclick="switchTab('departments', this)"><i class="fa-solid fa-building-user"></i> الأقسام</button>
-      <button class="tab-btn" data-tab="doctors" onclick="switchTab('doctors', this)"><i class="fa-solid fa-user-doctor"></i> الأطباء</button>
-      <button class="tab-btn" data-tab="nurses" onclick="switchTab('nurses', this)"><i class="fa-solid fa-user-nurse"></i> التمريض</button>
-      <button class="tab-btn" data-tab="clerks" onclick="switchTab('clerks', this)"><i class="fa-solid fa-keyboard"></i> الإداريين</button>
-      <button class="tab-btn" data-tab="forms" onclick="switchTab('forms', this)"><i class="fa-solid fa-file-signature"></i> النماذج</button>
-    </div>
-
-    <div id="doctorsSubTabs" class="sub-tabs hidden"></div>
-
-    <div class="toolbar">
-      <div class="sort-wrap">
-        <i class="fa-solid fa-arrow-down-a-z"></i>
-        <label>ترتيب حسب:</label>
-        <select id="sortBy" onchange="applySorting()">
-          <option value="percentage">مؤشر الأداء %</option>
-          <option value="count">عدد التقييمات</option>
+  <!-- FILTER BAR (sticky) -->
+  <div class="filter-bar" id="filterBar">
+    <div class="filter-inner">
+      <div class="filter-item">
+        <label>نوع التاريخ</label>
+        <select id="dateFilterType">
+          <option value="discharge">تاريخ الخروج</option>
+          <option value="timestamp">تاريخ التقييم</option>
         </select>
       </div>
-      <div class="export-btns no-print">
-        <button class="btn-export excel" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> Excel</button>
-        <button class="btn-export pdf" onclick="exportToPDF()"><i class="fa-solid fa-file-pdf"></i> PDF</button>
-        <button class="btn-export compare" id="compareToggleBtn" onclick="toggleComparisonSection()"><i class="fa-solid fa-chart-line"></i> مقارنة 3 أشهر</button>
+      <div class="filter-item">
+        <label>من</label>
+        <input type="date" id="startDate">
+      </div>
+      <div class="filter-item">
+        <label>إلى</label>
+        <input type="date" id="endDate">
+      </div>
+      <button class="filter-btn primary" onclick="applyDateFilter()">
+        <i class="fa-solid fa-filter"></i> تطبيق
+      </button>
+      <button class="filter-btn ghost" onclick="clearDateFilter()">
+        <i class="fa-solid fa-xmark"></i> مسح
+      </button>
+      <div class="active-filter hidden" id="activeFilter">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="activeFilterText"></span>
       </div>
     </div>
-
-    <div id="comparisonSection" class="comparison-section hidden">
-      <h3><i class="fa-solid fa-code-compare"></i> مقارنة الأداء لثلاثة أشهر</h3>
-      <div class="comparison-grid">
-        <div><label class="f-label">نوع المقارنة</label>
-          <select id="compareType3" class="f-select" onchange="updateThreeMonthsDropdowns()">
-            <option value="departments">الأقسام</option>
-            <option value="forms">النماذج</option>
-            <option value="doctors">الأطباء</option>
-          </select>
-        </div>
-        <div><label class="f-label">العنصر</label><select id="compareItem3" class="f-select"></select></div>
-        <div><label class="f-label">نوع التاريخ</label>
-          <select id="compareDateType3" class="f-select">
-            <option value="discharge">تاريخ الخروج</option>
-            <option value="timestamp">تاريخ التقييم</option>
-          </select>
-        </div>
-        <div><label class="f-label">الشهر الأول</label><input type="month" id="compareMonth1_3" class="f-input"></div>
-        <div><label class="f-label">الشهر الثاني</label><input type="month" id="compareMonth2_3" class="f-input"></div>
-        <div><label class="f-label">الشهر الثالث</label><input type="month" id="compareMonth3_3" class="f-input"></div>
-        <div style="grid-column:1/-1;text-align:center;margin-top:12px;">
-          <button class="btn btn-primary" onclick="performThreeMonthsComparison()"><i class="fa-solid fa-play"></i> بدء المقارنة</button>
-        </div>
-      </div>
-      <div id="threeMonthsResult" class="three-months-result hidden"></div>
-    </div>
-
-    <div id="cardsContainer" class="cards-grid"></div>
   </div>
+
+  <!-- CHART GRID -->
+  <section class="charts-grid">
+    <div class="chart-card chart-span-2">
+      <div class="chart-card-head">
+        <h3><i class="fa-solid fa-fire"></i> خريطة حرارية — الأقسام × الشهور</h3>
+        <span class="chart-hint">درجة اللون = مؤشر الأداء</span>
+      </div>
+      <div id="heatmapContainer" class="heatmap-container"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <h3><i class="fa-solid fa-bullseye"></i> أفضل 5 أقسام</h3>
+      </div>
+      <div id="radarChart" style="min-height:300px;"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <h3><i class="fa-solid fa-chart-pie"></i> توزيع مستويات الأداء</h3>
+      </div>
+      <div id="distributionChart" style="min-height:300px;"></div>
+    </div>
+
+    <div class="chart-card chart-span-2">
+      <div class="chart-card-head">
+        <h3><i class="fa-solid fa-chart-column"></i> أعلى 10 نماذج بعدد التقييمات</h3>
+      </div>
+      <div id="topFormsChart" style="min-height:320px;"></div>
+    </div>
+  </section>
+
+  <!-- TABS + TABLE -->
+  <section class="entities-section">
+    <div class="entities-tabs" id="entitiesTabs">
+      <button class="ent-tab active" data-tab="departments"><i class="fa-solid fa-building-user"></i> الأقسام</button>
+      <button class="ent-tab" data-tab="doctors"><i class="fa-solid fa-user-doctor"></i> الأطباء</button>
+      <button class="ent-tab" data-tab="nurses"><i class="fa-solid fa-user-nurse"></i> التمريض</button>
+      <button class="ent-tab" data-tab="clerks"><i class="fa-solid fa-keyboard"></i> الإداريين</button>
+      <button class="ent-tab" data-tab="forms"><i class="fa-solid fa-file-signature"></i> النماذج</button>
+    </div>
+
+    <div class="entities-toolbar">
+      <div class="entities-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="entitySearch" placeholder="ابحث بالاسم..." oninput="filterEntities()">
+      </div>
+      <div class="entities-sort">
+        <label>ترتيب:</label>
+        <select id="entitySort" onchange="renderEntities()">
+          <option value="percentage">مؤشر الأداء</option>
+          <option value="count">عدد التقييمات</option>
+          <option value="name">الاسم</option>
+        </select>
+      </div>
+      <div class="entities-exports">
+        <button class="export-btn excel" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> Excel</button>
+        <button class="export-btn pdf" onclick="exportToPDF()"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+      </div>
+    </div>
+
+    <div class="entities-table-wrap">
+      <table class="entities-table" id="entitiesTable">
+        <thead>
+          <tr>
+            <th style="width:40px;">#</th>
+            <th>الاسم</th>
+            <th>التخصص / القسم</th>
+            <th style="width:90px;">التقييمات</th>
+            <th style="width:100px;">النقاط</th>
+            <th style="width:140px;">مؤشر الأداء</th>
+            <th style="width:40px;"></th>
+          </tr>
+        </thead>
+        <tbody id="entitiesTbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer-shell">
+    <div class="footer-brand">VEXORIS SYSTEM</div>
+    <div class="footer-text" style="margin-bottom: 8px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+    <div class="footer-text">
+      تم برمجة النظام وتنفيذه بواسطة
+      <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+      <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+      <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+    </div>
+  </footer>
+
 </main>
 
-<div id="detailsModal" class="modal-overlay hidden">
+<!-- MODAL -->
+<div class="modal-overlay hidden" id="detailsModal">
   <div class="modal-backdrop" onclick="closeModal()"></div>
   <div class="modal-card">
     <div class="modal-head">
@@ -153,7 +272,7 @@ if (localStorage.getItem('theme') === 'light') document.documentElement.classLis
         <button onclick="closeModal()" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
       </div>
     </div>
-    <div class="modal-body" id="modalItemDetails"></div>
+    <div class="modal-body" id="modalBody"></div>
   </div>
 </div>
 
