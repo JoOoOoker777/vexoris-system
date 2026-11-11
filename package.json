@@ -4,8 +4,22 @@
     "description": "VEXORIS System - Enterprise Medical & Administrative Architecture",
     "main": "index.html",
     "scripts": {
-      "start": "npx serve ."
+        "start": "npx serve ."
     },
-    "dependencies": {},
-    "devDependencies": {}
-  }
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/JoOoOoker777/vexoris-system.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "commonjs",
+    "bugs": {
+        "url": "https://github.com/JoOoOoker777/vexoris-system/issues"
+    },
+    "homepage": "https://github.com/JoOoOoker777/vexoris-system#readme",
+    "dependencies": {
+        "@supabase/supabase-js": "^2.119.0",
+        "xlsx": "^0.18.5"
+    }
+}
