@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تطبيق تسجيل الشغل | VEXORIS</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -15,22 +16,24 @@
           document.documentElement.classList.remove('dark');
       }
     </script>
+
     <style>
         :root {
-            --bg: #04070f; --card-bg: rgba(15, 23, 42, 0.65);
+            --bg: #04070f; --card-bg: rgba(15, 23, 42, 0.55);
             --card-border: rgba(148, 163, 184, 0.12);
             --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
             --accent: #0ea5e9; --accent-2: #6366f1; --accent-3: #8b5cf6;
-            --input-bg: rgba(15, 23, 42, 0.6);
-            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+            --danger: #ef4444; --warning: #f59e0b; --success: #10b981;
+            --input-bg: rgba(15, 23, 42, 0.5);
         }
         html:not(.dark) {
-            --bg: #f5f8fc; --card-bg: rgba(255, 255, 255, 0.85);
-            --card-border: rgba(148, 163, 184, 0.25);
-            --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #64748b;
+            --bg: #e8eef5; --card-bg: rgba(255, 255, 255, 0.92);
+            --card-border: rgba(100, 116, 139, 0.28);
+            --text-primary: #0b1220; --text-secondary: #1e293b; --text-muted: #475569;
             --input-bg: rgba(255, 255, 255, 0.9);
         }
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
         body {
             font-family: 'Tajawal', system-ui, sans-serif;
             background: var(--bg); color: var(--text-primary);
@@ -38,199 +41,273 @@
             transition: background 0.4s ease, color 0.4s ease;
         }
         
-        /* Aurora & Grid Background */
+        /* Background */
         .aurora-bg {
             position: fixed; inset: 0; z-index: -2; pointer-events: none;
-            background: radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.15) 0%, transparent 60%),
-                        radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.12) 0%, transparent 60%),
-                        radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.1) 0%, transparent 65%);
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.16) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.14) 0%, transparent 65%);
+        }
+        html:not(.dark) .aurora-bg {
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.07) 0%, transparent 65%);
         }
         .grid-overlay {
             position: fixed; inset: 0; z-index: -1; pointer-events: none;
-            background-image: linear-gradient(to right, rgba(148, 163, 184, 0.04) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
             background-size: 56px 56px;
             mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
             -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
         }
+        html:not(.dark) .grid-overlay {
+            background-image:
+                linear-gradient(to right, rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(15, 23, 42, 0.045) 1px, transparent 1px);
+        }
 
-        /* Top Navigation (New Template) */
-        .top-nav-shell {
-            position: sticky; top: 0; z-index: 50;
-            width: 100%; background: var(--bg);
-            border-bottom: 1px solid var(--card-border);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(20px) saturate(180%);
+        /* UNIFIED NAV */
+        .nav-shell { position: sticky; top: 12px; z-index: 50; margin: 12px auto 0; width: 90%; max-width: 1800px; }
+        .nav-inner {
+            background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 18px; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
         }
-        .top-nav-inner {
-            width: 90%; max-width: 1800px; margin: 0 auto;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 0;
+        .logo-dot {
+            position: relative; width: 12px; height: 12px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18), 0 0 20px rgba(14, 165, 233, 0.7);
+            flex-shrink: 0;
         }
-        .brand-logo {
-            display: flex; align-items: center; gap: 10px;
-            font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.2rem;
-            letter-spacing: 0.1em;
-            background: linear-gradient(135deg, #22d3ee, #6366f1);
+        .logo-dot::before {
+            content: ''; position: absolute; inset: -3px; border-radius: 50%;
+            border: 1px solid rgba(14, 165, 233, 0.5);
+            animation: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes ping { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(2.4); opacity: 0; } }
+        .brand-text {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: 0.18em;
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 40%, #6366f1 100%);
             -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .brand-logo i { color: var(--accent); -webkit-text-fill-color: initial; }
-        
-        /* Nav Pills */
-        .nav-pills {
-            display: flex; align-items: center; gap: 6px;
-            overflow-x: auto; padding-bottom: 4px; /* for scrollbar */
-            scrollbar-width: none;
+        .nav-link {
+            position: relative; color: var(--text-secondary); font-weight: 600;
+            font-size: 0.875rem; padding: 6px 2px; transition: color 0.3s ease; text-decoration: none;
         }
-        .nav-pills::-webkit-scrollbar { display: none; }
-        .nav-pill {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 8px 16px; border-radius: 12px;
-            font-size: 0.85rem; font-weight: 700;
-            color: var(--text-secondary); cursor: pointer;
-            background: transparent; border: 1px solid transparent;
-            transition: all 0.3s ease; white-space: nowrap;
+        .nav-link:hover { color: var(--accent); }
+        .icon-btn {
+            width: 36px; height: 36px; border-radius: 10px;
+            border: 1px solid var(--card-border); background: transparent; color: var(--accent);
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.25s ease;
         }
-        .nav-pill:hover {
-            color: var(--text-primary); background: rgba(148, 163, 184, 0.1);
-        }
-        .nav-pill.active {
-            color: var(--accent); background: rgba(14, 165, 233, 0.1);
-            border-color: rgba(14, 165, 233, 0.3);
-            box-shadow: 0 0 15px rgba(14, 165, 233, 0.15);
-        }
+        .icon-btn:hover { background: rgba(14, 165, 233, 0.1); border-color: rgba(14, 165, 233, 0.4); transform: rotate(15deg); }
+        .icon-btn.logout-btn { color: #f87171; }
+        .icon-btn.logout-btn:hover { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.4); transform: scale(1.05); }
 
-        /* App Layout */
-        .app-container {
-            width: 90%; max-width: 1800px; margin: 30px auto 60px;
+        /* USER DROPDOWN */
+        .user-chip {
+            display: none; align-items: center; gap: 10px;
+            padding: 6px 12px 6px 8px;
+            background: rgba(148, 163, 184, 0.06);
+            border: 1px solid var(--card-border);
+            border-radius: 12px; cursor: pointer; transition: all 0.3s ease;
+            font-family: inherit; color: inherit;
         }
-        .page-title {
-            font-size: 1.8rem; font-weight: 900; margin-bottom: 8px;
-            display: flex; align-items: center; gap: 12px;
+        .user-chip:hover { border-color: var(--accent); background: rgba(14, 165, 233, 0.06); }
+        .user-avatar {
+            width: 32px; height: 32px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 0.95rem; color: #fff;
+            flex-shrink: 0; position: relative; overflow: hidden;
+            box-shadow: 0 2px 6px -1px rgba(0,0,0,0.25);
         }
-        .page-sub {
-            color: var(--text-secondary); font-size: 0.95rem;
-            font-weight: 600; margin-bottom: 30px;
+        .user-avatar i { position: relative; z-index: 2; }
+        .user-avatar::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%);
+            background-size: 200% 100%; animation: shine 4s infinite; z-index: 1;
         }
-
-        /* Glass Cards */
-        .glass-card {
+        @keyframes shine { 0% { background-position: -200% 0; } 50%, 100% { background-position: 200% 0; } }
+        .user-info { display: flex; flex-direction: column; gap: 1px; text-align: right; }
+        .user-name { font-size: 0.78rem; font-weight: 800; color: var(--text-primary); line-height: 1.1; }
+        .user-role { font-size: 0.65rem; font-weight: 700; line-height: 1.1; }
+        .user-chip-arrow { color: var(--text-muted); font-size: 0.65rem; transition: transform 0.3s ease; }
+        .user-chip.open .user-chip-arrow { transform: rotate(180deg); }
+        .user-dropdown {
+            position: absolute; top: 55px; left: 0; width: 260px;
             background: var(--card-bg);
             backdrop-filter: blur(24px) saturate(180%);
             -webkit-backdrop-filter: blur(24px) saturate(180%);
             border: 1px solid var(--card-border);
-            border-radius: 24px; padding: 28px;
-            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 16px; padding: 6px; z-index: 60;
+            box-shadow: 0 24px 48px -12px rgba(0,0,0,0.4);
+            opacity: 0; transform: translateY(-8px) scale(0.96); pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .glass-card:hover { box-shadow: 0 15px 50px -10px rgba(0,0,0,0.3); }
+        .user-dropdown.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+        .dropdown-profile { padding: 14px 12px; display: flex; align-items: center; gap: 12px; }
+        .dropdown-avatar-lg {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 1.2rem; color: #fff;
+            flex-shrink: 0; position: relative; overflow: hidden;
+        }
+        .dropdown-avatar-lg::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+            background-size: 200% 100%; animation: shine 4s infinite; z-index: 1;
+        }
+        .dropdown-avatar-lg i { position: relative; z-index: 2; }
+        .dropdown-name { font-size: 0.88rem; font-weight: 900; color: var(--text-primary); line-height: 1.2; }
+        .dropdown-email { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); line-height: 1.3; margin-top: 1px; }
+        .dropdown-role-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 0.6rem; font-weight: 800; padding: 2px 8px; border-radius: 5px; margin-top: 4px;
+        }
+        .dropdown-divider { height: 1px; background: var(--card-border); margin: 6px 4px; }
+        .dropdown-item {
+            width: 100%; padding: 10px 12px; background: transparent; border: none;
+            color: var(--text-secondary); font-family: inherit;
+            font-size: 0.8rem; font-weight: 700; border-radius: 8px;
+            display: flex; align-items: center; gap: 10px;
+            cursor: pointer; text-align: right; transition: all 0.2s ease;
+        }
+        .dropdown-item:hover { background: rgba(14, 165, 233, 0.08); color: var(--accent); }
+        .dropdown-item i { width: 16px; font-size: 0.8rem; }
 
-        /* Tabs */
-        .tab-pane { display: none; animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* APP LAYOUT (90% Width) */
+        .app-container { width: 90%; max-width: 1800px; margin: 24px auto 60px; }
+        
+        /* INNER TABS BAR */
+        .tabs-bar {
+            display: flex; gap: 8px; overflow-x: auto;
+            padding: 10px 14px; margin-bottom: 24px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            scrollbar-width: none;
+        }
+        .tabs-bar::-webkit-scrollbar { display: none; }
+        .side-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 18px; border-radius: 10px;
+            font-family: inherit; font-size: 0.85rem; font-weight: 700;
+            color: var(--text-secondary); background: transparent;
+            border: 1px solid transparent; cursor: pointer;
+            white-space: nowrap; transition: all 0.25s ease;
+        }
+        .side-btn:hover { background: rgba(148, 163, 184, 0.08); color: var(--text-primary); }
+        .side-btn.active {
+            background: rgba(14, 165, 233, 0.1);
+            border-color: rgba(14, 165, 233, 0.3);
+            color: var(--accent); font-weight: 800;
+            box-shadow: 0 4px 15px -5px rgba(14, 165, 233, 0.2);
+        }
+
+        .page-title {
+            font-size: 1.6rem; font-weight: 900; margin-bottom: 6px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .page-sub { color: var(--text-secondary); font-size: 0.9rem; font-weight: 600; margin-bottom: 24px; }
+
+        /* TABS CONTENT */
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
         .tab-pane.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Forms */
-        .form-label {
-            display: block; font-size: 0.85rem; font-weight: 800;
-            color: var(--text-secondary); margin-bottom: 8px;
+        /* GLASS CARDS */
+        .glass-card {
+            background: var(--card-bg); backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--card-border); border-radius: 20px;
+            padding: 24px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.2);
         }
-        .form-input {
-            width: 100%; padding: 12px 16px;
-            background: var(--input-bg); border: 1px solid var(--card-border);
-            border-radius: 12px; color: var(--text-primary);
-            font-size: 0.9rem; font-weight: 600; font-family: inherit;
-            transition: all 0.25s ease;
-        }
-        .form-input:focus {
-            outline: none; border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
-        }
-        .form-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+
+        /* FORMS */
+        .form-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
         @media (min-width: 768px) {
             .form-grid.cols-2 { grid-template-columns: 1fr 1fr; }
             .form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
         }
+        .form-label { display: block; font-size: 0.8rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 6px; }
+        .form-input {
+            width: 100%; padding: 11px 14px;
+            background: var(--input-bg); border: 1px solid var(--card-border);
+            border-radius: 10px; color: var(--text-primary);
+            font-size: 0.88rem; font-weight: 600; font-family: inherit;
+            transition: all 0.25s ease;
+        }
+        .form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1); }
 
-        /* Buttons */
+        /* BUTTONS */
         .btn-primary {
             background: linear-gradient(135deg, var(--accent), var(--accent-2));
-            color: white; font-weight: 800; font-size: 0.95rem;
-            border: none; border-radius: 12px; padding: 14px 24px;
+            color: white; font-weight: 800; font-size: 0.9rem;
+            border: none; border-radius: 10px; padding: 12px 20px;
             cursor: pointer; transition: all 0.3s;
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            width: 100%; box-shadow: 0 8px 20px -8px rgba(14, 165, 233, 0.5);
+            width: 100%;
         }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 25px -8px rgba(14, 165, 233, 0.7); }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 20px -5px rgba(14, 165, 233, 0.5); }
         .btn-ghost {
             background: transparent; border: 1px solid var(--card-border);
             color: var(--text-secondary); font-weight: 700;
-            padding: 10px 16px; border-radius: 10px; font-size: 0.85rem;
+            padding: 9px 14px; border-radius: 8px; font-size: 0.82rem;
             cursor: pointer; transition: all 0.2s;
             display: inline-flex; align-items: center; gap: 6px;
         }
         .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: rgba(14, 165, 233, 0.05); }
 
-        /* Radio Pills */
+        /* PILLS */
         .pill-radio { display: block; cursor: pointer; }
         .pill-radio input { display: none; }
         .pill-radio > div {
-            padding: 12px; border-radius: 10px; text-align: center;
-            font-size: 0.85rem; font-weight: 800;
-            border: 1.5px solid var(--card-border); color: var(--text-secondary);
+            padding: 10px; border-radius: 8px; text-align: center;
+            font-size: 0.82rem; font-weight: 800;
+            border: 1px solid var(--card-border); color: var(--text-secondary);
             transition: all 0.2s;
         }
         .pill-radio input:checked + div {
-            background: rgba(14, 165, 233, 0.1);
-            border-color: var(--accent); color: var(--accent);
-            box-shadow: 0 4px 15px -5px rgba(14, 165, 233, 0.4);
+            background: rgba(14, 165, 233, 0.1); border-color: var(--accent); color: var(--accent);
         }
 
-        /* Task Blocks */
+        /* TASK BLOCKS */
         .task-block {
-            background: rgba(15, 23, 42, 0.3);
-            border: 1px solid var(--card-border);
-            border-radius: 16px; padding: 20px;
-            position: relative; margin-bottom: 16px;
-            transition: all 0.25s ease;
+            background: rgba(15, 23, 42, 0.3); border: 1px solid var(--card-border);
+            border-radius: 14px; padding: 18px; margin-bottom: 14px;
         }
         html:not(.dark) .task-block { background: rgba(248, 250, 252, 0.6); }
-        .task-block:hover { border-color: rgba(14,165,233,0.3); }
         .task-block-header {
-            font-weight: 900; font-size: 0.9rem; color: var(--accent);
-            margin-bottom: 16px; padding-bottom: 12px;
-            border-bottom: 1px solid var(--card-border);
+            font-weight: 900; font-size: 0.88rem; color: var(--accent);
+            margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--card-border);
             display: flex; justify-content: space-between; align-items: center;
         }
-        
-        /* Stats */
+
+        /* STATS */
         .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .stat-card {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 16px; padding: 20px;
-            position: relative; overflow: hidden;
-        }
-        .stat-card::before {
-            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
-            background: var(--stat-color, var(--accent));
-        }
-        .stat-label { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); margin-bottom: 8px; }
-        .stat-value { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; color: var(--stat-color, var(--accent)); }
+        .stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 18px; position: relative; }
+        .stat-card::before { content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px; background: var(--stat-color, var(--accent)); border-radius: 14px 14px 0 0; }
+        .stat-label { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); margin-bottom: 6px; }
+        .stat-value { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--stat-color, var(--accent)); }
 
-        /* Tables */
-        .data-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-        .data-table th {
-            text-align: right; padding: 14px 12px; font-size: 0.75rem; font-weight: 800; 
-            color: var(--text-muted); border-bottom: 1px solid var(--card-border);
-            background: rgba(148, 163, 184, 0.05);
-        }
-        .data-table td { padding: 14px 12px; font-weight: 600; border-bottom: 1px solid var(--card-border); }
+        /* TABLES (Span 100% of the 90% container) */
+        .table-wrap { width: 100%; overflow-x: auto; border: 1px solid var(--card-border); border-radius: 14px; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .data-table th { text-align: right; padding: 14px 12px; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--card-border); background: rgba(148, 163, 184, 0.05); }
+        .data-table td { padding: 12px; font-weight: 600; border-bottom: 1px solid var(--card-border); color: var(--text-primary); }
         .data-table tbody tr:hover { background: rgba(14,165,233,0.04); }
-        .table-wrap { overflow-x: auto; border: 1px solid var(--card-border); border-radius: 16px; }
 
-        /* Tags */
-        .tag { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; }
+        /* TAGS */
+        .tag { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; }
         .tag.scan { background: rgba(14,165,233,0.15); color: #0ea5e9; }
         .tag.audit { background: rgba(16,185,129,0.15); color: #10b981; }
         .tag.inpatient { background: rgba(99,102,241,0.15); color: #6366f1; }
@@ -238,50 +315,16 @@
         .tag.ok { background: rgba(16,185,129,0.15); color: #10b981; }
         .tag.bad { background: rgba(239,68,68,0.15); color: #ef4444; }
 
-        /* KPI Cards */
-        .kpi-card {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 18px; padding: 22px;
-            transition: all 0.3s ease;
-        }
-        .kpi-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 15px 35px -10px rgba(14,165,233,0.3); }
-        .kpi-bar { height: 8px; border-radius: 8px; background: rgba(148,163,184,0.15); overflow: hidden; margin: 12px 0 18px; }
-        .kpi-bar-fill { height: 100%; border-radius: 8px; transition: width 1s ease; }
-
-        /* User Dropdown */
-        .user-chip {
-            display: inline-flex; align-items: center; gap: 10px;
-            padding: 6px 12px; background: rgba(148, 163, 184, 0.08);
-            border: 1px solid var(--card-border); border-radius: 12px;
-            cursor: pointer; transition: all 0.3s ease;
-        }
-        .user-chip:hover { border-color: var(--accent); }
-        .user-avatar {
-            width: 32px; height: 32px; border-radius: 9px;
-            display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 0.9rem;
-        }
-        .user-dropdown {
-            position: absolute; top: 60px; left: 0; width: 250px;
-            background: var(--card-bg); backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border); border-radius: 16px;
-            padding: 8px; z-index: 100; opacity: 0; transform: translateY(-10px);
-            pointer-events: none; transition: all 0.3s ease;
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.4);
-        }
-        .user-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        .dropdown-item {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 700;
-            color: var(--text-secondary); cursor: pointer; transition: all 0.2s;
-        }
-        .dropdown-item:hover { background: rgba(14, 165, 233, 0.08); color: var(--accent); }
-
-        /* Misc */
+        /* MISC */
         .empty-state { text-align: center; padding: 40px; color: var(--text-muted); }
-        .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.5; }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 10px; opacity: 0.5; }
         .loading-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .loading-screen.hide { opacity: 0; pointer-events: none; }
+        
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4)); border-radius: 10px; border: 2px solid var(--bg); }
+        ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
     </style>
     <link rel="stylesheet" href="../theme-overrides.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
@@ -298,68 +341,94 @@
     <div class="aurora-bg"></div>
     <div class="grid-overlay"></div>
 
-    <!-- New Top Navigation -->
-    <header class="top-nav-shell">
-        <div class="top-nav-inner">
-            <!-- Logo -->
-            <div class="brand-logo">
-                <i class="fa-solid fa-pen-ruler"></i> VEXORIS
-            </div>
-
-            <!-- Nav Pills (Scrollable on mobile) -->
-            <div class="nav-pills">
-                <button class="nav-pill active side-btn" data-tab="welcome" onclick="switchTab('welcome')"><i class="fa-solid fa-house"></i> الرئيسية</button>
-                <button class="nav-pill side-btn" data-tab="quota" onclick="switchTab('quota')"><i class="fa-solid fa-box-open"></i> تسجيل يومية</button>
-                <button class="nav-pill side-btn" data-tab="work" onclick="switchTab('work')"><i class="fa-solid fa-pen-nib"></i> تسجيل شغل</button>
-                <button class="nav-pill side-btn" data-tab="reports" onclick="switchTab('reports')"><i class="fa-solid fa-calendar-day"></i> تقارير الشغل</button>
-                <button class="nav-pill side-btn" data-tab="kpi" onclick="switchTab('kpi')"><i class="fa-solid fa-chart-pie"></i> مؤشرات الأداء</button>
-                <button class="nav-pill side-btn" data-tab="deficits" onclick="switchTab('deficits')"><i class="fa-solid fa-scale-balanced"></i> النواقص</button>
-                <button class="nav-pill side-btn" data-tab="evaluation" onclick="switchTab('evaluation')"><i class="fa-solid fa-star"></i> التقييم الإداري</button>
-                <button class="nav-pill side-btn" data-tab="edit" id="adminEditBtn" style="display:none; color: #f87171;" onclick="switchTab('edit')"><i class="fa-solid fa-pen-to-square"></i> تعديلات</button>
-                <button class="nav-pill side-btn" data-tab="staff-admin" id="adminStaffBtn" style="display:none; color: #f87171;" onclick="switchTab('staff-admin')"><i class="fa-solid fa-users-gear"></i> الإدارة</button>
-            </div>
-
-            <!-- User & Actions -->
-            <div class="flex items-center gap-3 relative">
-                <button onclick="toggleTheme()" class="btn-ghost" style="padding: 8px; border-radius: 10px;" title="تبديل الثيم">
-                    <i class="fa-solid fa-moon"></i>
-                </button>
-                <div class="relative">
-                    <button class="user-chip" id="userChip">
-                        <div class="user-avatar" id="userAvatar"></div>
-                        <div class="text-right hidden sm:block">
-                            <div class="text-xs font-black" id="navUserName">...</div>
-                            <div class="text-[10px] font-bold" id="navUserRole">...</div>
-                        </div>
-                        <i class="fa-solid fa-chevron-down text-xs" style="color: var(--text-muted);"></i>
-                    </button>
-                    <!-- Dropdown -->
-                    <div class="user-dropdown" id="userDropdown">
-                        <div class="p-3 border-b" style="border-color: var(--card-border);">
-                            <div class="font-black text-sm" id="dropdownName">...</div>
-                            <div class="text-xs font-bold text-muted" id="dropdownEmail">...</div>
-                        </div>
-                        <div class="pt-2">
-                            <div class="dropdown-item" onclick="showProfile()"><i class="fa-solid fa-user-pen w-4"></i> الملف الشخصي</div>
-                            <div class="dropdown-item" onclick="showChangePassword()"><i class="fa-solid fa-key w-4"></i> تغيير كلمة المرور</div>
-                            <div class="dropdown-item" onclick="logout()" style="color: #f87171;"><i class="fa-solid fa-power-off w-4"></i> تسجيل الخروج</div>
-                        </div>
-                    </div>
+    <!-- UNIFIED HEADER -->
+    <div class="nav-shell">
+        <header class="nav-inner">
+            <div class="flex items-center gap-3">
+                <div class="logo-dot"></div>
+                <div>
+                    <a href="../dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">تطبيق تسجيل الشغل</p>
                 </div>
             </div>
-        </div>
-    </header>
+            <nav class="hidden md:flex items-center gap-7">
+                <a href="../dashboard.html" class="nav-link">لوحة التحكم</a>
+                <a href="../about.html" class="nav-link">عن النظام</a>
+                <a href="../security.html" class="nav-link">درع VEXORIS</a>
+                <a href="../courses.html" class="nav-link">دورات تدريبية</a>
+                <a href="../feedback.html" class="nav-link">رأيك يهمنا</a>
+            </nav>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </button>
 
-    <!-- Main Content -->
+                <div style="position: relative;">
+                    <button class="user-chip" id="userChip">
+                        <div class="user-avatar" id="userAvatar"></div>
+                        <div class="user-info">
+                            <span class="user-name" id="navUserName">...</span>
+                            <span class="user-role" id="navUserRole">...</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down user-chip-arrow"></i>
+                    </button>
+                    
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-profile">
+                            <div class="dropdown-avatar-lg" id="dropdownAvatar"></div>
+                            <div>
+                                <div class="dropdown-name" id="dropdownName">...</div>
+                                <div class="dropdown-email" id="dropdownEmail">...</div>
+                                <div class="dropdown-role-badge" id="dropdownRoleBadge"></div>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" onclick="showProfile()">
+                            <i class="fa-solid fa-user-pen"></i> إدارة الملف الشخصي
+                        </button>
+                        <button class="dropdown-item" onclick="showChangePassword()">
+                            <i class="fa-solid fa-key"></i> تغيير كلمة المرور
+                        </button>
+                    </div>
+                </div>
+
+                <button onclick="logout()" class="icon-btn logout-btn" id="logoutBtn" title="تسجيل الخروج">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+
+                <a href="../dashboard.html" style="padding: 8px 16px; border-radius: 10px; background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    رجوع
+                </a>
+            </div>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
     <main class="app-container">
         
+        <!-- INNER TABS BAR -->
+        <div class="tabs-bar">
+            <button class="side-btn active" data-tab="welcome" onclick="switchTab('welcome')"><i class="fa-solid fa-house"></i> الرئيسية</button>
+            <button class="side-btn" data-tab="quota" onclick="switchTab('quota')"><i class="fa-solid fa-box-open"></i> تسجيل يومية</button>
+            <button class="side-btn" data-tab="work" onclick="switchTab('work')"><i class="fa-solid fa-pen-nib"></i> تسجيل شغل</button>
+            <button class="side-btn" data-tab="reports" onclick="switchTab('reports')"><i class="fa-solid fa-calendar-day"></i> تقارير الشغل</button>
+            <button class="side-btn" data-tab="kpi" onclick="switchTab('kpi')"><i class="fa-solid fa-chart-pie"></i> مؤشرات الأداء</button>
+            <button class="side-btn" data-tab="deficits" onclick="switchTab('deficits')"><i class="fa-solid fa-scale-balanced"></i> النواقص</button>
+            <button class="side-btn" data-tab="evaluation" onclick="switchTab('evaluation')"><i class="fa-solid fa-star"></i> التقييم الإداري</button>
+            <button class="side-btn" data-tab="edit" id="adminEditBtn" style="display:none; color: #f87171;" onclick="switchTab('edit')"><i class="fa-solid fa-pen-to-square"></i> تعديلات</button>
+            <button class="side-btn" data-tab="staff-admin" id="adminStaffBtn" style="display:none; color: #f87171;" onclick="switchTab('staff-admin')"><i class="fa-solid fa-users-gear"></i> الإدارة</button>
+        </div>
+
         <!-- WELCOME -->
         <section class="tab-pane active" id="tab-welcome">
-            <div class="glass-card text-center py-16">
+            <div class="glass-card text-center" style="padding: 48px 24px;">
                 <div class="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center text-4xl text-accent" style="background: rgba(14,165,233,0.1); border: 1px solid rgba(14,165,233,0.3);">
                     <i class="fa-solid fa-pen-ruler"></i>
                 </div>
-                <h1 class="text-3xl font-black mb-3">أهلاً بك في <span class="grad">تطبيق تسجيل الشغل</span></h1>
+                <h1 class="text-3xl font-black mb-3">أهلاً بك في <span style="background: linear-gradient(135deg, #22d3ee, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">تطبيق تسجيل الشغل</span></h1>
                 <p class="text-secondary font-medium mb-8 max-w-2xl mx-auto">نظام متكامل لإدارة سير العمل اليومي، تتبع الملفات، مؤشرات الأداء، ومطابقة النواقص.</p>
                 
                 <div class="stat-grid" style="text-align: right;">
@@ -387,7 +456,7 @@
         <section class="tab-pane" id="tab-quota">
             <div class="page-title"><i class="fa-solid fa-box-open text-accent"></i> تسجيل يومية</div>
             <p class="page-sub">تسجيل استلام اليومية من الأقسام (Inpatient / ER).</p>
-            <div class="glass-card" style="max-width: 800px;">
+            <div class="glass-card">
                 <form id="quotaForm" onsubmit="handleQuotaSubmit(event)">
                     <div class="form-grid cols-2">
                         <div>
@@ -407,7 +476,7 @@
                         </div>
                         <div>
                             <label class="form-label">عدد الملفات المستلم</label>
-                            <input type="number" name="receivedQuota" required min="1" class="form-input font-black text-success">
+                            <input type="number" name="receivedQuota" required min="1" class="form-input text-success font-black">
                         </div>
                         <div>
                             <label class="form-label">إجمالي اليومية على الغلاف</label>
@@ -521,7 +590,7 @@
         <section class="tab-pane" id="tab-evaluation">
             <div class="page-title"><i class="fa-solid fa-star text-accent-3"></i> التقييم الإداري</div>
             <p class="page-sub">10 معايير × 10 نقاط = 100 درجة.</p>
-            <div class="glass-card" style="max-width: 1000px;">
+            <div class="glass-card">
                 <form id="evaluationForm" onsubmit="handleEvaluationSubmit(event)">
                     <div class="form-grid cols-3 mb-6">
                         <div><label class="form-label">الموظف</label><select name="employee_name" id="evalEmpSelect" required class="form-input"></select></div>
@@ -624,8 +693,8 @@
     };
 
     const userChip = $('userChip'), userDropdown = $('userDropdown');
-    userChip.addEventListener('click', (e) => { e.stopPropagation(); userChip.classList.toggle('open'); userDropdown.classList.toggle('open'); });
-    document.addEventListener('click', (e) => { if (!userDropdown.contains(e.target) && !userChip.contains(e.target)) { userChip.classList.remove('open'); userDropdown.classList.remove('open'); } });
+    if(userChip) userChip.addEventListener('click', (e) => { e.stopPropagation(); userChip.classList.toggle('open'); userDropdown.classList.toggle('open'); });
+    document.addEventListener('click', (e) => { if (userChip && !userDropdown.contains(e.target) && !userChip.contains(e.target)) { userChip.classList.remove('open'); userDropdown.classList.remove('open'); } });
 
     window.logout = async function () {
         if (window.showConfirm) {
@@ -647,6 +716,9 @@
         const meta = ROLE_META[CURRENT_ROLE] || ROLE_META.viewer;
         const displayName = session.user.user_metadata?.display_name || profile?.username || 'مستخدم';
 
+        $('userChip').style.display = 'inline-flex';
+        $('logoutBtn').style.display = 'inline-flex';
+        
         $('navUserName').textContent = displayName;
         $('navUserRole').textContent = meta.name;
         $('navUserRole').style.color = meta.color;
