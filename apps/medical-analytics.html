@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إحصائيات الملفات الطبية | VEXORIS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+  if (localStorage.getItem('theme') === 'light') document.documentElement.classList.remove('dark');
+</script>
+<style>
+:root{
+  --bg:#04070f; --card-bg:rgba(15,23,42,.55); --card-border:rgba(148,163,184,.12);
+  --text-primary:#f1f5f9; --text-secondary:#94a3b8; --text-muted:#64748b;
+  --accent:#0ea5e9; --accent-2:#6366f1; --accent-3:#8b5cf6;
+  --danger:#ef4444; --warning:#f59e0b; --success:#10b981;
+  --input-bg:rgba(15,23,42,.5);
+}
+html:not(.dark){
+  --bg:#e8eef5; --card-bg:rgba(255,255,255,.92); --card-border:rgba(100,116,139,.28);
+  --text-primary:#0b1220; --text-secondary:#1e293b; --text-muted:#475569;
+  --input-bg:rgba(255,255,255,.9);
+}
+*{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;overflow-x:hidden;transition:background .4s,color .4s}
+.aurora-bg{position:fixed;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 15% 10%,rgba(14,165,233,.18) 0%,transparent 60%),radial-gradient(ellipse 50% 45% at 85% 25%,rgba(99,102,241,.16) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 50% 95%,rgba(139,92,246,.14) 0%,transparent 65%)}
+html:not(.dark) .aurora-bg{background:radial-gradient(ellipse 60% 50% at 15% 10%,rgba(14,165,233,.10) 0%,transparent 60%),radial-gradient(ellipse 50% 45% at 85% 25%,rgba(99,102,241,.08) 0%,transparent 60%)}
+.grid-overlay{position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(to right,rgba(148,163,184,.045) 1px,transparent 1px),linear-gradient(to bottom,rgba(148,163,184,.045) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 80% 70% at 50% 20%,#000 40%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 80% 70% at 50% 20%,#000 40%,transparent 100%)}
+
+/* Header */
+.nav-shell{position:sticky;top:12px;z-index:50;margin:12px auto 0;width:90%;max-width:1800px}
+.nav-inner{background:var(--card-bg);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid var(--card-border);border-radius:18px;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo-dot{position:relative;width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(14,165,233,.18),0 0 20px rgba(14,165,233,.7);flex-shrink:0}
+.logo-dot::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(14,165,233,.5);animation:ping 2.4s cubic-bezier(0,0,.2,1) infinite}
+@keyframes ping{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.4);opacity:0}}
+.brand-text{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:.18em;background:linear-gradient(135deg,#22d3ee 0%,#0ea5e9 40%,#6366f1 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.nav-link{color:var(--text-secondary);font-weight:600;font-size:.875rem;padding:6px 2px;transition:color .3s;text-decoration:none}
+.nav-link:hover{color:var(--accent)}
+.icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:transparent;color:var(--accent);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .25s}
+.icon-btn:hover{background:rgba(14,165,233,.1);border-color:rgba(14,165,233,.4);transform:rotate(15deg)}
+.icon-btn.logout-btn{color:#f87171}
+.icon-btn.logout-btn:hover{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.4);transform:scale(1.05)}
+.user-chip{display:none;align-items:center;gap:10px;padding:6px 12px 6px 8px;background:rgba(148,163,184,.06);border:1px solid var(--card-border);border-radius:12px;cursor:pointer;transition:all .3s;font-family:inherit;color:inherit}
+.user-chip:hover{border-color:var(--accent)}
+.user-avatar{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.95rem;flex-shrink:0;position:relative;overflow:hidden}
+.user-avatar i{position:relative;z-index:2}
+.user-avatar::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.4) 50%,transparent 70%);background-size:200% 100%;animation:shine 4s infinite;z-index:1}
+@keyframes shine{0%{background-position:-200% 0}50%,100%{background-position:200% 0}}
+.user-info{display:flex;flex-direction:column;gap:1px;text-align:right}
+.user-name{font-size:.78rem;font-weight:800;color:var(--text-primary);line-height:1.1}
+.user-role{font-size:.65rem;font-weight:700;line-height:1.1}
+.user-dropdown{position:absolute;top:55px;left:0;width:260px;background:var(--card-bg);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--card-border);border-radius:16px;padding:6px;z-index:60;box-shadow:0 24px 48px -12px rgba(0,0,0,.4);opacity:0;transform:translateY(-8px) scale(.96);pointer-events:none;transition:all .25s}
+.user-dropdown.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.dropdown-item{width:100%;padding:10px 12px;background:transparent;border:none;color:var(--text-secondary);font-family:inherit;font-size:.8rem;font-weight:700;border-radius:8px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:right;transition:all .2s}
+.dropdown-item:hover{background:rgba(14,165,233,.08);color:var(--accent)}
+.dropdown-item i{width:16px;font-size:.8rem}
+.dropdown-profile{padding:12px 12px;display:flex;align-items:center;gap:10px}
+.dropdown-avatar-lg{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;color:#fff;position:relative;overflow:hidden}
+.dropdown-avatar-lg i{position:relative;z-index:2}
+.dropdown-avatar-lg::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.3) 50%,transparent 70%);background-size:200% 100%;animation:shine 4s infinite;z-index:1}
+.dropdown-name{font-size:.88rem;font-weight:900;color:var(--text-primary);line-height:1.2}
+.dropdown-email{font-size:.7rem;font-weight:600;color:var(--text-muted);line-height:1.3;margin-top:1px}
+.dropdown-role-badge{display:inline-flex;align-items:center;gap:4px;font-size:.6rem;font-weight:800;padding:2px 8px;border-radius:5px;margin-top:4px}
+.dropdown-divider{height:1px;background:var(--card-border);margin:6px 4px}
+
+/* Layout */
+.app-container{width:90%;max-width:1800px;margin:24px auto 60px}
+.tabs-bar{display:flex;gap:8px;overflow-x:auto;padding:10px 14px;margin-bottom:24px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);scrollbar-width:none}
+.tabs-bar::-webkit-scrollbar{display:none}
+.side-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;font-family:inherit;font-size:.85rem;font-weight:700;color:var(--text-secondary);background:transparent;border:1px solid transparent;cursor:pointer;white-space:nowrap;transition:all .25s}
+.side-btn:hover{background:rgba(148,163,184,.08);color:var(--text-primary)}
+.side-btn.active{background:rgba(14,165,233,.1);border-color:rgba(14,165,233,.3);color:var(--accent);font-weight:800;box-shadow:0 4px 15px -5px rgba(14,165,233,.2)}
+
+.tab-pane{display:none;animation:fadeIn .3s ease}
+.tab-pane.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.page-title{font-size:1.6rem;font-weight:900;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.page-sub{color:var(--text-secondary);font-size:.9rem;font-weight:600;margin-bottom:24px}
+
+/* Cards */
+.glass-card{background:var(--card-bg);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--card-border);border-radius:20px;padding:24px;box-shadow:0 10px 40px -10px rgba(0,0,0,.2)}
+.filter-card{padding:16px 20px;margin-bottom:20px}
+
+/* Forms */
+.form-label{display:block;font-size:.75rem;font-weight:800;color:var(--text-secondary);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.form-input{width:100%;padding:9px 12px;background:var(--input-bg);border:1px solid var(--card-border);border-radius:9px;color:var(--text-primary);font-size:.85rem;font-weight:600;font-family:inherit;transition:all .25s}
+.form-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,165,233,.1)}
+
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:white;font-weight:800;font-size:.85rem;border:none;border-radius:10px;padding:10px 20px;cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 10px 20px -5px rgba(14,165,233,.5)}
+.btn-ghost{background:transparent;border:1px solid var(--card-border);color:var(--text-secondary);font-weight:700;padding:9px 14px;border-radius:9px;font-size:.82rem;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);background:rgba(14,165,233,.05)}
+
+/* Stat cards */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:20px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;right:0;left:0;height:3px;background:var(--stat-color,var(--accent))}
+.stat-label{font-size:.72rem;font-weight:800;color:var(--text-muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.stat-value{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;color:var(--stat-color,var(--accent));line-height:1}
+
+/* KPI Cards (Modern) */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+.kpi-card-modern{background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;padding:20px 18px 16px;position:relative;transition:all .35s cubic-bezier(.4,0,.2,1);overflow:hidden;cursor:pointer}
+.kpi-card-modern::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--kpi-color,var(--accent)),transparent)}
+.kpi-card-modern:hover{transform:translateY(-4px);border-color:var(--kpi-color,var(--accent));box-shadow:0 20px 45px -15px var(--kpi-color,rgba(14,165,233,.3))}
+.kpi-rank{position:absolute;top:-10px;left:18px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem;color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.35);border:2px solid var(--card-bg);z-index:2}
+.kpi-rank.gold{background:linear-gradient(135deg,#fbbf24,#f59e0b)}
+.kpi-rank.silver{background:linear-gradient(135deg,#e2e8f0,#94a3b8);color:#1e293b}
+.kpi-rank.bronze{background:linear-gradient(135deg,#fb923c,#ea580c)}
+.kpi-badge{position:absolute;top:14px;right:14px;font-size:.58rem;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.04em}
+.kpi-badge.mature{background:rgba(16,185,129,.15);color:#10b981}
+.kpi-badge.medium{background:rgba(245,158,11,.15);color:#f59e0b}
+.kpi-badge.new{background:rgba(239,68,68,.15);color:#ef4444}
+.kpi-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:12px}
+.kpi-name-modern{font-size:1rem;font-weight:900;color:var(--text-primary);margin-bottom:6px;line-height:1.3;padding-left:60px}
+.kpi-tag{display:inline-block;font-size:.55rem;font-weight:800;padding:3px 8px;border-radius:5px;letter-spacing:.04em;margin-right:4px;margin-bottom:4px}
+.kpi-ring{width:72px;height:72px;border-radius:50%;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.kpi-ring::after{content:'';position:absolute;inset:7px;border-radius:50%;background:var(--card-bg)}
+.kpi-ring-value{position:relative;z-index:1;font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;line-height:1}
+.kpi-ring-sub{position:relative;z-index:1;font-size:.44rem;font-weight:900;color:var(--text-muted);letter-spacing:.1em;margin-top:2px}
+.kpi-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi-metric{background:rgba(148,163,184,.05);border:1px solid var(--card-border);border-radius:9px;padding:8px 10px}
+.kpi-metric-lbl{font-size:.53rem;font-weight:800;color:var(--text-muted);letter-spacing:.03em;margin-bottom:4px;display:flex;align-items:center;gap:4px}
+.kpi-metric-val{font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:700;color:var(--text-primary);line-height:1}
+
+.load-more{display:flex;justify-content:center;margin-top:24px}
+.load-more button{background:var(--card-bg);border:1px dashed var(--card-border);color:var(--text-secondary);padding:12px 32px;border-radius:12px;font-family:inherit;font-weight:800;font-size:.85rem;cursor:pointer;transition:all .2s}
+.load-more button:hover{border-color:var(--accent);color:var(--accent)}
+
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
+.empty-state i{font-size:3rem;margin-bottom:14px;opacity:.4;display:block}
+
+/* Modal */
+.modal{position:fixed;inset:0;z-index:200;background:rgba(4,7,15,.7);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.modal-card{background:var(--card-bg);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--card-border);border-radius:22px;max-width:900px;width:100%;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 30px 60px -20px rgba(0,0,0,.5)}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--card-border);display:flex;justify-content:space-between;align-items:center}
+.modal-body{padding:22px;overflow-y:auto;flex:1}
+
+/* Loading */
+.loading-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s}
+.loading-screen.hide{opacity:0;pointer-events:none}
+
+/* Charts */
+.chart-box{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:16px;min-height:280px}
+.chart-title{font-size:.8rem;font-weight:900;color:var(--text-primary);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(14,165,233,.4),rgba(99,102,241,.4));border-radius:10px;border:2px solid var(--bg)}
+::selection{background:rgba(14,165,233,.35);color:#fff}
+</style>
+<link rel="stylesheet" href="../theme-overrides.css">
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color:var(--accent)"></i>
+  <p class="text-sm font-bold" style="color:var(--text-secondary)">جاري تحميل لوحة الإحصائيات...</p>
+</div>
+
+<div class="aurora-bg"></div>
+<div class="grid-overlay"></div>
+
+<!-- UNIFIED HEADER -->
+<div class="nav-shell">
+  <header class="nav-inner">
+    <div class="flex items-center gap-3">
+      <div class="logo-dot"></div>
+      <div>
+        <a href="../dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+        <p class="text-[10px] font-bold mt-1" style="color:var(--text-muted)">إحصائيات الملفات الطبية</p>
+      </div>
+    </div>
+    <nav class="hidden md:flex items-center gap-7">
+      <a href="../dashboard.html" class="nav-link">لوحة التحكم</a>
+      <a href="../about.html" class="nav-link">عن النظام</a>
+      <a href="../security.html" class="nav-link">درع VEXORIS</a>
+      <a href="../courses.html" class="nav-link">دورات تدريبية</a>
+      <a href="../feedback.html" class="nav-link">رأيك يهمنا</a>
+    </nav>
+    <div class="flex items-center gap-2">
+      <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+      <div style="position:relative">
+        <button class="user-chip" id="userChip">
+          <div class="user-avatar" id="userAvatar"></div>
+          <div class="user-info">
+            <span class="user-name" id="navUserName">...</span>
+            <span class="user-role" id="navUserRole">...</span>
+          </div>
+          <i class="fa-solid fa-chevron-down text-xs" style="color:var(--text-muted)"></i>
+        </button>
+        <div class="user-dropdown" id="userDropdown">
+          <div class="dropdown-profile">
+            <div class="dropdown-avatar-lg" id="dropdownAvatar"></div>
+            <div>
+              <div class="dropdown-name" id="dropdownName">...</div>
+              <div class="dropdown-email" id="dropdownEmail">...</div>
+              <div class="dropdown-role-badge" id="dropdownRoleBadge"></div>
+            </div>
+          </div>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" onclick="showProfile()"><i class="fa-solid fa-user-pen"></i> إدارة الملف الشخصي</button>
+          <button class="dropdown-item" onclick="showChangePassword()"><i class="fa-solid fa-key"></i> تغيير كلمة المرور</button>
+        </div>
+      </div>
+      <button onclick="logout()" class="icon-btn logout-btn" id="logoutBtn" title="تسجيل الخروج">
+        <i class="fa-solid fa-power-off"></i>
+      </button>
+      <a href="../dashboard.html" style="padding:8px 16px;border-radius:10px;background:transparent;border:1px solid var(--card-border);color:var(--text-secondary);font-weight:700;font-size:.78rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+        <i class="fa-solid fa-arrow-right"></i> رجوع
+      </a>
+    </div>
+  </header>
+</div>
+
+<!-- MAIN -->
+<main class="app-container">
+
+  <!-- Tabs bar -->
+  <div class="tabs-bar">
+    <button class="side-btn active" data-tab="overview" onclick="switchTab('overview')"><i class="fa-solid fa-gauge-high"></i> النظرة العامة</button>
+    <button class="side-btn" data-tab="trend" onclick="switchTab('trend')"><i class="fa-solid fa-chart-line"></i> الاتجاه الشهري</button>
+    <button class="side-btn" data-tab="departments" onclick="switchTab('departments')"><i class="fa-solid fa-building-user"></i> الأقسام</button>
+    <button class="side-btn" data-tab="doctors" onclick="switchTab('doctors')"><i class="fa-solid fa-user-doctor"></i> الأطباء</button>
+    <button class="side-btn" data-tab="nurses" onclick="switchTab('nurses')"><i class="fa-solid fa-user-nurse"></i> التمريض</button>
+    <button class="side-btn" data-tab="clerks" onclick="switchTab('clerks')"><i class="fa-solid fa-keyboard"></i> الإداريين</button>
+    <button class="side-btn" data-tab="forms" onclick="switchTab('forms')"><i class="fa-solid fa-file-signature"></i> النماذج</button>
+  </div>
+
+  <!-- ============ OVERVIEW ============ -->
+  <section class="tab-pane active" id="tab-overview">
+    <div class="page-title"><i class="fa-solid fa-gauge-high text-accent"></i> النظرة العامة</div>
+    <p class="page-sub">لوحة القيادة الشاملة لأداء النظام</p>
+
+    <div class="glass-card filter-card mb-6">
+      <div class="flex gap-3 items-end flex-wrap">
+        <div style="min-width:140px">
+          <label class="form-label">نوع التاريخ</label>
+          <select id="ovDateType" class="form-input">
+            <option value="discharge">تاريخ الخروج</option>
+            <option value="timestamp">تاريخ التقييم</option>
+          </select>
+        </div>
+        <div style="min-width:150px"><label class="form-label">من</label><input type="date" id="ovStart" class="form-input"></div>
+        <div style="min-width:150px"><label class="form-label">إلى</label><input type="date" id="ovEnd" class="form-input"></div>
+        <button onclick="applyFilters()" class="btn-primary"><i class="fa-solid fa-filter"></i> تطبيق</button>
+        <button onclick="clearFilters()" class="btn-ghost"><i class="fa-solid fa-xmark"></i> مسح</button>
+        <button onclick="loadOverview()" class="btn-ghost"><i class="fa-solid fa-rotate"></i> تحديث</button>
+      </div>
+    </div>
+
+    <div class="stat-grid" id="overviewStats">
+      <div class="stat-card" style="--stat-color:#0ea5e9">
+        <div class="stat-label"><i class="fa-solid fa-clipboard-check"></i> إجمالي التقييمات</div>
+        <div class="stat-value" id="ovUnits">—</div>
+      </div>
+      <div class="stat-card" style="--stat-color:#6366f1">
+        <div class="stat-label"><i class="fa-solid fa-folder-medical"></i> إجمالي الملفات</div>
+        <div class="stat-value" id="ovReviews">—</div>
+      </div>
+      <div class="stat-card" style="--stat-color:#8b5cf6">
+        <div class="stat-label"><i class="fa-solid fa-percent"></i> المطابقة العامة</div>
+        <div class="stat-value" id="ovPercent">—</div>
+      </div>
+      <div class="stat-card" style="--stat-color:#10b981">
+        <div class="stat-label"><i class="fa-solid fa-user-doctor"></i> أطباء</div>
+        <div class="stat-value" id="ovDoctors">—</div>
+      </div>
+      <div class="stat-card" style="--stat-color:#f59e0b">
+        <div class="stat-label"><i class="fa-solid fa-user-nurse"></i> تمريض</div>
+        <div class="stat-value" id="ovNurses">—</div>
+      </div>
+      <div class="stat-card" style="--stat-color:#ef4444">
+        <div class="stat-label"><i class="fa-solid fa-file-signature"></i> نماذج</div>
+        <div class="stat-value" id="ovForms">—</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;margin-bottom:24px">
+      <div class="chart-box"><div class="chart-title"><i class="fa-solid fa-chart-line text-accent"></i> الاتجاه الشهري</div><div id="chartOvTrend" style="min-height:240px"></div></div>
+      <div class="chart-box"><div class="chart-title"><i class="fa-solid fa-building-user text-accent-2"></i> الأقسام (أعلى 8)</div><div id="chartOvDept" style="min-height:240px"></div></div>
+      <div class="chart-box"><div class="chart-title"><i class="fa-solid fa-pie-chart text-accent-3"></i> توزيع التقييمات</div><div id="chartOvRoles" style="min-height:240px"></div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px">
+      <div class="glass-card">
+        <div class="chart-title mb-4"><i class="fa-solid fa-trophy text-warning"></i> أفضل 5 أطباء (Bayesian)</div>
+        <div id="ovTopDocs" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+      <div class="glass-card">
+        <div class="chart-title mb-4"><i class="fa-solid fa-trophy text-warning"></i> أفضل 5 تمريض (Bayesian)</div>
+        <div id="ovTopNurses" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TREND ============ -->
+  <section class="tab-pane" id="tab-trend">
+    <div class="page-title"><i class="fa-solid fa-chart-line text-accent"></i> الاتجاه الشهري</div>
+    <p class="page-sub">تحليل تطور الأداء على مدار الأشهر</p>
+    <div class="glass-card filter-card mb-6">
+      <div class="flex gap-3 items-end flex-wrap">
+        <div style="min-width:140px">
+          <label class="form-label">نوع التاريخ</label>
+          <select id="trDateType" class="form-input" onchange="loadTrend()">
+            <option value="discharge">تاريخ الخروج</option>
+            <option value="timestamp">تاريخ التقييم</option>
+          </select>
+        </div>
+        <div style="min-width:150px">
+          <label class="form-label">عدد الأشهر</label>
+          <select id="trMonths" class="form-input" onchange="loadTrend()">
+            <option value="6">6 أشهر</option>
+            <option value="12" selected>12 شهر</option>
+            <option value="24">24 شهر</option>
+          </select>
+        </div>
+        <button onclick="loadTrend()" class="btn-ghost"><i class="fa-solid fa-rotate"></i> تحديث</button>
+      </div>
+    </div>
+    <div class="glass-card mb-6">
+      <div class="chart-title mb-4"><i class="fa-solid fa-chart-area text-accent"></i> تطور نسبة المطابقة وعدد التقييمات</div>
+      <div id="chartTrendBig" style="min-height:350px"></div>
+    </div>
+    <div class="glass-card">
+      <div class="chart-title mb-4"><i class="fa-solid fa-table text-accent-2"></i> التفاصيل الشهرية</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800;border-bottom:1px solid var(--card-border)">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800;border-bottom:1px solid var(--card-border)">التقييمات</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800;border-bottom:1px solid var(--card-border)">النقاط</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800;border-bottom:1px solid var(--card-border)">النسبة</th>
+            </tr>
+          </thead>
+          <tbody id="trendTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DEPARTMENTS ============ -->
+  <section class="tab-pane" id="tab-departments">
+    <div class="page-title"><i class="fa-solid fa-building-user text-accent-2"></i> الأقسام</div>
+    <p class="page-sub">أداء الأقسام الطبية</p>
+    <div class="glass-card filter-card mb-6">
+      <div class="flex gap-3 items-end flex-wrap">
+        <div style="min-width:140px"><label class="form-label">نوع التاريخ</label>
+          <select id="depDateType" class="form-input"><option value="discharge">تاريخ الخروج</option><option value="timestamp">تاريخ التقييم</option></select>
+        </div>
+        <div style="min-width:150px"><label class="form-label">من</label><input type="date" id="depStart" class="form-input"></div>
+        <div style="min-width:150px"><label class="form-label">إلى</label><input type="date" id="depEnd" class="form-input"></div>
+        <div style="min-width:160px"><label class="form-label">ترتيب</label>
+          <select id="depSort" class="form-input"><option value="bayesian">Bayesian</option><option value="percentage">النسبة</option><option value="count">العدد</option></select>
+        </div>
+        <button onclick="loadDepartments()" class="btn-primary"><i class="fa-solid fa-filter"></i> تطبيق</button>
+        <input type="text" id="depSearch" oninput="filterCards('departments')" placeholder="بحث..." class="form-input" style="max-width:200px">
+      </div>
+    </div>
+    <div class="kpi-grid" id="depContainer"></div>
+  </section>
+
+  <!-- ============ DOCTORS ============ -->
+  <section class="tab-pane" id="tab-doctors">
+    <div class="page-title"><i class="fa-solid fa-user-doctor text-accent"></i> الأطباء</div>
+    <p class="page-sub">أداء الأطباء (مرتب حسب المؤشر المختار)</p>
+    <div class="glass-card filter-card mb-6">
+      <div class="flex gap-3 items-end flex-wrap">
+        <div style="min-width:140px"><label class="form-label">نوع التاريخ</label>
+          <select id="docDateType" class="form-input"><option value="discharge">تاريخ الخروج</option><option value="timestamp">تاريخ التقييم</option></select>
+        </div>
+        <div style="min-width:150px"><label class="form-label">من</label><input type="date" id="docStart" class="form-input"></div>
+        <div style="min-width:150px"><label class="form-label">إلى</label><input type="date" id="docEnd" class="form-input"></div>
+        <div style="min-width:170px"><label class="form-label">ترتيب</label>
+          <select id="docSort" class="form-input">
+            <option value="bayesian">Bayesian (الافتراضي)</option>
+            <option value="wilson">Wilson Score</option>
+            <option value="percentage">النسبة الفعلية</option>
+            <option value="count">عدد التقييمات</option>
+          </select>
+        </div>
+        <div style="min-width:130px"><label class="form-label">حد أدنى</label>
+          <input type="number" id="docMin" value="10" min="1" class="form-input">
+        </div>
+        <button onclick="loadDoctors()" class="btn-primary"><i class="fa-solid fa-filter"></i> تطبيق</button>
+        <input type="text" id="docSearch" oninput="filterCards('doctors')" placeholder="بحث بالاسم/القسم..." class="form-input" style="max-width:220px">
+      </div>
+    </div>
+    <div class="kpi-grid" id="docContainer"></div>
+    <div class="load-more" id="docLoadMore" style="display:none">
+      <button onclick="showMore('doctors')"><i class="fa-solid fa-plus"></i> عرض المزيد</button>
+    </div>
+  </section>
+
+  <!-- ============ NURSES ============ -->
+  <section class="tab-pane" id="tab-nurses">
+    <div class="page-title"><i class="fa-solid fa-user-nurse text-warning"></i> التمريض</div>
+    <p class="page-sub">أداء التمريض</p>
+    <div class="glass-card filter-card mb-6">
+      <div class="flex gap-3 items-end flex-wrap">
+        <div style="min-width:140px"><label class="form-label">نوع التاريخ</label>
+          <select id="nurDateType" class="form-input"><option value="discharge">تاريخ الخروج</option><option value="timestamp">تاريخ التقييم</option></select>
+        </div>
+        <div style="min-width:150px"><label class="form-label">من</label><input type="date" id="nurStart" class="form-input"></div>
+        <div style="min-width:150px"><label class="form-label">إلى</label><input type="date" id="nurEnd" class="form-input"></div>
+        <div style="min-width:170px"><label class="form-label">ترتيب</label>
+          <select id="nurSort" class="form-input">
+            <option value="bayesian">Bayesian</option>
+            <option value="wilson">Wilson Score</option>
+            <option value="percentage">النسبة الفعلية</option>
+            <option value="count">عدد التقييمات</option>
+          </select>
+        </div>
+        <div style="min-width:130px"><label class="form-label">حد أدنى</label>
+          <input type="number" id="nurMin" value="10" min="1" class="form-input">
+        </div>
+        <button onclick="loadNurses()" class="btn-primary"><i class="fa-solid fa-filter"></i> تطبيق</button>
+        <input type="text" id="nurSearch" oninput="filterCards('nurses')" placeholder="بحث..." class="form-input" style="max-width:200px">
+      </div>
+    </div>
+    <div class="kpi-grid" id="nurContainer"></div>
+    <div class="load-more" id="nurLoadMore" style="display:none">
+      <button onclick="showMore('nurses')"><i class="fa-solid fa-plus"></i> عرض المزيد</button>
+    </div>
+  </section>
+
+  <!-- ============ CLERKS ============ -->
+  <section class="tab-pane" id="tab-clerks">
+    <div class="page-title"><i class="fa-solid fa-keyboard text-success"></i> الإداريين</div>
+    <p class="page-sub">أداء مدخلي البيانات</p>
+    <div class="glass-card filter-card mb-6">
+      <div class="flex gap-3 items-end flex-wrap">
+        <div style="min-width:140px"><label class="form-label">نوع التاريخ</label>
+          <select id="clkDateType" class="form-input"><option value="discharge">تاريخ الخروج</option><option value="timestamp">تاريخ التقييم</option></select>
+        </div>
+        <div style="min-width:150px"><label class="form-label">من</label><input type="date" id="clkStart" class="form-input"></div>
+        <div style="min-width:150px"><label class="form-label">إلى</label><input type="date" id="clkEnd" class="form-input"></div>
+        <div style="min-width:170px"><label class="form-label">ترتيب</label>
+          <select id="clkSort" class="form-input">
+            <option value="bayesian">Bayesian</option>
+            <option value="wilson">Wilson Score</option>
+            <option value="percentage">النسبة الفعلية</option>
+            <option value="count">عدد التقييمات</option>
+          </select>
+        </div>
+        <div style="min-width:130px"><label class="form-label">حد أدنى</label>
+          <input type="number" id="clkMin" value="10" min="1" class="form-input">
+        </div>
+        <button onclick="loadClerks()" class="btn-primary"><i class="fa-solid fa-filter"></i> تطبيق</button>
+        <input type="text" id="clkSearch" oninput="filterCards('clerks')" placeholder="بحث..." class="form-input" style="max-width:200px">
+      </div>
+    </div>
+    <div class="kpi-grid" id="clkContainer"></div>
+    <div class="load-more" id="clkLoadMore" style="display:none">
+      <button onclick="showMore('clerks')"><i class="fa-solid fa-plus"></i> عرض المزيد</button>
+    </div>
+  </section>
+
+  <!-- ============ FORMS ============ -->
+  <section class="tab-pane" id="tab-forms">
+    <div class="page-title"><i class="fa-solid fa-file-signature text-accent-3"></i> النماذج</div>
+    <p class="page-sub">أداء النماذج الطبية</p>
+    <div class="glass-card filter-card mb-6">
+      <div class="flex gap-3 items-end flex-wrap">
+        <div style="min-width:140px"><label class="form-label">نوع التاريخ</label>
+          <select id="frmDateType" class="form-input"><option value="discharge">تاريخ الخروج</option><option value="timestamp">تاريخ التقييم</option></select>
+        </div>
+        <div style="min-width:150px"><label class="form-label">من</label><input type="date" id="frmStart" class="form-input"></div>
+        <div style="min-width:150px"><label class="form-label">إلى</label><input type="date" id="frmEnd" class="form-input"></div>
+        <div style="min-width:160px"><label class="form-label">ترتيب</label>
+          <select id="frmSort" class="form-input"><option value="bayesian">Bayesian</option><option value="percentage">النسبة</option><option value="count">العدد</option></select>
+        </div>
+        <button onclick="loadForms()" class="btn-primary"><i class="fa-solid fa-filter"></i> تطبيق</button>
+        <input type="text" id="frmSearch" oninput="filterCards('forms')" placeholder="بحث..." class="form-input" style="max-width:220px">
+      </div>
+    </div>
+    <div class="kpi-grid" id="frmContainer"></div>
+  </section>
+
+</main>
+
+<!-- Modal -->
+<div class="modal" id="drillModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div style="font-size:1.1rem;font-weight:900" id="modalTitle">تفاصيل</div>
+        <div style="font-size:.72rem;color:var(--text-muted);font-weight:700;margin-top:2px" id="modalSubtitle"></div>
+      </div>
+      <button onclick="closeDrill()" class="icon-btn"><i class="fa-solid fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script src="../notify.js"></script>
+<script type="module" src="../session-manager.js"></script>
+<script type="module">
+import { supabase } from '../supabase-client.js';
+
+// ============================================================
+// STATE
+// ============================================================
+const ROLE_META = {
+  super_admin:{name:'المطور',color:'#a855f7',icon:'fa-crown'},
+  admin:{name:'ادارة السجلات',color:'#0ea5e9',icon:'fa-user-shield'},
+  manager:{name:'المدير الطبي',color:'#6366f1',icon:'fa-user-tie'},
+  auditor:{name:'مراجع جودة',color:'#f59e0b',icon:'fa-clipboard-check'},
+  senior:{name:'رئيس قسم',color:'#10b981',icon:'fa-star'},
+  doctor:{name:'طبيب',color:'#14b8a6',icon:'fa-stethoscope'},
+  viewer:{name:'مراجع',color:'#94a3b8',icon:'fa-eye'}
+};
+
+const state = {
+  user:null, role:'viewer',
+  activeTab:'overview',
+  filter:{start:null,end:null,dateType:'discharge'},
+  cache:{},
+  charts:{},
+  pageSize:50,
+  visible:{doctors:50,nurses:50,clerks:50}
+};
+
+function $(id){return document.getElementById(id)}
+function toggleTheme(){const h=document.documentElement;h.classList.toggle('dark');localStorage.setItem('theme',h.classList.contains('dark')?'dark':'light')}
+window.toggleTheme = toggleTheme;
+
+function pctColor(p){return p>=90?'#10b981':p>=75?'#0ea5e9':p>=60?'#f59e0b':'#ef4444'}
+function pctLabel(p){return p>=90?'ممتاز':p>=75?'جيد':p>=60?'مقبول':'ضعيف'}
+
+function badgeFor(count){
+  if(count>=100) return {cls:'mature',label:'🟢 ناضج'};
+  if(count>=10) return {cls:'medium',label:'🟡 متوسط'};
+  return {cls:'new',label:'🔴 ناشئ'};
+}
+
+function fmtDate(d){if(!d)return '';const dt=new Date(d);return isNaN(dt)?d:dt.toLocaleDateString('en-GB',{year:'numeric',month:'2-digit',day:'2-digit'})}
+function fmtMonth(m){if(!m)return '';const [y,mo]=m.split('-');return `${mo}/${y}`}
+function num(n){return Number(n||0).toLocaleString('en-US')}
+function escapeHtml(s){if(!s)return '';return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+// ============================================================
+// INIT
+// ============================================================
+(async () => {
+  const {data:{session}} = await supabase.auth.getSession();
+  if(!session){window.location.href='../login.html';return}
+  state.user = session.user;
+
+  const {data:profile} = await supabase.from('profiles').select('role,username,email').eq('id',session.user.id).single();
+  state.role = profile?.role || 'viewer';
+  const meta = ROLE_META[state.role] || ROLE_META.viewer;
+  const name = session.user.user_metadata?.display_name || profile?.username || 'مستخدم';
+
+  $('userChip').style.display = 'inline-flex';
+  $('logoutBtn').style.display = 'inline-flex';
+  $('navUserName').textContent = name;
+  $('navUserRole').textContent = meta.name;
+  $('navUserRole').style.color = meta.color;
+  const avatarBg = `linear-gradient(135deg,${meta.color},${meta.color}cc)`;
+  ['userAvatar','dropdownAvatar'].forEach(id=>{const el=$(id);if(el){el.innerHTML=`<i class="fa-solid ${meta.icon}"></i>`;el.style.background=avatarBg}});
+  $('dropdownName').textContent = name;
+  $('dropdownEmail').textContent = session.user.email || profile?.email || '';
+  $('dropdownRoleBadge').innerHTML = `<i class="fa-solid ${meta.icon}"></i> ${meta.name}`;
+  $('dropdownRoleBadge').style.background = 'rgba(255,255,255,0.06)';
+  $('dropdownRoleBadge').style.color = meta.color;
+
+  // User chip toggle
+  const uc = $('userChip'), ud = $('userDropdown');
+  uc.addEventListener('click', e=>{e.stopPropagation();uc.classList.toggle('open');ud.classList.toggle('open')});
+  document.addEventListener('click', e=>{if(!ud.contains(e.target)&&!uc.contains(e.target)){uc.classList.remove('open');ud.classList.remove('open')}});
+
+  window.logout = async function(){
+    if(window.showConfirm){const ok=await window.showConfirm({title:'تسجيل الخروج',message:'هل تريد الخروج؟',confirmText:'خروج',cancelText:'إلغاء',type:'danger'});if(!ok)return}
+    await supabase.auth.signOut();sessionStorage.clear();window.location.href='../login.html';
+  };
+  window.showProfile = () => window.location.href='../profile.html';
+  window.showChangePassword = () => window.location.href='../change-password.html';
+
+  // Load initial
+  await loadOverview();
+  $('loadingScreen').classList.add('hide');
+})();
+
+// ============================================================
+// FILTERS
+// ============================================================
+function readFilter(prefix){
+  return {
+    start: $(prefix+'Start')?.value || null,
+    end: $(prefix+'End')?.value || null,
+    dateType: $(prefix+'DateType')?.value || 'discharge'
+  };
+}
+
+window.applyFilters = async function(){
+  state.filter = readFilter('ov');
+  state.cache = {};
+  await loadOverview();
+  if(window.showNotification) showNotification('تم تطبيق الفلاتر', 'success');
+};
+
+window.clearFilters = function(){
+  ['ov','dep','doc','nur','clk','frm'].forEach(p=>{
+    const s=$(p+'Start'), e=$(p+'End'), t=$(p+'DateType');
+    if(s)s.value='';if(e)e.value='';if(t)t.value='discharge';
+  });
+  state.filter = {start:null,end:null,dateType:'discharge'};
+  state.cache = {};
+  loadOverview();
+};
+
+window.switchTab = function(tab){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.side-btn').forEach(b=>b.classList.remove('active'));
+  $('tab-'+tab).classList.add('active');
+  document.querySelector(`.side-btn[data-tab="${tab}"]`).classList.add('active');
+  state.activeTab = tab;
+
+  if(tab==='trend') loadTrend();
+  else if(tab==='departments') loadDepartments();
+  else if(tab==='doctors') loadDoctors();
+  else if(tab==='nurses') loadNurses();
+  else if(tab==='clerks') loadClerks();
+  else if(tab==='forms') loadForms();
+};
+
+// ============================================================
+// OVERVIEW
+// ============================================================
+async function loadOverview(){
+  if(state.cache.overview){renderOverview(state.cache.overview);return}
+  try{
+    const f = state.filter;
+    const [ovRes, depRes, trendRes, docRes, nurseRes] = await Promise.all([
+      supabase.rpc('get_overview_stats', {p_start:f.start, p_end:f.end, p_date_type:f.dateType}),
+      supabase.rpc('get_departments_stats', {p_start:f.start, p_end:f.end, p_date_type:f.dateType, p_sort_by:'percentage'}),
+      supabase.rpc('get_monthly_trend', {p_months_back:12, p_date_type:f.dateType}),
+      supabase.rpc('get_doctors_stats', {p_start:f.start, p_end:f.end, p_date_type:f.dateType, p_sort_by:'bayesian', p_min_count:10}),
+      supabase.rpc('get_nurses_stats', {p_start:f.start, p_end:f.end, p_date_type:f.dateType, p_sort_by:'bayesian', p_min_count:10})
+    ]);
+    const data = {
+      overview: ovRes.data || {},
+      departments: depRes.data || [],
+      trend: trendRes.data || [],
+      doctors: docRes.data || [],
+      nurses: nurseRes.data || []
+    };
+    state.cache.overview = data;
+    renderOverview(data);
+  }catch(err){console.error(err);if(window.showNotification)showNotification('خطأ: '+err.message,'error')}
+}
+
+function renderOverview(data){
+  const o = data.overview;
+  $('ovUnits').textContent = num(o.total_units);
+  $('ovReviews').textContent = num(o.total_reviews);
+  $('ovPercent').textContent = (o.overall_pct||0)+'%';
+  $('ovDoctors').textContent = num(o.total_doctors);
+  $('ovNurses').textContent = num(o.total_nurses);
+  $('ovForms').textContent = num(o.total_forms);
+
+  // Charts
+  destroyChart('ovTrend');
+  if(data.trend.length){
+    state.charts.ovTrend = new ApexCharts($('chartOvTrend'),{
+      chart:{type:'area',height:240,toolbar:{show:false},background:'transparent',fontFamily:'Tajawal'},
+      series:[{name:'النسبة %',data:data.trend.map(t=>t.percentage)}],
+      colors:['#0ea5e9'],
+      stroke:{curve:'smooth',width:3},
+      fill:{type:'gradient',opacityFrom:.4,opacityTo:.05},
+      xaxis:{categories:data.trend.map(t=>fmtMonth(t.month)),labels:{style:{fontSize:'10px',fontWeight:700}}},
+      yaxis:{max:100,labels:{formatter:v=>v+'%',style:{fontSize:'10px'}}},
+      dataLabels:{enabled:false},
+      grid:{borderColor:'rgba(148,163,184,.1)'},
+      theme:{mode:document.documentElement.classList.contains('dark')?'dark':'light'}
+    });
+    state.charts.ovTrend.render();
+  }
+
+  destroyChart('ovDept');
+  const topDepts = data.departments.slice(0,8);
+  if(topDepts.length){
+    state.charts.ovDept = new ApexCharts($('chartOvDept'),{
+      chart:{type:'bar',height:240,toolbar:{show:false},background:'transparent',fontFamily:'Tajawal'},
+      series:[{name:'النسبة',data:topDepts.map(d=>d.percentage)}],
+      colors:['#6366f1'],
+      plotOptions:{bar:{horizontal:true,borderRadius:5,barHeight:'60%'}},
+      xaxis:{categories:topDepts.map(d=>d.name),max:100,labels:{formatter:v=>v+'%',style:{fontSize:'10px'}}},
+      dataLabels:{enabled:true,formatter:v=>v+'%',style:{fontSize:'10px',fontWeight:800}},
+      grid:{borderColor:'rgba(148,163,184,.1)'},
+      theme:{mode:document.documentElement.classList.contains('dark')?'dark':'light'}
+    });
+    state.charts.ovDept.render();
+  }
+
+  destroyChart('ovRoles');
+  state.charts.ovRoles = new ApexCharts($('chartOvRoles'),{
+    chart:{type:'donut',height:240,background:'transparent',fontFamily:'Tajawal'},
+    series:[o.total_doctors,o.total_nurses,o.total_clerks],
+    labels:['أطباء','تمريض','إداريين'],
+    colors:['#0ea5e9','#f59e0b','#10b981'],
+    legend:{position:'bottom',fontSize:'11px',fontWeight:700},
+    dataLabels:{enabled:true,formatter:v=>Math.round(v)+'%',style:{fontSize:'11px',fontWeight:800}}
+  });
+  state.charts.ovRoles.render();
+
+  // Top 5
+  renderTopList('ovTopDocs', data.doctors.slice(0,5), 'doctor');
+  renderTopList('ovTopNurses', data.nurses.slice(0,5), 'nurse');
+}
+
+function renderTopList(elId, items, type){
+  const el = $(elId);
+  if(!items.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:.85rem">لا توجد بيانات</div>';return}
+  el.innerHTML = items.map((it,i) => {
+    const color = pctColor(it.percentage);
+    const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
+    return `
+      <div onclick="openDrill('${type}', '${escapeHtml(it.name).replace(/'/g,"\\'")}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(148,163,184,.05);border:1px solid var(--card-border);border-radius:10px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='${color}'" onmouseout="this.style.borderColor=''">
+        <span style="font-size:1.1rem;min-width:28px">${medal}</span>
+        <span style="flex:1;font-weight:800;font-size:.85rem">${escapeHtml(it.name)}</span>
+        <span style="font-family:'Space Grotesk';font-weight:700;color:${color};font-size:.95rem">${it.percentage}%</span>
+        <span style="font-size:.65rem;color:var(--text-muted);font-weight:700">${it.count}</span>
+      </div>`;
+  }).join('');
+}
+
+// ============================================================
+// TREND
+// ============================================================
+async function loadTrend(){
+  const dt = $('trDateType').value, mb = parseInt($('trMonths').value)||12;
+  try{
+    const {data} = await supabase.rpc('get_monthly_trend',{p_months_back:mb, p_date_type:dt});
+    const trend = data || [];
+    destroyChart('trendBig');
+    if(!trend.length){$('chartTrendBig').innerHTML='<div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات</div>';$('trendTable').innerHTML='';return}
+
+    state.charts.trendBig = new ApexCharts($('chartTrendBig'),{
+      chart:{type:'area',height:350,toolbar:{show:false},background:'transparent',fontFamily:'Tajawal'},
+      series:[
+        {name:'النسبة %',type:'area',data:trend.map(t=>t.percentage)},
+        {name:'التقييمات',type:'column',data:trend.map(t=>t.count)}
+      ],
+      colors:['#0ea5e9','#6366f1'],
+      stroke:{curve:'smooth',width:3},
+      plotOptions:{bar:{columnWidth:'40%',borderRadius:4}},
+      xaxis:{categories:trend.map(t=>fmtMonth(t.month)),labels:{style:{fontSize:'10px',fontWeight:700}}},
+      yaxis:[
+        {title:{text:'النسبة %',style:{fontSize:'11px'}},max:100,labels:{formatter:v=>v+'%'}},
+        {opposite:true,title:{text:'التقييمات',style:{fontSize:'11px'}},labels:{formatter:v=>Math.round(v)}}
+      ],
+      dataLabels:{enabled:false},
+      fill:{type:'gradient',opacityFrom:.4,opacityTo:.05},
+      grid:{borderColor:'rgba(148,163,184,.1)'},
+      legend:{position:'top',fontSize:'11px',fontWeight:700},
+      theme:{mode:document.documentElement.classList.contains('dark')?'dark':'light'}
+    });
+    state.charts.trendBig.render();
+
+    $('trendTable').innerHTML = trend.map(t=>{
+      const c = pctColor(t.percentage);
+      return `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(t.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(t.count)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(t.total_score)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${t.percentage}%</span></td>
+      </tr>`;
+    }).join('');
+  }catch(err){console.error(err);if(window.showNotification)showNotification(err.message,'error')}
+}
+
+// ============================================================
+// DEPARTMENTS
+// ============================================================
+async function loadDepartments(){
+  const f = readFilter('dep'), sort = $('depSort').value;
+  try{
+    const {data} = await supabase.rpc('get_departments_stats',{p_start:f.start,p_end:f.end,p_date_type:f.dateType,p_sort_by:sort});
+    state.cache.departments = data || [];
+    renderDepartments();
+  }catch(err){console.error(err);if(window.showNotification)showNotification(err.message,'error')}
+}
+
+function renderDepartments(){
+  const items = state.cache.departments || [];
+  const search = ($('depSearch').value||'').toLowerCase().trim();
+  const filtered = search ? items.filter(i=>i.name.toLowerCase().includes(search)) : items;
+  const c = $('depContainer');
+  if(!filtered.length){c.innerHTML='<div class="empty-state" style="grid-column:1/-1"><i class="fa-solid fa-building-user"></i>لا توجد بيانات</div>';return}
+
+  c.innerHTML = filtered.map((it,i)=>{
+    const color = pctColor(it.percentage);
+    const ringBg = `conic-gradient(${color} 0% ${Math.min(it.percentage,100)}%, rgba(148,163,184,0.15) ${Math.min(it.percentage,100)}% 100%)`;
+    return `
+      <div class="kpi-card-modern" style="--kpi-color:${color}" onclick="openDrill('department','${escapeHtml(it.name).replace(/'/g,"\\'")}')">
+        <div class="kpi-head">
+          <div style="flex:1">
+            <div class="kpi-name-modern">${escapeHtml(it.name)}</div>
+          </div>
+          <div class="kpi-ring" style="background:${ringBg}">
+            <div class="kpi-ring-value" style="color:${color}">${it.percentage}%</div>
+            <div class="kpi-ring-sub">RAW</div>
+          </div>
+        </div>
+        <div class="kpi-metrics">
+          <div class="kpi-metric">
+            <div class="kpi-metric-lbl"><i class="fa-solid fa-calculator" style="color:#8b5cf6"></i> Bayesian</div>
+            <div class="kpi-metric-val">${it.bayesian_pct}%</div>
+          </div>
+          <div class="kpi-metric">
+            <div class="kpi-metric-lbl"><i class="fa-solid fa-clipboard-list" style="color:#0ea5e9"></i> التقييمات</div>
+            <div class="kpi-metric-val">${num(it.count)}</div>
+          </div>
+          <div class="kpi-metric">
+            <div class="kpi-metric-lbl"><i class="fa-solid fa-check" style="color:#10b981"></i> مطابق</div>
+            <div class="kpi-metric-val" style="color:#10b981">${num(it.success_count||0)}</div>
+          </div>
+          <div class="kpi-metric">
+            <div class="kpi-metric-lbl"><i class="fa-solid fa-triangle-exclamation" style="color:#ef4444"></i> أخطاء</div>
+            <div class="kpi-metric-val" style="color:#ef4444">${num(it.score0_count||0)}</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ============================================================
+// DOCTORS / NURSES / CLERKS — generic
+// ============================================================
+async function loadDoctors(){
+  const f = readFilter('doc'), sort = $('docSort').value, min = parseInt($('docMin').value)||10;
+  try{
+    const {data} = await supabase.rpc('get_doctors_stats',{p_start:f.start,p_end:f.end,p_date_type:f.dateType,p_sort_by:sort,p_min_count:min});
+    state.cache.doctors = data || [];
+    state.visible.doctors = state.pageSize;
+    renderPeople('doctors');
+  }catch(err){console.error(err);if(window.showNotification)showNotification(err.message,'error')}
+}
+
+async function loadNurses(){
+  const f = readFilter('nur'), sort = $('nurSort').value, min = parseInt($('nurMin').value)||10;
+  try{
+    const {data} = await supabase.rpc('get_nurses_stats',{p_start:f.start,p_end:f.end,p_date_type:f.dateType,p_sort_by:sort,p_min_count:min});
+    state.cache.nurses = data || [];
+    state.visible.nurses = state.pageSize;
+    renderPeople('nurses');
+  }catch(err){console.error(err);if(window.showNotification)showNotification(err.message,'error')}
+}
+
+async function loadClerks(){
+  const f = readFilter('clk'), sort = $('clkSort').value, min = parseInt($('clkMin').value)||10;
+  try{
+    const {data} = await supabase.rpc('get_clerks_stats',{p_start:f.start,p_end:f.end,p_date_type:f.dateType,p_sort_by:sort,p_min_count:min});
+    state.cache.clerks = data || [];
+    state.visible.clerks = state.pageSize;
+    renderPeople('clerks');
+  }catch(err){console.error(err);if(window.showNotification)showNotification(err.message,'error')}
+}
+
+function renderPeople(category){
+  const prefix = category==='doctors'?'doc':category==='nurses'?'nur':'clk';
+  const type = category==='doctors'?'doctor':category==='nurses'?'nurse':'clerk';
+  const items = state.cache[category] || [];
+  const search = ($(prefix+'Search').value||'').toLowerCase().trim();
+  const filtered = search ? items.filter(i=>i.name.toLowerCase().includes(search)||(i.department||'').toLowerCase().includes(search)) : items;
+  const visible = filtered.slice(0, state.visible[category]);
+  const container = $(prefix+'Container');
+  const loadMore = $(prefix+'LoadMore');
+
+  if(!filtered.length){container.innerHTML='<div class="empty-state" style="grid-column:1/-1"><i class="fa-solid fa-users"></i>لا توجد بيانات</div>';loadMore.style.display='none';return}
+
+  container.innerHTML = visible.map((it,i)=>{
+    const color = pctColor(it.percentage);
+    const badge = badgeFor(it.count);
+    const ringBg = `conic-gradient(${color} 0% ${Math.min(it.percentage,100)}%, rgba(148,163,184,0.15) ${Math.min(it.percentage,100)}% 100%)`;
+    const isTop3 = i<3;
+    const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const rankIcon = i===0?'👑':i===1?'2':i===2?'3':'';
+    const specTag = it.specialty && it.specialty!=='غير محدد' ? `<span class="kpi-tag" style="background:rgba(139,92,246,.15);color:#8b5cf6">${escapeHtml(it.specialty)}</span>` : '';
+    const deptTag = it.department && it.department!=='غير محدد' ? `<span class="kpi-tag" style="background:rgba(99,102,241,.15);color:#6366f1">${escapeHtml(it.department)}</span>` : '';
+    return `
+      <div class="kpi-card-modern" style="--kpi-color:${color}" onclick="openDrill('${type}','${escapeHtml(it.name).replace(/'/g,"\\'")}')">
+        ${isTop3?`<div class="kpi-rank ${rankClass}">${rankIcon}</div>`:''}
+        <span class="kpi-badge ${badge.cls}">${badge.label}</span>
+        <div class="kpi-head">
+          <div style="flex:1;min-width:0">
+            <div class="kpi-name-modern">${escapeHtml(it.name)}</div>
+            ${specTag}${deptTag}
+          </div>
+          <div class="kpi-ring" style="background:${ringBg}">
+            <div class="kpi-ring-value" style="color:${color}">${it.percentage}%</div>
+            <div class="kpi-ring-sub">RAW</div>
+          </div>
+        </div>
+        <div class="kpi-metrics">
+          <div class="kpi-metric">
+            <div class="kpi-metric-lbl"><i class="fa-solid fa-calculator" style="color:#8b5cf6"></i> Bayesian</div>
+            <div class="kpi-metric-val">${it.bayesian_pct}%</div>
+          </div>
+          <div class="kpi-metric">
+            <div class="kpi-metric-lbl"><i class="fa-solid fa-flask" style="color:#f59e0b"></i> Wilson</div>
+            <div class="kpi-metric-val">${it.wilson_lb}%</div>
+          </div>
+          <div class="kpi-metric">
+            <div class="kpi-metric-lbl"><i class="fa-solid fa-clipboard-list" style="color:#0ea5e9"></i> التقييمات</div>
+            <div class="kpi-metric-val">${num(it.count)}</div>
+          </div>
+          <div class="kpi-metric">
+            <div class="kpi-metric-lbl"><i class="fa-solid fa-check" style="color:#10b981"></i> مطابق / جزئي / خطأ</div>
+            <div class="kpi-metric-val" style="font-size:.72rem">${num(it.success_count||0)} / ${num(it.score1_count||0)} / ${num(it.score0_count||0)}</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  loadMore.style.display = filtered.length > state.visible[category] ? 'flex' : 'none';
+}
+
+window.showMore = function(category){
+  state.visible[category] += state.pageSize;
+  renderPeople(category);
+};
+
+window.filterCards = function(category){
+  if(category==='departments') renderDepartments();
+  else renderPeople(category);
+};
+
+// ============================================================
+// FORMS
+// ============================================================
+async function loadForms(){
+  const f = readFilter('frm'), sort = $('frmSort').value;
+  try{
+    const {data} = await supabase.rpc('get_forms_stats',{p_start:f.start,p_end:f.end,p_date_type:f.dateType,p_sort_by:sort});
+    state.cache.forms = data || [];
+    renderForms();
+  }catch(err){console.error(err);if(window.showNotification)showNotification(err.message,'error')}
+}
+
+function renderForms(){
+  const items = state.cache.forms || [];
+  const search = ($('frmSearch').value||'').toLowerCase().trim();
+  const filtered = search ? items.filter(i=>i.name.toLowerCase().includes(search)) : items;
+  const c = $('frmContainer');
+  if(!filtered.length){c.innerHTML='<div class="empty-state" style="grid-column:1/-1"><i class="fa-solid fa-file-signature"></i>لا توجد بيانات</div>';return}
+
+  c.innerHTML = filtered.map(it=>{
+    const color = pctColor(it.percentage);
+    const ringBg = `conic-gradient(${color} 0% ${Math.min(it.percentage,100)}%, rgba(148,163,184,0.15) ${Math.min(it.percentage,100)}% 100%)`;
+    return `
+      <div class="kpi-card-modern" style="--kpi-color:${color}" onclick="openDrill('form','${escapeHtml(it.name).replace(/'/g,"\\'")}')">
+        <div class="kpi-head">
+          <div style="flex:1;min-width:0">
+            <div class="kpi-name-modern" style="padding-left:0">${escapeHtml(it.name)}</div>
+          </div>
+          <div class="kpi-ring" style="background:${ringBg}">
+            <div class="kpi-ring-value" style="color:${color}">${it.percentage}%</div>
+            <div class="kpi-ring-sub">RAW</div>
+          </div>
+        </div>
+        <div class="kpi-metrics">
+          <div class="kpi-metric">
+            <div class="kpi-metric-lbl"><i class="fa-solid fa-calculator" style="color:#8b5cf6"></i> Bayesian</div>
+            <div class="kpi-metric-val">${it.bayesian_pct}%</div>
+          </div>
+          <div class="kpi-metric">
+            <div class="kpi-metric-lbl"><i class="fa-solid fa-clipboard-list" style="color:#0ea5e9"></i> التقييمات</div>
+            <div class="kpi-metric-val">${num(it.count)}</div>
+          </div>
+          <div class="kpi-metric">
+            <div class="kpi-metric-lbl"><i class="fa-solid fa-check" style="color:#10b981"></i> مطابق</div>
+            <div class="kpi-metric-val" style="color:#10b981">${num(it.success_count||0)}</div>
+          </div>
+          <div class="kpi-metric">
+            <div class="kpi-metric-lbl"><i class="fa-solid fa-triangle-exclamation" style="color:#ef4444"></i> أخطاء</div>
+            <div class="kpi-metric-val" style="color:#ef4444">${num(it.score0_count||0)}</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ============================================================
+// DRILL-DOWN
+// ============================================================
+window.openDrill = async function(type, name){
+  const modal = $('drillModal');
+  $('modalTitle').textContent = name;
+  $('modalSubtitle').textContent = 'جاري التحميل...';
+  $('modalBody').innerHTML = '<div style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin text-2xl" style="color:var(--accent)"></i></div>';
+  modal.classList.add('open');
+
+  const f = state.filter;
+  try{
+    const {data} = await supabase.rpc('get_item_details',{
+      p_type:type, p_name:name, p_start:f.start, p_end:f.end, p_date_type:f.dateType
+    });
+    if(!data){$('modalSubtitle').textContent='لا توجد بيانات';$('modalBody').innerHTML='';return}
+    renderDrill(data, type);
+  }catch(err){
+    console.error(err);
+    $('modalSubtitle').textContent='خطأ';
+    $('modalBody').innerHTML=`<div style="text-align:center;padding:40px;color:#ef4444">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+function renderDrill(data, type){
+  const it = data.item || {count:0,total_score:0,percentage:0};
+  $('modalSubtitle').textContent = `${num(it.count)} تقييم · ${it.percentage}%`;
+  const color = pctColor(it.percentage);
+
+  let html = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+      <div style="background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.2);border-radius:12px;padding:14px;text-align:center">
+        <div style="font-family:'Space Grotesk';font-size:1.3rem;font-weight:700;color:#0ea5e9">${num(it.count)}</div>
+        <div style="font-size:.65rem;font-weight:800;color:var(--text-muted);margin-top:4px">إجمالي التقييمات</div>
+      </div>
+      <div style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:12px;padding:14px;text-align:center">
+        <div style="font-family:'Space Grotesk';font-size:1.3rem;font-weight:700;color:#6366f1">${num(it.total_score)} / ${num(it.count*2)}</div>
+        <div style="font-size:.65rem;font-weight:800;color:var(--text-muted);margin-top:4px">النقاط / الإجمالي</div>
+      </div>
+      <div style="background:${color}15;border:1px solid ${color}40;border-radius:12px;padding:14px;text-align:center">
+        <div style="font-family:'Space Grotesk';font-size:1.3rem;font-weight:700;color:${color}">${it.percentage}%</div>
+        <div style="font-size:.65rem;font-weight:800;color:var(--text-muted);margin-top:4px">${pctLabel(it.percentage)}</div>
+      </div>
+    </div>`;
+
+  // Errors
+  const errors = data.topErrors || [];
+  html += `<div style="margin-bottom:20px">
+    <div style="font-weight:900;font-size:.9rem;margin-bottom:12px;color:#ef4444"><i class="fa-solid fa-triangle-exclamation"></i> أكثر 10 أخطاء</div>`;
+  if(errors.length){
+    html += '<div style="display:grid;gap:6px">';
+    errors.forEach(e=>{
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.2);border-radius:8px">
+        <span style="font-weight:700;font-size:.82rem">${escapeHtml(e.error)}</span>
+        <span style="background:#ef4444;color:#fff;padding:2px 10px;border-radius:12px;font-size:.75rem;font-weight:900">${e.count}</span>
+      </div>`;
+    });
+    html += '</div>';
+  }else{
+    html += '<div style="text-align:center;padding:20px;color:#10b981;font-weight:800"><i class="fa-solid fa-check-circle"></i> أداء مثالي! لا توجد أخطاء</div>';
+  }
+  html += '</div>';
+
+  // For departments: top/bottom doctors
+  if(type==='department'){
+    const top = data.topDoctors || [], bot = data.bottomDoctors || [];
+    html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <div style="font-weight:900;font-size:.85rem;margin-bottom:8px;color:#10b981"><i class="fa-solid fa-trophy"></i> أفضل 5 أطباء</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          ${top.map((d,i)=>`<div style="display:flex;justify-content:space-between;padding:7px 10px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);border-radius:7px;font-size:.78rem"><span style="font-weight:700">${i+1}. ${escapeHtml(d.name)}</span><span style="font-family:'Space Grotesk';font-weight:700;color:#10b981">${d.percentage}%</span></div>`).join('')}
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:900;font-size:.85rem;margin-bottom:8px;color:#ef4444"><i class="fa-solid fa-arrow-trend-down"></i> بحاجة للدعم</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          ${bot.map((d,i)=>`<div style="display:flex;justify-content:space-between;padding:7px 10px;background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.2);border-radius:7px;font-size:.78rem"><span style="font-weight:700">${escapeHtml(d.name)}</span><span style="font-family:'Space Grotesk';font-weight:700;color:#ef4444">${d.percentage}%</span></div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  $('modalBody').innerHTML = html;
+}
+
+window.closeDrill = function(){
+  $('drillModal').classList.remove('open');
+};
+
+// Charts cleanup
+function destroyChart(key){
+  if(state.charts[key]){try{state.charts[key].destroy()}catch(e){}delete state.charts[key]}
+}
+</script>
+</body>
+</html>
