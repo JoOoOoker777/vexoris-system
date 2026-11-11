@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إحصائيات الجودة (MRD) | VEXORIS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+  if (localStorage.getItem('theme') === 'light') document.documentElement.classList.remove('dark');
+</script>
+<style>
+:root{
+  --bg:#04070f; --card-bg:rgba(15,23,42,.55); --card-border:rgba(148,163,184,.12);
+  --text-primary:#f1f5f9; --text-secondary:#94a3b8; --text-muted:#64748b;
+  --accent:#0ea5e9; --accent-2:#6366f1; --accent-3:#8b5cf6;
+  --danger:#ef4444; --warning:#f59e0b; --success:#10b981;
+  --input-bg:rgba(15,23,42,.5);
+  --nav-height: 75px;
+}
+html:not(.dark){
+  --bg:#e8eef5; --card-bg:rgba(255,255,255,.92); --card-border:rgba(100,116,139,.28);
+  --text-primary:#0b1220; --text-secondary:#1e293b; --text-muted:#475569;
+  --input-bg:rgba(255,255,255,.9);
+}
+*{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;overflow-x:hidden;transition:background .4s,color .4s}
+.aurora-bg{position:fixed;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 15% 10%,rgba(14,165,233,.18) 0%,transparent 60%),radial-gradient(ellipse 50% 45% at 85% 25%,rgba(99,102,241,.16) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 50% 95%,rgba(139,92,246,.14) 0%,transparent 65%)}
+html:not(.dark) .aurora-bg{background:radial-gradient(ellipse 60% 50% at 15% 10%,rgba(14,165,233,.10) 0%,transparent 60%),radial-gradient(ellipse 50% 45% at 85% 25%,rgba(99,102,241,.08) 0%,transparent 60%)}
+.grid-overlay{position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(to right,rgba(148,163,184,.045) 1px,transparent 1px),linear-gradient(to bottom,rgba(148,163,184,.045) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 80% 70% at 50% 20%,#000 40%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 80% 70% at 50% 20%,#000 40%,transparent 100%)}
+
+/* HEADER */
+.nav-shell{position:sticky;top:0;z-index:50;width:100%;padding:12px 0;background:linear-gradient(to bottom,var(--bg) 0%,var(--bg) 85%,rgba(4,7,15,.7) 100%);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+html:not(.dark) .nav-shell{background:linear-gradient(to bottom,var(--bg) 0%,var(--bg) 85%,rgba(232,238,245,.7) 100%)}
+.nav-inner{background:var(--card-bg);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid var(--card-border);border-radius:18px;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;width:90%;max-width:1800px;margin:0 auto}
+.logo-dot{position:relative;width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(14,165,233,.18),0 0 20px rgba(14,165,233,.7);flex-shrink:0}
+.logo-dot::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(14,165,233,.5);animation:ping 2.4s cubic-bezier(0,0,.2,1) infinite}
+@keyframes ping{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.4);opacity:0}}
+.brand-text{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:.18em;background:linear-gradient(135deg,#22d3ee 0%,#0ea5e9 40%,#6366f1 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.nav-link{color:var(--text-secondary);font-weight:600;font-size:.875rem;padding:6px 2px;transition:color .3s;text-decoration:none}
+.nav-link:hover{color:var(--accent)}
+.icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:transparent;color:var(--accent);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .25s}
+.icon-btn:hover{background:rgba(14,165,233,.1);border-color:rgba(14,165,233,.4);transform:rotate(15deg)}
+.icon-btn.logout-btn{color:#f87171}
+.icon-btn.logout-btn:hover{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.4);transform:scale(1.05)}
+.user-chip{display:none;align-items:center;gap:10px;padding:6px 12px 6px 8px;background:rgba(148,163,184,.06);border:1px solid var(--card-border);border-radius:12px;cursor:pointer;transition:all .3s;font-family:inherit;color:inherit}
+.user-chip:hover{border-color:var(--accent)}
+.user-avatar{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.95rem;flex-shrink:0;position:relative;overflow:hidden}
+.user-avatar i{position:relative;z-index:2}
+.user-avatar::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.4) 50%,transparent 70%);background-size:200% 100%;animation:shine 4s infinite;z-index:1}
+@keyframes shine{0%{background-position:-200% 0}50%,100%{background-position:200% 0}}
+.user-info{display:flex;flex-direction:column;gap:1px;text-align:right}
+.user-name{font-size:.78rem;font-weight:800;color:var(--text-primary);line-height:1.1}
+.user-role{font-size:.65rem;font-weight:700;line-height:1.1}
+.user-dropdown{position:absolute;top:55px;left:0;width:260px;background:var(--card-bg);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--card-border);border-radius:16px;padding:6px;z-index:60;box-shadow:0 24px 48px -12px rgba(0,0,0,.4);opacity:0;transform:translateY(-8px) scale(.96);pointer-events:none;transition:all .25s}
+.user-dropdown.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.dropdown-item{width:100%;padding:10px 12px;background:transparent;border:none;color:var(--text-secondary);font-family:inherit;font-size:.8rem;font-weight:700;border-radius:8px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:right;transition:all .2s}
+.dropdown-item:hover{background:rgba(14,165,233,.08);color:var(--accent)}
+.dropdown-item i{width:16px;font-size:.8rem}
+.dropdown-profile{padding:12px 12px;display:flex;align-items:center;gap:10px}
+.dropdown-avatar-lg{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;color:#fff;position:relative;overflow:hidden}
+.dropdown-avatar-lg i{position:relative;z-index:2}
+.dropdown-avatar-lg::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.3) 50%,transparent 70%);background-size:200% 100%;animation:shine 4s infinite;z-index:1}
+.dropdown-name{font-size:.88rem;font-weight:900;color:var(--text-primary);line-height:1.2}
+.dropdown-email{font-size:.7rem;font-weight:600;color:var(--text-muted);line-height:1.3;margin-top:1px}
+.dropdown-role-badge{display:inline-flex;align-items:center;gap:4px;font-size:.6rem;font-weight:800;padding:2px 8px;border-radius:5px;margin-top:4px}
+.dropdown-divider{height:1px;background:var(--card-border);margin:6px 4px}
+
+/* LAYOUT */
+.app-container{width:90%;max-width:1800px;margin:16px auto 60px}
+.global-filter-bar{background:var(--card-bg);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid var(--card-border);border-radius:16px;padding:12px 18px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.tabs-bar{position:sticky;top:var(--nav-height);z-index:40;display:flex;gap:6px;overflow-x:auto;padding:10px 14px;margin-bottom:20px;background:var(--card-bg);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid var(--card-border);border-radius:16px;scrollbar-width:none;box-shadow:0 4px 20px -8px rgba(0,0,0,.2)}
+.tabs-bar::-webkit-scrollbar{display:none}
+.side-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:10px;font-family:inherit;font-size:.85rem;font-weight:700;color:var(--text-secondary);background:transparent;border:1px solid transparent;cursor:pointer;white-space:nowrap;transition:all .25s}
+.side-btn:hover{background:rgba(148,163,184,.08);color:var(--text-primary)}
+.side-btn.active{background:linear-gradient(135deg,rgba(14,165,233,.15),rgba(99,102,241,.1));border-color:rgba(14,165,233,.35);color:var(--accent);font-weight:800;box-shadow:0 4px 15px -5px rgba(14,165,233,.3)}
+
+.tab-pane{display:none;animation:fadeIn .35s ease}
+.tab-pane.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.page-title{font-size:1.7rem;font-weight:900;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+.page-sub{color:var(--text-secondary);font-size:.9rem;font-weight:600;margin-bottom:22px}
+
+.glass-card{background:var(--card-bg);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--card-border);border-radius:20px;padding:24px;box-shadow:0 10px 40px -10px rgba(0,0,0,.2)}
+.local-filter-card{padding:14px 18px;margin-bottom:18px}
+.form-label{display:block;font-size:.72rem;font-weight:800;color:var(--text-secondary);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.form-input{width:100%;padding:9px 12px;background:var(--input-bg);border:1px solid var(--card-border);border-radius:9px;color:var(--text-primary);font-size:.85rem;font-weight:600;font-family:inherit;transition:all .25s}
+.form-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,165,233,.1)}
+
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:white;font-weight:800;font-size:.85rem;border:none;border-radius:10px;padding:10px 20px;cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 18px -6px rgba(14,165,233,.5)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 10px 24px -6px rgba(99,102,241,.6)}
+.btn-ghost{background:transparent;border:1px solid var(--card-border);color:var(--text-secondary);font-weight:700;padding:9px 14px;border-radius:9px;font-size:.82rem;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);background:rgba(14,165,233,.05)}
+
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:22px}
+.stat-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .25s}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px -12px var(--stat-color,rgba(14,165,233,.3))}
+.stat-card::before{content:'';position:absolute;top:0;right:0;left:0;height:3px;background:var(--stat-color,var(--accent))}
+.stat-label{font-size:.72rem;font-weight:800;color:var(--text-muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.stat-value{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;color:var(--stat-color,var(--accent));line-height:1}
+
+/* Table */
+.data-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.data-table th{text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800;border-bottom:1px solid var(--card-border);background:rgba(148,163,184,.05);text-transform:uppercase;letter-spacing:.04em}
+.data-table td{padding:12px;font-weight:600;border-bottom:1px solid var(--card-border);color:var(--text-primary)}
+.data-table tbody tr:hover{background:rgba(14,165,233,.04)}
+.data-table tbody tr{cursor:pointer;transition:background .15s}
+
+.badge{padding:3px 10px;border-radius:6px;font-size:.7rem;font-weight:900;display:inline-block}
+.badge.excellent{background:rgba(14,165,233,.15);color:#0ea5e9}
+.badge.good{background:rgba(16,185,129,.15);color:#10b981}
+.badge.ok{background:rgba(245,158,11,.15);color:#f59e0b}
+.badge.weak{background:rgba(239,68,68,.15);color:#ef4444}
+.badge.quality{background:rgba(139,92,246,.15);color:#8b5cf6}
+
+.chart-box{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:16px;min-height:280px}
+.chart-title{font-size:.85rem;font-weight:900;color:var(--text-primary);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+
+/* Modal */
+.modal{position:fixed;inset:0;z-index:200;background:rgba(4,7,15,.7);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.modal-card{background:var(--card-bg);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--card-border);border-radius:22px;max-width:1000px;width:100%;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 30px 60px -20px rgba(0,0,0,.5)}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--card-border);display:flex;justify-content:space-between;align-items:center}
+.modal-body{padding:22px;overflow-y:auto;flex:1}
+
+.loading-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s}
+.loading-screen.hide{opacity:0;pointer-events:none}
+
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
+.empty-state i{font-size:3rem;margin-bottom:14px;opacity:.4;display:block}
+
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(14,165,233,.4),rgba(99,102,241,.4));border-radius:10px;border:2px solid var(--bg)}
+::selection{background:rgba(14,165,233,.35);color:#fff}
+</style>
+<link rel="stylesheet" href="../theme-overrides.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+<script src="../loading-logo.js" defer></script>
+<script src="../loader-buttons.js" defer></script>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color:var(--accent)"></i>
+  <p class="text-sm font-bold" style="color:var(--text-secondary)">جاري تحميل لوحة الجودة...</p>
+</div>
+
+<div class="aurora-bg"></div>
+<div class="grid-overlay"></div>
+
+<!-- HEADER -->
+<div class="nav-shell">
+  <header class="nav-inner">
+    <div class="flex items-center gap-3">
+      <div class="logo-dot"></div>
+      <div>
+        <a href="../dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+        <p class="text-[10px] font-bold mt-1" style="color:var(--text-muted)">إحصائيات الجودة (MRD)</p>
+      </div>
+    </div>
+    <nav class="hidden md:flex items-center gap-7">
+      <a href="../dashboard.html" class="nav-link">لوحة التحكم</a>
+      <a href="../about.html" class="nav-link">عن النظام</a>
+      <a href="../security.html" class="nav-link">درع VEXORIS</a>
+      <a href="../courses.html" class="nav-link">دورات تدريبية</a>
+      <a href="../feedback.html" class="nav-link">رأيك يهمنا</a>
+    </nav>
+    <div class="flex items-center gap-2">
+      <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم"><i class="fa-solid fa-moon"></i></button>
+      <div style="position:relative">
+        <button class="user-chip" id="userChip">
+          <div class="user-avatar" id="userAvatar"></div>
+          <div class="user-info">
+            <span class="user-name" id="navUserName">...</span>
+            <span class="user-role" id="navUserRole">...</span>
+          </div>
+          <i class="fa-solid fa-chevron-down text-xs" style="color:var(--text-muted)"></i>
+        </button>
+        <div class="user-dropdown" id="userDropdown">
+          <div class="dropdown-profile">
+            <div class="dropdown-avatar-lg" id="dropdownAvatar"></div>
+            <div>
+              <div class="dropdown-name" id="dropdownName">...</div>
+              <div class="dropdown-email" id="dropdownEmail">...</div>
+              <div class="dropdown-role-badge" id="dropdownRoleBadge"></div>
+            </div>
+          </div>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" onclick="showProfile()"><i class="fa-solid fa-user-pen"></i> إدارة الملف الشخصي</button>
+          <button class="dropdown-item" onclick="showChangePassword()"><i class="fa-solid fa-key"></i> تغيير كلمة المرور</button>
+        </div>
+      </div>
+      <button onclick="logout()" class="icon-btn logout-btn" id="logoutBtn" title="تسجيل الخروج"><i class="fa-solid fa-power-off"></i></button>
+      <a href="../dashboard.html" style="padding:8px 16px;border-radius:10px;background:transparent;border:1px solid var(--card-border);color:var(--text-secondary);font-weight:700;font-size:.78rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+        <i class="fa-solid fa-arrow-right"></i> رجوع
+      </a>
+    </div>
+  </header>
+</div>
+
+<!-- MAIN -->
+<main class="app-container">
+
+  <!-- GLOBAL FILTER -->
+  <div class="global-filter-bar">
+    <div style="min-width:140px">
+      <label class="form-label">نوع التاريخ</label>
+      <select id="gDateType" class="form-input">
+        <option value="discharge">تاريخ الخروج</option>
+        <option value="timestamp">تاريخ التقييم</option>
+      </select>
+    </div>
+    <div style="min-width:150px"><label class="form-label">من</label><input type="date" id="gStart" class="form-input"></div>
+    <div style="min-width:150px"><label class="form-label">إلى</label><input type="date" id="gEnd" class="form-input"></div>
+    <button onclick="applyGlobalFilter()" class="btn-primary"><i class="fa-solid fa-filter"></i> تطبيق</button>
+    <button onclick="clearGlobalFilter()" class="btn-ghost"><i class="fa-solid fa-rotate-left"></i> إعادة تعيين</button>
+    <button onclick="refreshCurrentTab()" class="btn-ghost"><i class="fa-solid fa-rotate"></i> تحديث</button>
+    <div style="flex:1;text-align:left;font-size:.72rem;color:var(--text-muted);font-weight:700" id="filterStatus">آخر 30 يوم</div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs-bar">
+    <button class="side-btn active" data-tab="overview" onclick="switchTab('overview')"><i class="fa-solid fa-gauge-high"></i> النظرة العامة</button>
+    <button class="side-btn" data-tab="reviewers" onclick="switchTab('reviewers')"><i class="fa-solid fa-users"></i> المراجعون</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <section class="tab-pane active" id="tab-overview">
+    <div class="page-title"><i class="fa-solid fa-award text-warning"></i> نظرة عامة على الجودة</div>
+    <p class="page-sub">أداء المراجعين وجودة المراجعة في الفترة المحددة</p>
+
+    <div class="stat-grid">
+      <div class="stat-card" style="--stat-color:#0ea5e9"><div class="stat-label"><i class="fa-solid fa-users"></i> إجمالي المراجعين</div><div class="stat-value" id="kpiReviewers">—</div></div>
+      <div class="stat-card" style="--stat-color:#6366f1"><div class="stat-label"><i class="fa-solid fa-folder"></i> إجمالي الملفات</div><div class="stat-value" id="kpiFiles">—</div></div>
+      <div class="stat-card" style="--stat-color:#8b5cf6"><div class="stat-label"><i class="fa-solid fa-calendar"></i> أيام العمل</div><div class="stat-value" id="kpiDays">—</div></div>
+      <div class="stat-card" style="--stat-color:#10b981"><div class="stat-label"><i class="fa-solid fa-chart-line"></i> متوسط الإنجاز</div><div class="stat-value" id="kpiAvgPer">—</div></div>
+      <div class="stat-card" style="--stat-color:#f59e0b"><div class="stat-label"><i class="fa-solid fa-star"></i> متوسط الجودة</div><div class="stat-value" id="kpiQuality">—</div></div>
+      <div class="stat-card" style="--stat-color:#ef4444"><div class="stat-label"><i class="fa-solid fa-trophy"></i> الأعلى إنتاجية</div><div class="stat-value" id="kpiTop" style="font-size:1.1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">—</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;margin-bottom:22px">
+      <div class="chart-box"><div class="chart-title"><i class="fa-solid fa-chart-area text-accent"></i> الاتجاه الزمني للإنتاجية</div><div id="chartTrend" style="min-height:240px"></div></div>
+      <div class="chart-box"><div class="chart-title"><i class="fa-solid fa-chart-line text-accent-3"></i> اتجاه جودة المراجعة</div><div id="chartQuality" style="min-height:240px"></div></div>
+      <div class="chart-box"><div class="chart-title"><i class="fa-solid fa-pie-chart text-accent-2"></i> توزيع التخصصات</div><div id="chartSpecialties" style="min-height:240px"></div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:18px">
+      <div class="glass-card">
+        <div class="chart-title mb-4"><i class="fa-solid fa-triangle-exclamation text-danger"></i> أكثر النواقص تكراراً</div>
+        <div id="errorsHeatmap" style="display:flex;flex-direction:column;gap:12px"></div>
+      </div>
+      <div class="glass-card">
+        <div class="chart-title mb-4"><i class="fa-solid fa-trophy text-warning"></i> أفضل 10 مراجعين</div>
+        <div id="chartTop" style="min-height:280px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEWERS -->
+  <section class="tab-pane" id="tab-reviewers">
+    <div class="page-title"><i class="fa-solid fa-users text-accent"></i> المراجعون</div>
+    <p class="page-sub">قائمة مفصلة بأداء كل مراجع</p>
+
+    <div class="glass-card local-filter-card mb-5">
+      <div class="flex gap-3 items-end flex-wrap">
+        <div style="min-width:170px"><label class="form-label">ترتيب حسب</label>
+          <select id="sortBy" class="form-input" onchange="loadReviewers()">
+            <option value="quality">جودة المراجعة</option>
+            <option value="count">عدد الملفات</option>
+            <option value="efficiency">الكفاءة اليومية</option>
+          </select>
+        </div>
+        <div style="min-width:150px"><label class="form-label">مجموعة القسم</label>
+          <select id="deptGroup" class="form-input" onchange="loadReviewers()">
+            <option value="all">الكل</option>
+            <option value="جودة">جودة</option>
+            <option value="سجلات">سجلات</option>
+            <option value="أخرى">أخرى</option>
+          </select>
+        </div>
+        <div style="min-width:180px"><label class="form-label">التخصص</label>
+          <select id="specFilter" class="form-input" onchange="loadReviewers()">
+            <option value="all">الكل</option>
+          </select>
+        </div>
+        <input type="text" id="reviewersSearch" oninput="filterReviewers()" placeholder="بحث بالاسم..." class="form-input" style="max-width:240px">
+        <button onclick="openCompareModal()" class="btn-ghost"><i class="fa-solid fa-people-arrows"></i> مقارنة</button>
+        <button onclick="exportReviewersExcel()" class="btn-ghost" style="color:#10b981;border-color:#10b981"><i class="fa-solid fa-file-excel"></i> Excel</button>
+        <button onclick="exportReviewersPDF()" class="btn-ghost" style="color:#ef4444;border-color:#ef4444"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+      </div>
+    </div>
+
+    <div class="glass-card">
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>المراجع</th>
+              <th style="text-align:center">القسم</th>
+              <th style="text-align:center">الملفات</th>
+              <th style="text-align:center">الكفاءة اليومية</th>
+              <th style="text-align:center">جودة المراجعة</th>
+              <th style="text-align:center">إجراء</th>
+            </tr>
+          </thead>
+          <tbody id="reviewersBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Reviewer Modal -->
+<div class="modal" id="reviewerModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div style="font-size:1.1rem;font-weight:900" id="rmTitle">تفاصيل المراجع</div>
+        <div style="font-size:.72rem;color:var(--text-muted);font-weight:700;margin-top:2px" id="rmSubtitle"></div>
+      </div>
+      <button onclick="closeReviewerModal()" class="icon-btn"><i class="fa-solid fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="rmBody"></div>
+  </div>
+</div>
+
+<!-- Compare Modal -->
+<div class="modal" id="compareModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div style="font-size:1.1rem;font-weight:900">مقارنة مراجعين</div>
+      <button onclick="closeCompareModal()" class="icon-btn"><i class="fa-solid fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;margin-bottom:20px">
+        <div><label class="form-label">المراجع الأول</label><select id="cmpR1" class="form-input"></select></div>
+        <div><label class="form-label">المراجع الثاني</label><select id="cmpR2" class="form-input"></select></div>
+        <button onclick="runCompare()" class="btn-primary"><i class="fa-solid fa-play"></i> مقارنة</button>
+      </div>
+      <div id="cmpResult"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Daily Modal -->
+<div class="modal" id="dailyModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div style="font-size:1.1rem;font-weight:900" id="dmTitle">الإحصائيات اليومية</div>
+        <div style="font-size:.72rem;color:var(--text-muted);font-weight:700;margin-top:2px" id="dmSubtitle"></div>
+      </div>
+      <button onclick="closeDailyModal()" class="icon-btn"><i class="fa-solid fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="dailyChart" style="min-height:350px"></div>
+    </div>
+  </div>
+</div>
+
+<script src="../notify.js"></script>
+<script type="module" src="../session-manager.js"></script>
+<script type="module">
+import { supabase } from '../supabase-client.js';
+
+// ============================================================
+// CONSTANTS
+// ============================================================
+const ROLE_META = {
+  super_admin:{name:'المطور',color:'#a855f7',icon:'fa-crown'},
+  admin:{name:'ادارة السجلات',color:'#0ea5e9',icon:'fa-user-shield'},
+  manager:{name:'المدير الطبي',color:'#6366f1',icon:'fa-user-tie'},
+  auditor:{name:'مراجع جودة',color:'#f59e0b',icon:'fa-clipboard-check'},
+  senior:{name:'رئيس قسم',color:'#10b981',icon:'fa-star'},
+  doctor:{name:'طبيب',color:'#14b8a6',icon:'fa-stethoscope'},
+  viewer:{name:'مراجع',color:'#94a3b8',icon:'fa-eye'}
+};
+
+const ERROR_LABELS = {
+  'noSign':'بدون توقيع', 'noStamp':'بدون ختم', 'unclearSign':'توقيع غير واضح',
+  'noTime':'بدون وقت', 'noDate':'بدون تاريخ', 'noDiagnosis':'بدون تشخيص',
+  'unclearHandwriting':'خط غير واضح', 'incompleteData':'بيانات غير مكتملة',
+  'missingForm':'نموذج غير موجود', 'emptyForm':'نموذج فارغ',
+  'incompleteDiagnosis':'تشخيص غير مكتمل', 'patientRelativeSign':'توقيع المريض أو ذويه',
+  'treatment':'العلاج', 'bloodSugar':'نسبة السكر', 'heightWeight':'الطول/الوزن',
+  'vitalSigns':'العلامات الحيوية', 'medicalHistory':'التاريخ المرضي',
+  'incompleteassesment':'تقييم غير مكتمل', 'invasivedate':'تاريخ الرفع',
+  'invasivereason':'سبب الرفع', 'invasiveperson':'القائم بالرفع',
+  'admissionType':'نوع الدخول', 'dischargeTime':'وقت الخروج',
+  'dischargeCondition':'الحالة عند الخروج', 'investigations':'الفحوصات',
+  'anesthesiaInfo':'معلومات التخدير', 'icuInOutDate':'تاريخ دخول وخروج الرعاية',
+  'dietPlan':'النظام الغذائي', 'mobility':'الحركة', 'followUpDate':'موعد زيارة الطبيب',
+  'nationalId':'الرقم القومي', 'admissionTime':'وقت الدخول',
+  'transferTime':'وقت النقل', 'transferReason':'سبب النقل',
+  'transferDestination':'مكان النقل', 'allergyTest':'اختبار حساسية',
+  'allergyAssessment':'تقييم حساسية', 'vaccinationAssessment':'تقييم التطعيمات',
+  'physicalMeasurements':'القياسات الجسدية', 'medicationHistory':'التاريخ الدوائي',
+  'reAssessment':'إعادة التقييم', 'icuRoomNumber':'رقم غرفة الرعاية',
+  'problemResolutionDate':'تاريخ حل المشكلة', 'deputySign':'توقيع النائب بالعلم',
+  'admissionMedications':'أدوية الدخول', 'noTimeFrame':'بدون إطار زمني',
+  'unscrubTime':'وقت فك التعقيم', 'cauteryNumber':'رقم جهاز الكي',
+  'intraOpNotes':'ملاحظات المتابعة في العملية', 'orRoomNumber':'رقم غرفة العمليات',
+  'operationDuration':'مدة العملية', 'ecg':'رسم القلب',
+  'noPatientMonitoring':'لم يتم متابعة المريض', 'icuBedStatus':'الموقف من حجز سرير رعاية',
+  'consultationStatus':'الموقف من طلب الاستشارة', 'consentStatus':'الموقف من كتابة الموافقة',
+  'خطأ عام':'خطأ عام'
+};
+
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  user:null, role:'viewer', activeTab:'overview',
+  filter:{start:null, end:null, dateType:'discharge'},
+  cache:{reviewers:[]},
+  charts:{},
+  reviewerModalPage:1,
+  currentReviewerName:null
+};
+
+function $(id){return document.getElementById(id)}
+function translateError(code){return ERROR_LABELS[code] || code}
+function toggleTheme(){const h=document.documentElement;h.classList.toggle('dark');localStorage.setItem('theme',h.classList.contains('dark')?'dark':'light')}
+window.toggleTheme = toggleTheme;
+
+function fmtDate(d){if(!d)return '';const dt=new Date(d);return isNaN(dt)?d:dt.toLocaleDateString('en-GB',{year:'numeric',month:'2-digit',day:'2-digit'})}
+function num(n){return Number(n||0).toLocaleString('en-US')}
+function escapeHtml(s){if(!s)return '';return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function qualityColor(p){return p>=90?'#10b981':p>=75?'#0ea5e9':p>=60?'#f59e0b':'#ef4444'}
+function efficiencyBadge(eff){
+  if(eff>=2) return {text:'🔥 استثنائي', cls:'excellent'};
+  if(eff>=1) return {text:'⚡ ممتاز', cls:'good'};
+  if(eff>=0.5) return {text:'👍 جيد', cls:'ok'};
+  return {text:'⚠️ ضعيف', cls:'weak'};
+}
+
+// ============================================================
+// INIT
+// ============================================================
+(async () => {
+  const {data:{session}} = await supabase.auth.getSession();
+  if(!session){window.location.href='../login.html';return}
+  state.user = session.user;
+
+  const {data:profile} = await supabase.from('profiles').select('role,username,email').eq('id',session.user.id).single();
+  state.role = profile?.role || 'viewer';
+  const meta = ROLE_META[state.role] || ROLE_META.viewer;
+  const name = session.user.user_metadata?.display_name || profile?.username || 'مستخدم';
+
+  $('userChip').style.display = 'inline-flex';
+  $('logoutBtn').style.display = 'inline-flex';
+  $('navUserName').textContent = name;
+  $('navUserRole').textContent = meta.name;
+  $('navUserRole').style.color = meta.color;
+  const avatarBg = `linear-gradient(135deg,${meta.color},${meta.color}cc)`;
+  ['userAvatar','dropdownAvatar'].forEach(id=>{const el=$(id);if(el){el.innerHTML=`<i class="fa-solid ${meta.icon}"></i>`;el.style.background=avatarBg}});
+  $('dropdownName').textContent = name;
+  $('dropdownEmail').textContent = session.user.email || profile?.email || '';
+  $('dropdownRoleBadge').innerHTML = `<i class="fa-solid ${meta.icon}"></i> ${meta.name}`;
+  $('dropdownRoleBadge').style.background = 'rgba(255,255,255,0.06)';
+  $('dropdownRoleBadge').style.color = meta.color;
+
+  const uc = $('userChip'), ud = $('userDropdown');
+  uc.addEventListener('click', e=>{e.stopPropagation();uc.classList.toggle('open');ud.classList.toggle('open')});
+  document.addEventListener('click', e=>{if(!ud.contains(e.target)&&!uc.contains(e.target)){uc.classList.remove('open');ud.classList.remove('open')}});
+
+  window.logout = async function(){
+    if(window.showConfirm){const ok=await window.showConfirm({title:'تسجيل الخروج',message:'هل تريد الخروج؟',confirmText:'خروج',cancelText:'إلغاء',type:'danger'});if(!ok)return}
+    await supabase.auth.signOut();sessionStorage.clear();window.location.href='../login.html';
+  };
+  window.showProfile = () => window.location.href='../profile.html';
+  window.showChangePassword = () => window.location.href='../change-password.html';
+
+  // Default date: last 30 days
+  const now = new Date();
+  const past = new Date(Date.now() - 30*86400000);
+  $('gStart').value = past.toISOString().split('T')[0];
+  $('gEnd').value = now.toISOString().split('T')[0];
+  state.filter.start = $('gStart').value;
+  state.filter.end = $('gEnd').value;
+  $('filterStatus').textContent = `📅 ${state.filter.start} ← ${state.filter.end}`;
+  $('filterStatus').style.color = 'var(--accent)';
+
+  syncTabsBarTop();
+  window.addEventListener('resize', syncTabsBarTop);
+
+  await loadAllSpecialties();
+  await loadOverview();
+  $('loadingScreen').classList.add('hide');
+})();
+
+function syncTabsBarTop(){
+  const navShell = document.querySelector('.nav-shell');
+  if(!navShell) return;
+  document.documentElement.style.setProperty('--nav-height', navShell.offsetHeight + 'px');
+}
+
+// ============================================================
+// GLOBAL FILTER
+// ============================================================
+window.applyGlobalFilter = async function(){
+  const start = $('gStart').value || null;
+  const end = $('gEnd').value || null;
+  const dateType = $('gDateType').value;
+  if(start && end && new Date(start) > new Date(end)){
+    if(window.showNotification) showNotification('تاريخ البداية يجب أن يكون قبل النهاية', 'error');
+    return;
+  }
+  state.filter = {start, end, dateType};
+  const dtLabel = dateType==='discharge'?'تاريخ الخروج':'تاريخ التقييم';
+  if(start || end){
+    $('filterStatus').textContent = `📅 ${dtLabel}: ${start||'البداية'} ← ${end||'اليوم'}`;
+    $('filterStatus').style.color = 'var(--accent)';
+  } else {
+    $('filterStatus').textContent = 'كل البيانات';
+    $('filterStatus').style.color = 'var(--text-muted)';
+  }
+  await refreshCurrentTab();
+  if(window.showNotification) showNotification('تم تطبيق الفلتر', 'success');
+};
+
+window.clearGlobalFilter = function(){
+  $('gStart').value = ''; $('gEnd').value = ''; $('gDateType').value = 'discharge';
+  state.filter = {start:null, end:null, dateType:'discharge'};
+  $('filterStatus').textContent = 'كل البيانات';
+  $('filterStatus').style.color = 'var(--text-muted)';
+  refreshCurrentTab();
+};
+
+async function refreshCurrentTab(){
+  if(state.activeTab==='overview') await loadOverview();
+  else if(state.activeTab==='reviewers') await loadReviewers();
+}
+window.refreshCurrentTab = refreshCurrentTab;
+
+window.switchTab = function(tab){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.side-btn').forEach(b=>b.classList.remove('active'));
+  $('tab-'+tab).classList.add('active');
+  document.querySelector(`.side-btn[data-tab="${tab}"]`).classList.add('active');
+  state.activeTab = tab;
+  refreshCurrentTab();
+};
+
+// ============================================================
+// LOAD SPECIALTIES (once)
+// ============================================================
+async function loadAllSpecialties(){
+  try{
+    const {data} = await supabase.rpc('get_quality_all_specialties');
+    const sel = $('specFilter');
+    sel.innerHTML = '<option value="all">الكل</option>';
+    (data||[]).forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o)});
+  }catch(e){console.error(e)}
+}
+
+// ============================================================
+// OVERVIEW
+// ============================================================
+async function loadOverview(){
+  try{
+    const f = state.filter;
+    const [kpiRes, trendRes, errorsRes, specRes, topRes] = await Promise.all([
+      supabase.rpc('get_quality_kpis', {p_start:f.start, p_end:f.end, p_date_type:f.dateType}),
+      supabase.rpc('get_quality_trend', {p_start:f.start, p_end:f.end, p_date_type:f.dateType}),
+      supabase.rpc('get_quality_errors', {p_start:f.start, p_end:f.end, p_date_type:f.dateType}),
+      supabase.rpc('get_quality_specialties', {p_start:f.start, p_end:f.end, p_date_type:f.dateType}),
+      supabase.rpc('get_quality_reviewers', {p_start:f.start, p_end:f.end, p_date_type:f.dateType, p_sort_by:'count', p_dept_group:'all', p_specialty:'all'})
+    ]);
+    renderOverview({
+      kpi: kpiRes.data || {},
+      trend: trendRes.data || {dates:[],counts:[],quality:[]},
+      errors: errorsRes.data || [],
+      specs: specRes.data || [],
+      top: (topRes.data || []).slice(0,10)
+    });
+  }catch(err){console.error(err);if(window.showNotification)showNotification('خطأ: '+err.message,'error')}
+}
+
+function renderOverview(data){
+  const k = data.kpi;
+  $('kpiReviewers').textContent = num(k.total_reviewers);
+  $('kpiFiles').textContent = num(k.total_files);
+  $('kpiDays').textContent = num(k.working_days);
+  $('kpiAvgPer').textContent = k.avg_per_reviewer || 0;
+  $('kpiQuality').textContent = (k.avg_quality||0) + '%';
+  $('kpiTop').textContent = k.top_reviewer || '--';
+
+  // Trend
+  destroyChart('trend');
+  if(data.trend.dates && data.trend.dates.length){
+    state.charts.trend = new ApexCharts($('chartTrend'),{
+      chart:{type:'area',height:240,toolbar:{show:false},background:'transparent',fontFamily:'Tajawal'},
+      series:[{name:'ملفات',data:data.trend.counts}],
+      colors:['#0ea5e9'],stroke:{curve:'smooth',width:3},fill:{type:'gradient',opacityFrom:.4,opacityTo:.05},
+      xaxis:{categories:data.trend.dates.map(d=>d.slice(5)),labels:{style:{fontSize:'10px',fontWeight:700}}},
+      dataLabels:{enabled:false},grid:{borderColor:'rgba(148,163,184,.1)'},
+      theme:{mode:document.documentElement.classList.contains('dark')?'dark':'light'}
+    });
+    state.charts.trend.render();
+  }
+
+  // Quality trend
+  destroyChart('quality');
+  if(data.trend.dates && data.trend.dates.length){
+    state.charts.quality = new ApexCharts($('chartQuality'),{
+      chart:{type:'line',height:240,toolbar:{show:false},background:'transparent',fontFamily:'Tajawal'},
+      series:[{name:'جودة %',data:data.trend.quality}],
+      colors:['#8b5cf6'],stroke:{curve:'smooth',width:3},markers:{size:3},
+      xaxis:{categories:data.trend.dates.map(d=>d.slice(5)),labels:{style:{fontSize:'10px',fontWeight:700}}},
+      yaxis:{min:0,max:100,labels:{formatter:v=>v+'%'}},
+      dataLabels:{enabled:false},grid:{borderColor:'rgba(148,163,184,.1)'},
+      theme:{mode:document.documentElement.classList.contains('dark')?'dark':'light'}
+    });
+    state.charts.quality.render();
+  }
+
+  // Specialties donut
+  destroyChart('spec');
+  if(data.specs.length){
+    state.charts.spec = new ApexCharts($('chartSpecialties'),{
+      chart:{type:'donut',height:240,background:'transparent',fontFamily:'Tajawal'},
+      series:data.specs.map(s=>s.count),
+      labels:data.specs.map(s=>s.name),
+      colors:['#0ea5e9','#6366f1','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#a855f7'],
+      legend:{position:'bottom',fontSize:'10px',fontWeight:700},
+      dataLabels:{enabled:false},
+      plotOptions:{pie:{donut:{size:'70%',labels:{show:true,total:{show:true,label:'ملفات',fontSize:'12px',fontWeight:'900'}}}}}
+    });
+    state.charts.spec.render();
+  }
+
+  // Errors heatmap
+  const errEl = $('errorsHeatmap');
+  if(!data.errors.length){
+    errEl.innerHTML = '<div style="text-align:center;padding:20px;color:#10b981;font-weight:800"><i class="fa-solid fa-check-circle"></i> لا توجد أخطاء</div>';
+  } else {
+    const max = data.errors[0].count;
+    errEl.innerHTML = data.errors.map(e=>`
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:.78rem;font-weight:800;margin-bottom:5px">
+          <span>${escapeHtml(translateError(e.issue))}</span>
+          <span style="color:#ef4444">${num(e.count)}</span>
+        </div>
+        <div style="height:7px;background:rgba(148,163,184,.12);border-radius:4px;overflow:hidden">
+          <div style="height:100%;width:${(e.count/max)*100}%;background:linear-gradient(90deg,#ef4444,#f59e0b);border-radius:4px"></div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Top 10 chart
+  destroyChart('top');
+  if(data.top.length){
+    state.charts.top = new ApexCharts($('chartTop'),{
+      chart:{type:'bar',height:280,toolbar:{show:false},background:'transparent',fontFamily:'Tajawal',
+        events:{dataPointSelection:(e,c,cfg)=>{const name=data.top[cfg.dataPointIndex].name;openReviewerModal(name,1)}}},
+      series:[{name:'ملفات',data:data.top.map(t=>t.file_count)}],
+      colors:['#14b8a6'],
+      plotOptions:{bar:{borderRadius:6,columnWidth:'50%',horizontal:false}},
+      xaxis:{categories:data.top.map(t=>t.name),labels:{rotate:-45,trim:true,maxHeight:80,style:{fontSize:'10px',fontWeight:700}}},
+      dataLabels:{enabled:true,style:{fontSize:'10px',fontWeight:800}},
+      grid:{borderColor:'rgba(148,163,184,.1)'},
+      theme:{mode:document.documentElement.classList.contains('dark')?'dark':'light'}
+    });
+    state.charts.top.render();
+  }
+}
+
+// ============================================================
+// REVIEWERS
+// ============================================================
+async function loadReviewers(){
+  try{
+    const f = state.filter;
+    const sortBy = $('sortBy').value || 'quality';
+    const deptGroup = $('deptGroup').value || 'all';
+    const spec = $('specFilter').value || 'all';
+    const {data} = await supabase.rpc('get_quality_reviewers',{
+      p_start:f.start, p_end:f.end, p_date_type:f.dateType,
+      p_sort_by:sortBy, p_dept_group:deptGroup, p_specialty:spec
+    });
+    state.cache.reviewers = data || [];
+    renderReviewers();
+  }catch(err){console.error(err);if(window.showNotification)showNotification(err.message,'error')}
+}
+
+function renderReviewers(){
+  const items = state.cache.reviewers;
+  const search = ($('reviewersSearch').value||'').toLowerCase().trim();
+  const filtered = search ? items.filter(r=>r.name.toLowerCase().includes(search)) : items;
+  const tbody = $('reviewersBody');
+  if(!filtered.length){
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fa-solid fa-users"></i>لا يوجد مراجعون</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map((r,i)=>{
+    const qColor = qualityColor(r.quality_score);
+    const badge = efficiencyBadge(r.efficiency);
+    const deptBadge = r.dept_group==='جودة'?'background:rgba(139,92,246,.15);color:#8b5cf6':r.dept_group==='سجلات'?'background:rgba(14,165,233,.15);color:#0ea5e9':'background:rgba(148,163,184,.15);color:#64748b';
+    return `
+      <tr onclick="openReviewerModal('${escapeHtml(r.name).replace(/'/g,"\\'")}',1)">
+        <td style="font-family:'Space Grotesk';font-weight:700;color:var(--text-muted);text-align:center">${i+1}</td>
+        <td style="font-weight:900">${escapeHtml(r.name)}</td>
+        <td style="text-align:center"><span class="badge" style="${deptBadge}">${escapeHtml(r.department||'غير محدد')}</span></td>
+        <td style="text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.file_count)}</td>
+        <td style="text-align:center"><span class="badge ${badge.cls}">${badge.text} (${r.efficiency})</span></td>
+        <td style="text-align:center"><span class="badge quality" style="color:${qColor}">${r.quality_score}%</span></td>
+        <td style="text-align:center"><button class="btn-ghost" style="padding:5px 10px" onclick="event.stopPropagation();openReviewerModal('${escapeHtml(r.name).replace(/'/g,"\\'")}',1)"><i class="fa-solid fa-eye"></i> تفاصيل</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+window.filterReviewers = function(){ renderReviewers(); };
+
+// ============================================================
+// REVIEWER MODAL
+// ============================================================
+window.openReviewerModal = async function(name, page){
+  state.currentReviewerName = name;
+  state.reviewerModalPage = page;
+  $('rmTitle').textContent = name;
+  $('rmSubtitle').textContent = 'جاري التحميل...';
+  $('rmBody').innerHTML = '<div style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin text-2xl" style="color:var(--accent)"></i></div>';
+  $('reviewerModal').classList.add('open');
+
+  try{
+    const f = state.filter;
+    const {data} = await supabase.rpc('get_quality_reviewer_details',{
+      p_reviewer_name: name, p_start:f.start, p_end:f.end, p_date_type:f.dateType,
+      p_page: page, p_page_size: 10
+    });
+    renderReviewerModal(data);
+  }catch(err){
+    console.error(err);
+    $('rmBody').innerHTML = `<div style="text-align:center;padding:40px;color:#ef4444">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+function renderReviewerModal(data){
+  const pg = data.pagination;
+  $('rmSubtitle').textContent = `${num(data.total_files)} ملف · جودة ${data.avg_quality}% · ${num(data.total_errors)} خطأ`;
+
+  let html = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+      <div style="background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.2);border-radius:12px;padding:14px;text-align:center">
+        <div style="font-family:'Space Grotesk';font-size:1.4rem;font-weight:700;color:#0ea5e9">${num(data.total_files)}</div>
+        <div style="font-size:.65rem;font-weight:800;color:var(--text-muted);margin-top:4px">إجمالي الملفات</div>
+      </div>
+      <div style="background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);border-radius:12px;padding:14px;text-align:center">
+        <div style="font-family:'Space Grotesk';font-size:1.4rem;font-weight:700;color:#8b5cf6">${data.avg_quality}%</div>
+        <div style="font-size:.65rem;font-weight:800;color:var(--text-muted);margin-top:4px">جودة المراجعة</div>
+      </div>
+      <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:14px;text-align:center">
+        <div style="font-family:'Space Grotesk';font-size:1.4rem;font-weight:700;color:#ef4444">${num(data.total_errors)}</div>
+        <div style="font-size:.65rem;font-weight:800;color:var(--text-muted);margin-top:4px">إجمالي الأخطاء</div>
+      </div>
+    </div>`;
+
+  // Top errors
+  if(data.top_errors && data.top_errors.length){
+    html += `<div style="margin-bottom:20px">
+      <div style="font-weight:900;font-size:.9rem;margin-bottom:10px;color:#ef4444"><i class="fa-solid fa-triangle-exclamation"></i> أكثر 5 أخطاء</div>
+      <div style="display:grid;gap:6px">`;
+    data.top_errors.forEach(e=>{
+      html += `<div style="display:flex;justify-content:space-between;padding:8px 12px;background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.2);border-radius:8px">
+        <span style="font-weight:700;font-size:.82rem">${escapeHtml(translateError(e.error))}</span>
+        <span style="background:#ef4444;color:#fff;padding:2px 10px;border-radius:12px;font-size:.75rem;font-weight:900">${e.count}</span>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // Files table
+  html += `<div style="margin-bottom:16px">
+    <div style="font-weight:900;font-size:.9rem;margin-bottom:10px;color:var(--text-primary)"><i class="fa-solid fa-folder"></i> تفاصيل الملفات</div>
+    <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:12px">
+      <table class="data-table" style="font-size:.8rem">
+        <thead><tr><th>الرقم الطبي</th><th>الزيارة</th><th style="text-align:center">التخصص</th><th style="text-align:center">التاريخ</th><th style="text-align:center">الجودة</th></tr></thead>
+        <tbody>`;
+  if(!data.files || !data.files.length){
+    html += `<tr><td colspan="5"><div class="empty-state">لا توجد ملفات</div></td></tr>`;
+  } else {
+    data.files.forEach(f=>{
+      const c = qualityColor(f.quality_pct);
+      html += `<tr>
+        <td style="font-family:'Space Grotesk';font-weight:700">${escapeHtml(f.medical_id)}</td>
+        <td>${escapeHtml(f.visit_number||'-')}</td>
+        <td style="text-align:center">${escapeHtml(f.specialty||'-')}</td>
+        <td style="text-align:center">${fmtDate(f.file_date)}</td>
+        <td style="text-align:center"><span class="badge" style="background:${c}20;color:${c}">${f.quality_pct}%</span></td>
+      </tr>`;
+    });
+  }
+  html += `</tbody></table></div></div>`;
+
+  // Pagination
+  html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+    <div style="font-size:.8rem;color:var(--text-secondary);font-weight:700">صفحة ${pg.page} من ${pg.total_pages}</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-ghost" ${!pg.has_prev?'disabled style="opacity:0.4;cursor:not-allowed"':''} onclick="openReviewerModal('${escapeHtml(state.currentReviewerName).replace(/'/g,"\\'")}',${pg.page-1})"><i class="fa-solid fa-chevron-right"></i> السابق</button>
+      <button class="btn-ghost" ${!pg.has_next?'disabled style="opacity:0.4;cursor:not-allowed"':''} onclick="openReviewerModal('${escapeHtml(state.currentReviewerName).replace(/'/g,"\\'")}',${pg.page+1})">التالي <i class="fa-solid fa-chevron-left"></i></button>
+      <button class="btn-ghost" onclick="showDailyModal('${escapeHtml(state.currentReviewerName).replace(/'/g,"\\'")}')"><i class="fa-solid fa-calendar"></i> يومي</button>
+    </div>
+  </div>`;
+
+  $('rmBody').innerHTML = html;
+}
+
+window.closeReviewerModal = function(){ $('reviewerModal').classList.remove('open'); };
+
+// ============================================================
+// COMPARE
+// ============================================================
+window.openCompareModal = function(){
+  const sel1 = $('cmpR1'), sel2 = $('cmpR2');
+  const opts = state.cache.reviewers.map(r=>`<option value="${escapeHtml(r.name)}">${escapeHtml(r.name)}</option>`).join('');
+  sel1.innerHTML = opts; sel2.innerHTML = opts;
+  if(state.cache.reviewers.length >= 2) sel2.selectedIndex = 1;
+  $('cmpResult').innerHTML = '';
+  $('compareModal').classList.add('open');
+};
+
+window.closeCompareModal = function(){ $('compareModal').classList.remove('open'); };
+
+window.runCompare = async function(){
+  const r1 = $('cmpR1').value, r2 = $('cmpR2').value;
+  if(!r1 || !r2 || r1 === r2){ if(window.showNotification) showNotification('اختر مراجعين مختلفين', 'error'); return; }
+  $('cmpResult').innerHTML = '<div style="text-align:center;padding:30px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent)"></i></div>';
+  try{
+    const f = state.filter;
+    const {data} = await supabase.rpc('get_quality_compare',{
+      p_reviewer1: r1, p_reviewer2: r2,
+      p_start:f.start, p_end:f.end, p_date_type:f.dateType
+    });
+    renderCompare(data, r1, r2);
+  }catch(err){
+    $('cmpResult').innerHTML = `<div style="text-align:center;color:#ef4444">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+function renderCompare(data, r1, r2){
+  const a = data.reviewer1, b = data.reviewer2;
+  let html = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+      <div style="padding:16px;background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.2);border-radius:12px;text-align:center">
+        <div style="font-weight:900;font-size:.95rem;color:#0ea5e9">${escapeHtml(a.name)}</div>
+        <div style="margin-top:8px;font-size:1.5rem;font-family:'Space Grotesk';font-weight:700;color:#0ea5e9">${num(a.total_files)}</div>
+        <div style="font-size:.7rem;color:var(--text-muted);font-weight:700">ملفات · جودة ${a.avg_quality}%</div>
+      </div>
+      <div style="padding:16px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);border-radius:12px;text-align:center">
+        <div style="font-weight:900;font-size:.95rem;color:#8b5cf6">${escapeHtml(b.name)}</div>
+        <div style="margin-top:8px;font-size:1.5rem;font-family:'Space Grotesk';font-weight:700;color:#8b5cf6">${num(b.total_files)}</div>
+        <div style="font-size:.7rem;color:var(--text-muted);font-weight:700">ملفات · جودة ${b.avg_quality}%</div>
+      </div>
+    </div>
+    <div id="cmpChart" style="min-height:280px"></div>
+  `;
+  $('cmpResult').innerHTML = html;
+
+  if(data.daily && data.daily.length){
+    if(state.charts.cmp) try{state.charts.cmp.destroy()}catch(e){}
+    state.charts.cmp = new ApexCharts($('cmpChart'),{
+      chart:{type:'line',height:280,toolbar:{show:false},background:'transparent',fontFamily:'Tajawal'},
+      series:[
+        {name:r1,data:data.daily.map(d=>d.r1)},
+        {name:r2,data:data.daily.map(d=>d.r2)}
+      ],
+      colors:['#0ea5e9','#8b5cf6'],
+      stroke:{curve:'smooth',width:3},markers:{size:3},
+      xaxis:{categories:data.daily.map(d=>d.date.slice(5)),labels:{style:{fontSize:'10px',fontWeight:700}}},
+      dataLabels:{enabled:false},grid:{borderColor:'rgba(148,163,184,.1)'},
+      legend:{position:'top',fontSize:'11px',fontWeight:700},
+      theme:{mode:document.documentElement.classList.contains('dark')?'dark':'light'}
+    });
+    state.charts.cmp.render();
+  }
+}
+
+// ============================================================
+// DAILY STATS
+// ============================================================
+window.showDailyModal = async function(name){
+  $('dmTitle').textContent = `إحصائيات يومية - ${name}`;
+  $('dmSubtitle').textContent = 'جاري التحميل...';
+  $('dailyChart').innerHTML = '<div style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent)"></i></div>';
+  $('dailyModal').classList.add('open');
+  try{
+    const f = state.filter;
+    const start = f.start || new Date(Date.now() - 30*86400000).toISOString().split('T')[0];
+    const end = f.end || new Date().toISOString().split('T')[0];
+    const {data} = await supabase.rpc('get_quality_daily',{
+      p_reviewer_name: name, p_start: start, p_end: end
+    });
+    $('dmSubtitle').textContent = `${start} ← ${end}`;
+    if(data && data.dates && data.dates.length){
+      if(state.charts.daily) try{state.charts.daily.destroy()}catch(e){}
+      state.charts.daily = new ApexCharts($('dailyChart'),{
+        chart:{type:'bar',height:350,toolbar:{show:true},background:'transparent',fontFamily:'Tajawal'},
+        series:[{name:'ملفات',data:data.counts}],
+        colors:['#14b8a6'],plotOptions:{bar:{borderRadius:5,columnWidth:'50%'}},
+        xaxis:{categories:data.dates.map(d=>d.slice(5)),labels:{rotate:-45,style:{fontSize:'10px',fontWeight:700}}},
+        dataLabels:{enabled:true,style:{fontSize:'10px',fontWeight:800}},
+        grid:{borderColor:'rgba(148,163,184,.1)'},
+        theme:{mode:document.documentElement.classList.contains('dark')?'dark':'light'}
+      });
+      state.charts.daily.render();
+    } else {
+      $('dailyChart').innerHTML = '<div class="empty-state"><i class="fa-solid fa-inbox"></i>لا توجد بيانات لهذه الفترة</div>';
+    }
+  }catch(err){
+    $('dailyChart').innerHTML = `<div style="text-align:center;color:#ef4444">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+window.closeDailyModal = function(){ $('dailyModal').classList.remove('open'); };
+
+// ============================================================
+// EXPORTS
+// ============================================================
+window.exportReviewersExcel = function(){
+  if(!state.cache.reviewers.length){ if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(state.cache.reviewers.map(r=>({
+    'المراجع': r.name,
+    'القسم': r.department,
+    'الملفات': r.file_count,
+    'الكفاءة اليومية': r.efficiency,
+    'جودة المراجعة %': r.quality_score
+  })));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Quality');
+  XLSX.writeFile(wb, `Quality_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
+};
+
+window.exportReviewersPDF = function(){
+  if(!state.cache.reviewers.length){ if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF('landscape');
+  doc.setFont('helvetica');
+  doc.text('Quality Report - MRD Tracking', 14, 15);
+  doc.autoTable({
+    head: [['Reviewer','Department','Files','Efficiency','Quality%']],
+    body: state.cache.reviewers.map(r=>[r.name, r.department, r.file_count, r.efficiency, r.quality_score+'%']),
+    startY: 22,
+    styles:{fontSize:8}
+  });
+  doc.save(`Quality_Report_${new Date().toISOString().slice(0,10)}.pdf`);
+};
+
+// ============================================================
+// HELPERS
+// ============================================================
+function destroyChart(key){
+  if(state.charts[key]){try{state.charts[key].destroy()}catch(e){}delete state.charts[key]}
+}
+
+// Expose to window for inline handlers
+window.loadReviewers = loadReviewers;
+window.loadOverview = loadOverview;
+</script>
+</body>
+</html>
