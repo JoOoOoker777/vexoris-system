@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق تسجيل الشغل | VEXORIS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+      if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+      }
+    </script>
+    <style>
+        :root {
+            --bg: #04070f; --card-bg: rgba(15, 23, 42, 0.55);
+            --card-border: rgba(148, 163, 184, 0.12);
+            --card-border-hover: rgba(14, 165, 233, 0.45);
+            --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+            --accent: #0ea5e9; --accent-2: #6366f1; --accent-3: #8b5cf6;
+            --input-bg: rgba(15, 23, 42, 0.5);
+            --glow: rgba(14, 165, 233, 0.15);
+        }
+        html:not(.dark) {
+            --bg: #f5f8fc; --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(148, 163, 184, 0.28);
+            --card-border-hover: rgba(14, 165, 233, 0.6);
+            --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #64748b;
+            --input-bg: rgba(255, 255, 255, 0.9);
+            --glow: rgba(14, 165, 233, 0.12);
+        }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Tajawal', system-ui, sans-serif;
+            background: var(--bg); color: var(--text-primary);
+            min-height: 100vh; overflow-x: hidden;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.16) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.14) 0%, transparent 65%);
+        }
+        html:not(.dark) .aurora-bg {
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.07) 0%, transparent 65%);
+        }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+        }
+        .scroll-progress {
+            position: fixed; top: 0; right: 0; height: 2px; width: 0%; z-index: 100;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.6);
+            transition: width 0.1s linear;
+        }
+        .nav-shell { position: sticky; top: 12px; z-index: 50; margin: 12px auto 0; max-width: 1600px; padding: 0 16px; }
+        .nav-inner {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 18px; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .logo-dot {
+            position: relative; width: 12px; height: 12px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18), 0 0 20px rgba(14, 165, 233, 0.7);
+            flex-shrink: 0;
+        }
+        .logo-dot::before {
+            content: ''; position: absolute; inset: -3px; border-radius: 50%;
+            border: 1px solid rgba(14, 165, 233, 0.5);
+            animation: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes ping { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(2.4); opacity: 0; } }
+        .brand-text {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: 0.18em;
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 40%, #6366f1 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .nav-link {
+            color: var(--text-secondary); font-weight: 600;
+            font-size: 0.875rem; padding: 6px 2px; transition: color 0.3s ease;
+            text-decoration: none;
+        }
+        .nav-link:hover { color: var(--accent); }
+        .nav-link.active { color: var(--accent); font-weight: 800; }
+        .icon-btn {
+            width: 36px; height: 36px; border-radius: 10px;
+            border: 1px solid var(--card-border); background: transparent; color: var(--accent);
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .icon-btn:hover {
+            background: rgba(14, 165, 233, 0.1);
+            border-color: rgba(14, 165, 233, 0.4);
+        }
+        .icon-btn.logout-btn { color: #f87171; }
+        .icon-btn.logout-btn:hover { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.4); }
+        .user-chip {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 6px 12px 6px 8px;
+            background: rgba(148, 163, 184, 0.06);
+            border: 1px solid var(--card-border);
+            border-radius: 12px; cursor: pointer; transition: all 0.3s ease;
+            font-family: inherit; color: inherit;
+        }
+        .user-chip:hover { border-color: var(--accent); background: rgba(14, 165, 233, 0.06); }
+        .user-avatar {
+            width: 32px; height: 32px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 0.95rem; color: #fff;
+            flex-shrink: 0; position: relative; overflow: hidden;
+            box-shadow: 0 2px 6px -1px rgba(0,0,0,0.25);
+        }
+        .user-avatar i { position: relative; z-index: 2; }
+        .user-avatar::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%);
+            background-size: 200% 100%; animation: shine 4s infinite; z-index: 1;
+        }
+        @keyframes shine { 0% { background-position: -200% 0; } 50%, 100% { background-position: 200% 0; } }
+        .user-info { display: flex; flex-direction: column; gap: 1px; text-align: right; }
+        .user-name { font-size: 0.78rem; font-weight: 800; color: var(--text-primary); line-height: 1.1; }
+        .user-role { font-size: 0.65rem; font-weight: 700; line-height: 1.1; }
+        .user-chip-arrow { color: var(--text-muted); font-size: 0.65rem; transition: transform 0.3s ease; }
+        .user-chip.open .user-chip-arrow { transform: rotate(180deg); }
+        .user-dropdown {
+            position: fixed; top: 76px; left: 16px; width: 300px;
+            background: var(--card-bg);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 16px; padding: 6px; z-index: 60;
+            box-shadow: 0 24px 48px -12px rgba(0,0,0,0.4);
+            opacity: 0; transform: translateY(-8px) scale(0.96); pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .user-dropdown.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+        .dropdown-profile { padding: 14px 12px; display: flex; align-items: center; gap: 12px; }
+        .dropdown-avatar-lg {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 1.35rem; color: #fff;
+            flex-shrink: 0; position: relative; overflow: hidden;
+        }
+        .dropdown-avatar-lg::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+            background-size: 200% 100%; animation: shine 4s infinite; z-index: 1;
+        }
+        .dropdown-avatar-lg i { position: relative; z-index: 2; }
+        .dropdown-name { font-size: 0.88rem; font-weight: 900; color: var(--text-primary); line-height: 1.2; }
+        .dropdown-email { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); line-height: 1.3; margin-top: 1px; }
+        .dropdown-role-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 0.6rem; font-weight: 800; padding: 2px 8px; border-radius: 5px; margin-top: 4px;
+        }
+        .dropdown-divider { height: 1px; background: var(--card-border); margin: 6px 4px; }
+        .dropdown-item {
+            width: 100%; padding: 10px 12px; background: transparent; border: none;
+            color: var(--text-secondary); font-family: inherit;
+            font-size: 0.8rem; font-weight: 700; border-radius: 8px;
+            display: flex; align-items: center; gap: 10px;
+            cursor: pointer; text-align: right; transition: all 0.2s ease;
+        }
+        .dropdown-item:hover { background: rgba(14, 165, 233, 0.08); color: var(--accent); }
+        .dropdown-item i { width: 16px; font-size: 0.8rem; }
+
+        /* app layout */
+        .app-shell {
+            max-width: 1600px; width: 90%; margin: 24px auto 40px;
+            padding: 0 16px;
+            display: grid; grid-template-columns: 260px 1fr; gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 1024px) { .app-shell { grid-template-columns: 1fr; } }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: 0 8px 32px -12px rgba(0,0,0,0.3);
+        }
+
+        .side-nav { position: sticky; top: 96px; padding: 14px; }
+        @media (max-width: 1024px) { .side-nav { position: relative; top: auto; } }
+        .side-nav-label {
+            font-size: 0.65rem; font-weight: 800; color: var(--text-muted);
+            letter-spacing: 0.18em; text-transform: uppercase;
+            padding: 0 10px 10px;
+        }
+        .side-btn {
+            display: flex; align-items: center; gap: 12px;
+            width: 100%; padding: 11px 14px;
+            background: transparent; border: 1px solid transparent;
+            border-radius: 11px; cursor: pointer;
+            color: var(--text-secondary); font-family: inherit;
+            font-size: 0.82rem; font-weight: 700;
+            text-align: right; transition: all 0.2s ease;
+        }
+        .side-btn i { width: 18px; text-align: center; opacity: 0.85; }
+        .side-btn:hover {
+            background: rgba(14, 165, 233, 0.06);
+            color: var(--accent);
+        }
+        .side-btn.active {
+            background: linear-gradient(135deg, rgba(14,165,233,0.15), rgba(99,102,241,0.1));
+            border-color: rgba(14, 165, 233, 0.35);
+            color: var(--accent); font-weight: 800;
+            box-shadow: 0 6px 20px -10px rgba(14,165,233,0.5);
+        }
+        .side-btn.danger { color: #f87171; }
+        .side-btn.danger:hover { background: rgba(239,68,68,0.08); color: #f87171; }
+        .side-btn.active.danger {
+            background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(244,63,94,0.1));
+            border-color: rgba(239, 68, 68, 0.35); color: #f87171;
+        }
+        .side-divider { height: 1px; background: var(--card-border); margin: 10px 4px; }
+
+        .page-title {
+            font-size: 1.5rem; font-weight: 900;
+            letter-spacing: -0.01em; margin-bottom: 4px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .page-sub {
+            color: var(--text-secondary); font-size: 0.82rem;
+            font-weight: 600; margin-bottom: 22px;
+        }
+
+        .tab-pane { display: none; animation: fadeUp 0.4s cubic-bezier(0.4,0,0.2,1); }
+        .tab-pane.active { display: block; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* form inputs */
+        .form-input, .premium-input {
+            width: 100%; padding: 11px 14px;
+            background: var(--input-bg); border: 1px solid var(--card-border);
+            border-radius: 11px; color: var(--text-primary);
+            font-size: 0.88rem; font-weight: 600; font-family: inherit;
+            transition: all 0.25s ease;
+        }
+        .form-input:focus, .premium-input:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(14,165,233,0.12);
+        }
+        .form-label {
+            display: block; font-size: 0.78rem; font-weight: 800;
+            color: var(--text-secondary); margin-bottom: 6px;
+        }
+        .form-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+        @media (min-width: 720px) {
+            .form-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+            .form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+            color: white; font-weight: 800; font-size: 0.9rem;
+            border: none; border-radius: 12px; padding: 13px 20px;
+            cursor: pointer; transition: all 0.3s;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(99,102,241,0.5); }
+        .btn-primary:disabled { opacity: 0.6; transform: none; cursor: not-allowed; }
+
+        .btn-ghost {
+            background: transparent; border: 1px solid var(--card-border);
+            color: var(--text-secondary); font-weight: 700;
+            padding: 9px 14px; border-radius: 10px; font-size: 0.8rem;
+            cursor: pointer; transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Radio pills */
+        .pill-radio { display: block; cursor: pointer; }
+        .pill-radio input { display: none; }
+        .pill-radio > div {
+            padding: 10px 12px; border-radius: 10px; text-align: center;
+            font-size: 0.78rem; font-weight: 800;
+            border: 1.5px solid var(--card-border); color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+        .pill-radio input:checked + div {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: var(--accent); color: var(--accent);
+            box-shadow: 0 6px 18px -10px rgba(14,165,233,0.5);
+        }
+        .pill-radio > div:hover { border-color: rgba(14,165,233,0.4); }
+
+        .task-block {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1.5px dashed rgba(148, 163, 184, 0.2);
+            border-radius: 16px; padding: 18px;
+            position: relative; margin-bottom: 14px;
+            transition: all 0.25s ease;
+        }
+        html:not(.dark) .task-block { background: rgba(248, 250, 252, 0.7); }
+        .task-block:hover { border-color: rgba(14,165,233,0.4); }
+        .task-block-header {
+            font-weight: 900; font-size: 0.85rem; color: var(--accent);
+            margin-bottom: 14px; padding-bottom: 10px;
+            border-bottom: 1px solid var(--card-border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .task-remove {
+            background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+            color: #f87171; padding: 4px 9px; border-radius: 7px;
+            cursor: pointer; font-size: 0.7rem; font-weight: 800;
+            font-family: inherit;
+        }
+        .task-remove:hover { background: rgba(239,68,68,0.2); }
+
+        .dyn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 80px 130px;
+            gap: 6px; padding: 6px;
+            background: rgba(15, 23, 42, 0.35);
+            border-radius: 8px; margin-bottom: 6px;
+        }
+        html:not(.dark) .dyn-row { background: rgba(226, 232, 240, 0.5); }
+        .dyn-row input {
+            padding: 7px 9px; font-size: 0.75rem; font-weight: 600;
+            background: var(--input-bg); border: 1px solid var(--card-border);
+            border-radius: 7px; color: var(--text-primary); font-family: inherit;
+        }
+        @media (max-width: 720px) {
+            .dyn-row { grid-template-columns: 1fr 1fr; }
+        }
+
+        /* Stat cards */
+        .stat-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px; margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px; padding: 16px;
+            position: relative; overflow: hidden;
+            transition: all 0.25s;
+        }
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
+            background: var(--stat-color, var(--accent));
+        }
+        .stat-card:hover { border-color: var(--stat-color, var(--accent)); transform: translateY(-2px); }
+        .stat-label { font-size: 0.65rem; font-weight: 800; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 6px; }
+        .stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.6rem; font-weight: 700; color: var(--stat-color, var(--accent));
+        }
+        .stat-hint { font-size: 0.65rem; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+
+        /* Tables */
+        .data-table {
+            width: 100%; border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+        .data-table th {
+            text-align: right; padding: 12px 10px;
+            font-size: 0.7rem; font-weight: 800; color: var(--text-muted);
+            letter-spacing: 0.05em; text-transform: uppercase;
+            border-bottom: 1px solid var(--card-border);
+            background: rgba(148, 163, 184, 0.04);
+        }
+        .data-table td {
+            padding: 11px 10px; font-weight: 600;
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-secondary);
+        }
+        .data-table tbody tr { transition: background 0.2s; }
+        .data-table tbody tr:hover { background: rgba(14,165,233,0.04); }
+        .data-table tbody tr:last-child td { border-bottom: none; }
+
+        .table-wrap { overflow-x: auto; border: 1px solid var(--card-border); border-radius: 14px; }
+
+        .tag {
+            display: inline-block; padding: 2px 8px; border-radius: 6px;
+            font-size: 0.68rem; font-weight: 800;
+        }
+        .tag.scan { background: rgba(14,165,233,0.15); color: #0ea5e9; }
+        .tag.audit { background: rgba(16,185,129,0.15); color: #10b981; }
+        .tag.inpatient { background: rgba(99,102,241,0.15); color: #6366f1; }
+        .tag.er { background: rgba(245,158,11,0.15); color: #f59e0b; }
+        .tag.prog { background: rgba(139,92,246,0.15); color: #8b5cf6; }
+        .tag.ok { background: rgba(16,185,129,0.15); color: #10b981; }
+        .tag.bad { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+        .kpi-card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 16px; padding: 18px;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        .kpi-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 12px 28px -12px rgba(14,165,233,0.4); }
+        .kpi-name { font-size: 1rem; font-weight: 900; margin-bottom: 4px; }
+        .kpi-score { font-family: 'Space Grotesk', sans-serif; font-size: 1.9rem; font-weight: 700; }
+        .kpi-bar { height: 6px; border-radius: 6px; background: rgba(148,163,184,0.15); overflow: hidden; margin: 10px 0 14px; }
+        .kpi-bar-fill { height: 100%; border-radius: 6px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+        .kpi-meta {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+            font-size: 0.7rem; font-weight: 700;
+        }
+        .kpi-meta > div {
+            display: flex; justify-content: space-between;
+            padding: 6px 9px; background: rgba(148,163,184,0.06); border-radius: 7px;
+        }
+        .kpi-meta span:first-child { color: var(--text-muted); }
+        .kpi-crown {
+            position: absolute; top: -12px; right: 12px; font-size: 1.6rem;
+            color: #facc15; filter: drop-shadow(0 3px 6px rgba(250,204,21,0.4));
+            animation: bounce 1.5s infinite;
+        }
+        @keyframes bounce { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-5px);} }
+
+        .slider-row { margin-bottom: 14px; }
+        .slider-head {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.72rem; font-weight: 800;
+            color: var(--text-secondary); margin-bottom: 6px;
+        }
+        .slider-val { color: var(--accent); font-family: 'Space Grotesk', sans-serif; }
+        input[type=range] {
+            -webkit-appearance: none; width: 100%;
+            height: 6px; border-radius: 6px;
+            background: rgba(148,163,184,0.25);
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 18px; height: 18px;
+            border-radius: 50%; background: var(--accent);
+            cursor: pointer; box-shadow: 0 0 0 4px rgba(14,165,233,0.2);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed; inset: 0; z-index: 200;
+            background: rgba(4,7,15,0.7); backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal.open { display: flex; }
+        .modal-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            max-width: 800px; width: 100%;
+            max-height: 90vh; display: flex; flex-direction: column;
+            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5);
+        }
+        .modal-head {
+            padding: 16px 20px; border-bottom: 1px solid var(--card-border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+
+        .empty-state {
+            text-align: center; padding: 40px 20px;
+            color: var(--text-muted); font-weight: 700;
+        }
+        .empty-state i {
+            display: block; font-size: 2.2rem;
+            margin-bottom: 12px; opacity: 0.4;
+        }
+
+        .loading-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .loading-screen.hide { opacity: 0; pointer-events: none; }
+
+        .sec-title {
+            font-size: 1rem; font-weight: 900; margin: 22px 0 12px;
+            padding-bottom: 8px; border-bottom: 1px solid var(--card-border);
+            color: var(--text-primary);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(14,165,233,0.4), rgba(99,102,241,0.4));
+            border-radius: 10px; border: 2px solid var(--bg);
+        }
+        ::selection { background: rgba(14,165,233,0.35); color: #fff; }
+    </style>
+    <link rel="stylesheet" href="../theme-overrides.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+    <script src="../loading-logo.js" defer></script>
+    <script src="../loader-buttons.js" defer></script>
+</head>
+<body>
+
+    <div class="loading-screen" id="loadingScreen">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري تحميل التطبيق...</p>
+    </div>
+
+    <div class="scroll-progress" id="scrollProgress"></div>
+    <div class="aurora-bg"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="nav-shell">
+        <header class="nav-inner">
+            <div class="flex items-center gap-3">
+                <div class="logo-dot"></div>
+                <div>
+                    <a href="../dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">تطبيق تسجيل الشغل</p>
+                </div>
+            </div>
+            <nav class="hidden md:flex items-center gap-7">
+                <a href="../dashboard.html" class="nav-link">لوحة التحكم</a>
+                <a href="#" class="nav-link active">تسجيل الشغل</a>
+            </nav>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <button class="user-chip" id="userChip">
+                    <div class="user-avatar" id="userAvatar"></div>
+                    <div class="user-info">
+                        <span class="user-name" id="navUserName">...</span>
+                        <span class="user-role" id="navUserRole">...</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down user-chip-arrow"></i>
+                </button>
+                <button onclick="logout()" class="icon-btn logout-btn" title="تسجيل الخروج">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+        </header>
+    </div>
+
+    <div class="user-dropdown" id="userDropdown">
+        <div class="dropdown-profile">
+            <div class="dropdown-avatar-lg" id="dropdownAvatar"></div>
+            <div>
+                <div class="dropdown-name" id="dropdownName">...</div>
+                <div class="dropdown-email" id="dropdownEmail">...</div>
+                <div class="dropdown-role-badge" id="dropdownRoleBadge"></div>
+            </div>
+        </div>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item" onclick="showProfile()">
+            <i class="fa-solid fa-user-pen"></i> إدارة الملف الشخصي
+        </button>
+        <button class="dropdown-item" onclick="showChangePassword()">
+            <i class="fa-solid fa-key"></i> تغيير كلمة المرور
+        </button>
+    </div>
+
+    <div class="app-shell">
+        <!-- Sidebar -->
+        <aside class="glass-card side-nav">
+            <div class="side-nav-label">القائمة الرئيسية</div>
+            <button class="side-btn active" data-tab="welcome" onclick="switchTab('welcome')">
+                <i class="fa-solid fa-house"></i> الرئيسية
+            </button>
+            <button class="side-btn" data-tab="quota" onclick="switchTab('quota')">
+                <i class="fa-solid fa-box-open"></i> تسجيل يومية
+            </button>
+            <button class="side-btn" data-tab="work" onclick="switchTab('work')">
+                <i class="fa-solid fa-pen-nib"></i> تسجيل شغل
+            </button>
+            <button class="side-btn" data-tab="reports" onclick="switchTab('reports')">
+                <i class="fa-solid fa-calendar-day"></i> تقارير الشغل
+            </button>
+            <div class="side-divider"></div>
+            <button class="side-btn" data-tab="kpi" onclick="switchTab('kpi')">
+                <i class="fa-solid fa-chart-pie"></i> مؤشرات الأداء
+            </button>
+            <button class="side-btn" data-tab="deficits" onclick="switchTab('deficits')">
+                <i class="fa-solid fa-scale-balanced"></i> النواقص
+            </button>
+            <button class="side-btn" data-tab="evaluation" onclick="switchTab('evaluation')">
+                <i class="fa-solid fa-star"></i> التقييم الإداري
+            </button>
+            <div class="side-divider" id="adminDivider" style="display:none;"></div>
+            <button class="side-btn danger" data-tab="edit" id="adminEditBtn" style="display:none;" onclick="switchTab('edit')">
+                <i class="fa-solid fa-pen-to-square"></i> تعديلات
+            </button>
+            <button class="side-btn danger" data-tab="staff-admin" id="adminStaffBtn" style="display:none;" onclick="switchTab('staff-admin')">
+                <i class="fa-solid fa-users-gear"></i> إدارة الموظفين
+            </button>
+        </aside>
+
+        <!-- Main -->
+        <main>
+            <!-- WELCOME -->
+            <section class="tab-pane active" id="tab-welcome">
+                <div class="glass-card" style="text-align: center; padding: 48px 32px;">
+                    <div style="width: 80px; height: 80px; margin: 0 auto 20px; border-radius: 22px; background: linear-gradient(135deg, rgba(14,165,233,0.2), rgba(99,102,241,0.15)); border: 1px solid rgba(14,165,233,0.4); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--accent);">
+                        <i class="fa-solid fa-pen-ruler"></i>
+                    </div>
+                    <h1 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 8px;">أهلاً بك في <span style="background: linear-gradient(135deg, #22d3ee, #6366f1); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">تطبيق تسجيل الشغل</span></h1>
+                    <p style="color: var(--text-secondary); font-size: 0.92rem; max-width: 620px; margin: 0 auto 26px; line-height: 1.85;">
+                        نظام متكامل لإدارة سير العمل اليومي، تتبع الملفات بالـ MRN، مؤشرات الأداء، ومطابقة النواقص بين اليوميات والمنفذ.
+                    </p>
+                    <div class="stat-grid" id="welcomeStats" style="text-align: right;">
+                        <div class="stat-card" style="--stat-color: #0ea5e9;">
+                            <div class="stat-label">موظفين نشطين</div>
+                            <div class="stat-value" id="statStaffCount">—</div>
+                        </div>
+                        <div class="stat-card" style="--stat-color: #6366f1;">
+                            <div class="stat-label">حركات اليوم</div>
+                            <div class="stat-value" id="statTodayRecords">—</div>
+                        </div>
+                        <div class="stat-card" style="--stat-color: #10b981;">
+                            <div class="stat-label">تقييمات مسجلة</div>
+                            <div class="stat-value" id="statEvalCount">—</div>
+                        </div>
+                        <div class="stat-card" style="--stat-color: #8b5cf6;">
+                            <div class="stat-label">إجمالي الحركات</div>
+                            <div class="stat-value" id="statTotalRecords">—</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- QUOTA -->
+            <section class="tab-pane" id="tab-quota">
+                <div class="page-title"><i class="fa-solid fa-box-open" style="color: var(--accent);"></i> تسجيل يومية</div>
+                <p class="page-sub">تسجيل استلام اليومية من الأقسام (Inpatient / ER).</p>
+                <div class="glass-card" style="max-width: 720px;">
+                    <form id="quotaForm" onsubmit="handleQuotaSubmit(event)">
+                        <div class="form-grid cols-2">
+                            <div>
+                                <label class="form-label">اسم المشرف</label>
+                                <select name="name" id="quotaEmpSelect" required class="form-input"></select>
+                            </div>
+                            <div>
+                                <label class="form-label">نوع الشغل</label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <label class="pill-radio"><input type="radio" name="quotaType" value="Inpatient" required><div>Inpatient</div></label>
+                                    <label class="pill-radio"><input type="radio" name="quotaType" value="ER"><div>ER</div></label>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label">تاريخ خروج اليومية</label>
+                                <input type="date" name="dailyDate" required class="form-input" dir="ltr">
+                            </div>
+                            <div>
+                                <label class="form-label">عدد الملفات المستلم</label>
+                                <input type="number" name="receivedQuota" required min="1" class="form-input" style="color: #10b981; font-weight: 900;">
+                            </div>
+                            <div>
+                                <label class="form-label">إجمالي اليومية على الغلاف</label>
+                                <input type="number" name="totalQuota" class="form-input">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary" style="margin-top: 18px;">
+                            <i class="fa-solid fa-check"></i> حفظ اليومية
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- WORK -->
+            <section class="tab-pane" id="tab-work">
+                <div class="page-title"><i class="fa-solid fa-pen-nib" style="color: #10b981;"></i> تسجيل شغل</div>
+                <p class="page-sub">إدخال حركة الشغل اليومية مع دعم مسارات متعددة.</p>
+                <div class="glass-card">
+                    <form id="workForm">
+                        <div class="form-grid cols-2" style="margin-bottom: 18px;">
+                            <div>
+                                <label class="form-label">اسم الموظف</label>
+                                <select id="adv_empName" required class="form-input"></select>
+                            </div>
+                            <div>
+                                <label class="form-label">تاريخ الشغل</label>
+                                <input type="date" id="adv_workDate" required class="form-input" dir="ltr">
+                            </div>
+                            <div style="grid-column: 1/-1;">
+                                <label class="form-label">ملاحظات عامة</label>
+                                <textarea id="adv_notes" rows="1" class="form-input"></textarea>
+                            </div>
+                        </div>
+
+                        <div id="taskBlocksContainer"></div>
+
+                        <button type="button" onclick="addTaskBlock()" class="btn-ghost" style="width: 100%; margin: 6px 0 16px; border-style: dashed;">
+                            <i class="fa-solid fa-plus"></i> إضافة مسار آخر
+                        </button>
+
+                        <button type="button" onclick="submitWork()" class="btn-primary">
+                            <i class="fa-solid fa-paper-plane"></i> حفظ الحركة
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- REPORTS -->
+            <section class="tab-pane" id="tab-reports">
+                <div class="page-title"><i class="fa-solid fa-calendar-day" style="color: #f59e0b;"></i> تقارير الشغل</div>
+                <p class="page-sub">عرض حركة الشغل اليومية حسب التاريخ.</p>
+                <div class="glass-card">
+                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 18px; flex-wrap: wrap;">
+                        <input type="date" id="reportDate" class="form-input" style="max-width: 220px;" dir="ltr">
+                        <button onclick="loadWorkReport()" class="btn-ghost" style="border-color: var(--accent); color: var(--accent);">
+                            <i class="fa-solid fa-search"></i> عرض
+                        </button>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>الموظف</th>
+                                    <th>المسار</th>
+                                    <th>الطريقة</th>
+                                    <th style="text-align:center;">ملفات</th>
+                                    <th style="text-align:center;">نماذج</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportBody">
+                                <tr><td colspan="6"><div class="empty-state"><i class="fa-solid fa-calendar-days"></i>حدد التاريخ واضغط عرض</div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- KPI -->
+            <section class="tab-pane" id="tab-kpi">
+                <div class="page-title"><i class="fa-solid fa-chart-pie" style="color: #6366f1;"></i> مؤشرات الأداء</div>
+                <p class="page-sub">الإنتاجية (70%) + التقييم الإداري (30%) لكل موظف.</p>
+                <div class="glass-card">
+                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 18px; flex-wrap: wrap;">
+                        <input type="date" id="kpiStart" class="form-input" style="max-width: 190px;" dir="ltr" title="من تاريخ">
+                        <input type="date" id="kpiEnd" class="form-input" style="max-width: 190px;" dir="ltr" title="إلى تاريخ">
+                        <button onclick="loadKPI()" class="btn-ghost" style="border-color: var(--accent); color: var(--accent);">
+                            <i class="fa-solid fa-filter"></i> تصفية
+                        </button>
+                        <input type="text" oninput="filterCards(this.value)" placeholder="بحث سريع..." class="form-input" style="max-width: 260px;">
+                    </div>
+                    <div id="kpiContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;"></div>
+                </div>
+            </section>
+
+            <!-- DEFICITS -->
+            <section class="tab-pane" id="tab-deficits">
+                <div class="page-title"><i class="fa-solid fa-scale-balanced" style="color: #ef4444;"></i> النواقص</div>
+                <p class="page-sub">مطابقة اليوميات المستلمة مع المنفذ (Scan / Audit) لاكتشاف العجز.</p>
+                <div class="glass-card">
+                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 18px; flex-wrap: wrap;">
+                        <input type="date" id="defStart" class="form-input" style="max-width: 190px;" dir="ltr" title="من تاريخ">
+                        <input type="date" id="defEnd" class="form-input" style="max-width: 190px;" dir="ltr" title="إلى تاريخ">
+                        <button onclick="loadDeficits()" class="btn-ghost" style="border-color: var(--accent); color: var(--accent);">
+                            <i class="fa-solid fa-filter"></i> تصفية
+                        </button>
+                    </div>
+
+                    <div class="stat-grid" id="defStats">
+                        <div class="stat-card" style="--stat-color: #6366f1;">
+                            <div class="stat-label">مستلم فعلي (ملفات)</div>
+                            <div class="stat-value" id="defReceived">0</div>
+                        </div>
+                        <div class="stat-card" style="--stat-color: #0ea5e9;">
+                            <div class="stat-label">منفذ Scan</div>
+                            <div class="stat-value" id="defScan">0</div>
+                        </div>
+                        <div class="stat-card" style="--stat-color: #10b981;">
+                            <div class="stat-label">منفذ Audit</div>
+                            <div class="stat-value" id="defAudit">0</div>
+                        </div>
+                        <div class="stat-card" style="--stat-color: #ef4444;">
+                            <div class="stat-label">عجز Scan</div>
+                            <div class="stat-value" id="defScanDef">0</div>
+                        </div>
+                        <div class="stat-card" style="--stat-color: #ef4444;">
+                            <div class="stat-label">عجز Audit</div>
+                            <div class="stat-value" id="defAuditDef">0</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 16px;">
+                        <button onclick="renderDeficits('Inpatient')" id="defBtnIn" class="btn-ghost" style="border-color: var(--accent); color: var(--accent);">Inpatient</button>
+                        <button onclick="renderDeficits('ER')" id="defBtnEr" class="btn-ghost">ER</button>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>تاريخ الخروج</th>
+                                    <th>النوع</th>
+                                    <th style="text-align:center;">مستلم</th>
+                                    <th style="text-align:center;">Scan</th>
+                                    <th style="text-align:center;">Audit</th>
+                                    <th style="text-align:center;">عجز Scan</th>
+                                    <th style="text-align:center;">عجز Audit</th>
+                                    <th style="text-align:center;">الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="defBody">
+                                <tr><td colspan="8"><div class="empty-state"><i class="fa-solid fa-scale-balanced"></i>اضغط تصفية لعرض النواقص</div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- EVALUATION -->
+            <section class="tab-pane" id="tab-evaluation">
+                <div class="page-title"><i class="fa-solid fa-star" style="color: #8b5cf6;"></i> التقييم الإداري</div>
+                <p class="page-sub">10 معايير × 10 نقاط = 100 درجة.</p>
+                <div class="glass-card" style="max-width: 900px;">
+                    <form id="evaluationForm" onsubmit="handleEvaluationSubmit(event)">
+                        <div class="form-grid cols-3" style="margin-bottom: 18px;">
+                            <div>
+                                <label class="form-label">الموظف</label>
+                                <select name="employee_name" id="evalEmpSelect" required class="form-input"></select>
+                            </div>
+                            <div>
+                                <label class="form-label">المشرف</label>
+                                <select name="supervisor_name" id="evalAdminSelect" required class="form-input"></select>
+                            </div>
+                            <div>
+                                <label class="form-label">شهر التقييم</label>
+                                <input type="month" name="eval_month" required class="form-input" dir="ltr">
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px; background: rgba(139,92,246,0.08); border-radius: 12px; border: 1px solid rgba(139,92,246,0.25); margin-bottom: 20px;">
+                            <span style="font-weight: 800; color: var(--text-secondary);">الإجمالي</span>
+                            <span style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 700; color: #8b5cf6;">
+                                <span id="evalTotal">100</span><span style="font-size: 0.9rem; color: var(--text-muted);"> / 100</span>
+                            </span>
+                        </div>
+
+                        <div id="evalSliders"></div>
+
+                        <div style="margin: 20px 0;">
+                            <label class="form-label">ملاحظات سرية</label>
+                            <textarea name="notes" rows="2" class="form-input"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-primary">
+                            <i class="fa-solid fa-check-double"></i> حفظ التقييم
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- EDIT (admin only) -->
+            <section class="tab-pane" id="tab-edit">
+                <div class="page-title" style="color: #f87171;"><i class="fa-solid fa-pen-to-square"></i> تعديلات (صلاحيات إدارية)</div>
+                <p class="page-sub">مراجعة/تعديل/حذف الحركات السابقة.</p>
+                <div class="glass-card">
+                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 18px; flex-wrap: wrap;">
+                        <input type="date" id="editFilterDate" class="form-input" style="max-width: 220px;" dir="ltr">
+                        <button onclick="loadEditRecords()" class="btn-ghost" style="border-color: var(--accent); color: var(--accent);">
+                            <i class="fa-solid fa-search"></i> بحث
+                        </button>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>وقت التسجيل</th>
+                                    <th>الموظف</th>
+                                    <th>تاريخ الشغل</th>
+                                    <th style="text-align:center;">الإجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody id="editBody">
+                                <tr><td colspan="4"><div class="empty-state"><i class="fa-solid fa-inbox"></i>اضغط بحث لعرض الحركات</div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STAFF ADMIN (admin only) -->
+            <section class="tab-pane" id="tab-staff-admin">
+                <div class="page-title" style="color: #f87171;"><i class="fa-solid fa-users-gear"></i> إدارة موظفي الشغل</div>
+                <p class="page-sub">إضافة / تعديل / إيقاف الموظفين في نظام تسجيل الشغل.</p>
+                <div class="glass-card" style="margin-bottom: 20px;">
+                    <form id="staffForm" onsubmit="handleAddStaff(event)">
+                        <div class="form-grid cols-3">
+                            <div>
+                                <label class="form-label">الاسم</label>
+                                <input type="text" name="name" required class="form-input">
+                            </div>
+                            <div>
+                                <label class="form-label">نوع العمل</label>
+                                <select name="emp_type" class="form-input">
+                                    <option value="Inpatient">Inpatient</option>
+                                    <option value="ER">ER</option>
+                                    <option value="Progressive">Progressive</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">التارجت اليومي</label>
+                                <input type="number" name="daily_target" min="0" value="0" class="form-input">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary" style="margin-top: 14px;">
+                            <i class="fa-solid fa-plus"></i> إضافة موظف
+                        </button>
+                    </form>
+                </div>
+                <div class="glass-card">
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>الاسم</th>
+                                    <th>النوع</th>
+                                    <th style="text-align:center;">التارجت</th>
+                                    <th style="text-align:center;">الحالة</th>
+                                    <th style="text-align:center;">إجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staffBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-card">
+            <div class="modal-head">
+                <div>
+                    <div style="font-weight: 900; font-size: 1.1rem;">تعديل التسجيلة</div>
+                    <div id="editModalSubtitle" style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; margin-top: 2px;"></div>
+                </div>
+                <button onclick="closeEditModal()" class="icon-btn"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="editModalBody"></div>
+        </div>
+    </div>
+
+    <script src="../notify.js"></script>
+    <script type="module" src="../session-manager.js"></script>
+
+        <script type="module">
+    import { supabase } from '../supabase-client.js';
+
+    // ============================================================
+    // ROLE META
+    // ============================================================
+    const ROLE_META = {
+        super_admin: { name: 'المطور', color: '#a855f7', icon: 'fa-crown' },
+        admin:       { name: 'ادارة السجلات الطبية', color: '#0ea5e9', icon: 'fa-user-shield' },
+        manager:     { name: 'المدير الطبي', color: '#6366f1', icon: 'fa-user-tie' },
+        auditor:     { name: 'مراجع جودة', color: '#f59e0b', icon: 'fa-clipboard-check' },
+        senior:      { name: 'رئيس قسم', color: '#10b981', icon: 'fa-star' },
+        doctor:      { name: 'طبيب', color: '#14b8a6', icon: 'fa-stethoscope' },
+        viewer:      { name: 'مراجع', color: '#94a3b8', icon: 'fa-eye' },
+    };
+
+    const ADMINS = ['super_admin', 'admin'];
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    let CURRENT_USER = null;
+    let CURRENT_ROLE = 'viewer';
+    let STAFF = [];              // work_staff rows
+    let TASK_COUNTER = 0;
+    let DEFICITS_DATA = [];
+    let DEFICITS_FILTER = 'Inpatient';
+    let KPI_DATA = [];
+    let STAFF_FOR_EVAL = [];
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    function $(id) { return document.getElementById(id); }
+    function todayISO() { return new Date().toISOString().split('T')[0]; }
+    function fmtDate(d) {
+        if (!d) return '';
+        const dt = new Date(d);
+        if (isNaN(dt)) return d;
+        return dt.toLocaleDateString('en-GB', { year:'numeric', month:'2-digit', day:'2-digit' });
+    }
+    function money(n) { return (Number(n)||0).toLocaleString('en-US'); }
+    function safeInt(v) {
+        if (v === null || v === undefined || v === '') return 0;
+        const s = String(v).replace(/,/g, '').trim();
+        return parseInt(s) || 0;
+    }
+    function isAdmin() { return ADMINS.includes(CURRENT_ROLE); }
+
+    // ============================================================
+    // THEME
+    // ============================================================
+    window.toggleTheme = function () {
+        const html = document.documentElement;
+        html.classList.toggle('dark');
+        localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+    };
+
+    // ============================================================
+    // USER DROPDOWN + LOGOUT
+    // ============================================================
+    const userChip = $('userChip');
+    const userDropdown = $('userDropdown');
+    if (userChip) userChip.addEventListener('click', (e) => {
+        e.stopPropagation();
+        userChip.classList.toggle('open');
+        userDropdown.classList.toggle('open');
+    });
+    document.addEventListener('click', (e) => {
+        if (userChip && !userDropdown.contains(e.target) && !userChip.contains(e.target)) {
+            userChip.classList.remove('open');
+            userDropdown.classList.remove('open');
+        }
+    });
+
+    window.logout = async function () {
+        if (window.showConfirm) {
+            const ok = await window.showConfirm({
+                title: 'تسجيل الخروج', message: 'هل تريد الخروج؟',
+                confirmText: 'خروج', cancelText: 'إلغاء', type: 'danger'
+            });
+            if (!ok) return;
+        }
+        await supabase.auth.signOut();
+        sessionStorage.clear();
+        window.location.href = '../login.html';
+    };
+    window.showProfile = function () { window.location.href = '../profile.html'; };
+    window.showChangePassword = function () { window.location.href = '../change-password.html'; };
+
+    // ============================================================
+    // SCROLL PROGRESS
+    // ============================================================
+    window.addEventListener('scroll', () => {
+        const h = document.documentElement.scrollHeight - window.innerHeight;
+        if (h > 0) $('scrollProgress').style.width = (window.scrollY / h) * 100 + '%';
+    }, { passive: true });
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    (async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
+        CURRENT_USER = session.user;
+
+        const { data: profile } = await supabase
+            .from('profiles').select('role, username, email').eq('id', session.user.id).single();
+        if (!profile) { alert('خطأ في جلب الحساب'); window.location.href = '../login.html'; return; }
+
+        CURRENT_ROLE = profile.role || 'viewer';
+        const meta = ROLE_META[CURRENT_ROLE] || ROLE_META.viewer;
+        const displayName = session.user.user_metadata?.display_name || profile.username || 'مستخدم';
+
+        // header
+        $('navUserName').textContent = displayName;
+        $('navUserRole').textContent = meta.name;
+        $('navUserRole').style.color = meta.color;
+
+        const avatarBg = `radial-gradient(circle at 30% 25%, rgba(255,255,255,0.35) 0%, transparent 55%), linear-gradient(135deg, ${meta.color}, ${meta.color}cc)`;
+        ['userAvatar', 'dropdownAvatar'].forEach(id => {
+            const el = $(id);
+            if (el) { el.innerHTML = `<i class="fa-solid ${meta.icon}"></i>`; el.style.background = avatarBg; }
+        });
+        $('dropdownName').textContent = displayName;
+        $('dropdownEmail').textContent = session.user.email || profile.email || '';
+        $('dropdownRoleBadge').innerHTML = `<i class="fa-solid ${meta.icon}"></i> ${meta.name}`;
+        $('dropdownRoleBadge').style.background = `rgba(255,255,255,0.06)`;
+        $('dropdownRoleBadge').style.color = meta.color;
+
+        // admin sections
+        if (isAdmin()) {
+            $('adminDivider').style.display = 'block';
+            $('adminEditBtn').style.display = 'flex';
+            $('adminStaffBtn').style.display = 'flex';
+        }
+
+        // load staff once
+        await loadStaff();
+
+        // default dates
+        const t = todayISO();
+        ['reportDate','adv_workDate'].forEach(id => { if($(id)) $(id).value = t; });
+
+        // build eval sliders
+        buildEvalSliders();
+
+        // welcome stats
+        await loadWelcomeStats();
+
+        // hide loader
+        $('loadingScreen').classList.add('hide');
+    })();
+
+    // ============================================================
+    // LOAD STAFF
+    // ============================================================
+    async function loadStaff() {
+        const { data, error } = await supabase.from('work_staff')
+            .select('*').eq('is_active', true).order('name');
+        if (error) { console.error(error); return; }
+        STAFF = data || [];
+        populateStaffSelects();
+    }
+
+    function populateStaffSelects() {
+        const opts = '<option value="" disabled selected>-- اختر --</option>' +
+            STAFF.map(s => `<option value="${s.name}">${s.name} (${s.emp_type})</option>`).join('');
+        ['quotaEmpSelect','adv_empName','evalEmpSelect'].forEach(id => {
+            if ($(id)) $(id).innerHTML = opts;
+        });
+        // supervisor select: admins+super_admins from profiles
+        loadSupervisors();
+    }
+
+    async function loadSupervisors() {
+        const { data } = await supabase.from('profiles')
+            .select('display_name, username, role')
+            .in('role', ['super_admin','admin','manager']);
+        const el = $('evalAdminSelect');
+        if (!el) return;
+        const opts = '<option value="" disabled selected>-- اختر --</option>' +
+            (data||[]).map(p => `<option value="${p.display_name || p.username}">${p.display_name || p.username}</option>`).join('');
+        el.innerHTML = opts;
+    }
+
+    // ============================================================
+    // WELCOME STATS
+    // ============================================================
+    async function loadWelcomeStats() {
+        const [staffCount, todayRecs, evalCount, totalRecs] = await Promise.all([
+            supabase.from('work_staff').select('id', { count: 'exact', head: true }).eq('is_active', true),
+            supabase.from('work_records').select('id', { count: 'exact', head: true }).eq('work_date', todayISO()),
+            supabase.from('work_evaluations').select('id', { count: 'exact', head: true }),
+            supabase.from('work_records').select('id', { count: 'exact', head: true }),
+        ]);
+        $('statStaffCount').textContent = staffCount.count || 0;
+        $('statTodayRecords').textContent = todayRecs.count || 0;
+        $('statEvalCount').textContent = evalCount.count || 0;
+        $('statTotalRecords').textContent = totalRecs.count || 0;
+    }
+
+    // ============================================================
+    // TAB SWITCHING
+    // ============================================================
+    window.switchTab = function (tabId) {
+        // حماية: التابات الإدارية
+        if (['edit','staff-admin'].includes(tabId) && !isAdmin()) {
+            if (window.showNotification) showNotification('هذه الصفحة للمشرفين فقط', 'error');
+            return;
+        }
+
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.side-btn').forEach(b => b.classList.remove('active'));
+        const pane = $('tab-' + tabId);
+        if (pane) pane.classList.add('active');
+        const btn = document.querySelector(`.side-btn[data-tab="${tabId}"]`);
+        if (btn) btn.classList.add('active');
+
+        // lazy loaders
+        if (tabId === 'kpi') loadKPI();
+        if (tabId === 'deficits') loadDeficits();
+        if (tabId === 'edit') loadEditRecords();
+        if (tabId === 'staff-admin') renderStaffTable();
+    };
+
+    // ============================================================
+    // QUOTA FORM
+    // ============================================================
+    window.handleQuotaSubmit = async function (e) {
+        e.preventDefault();
+        const form = e.target;
+        const fd = new FormData(form);
+        const name = fd.get('name');
+        const quotaType = fd.get('quotaType');
+        const dailyDate = fd.get('dailyDate');
+        const received = safeInt(fd.get('receivedQuota'));
+        let total = safeInt(fd.get('totalQuota'));
+        if (!total) total = received;
+
+        if (!name || !quotaType || !dailyDate || received <= 0) {
+            if (window.showNotification) showNotification('أكمل البيانات بشكل صحيح', 'error');
+            return;
+        }
+
+        const btn = form.querySelector('button[type=submit]');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحفظ...';
+
+        const { error } = await supabase.from('work_records').insert({
+            work_date: todayISO(),
+            daily_exit_date: dailyDate,
+            movement_type: 'توريد يومية',
+            employee_name: name,
+            work_path: quotaType,
+            work_method: 'توريد',
+            target_quota: total,
+            actual_count: received,
+            models_count: 0,
+            notes: 'عملية توريد رسمية',
+            created_by: CURRENT_USER.id
+        });
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> حفظ اليومية';
+
+        if (error) {
+            if (window.showNotification) showNotification('خطأ: ' + error.message, 'error');
+            return;
+        }
+        if (window.showNotification) showNotification('تم تسجيل اليومية بنجاح', 'success');
+        form.reset();
+        await loadWelcomeStats();
+    };
+
+    // ============================================================
+    // WORK FORM — TASK BLOCKS
+    // ============================================================
+    window.addTaskBlock = function (existingData = null) {
+        TASK_COUNTER++;
+        const id = TASK_COUNTER;
+        const container = $('taskBlocksContainer');
+        const div = document.createElement('div');
+        div.className = 'task-block';
+        div.id = `task_${id}`;
+        div.dataset.id = id;
+
+        const mScan = existingData?.workMethod === 'Scan' ? 'checked' : '';
+        const mAudit = existingData?.workMethod === 'Audit' ? 'checked' : '';
+        const mOther = existingData?.workMethod === 'Other' ? 'checked' : '';
+        const pIn = existingData?.workType === 'Inpatient' ? 'checked' : '';
+        const pEr = existingData?.workType === 'ER' ? 'checked' : '';
+        const pProg = existingData?.workType === 'Progressive' ? 'checked' : '';
+        const pRep = existingData?.workType === 'Reports' ? 'checked' : '';
+
+        div.innerHTML = `
+            <div class="task-block-header">
+                <span>مسار #${id}</span>
+                ${id > 1 || existingData ? `<button type="button" class="task-remove" onclick="removeTaskBlock(${id})"><i class="fa-solid fa-xmark"></i> حذف</button>` : ''}
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label class="form-label">1. طريقة الشغل</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+                    <label class="pill-radio"><input type="radio" name="method_${id}" value="Scan" ${mScan} onchange="handleTaskChange(${id})"><div>Scan</div></label>
+                    <label class="pill-radio"><input type="radio" name="method_${id}" value="Audit" ${mAudit} onchange="handleTaskChange(${id})"><div>Audit</div></label>
+                    <label class="pill-radio"><input type="radio" name="method_${id}" value="Other" ${mOther} onchange="handleTaskChange(${id})"><div>Other</div></label>
+                </div>
+            </div>
+
+            <div id="pathCont_${id}" style="margin-bottom: 12px;">
+                <label class="form-label">2. نوع الشغل</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;">
+                    <label class="pill-radio"><input type="radio" name="path_${id}" value="Inpatient" ${pIn} onchange="handleTaskChange(${id})"><div>Inpatient</div></label>
+                    <label class="pill-radio"><input type="radio" name="path_${id}" value="ER" ${pEr} onchange="handleTaskChange(${id})"><div>ER</div></label>
+                    <label class="pill-radio"><input type="radio" name="path_${id}" value="Progressive" ${pProg} onchange="handleTaskChange(${id})"><div>Progressive</div></label>
+                    <label class="pill-radio"><input type="radio" name="path_${id}" value="Reports" ${pRep} onchange="handleTaskChange(${id})"><div>Reports</div></label>
+                </div>
+            </div>
+
+            <div id="countCont_${id}" class="form-grid cols-2">
+                <div>
+                    <label class="form-label">عدد الملفات</label>
+                    <input type="number" id="fCount_${id}" min="1" oninput="handleTaskChange(${id})" class="form-input" value="${existingData?.count || ''}">
+                </div>
+                <div>
+                    <label class="form-label">عدد النماذج</label>
+                    <input type="number" id="mCount_${id}" min="1" class="form-input" value="${existingData?.modelsCount || ''}">
+                </div>
+            </div>
+
+            <div id="dailyDateCont_${id}" style="display:none;margin-top:12px;">
+                <label class="form-label">تاريخ خروج اليومية (ER)</label>
+                <input type="date" id="dDate_${id}" class="form-input" dir="ltr">
+            </div>
+
+            <div id="dynCont_${id}" style="display:none;margin-top:12px;border-top:1px solid var(--card-border);padding-top:12px;">
+                <div style="font-size:0.75rem;font-weight:800;color:var(--accent);margin-bottom:8px;">تفاصيل ملفات Inpatient</div>
+                <div id="dynWrap_${id}"></div>
+            </div>
+        `;
+        container.appendChild(div);
+    };
+
+    window.removeTaskBlock = function (id) {
+        const el = $(`task_${id}`);
+        if (el) el.remove();
+    };
+
+    window.handleTaskChange = function (id) {
+        const method = document.querySelector(`input[name="method_${id}"]:checked`)?.value;
+        const path = document.querySelector(`input[name="path_${id}"]:checked`)?.value;
+        const count = safeInt($(`fCount_${id}`)?.value);
+
+        const pathCont = $(`pathCont_${id}`);
+        const countCont = $(`countCont_${id}`);
+        const dynCont = $(`dynCont_${id}`);
+        const dDateCont = $(`dailyDateCont_${id}`);
+        const dynWrap = $(`dynWrap_${id}`);
+        const mCount = $(`mCount_${id}`);
+
+        if (method === 'Other') {
+            pathCont.style.display = 'none';
+            countCont.style.display = 'none';
+            dynCont.style.display = 'none';
+            dDateCont.style.display = 'none';
+            return;
+        }
+        pathCont.style.display = 'block';
+        countCont.style.display = 'grid';
+
+        if (path === 'ER') dDateCont.style.display = 'block';
+        else dDateCont.style.display = 'none';
+
+        if (path === 'Inpatient' && count > 0) {
+            dynCont.style.display = 'block';
+            mCount.readOnly = true;
+            const currentCount = dynWrap.children.length;
+            if (count > currentCount) {
+                for (let i = currentCount + 1; i <= count; i++) {
+                    const row = document.createElement('div');
+                    row.className = 'dyn-row';
+                    row.id = `dyn_${id}_row_${i}`;
+                    row.innerHTML = `
+                        <input type="text" id="dyn_${id}_mrn_${i}" placeholder="MRN ${i}" required>
+                        <input type="text" id="dyn_${id}_name_${i}" placeholder="الاسم" required>
+                        <input type="number" id="dyn_${id}_mod_${i}" placeholder="نماذج" min="1" oninput="calcBlockModels(${id})" required>
+                        <input type="date" id="dyn_${id}_date_${i}" value="${todayISO()}" required>
+                    `;
+                    dynWrap.appendChild(row);
+                }
+            } else if (count < currentCount) {
+                for (let i = currentCount; i > count; i--) {
+                    $(`dyn_${id}_row_${i}`)?.remove();
+                }
+            }
+            calcBlockModels(id);
+        } else {
+            dynCont.style.display = 'none';
+            mCount.readOnly = false;
+        }
+    };
+
+    window.calcBlockModels = function (id) {
+        let total = 0;
+        const count = safeInt($(`fCount_${id}`)?.value);
+        for (let i = 1; i <= count; i++) {
+            total += safeInt($(`dyn_${id}_mod_${i}`)?.value);
+        }
+        const m = $(`mCount_${id}`);
+        if (m) m.value = total > 0 ? total : '';
+    };
+
+    window.submitWork = async function () {
+        const empName = $('adv_empName').value;
+        const workDate = $('adv_workDate').value;
+        const notes = $('adv_notes').value;
+
+        if (!empName || !workDate) {
+            if (window.showNotification) showNotification('اختر الموظف والتاريخ', 'error');
+            return;
+        }
+
+        const blocks = document.querySelectorAll('#taskBlocksContainer > .task-block');
+        const tasks = [];
+        let hasError = false;
+
+        blocks.forEach(block => {
+            const id = block.dataset.id;
+            const method = document.querySelector(`input[name="method_${id}"]:checked`)?.value;
+            if (!method) { hasError = true; return; }
+
+            const t = { workMethod: method, workType: '', count: 0, modelsCount: 0, dailyDate: '', dynFiles: [] };
+
+            if (method !== 'Other') {
+                t.workType = document.querySelector(`input[name="path_${id}"]:checked`)?.value;
+                if (!t.workType) { hasError = true; return; }
+                t.count = safeInt($(`fCount_${id}`)?.value);
+                t.modelsCount = safeInt($(`mCount_${id}`)?.value);
+                if (t.count <= 0 || t.modelsCount <= 0) {
+                    if (window.showNotification) showNotification('لا يمكن تسجيل مسار بصفر ملفات/نماذج', 'error');
+                    hasError = true; return;
+                }
+                if (t.workType === 'ER') {
+                    t.dailyDate = $(`dDate_${id}`)?.value;
+                    if (!t.dailyDate) { hasError = true; return; }
+                }
+                if (t.workType === 'Inpatient') {
+                    for (let i = 1; i <= t.count; i++) {
+                        const mrn = $(`dyn_${id}_mrn_${i}`)?.value;
+                        const nm = $(`dyn_${id}_name_${i}`)?.value;
+                        const md = safeInt($(`dyn_${id}_mod_${i}`)?.value);
+                        const dt = $(`dyn_${id}_date_${i}`)?.value;
+                        if (!mrn || !nm || md <= 0 || !dt) { hasError = true; return; }
+                        t.dynFiles.push({ mrn, name: nm, mod: md, date: dt });
+                    }
+                }
+            }
+            tasks.push(t);
+        });
+
+        if (hasError || tasks.length === 0) return;
+
+        const payload = { name: empName, workDate, notes, tasks };
+
+        const { data, error } = await supabase.rpc('save_work_batch', { payload });
+        if (error) {
+            if (window.showNotification) showNotification('خطأ: ' + error.message, 'error');
+            return;
+        }
+        if (data?.status === 'error') {
+            if (window.showNotification) showNotification('خطأ: ' + data.message, 'error');
+            return;
+        }
+        if (window.showNotification) showNotification('تم حفظ الحركة بنجاح', 'success');
+        $('taskBlocksContainer').innerHTML = '';
+        TASK_COUNTER = 0;
+        $('adv_notes').value = '';
+        addTaskBlock();
+        await loadWelcomeStats();
+    };
+
+    // ============================================================
+    // WORK REPORT
+    // ============================================================
+    window.loadWorkReport = async function () {
+        const date = $('reportDate').value;
+        const tbody = $('reportBody');
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fa-solid fa-circle-notch fa-spin"></i>جاري التحميل</div></td></tr>';
+
+        const { data, error } = await supabase.from('work_records')
+            .select('*').eq('work_date', date).eq('movement_type', 'تسجيل شغل');
+        if (error) { tbody.innerHTML = `<tr><td colspan="6">${error.message}</td></tr>`; return; }
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fa-solid fa-inbox"></i>لا توجد حركات لهذا اليوم</div></td></tr>';
+            return;
+        }
+
+        // group by employee
+        const grouped = {};
+        data.forEach(r => {
+            if (!grouped[r.employee_name]) {
+                grouped[r.employee_name] = { name: r.employee_name, paths: new Set(), methods: new Set(), files: 0, models: 0 };
+            }
+            grouped[r.employee_name].paths.add(r.work_path);
+            grouped[r.employee_name].methods.add(r.work_method);
+            grouped[r.employee_name].files += r.actual_count || 0;
+            grouped[r.employee_name].models += r.models_count || 0;
+        });
+
+        tbody.innerHTML = Object.values(grouped).map(g => `
+            <tr>
+                <td style="font-weight:900;color:var(--text-primary);">${g.name}</td>
+                <td>${Array.from(g.paths).map(p=>`<span class="tag ${tagFor(p)}">${p}</span>`).join(' ')}</td>
+                <td>${Array.from(g.methods).map(m=>`<span class="tag ${tagFor(m)}">${m}</span>`).join(' ')}</td>
+                <td style="text-align:center;font-weight:900;color:#0ea5e9;">${g.files}</td>
+                <td style="text-align:center;font-weight:900;color:#10b981;">${g.models}</td>
+                <td style="text-align:center;">
+                    <button class="btn-ghost" onclick="showEmployeeDetails('${g.name}')"><i class="fa-solid fa-eye"></i></button>
+                </td>
+            </tr>
+        `).join('');
+
+        window.__reportData = grouped;
+    };
+
+    window.showEmployeeDetails = function (name) {
+        const g = window.__reportData?.[name];
+        if (!g) return;
+        if (window.showAlert) {
+            showAlert({ title: 'تفاصيل ' + name, message: `الملفات: ${g.files} | النماذج: ${g.models}`, type: 'info' });
+        } else {
+            alert(`تفاصيل ${name}\nملفات: ${g.files}\nنماذج: ${g.models}`);
+        }
+    };
+
+    function tagFor(v) {
+        if (v === 'Scan') return 'scan';
+        if (v === 'Audit') return 'audit';
+        if (v === 'Inpatient') return 'inpatient';
+        if (v === 'ER') return 'er';
+        if (v === 'Progressive') return 'prog';
+        return '';
+    }
+
+    // ============================================================
+    // KPI
+    // ============================================================
+    window.loadKPI = async function () {
+        const start = $('kpiStart').value;
+        const end = $('kpiEnd').value;
+        const container = $('kpiContainer');
+        container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-circle-notch fa-spin"></i>جاري التحليل</div>';
+
+        let q = supabase.from('work_records')
+            .select('*').eq('movement_type', 'تسجيل شغل');
+        if (start) q = q.gte('work_date', start);
+        if (end) q = q.lte('work_date', end);
+        const { data: recs } = await q;
+
+        // evaluations
+        const { data: evals } = await supabase.from('work_evaluations').select('*');
+
+        const evalMap = {};
+        (evals||[]).forEach(e => {
+            if (!evalMap[e.employee_name]) evalMap[e.employee_name] = { sum: 0, n: 0 };
+            evalMap[e.employee_name].sum += e.total_score || 0;
+            evalMap[e.employee_name].n++;
+        });
+
+        // staff meta
+        const staffMap = {};
+        STAFF.forEach(s => staffMap[s.name] = s);
+
+        const summary = {};
+        (recs||[]).forEach(r => {
+            if (!summary[r.employee_name]) {
+                summary[r.employee_name] = {
+                    name: r.employee_name, models: 0, files: 0,
+                    dates: new Set(), dailyLog: {}, paths: {},
+                    empType: staffMap[r.employee_name]?.emp_type || 'Other',
+                    dailyTarget: staffMap[r.employee_name]?.daily_target || 0,
+                };
+            }
+            const s = summary[r.employee_name];
+            s.models += r.models_count || 0;
+            s.files += r.actual_count || 0;
+            if (r.work_date) {
+                s.dates.add(r.work_date);
+                s.dailyLog[r.work_date] = (s.dailyLog[r.work_date] || 0) + (r.models_count || 0);
+            }
+            s.paths[r.work_path] = (s.paths[r.work_path] || 0) + 1;
+        });
+
+        const result = [];
+        for (const name in summary) {
+            const s = summary[name];
+            if (!['Inpatient','ER','Progressive'].includes(s.empType) || s.dailyTarget <= 0) continue;
+
+            s.daysWorked = s.dates.size;
+            s.totalTarget = s.dailyTarget * Math.max(1, s.daysWorked);
+            s.percent = s.totalTarget > 0 ? Math.round((s.models / s.totalTarget) * 100) : 0;
+            s.dailyAverage = s.daysWorked > 0 ? Math.round(s.models / s.daysWorked) : 0;
+            s.fileDensity = s.files > 0 ? (s.models / s.files).toFixed(1) : 0;
+
+            let maxM = -1, bestDate = '-', hits = 0;
+            for (const d in s.dailyLog) {
+                if (s.dailyLog[d] > maxM) { maxM = s.dailyLog[d]; bestDate = d; }
+                if (s.dailyLog[d] >= s.dailyTarget) hits++;
+            }
+            s.bestDay = maxM > 0 ? `${fmtDate(bestDate)} (${maxM})` : '-';
+            s.hitRate = s.daysWorked > 0 ? Math.round((hits / s.daysWorked) * 100) : 0;
+
+            let topPath = '-', maxC = -1, totalP = 0;
+            for (const p in s.paths) {
+                totalP += s.paths[p];
+                if (s.paths[p] > maxC) { maxC = s.paths[p]; topPath = p; }
+            }
+            s.topPath = totalP > 0 ? `${topPath} (${Math.round((maxC/totalP)*100)}%)` : '-';
+
+            const ev = evalMap[s.name];
+            s.adminScore = ev ? Math.round(ev.sum / ev.n) : null;
+            s.combinedScore = s.adminScore !== null
+                ? Math.round(Math.min(s.percent,100)*0.7 + s.adminScore*0.3)
+                : s.percent;
+
+            result.push(s);
+        }
+        result.sort((a,b) => b.combinedScore - a.combinedScore);
+        KPI_DATA = result;
+        renderKPI();
+    };
+
+    function renderKPI() {
+        const container = $('kpiContainer');
+        if (!KPI_DATA.length) {
+            container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><i class="fa-solid fa-inbox"></i>لا توجد بيانات</div>';
+            return;
+        }
+        container.innerHTML = KPI_DATA.map((emp, i) => {
+            const score = emp.combinedScore;
+            const color = score >= 100 ? '#10b981' : score >= 75 ? '#0ea5e9' : '#f59e0b';
+            const crown = i === 0 && score > 0 ? '<div class="kpi-crown"><i class="fa-solid fa-crown"></i></div>' : '';
+            return `
+                <div class="kpi-card" data-name="${emp.name.toLowerCase()}">
+                    ${crown}
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                        <div>
+                            <div class="kpi-name">${emp.name}</div>
+                            <span class="tag ${tagFor(emp.empType)}" style="margin-top:4px;display:inline-block;">${emp.empType}</span>
+                        </div>
+                        <div class="kpi-score" style="color:${color};">${score}%</div>
+                    </div>
+                    <div class="kpi-bar"><div class="kpi-bar-fill" style="width:${Math.min(score,100)}%;background:${color};"></div></div>
+                    <div class="kpi-meta">
+                        <div><span>الإنتاجية</span><span style="color:${emp.percent>=100?'#10b981':'var(--text-primary)'};">${emp.percent}%</span></div>
+                        <div><span>الإداري</span><span style="color:#8b5cf6;">${emp.adminScore !== null ? emp.adminScore+'/100' : '—'}</span></div>
+                        <div><span>المتوسط</span><span>${emp.dailyAverage}</span></div>
+                        <div><span>نسبة التارجت</span><span style="color:#10b981;">${emp.hitRate}%</span></div>
+                        <div style="grid-column:1/-1;"><span>أفضل يوم</span><span dir="ltr">${emp.bestDay}</span></div>
+                        <div><span>كثافة الملف</span><span>${emp.fileDensity}</span></div>
+                        <div><span>المسار</span><span>${emp.topPath}</span></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    window.filterCards = function (q) {
+        q = (q||'').toLowerCase().trim();
+        document.querySelectorAll('#kpiContainer .kpi-card').forEach(c => {
+            c.style.display = c.dataset.name.includes(q) ? '' : 'none';
+        });
+    };
+
+    // ============================================================
+    // DEFICITS
+    // ============================================================
+    window.loadDeficits = async function () {
+        const start = $('defStart').value;
+        const end = $('defEnd').value;
+        const tbody = $('defBody');
+        tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fa-solid fa-circle-notch fa-spin"></i>جاري الاستعلام</div></td></tr>';
+
+        let q = supabase.from('work_records').select('*');
+        if (start) q = q.gte('daily_exit_date', start);
+        if (end) q = q.lte('daily_exit_date', end);
+        const { data, error } = await q;
+
+        if (error) { tbody.innerHTML = `<tr><td colspan="8">${error.message}</td></tr>`; return; }
+
+        const summary = {};
+        (data||[]).forEach(r => {
+            if (r.movement_type === 'توريد يومية') {
+                if (!r.daily_exit_date) return;
+                const key = `${r.daily_exit_date}|${r.work_path}`;
+                if (!summary[key]) summary[key] = { date: r.daily_exit_date, type: r.work_path, total: 0, received: 0, scan: 0, audit: 0 };
+                summary[key].received += r.actual_count || 0;
+                summary[key].total += r.target_quota || 0;
+            } else if (r.movement_type === 'تسجيل شغل') {
+                if (r.work_path === 'ER' && r.daily_exit_date) {
+                    const key = `${r.daily_exit_date}|ER`;
+                    if (!summary[key]) summary[key] = { date: r.daily_exit_date, type: 'ER', total: 0, received: 0, scan: 0, audit: 0 };
+                    if (r.work_method === 'Scan') summary[key].scan += r.actual_count || 0;
+                    if (r.work_method === 'Audit') summary[key].audit += r.actual_count || 0;
+                } else if (r.work_path === 'Inpatient' && r.daily_exit_date) {
+                    const key = `${r.daily_exit_date}|Inpatient`;
+                    if (!summary[key]) summary[key] = { date: r.daily_exit_date, type: 'Inpatient', total: 0, received: 0, scan: 0, audit: 0 };
+                    if (r.work_method === 'Scan') summary[key].scan += r.actual_count || 0;
+                    if (r.work_method === 'Audit') summary[key].audit += r.actual_count || 0;
+                }
+            }
+        });
+
+        const arr = [];
+        for (const k in summary) {
+            const s = summary[k];
+            if (s.received > 0 || s.scan > 0 || s.audit > 0) {
+                s.remScan = Math.max(0, s.received - s.scan);
+                s.remAudit = Math.max(0, s.received - s.audit);
+                s.status = (s.remScan === 0 && s.remAudit === 0) ? 'مكتمل' : 'عجز';
+                arr.push(s);
+            }
+        }
+        arr.sort((a,b) => b.date.localeCompare(a.date));
+        DEFICITS_DATA = arr;
+        renderDeficits(DEFICITS_FILTER);
+    };
+
+    window.renderDeficits = function (type) {
+        DEFICITS_FILTER = type;
+        $('defBtnIn').style.borderColor = type === 'Inpatient' ? 'var(--accent)' : '';
+        $('defBtnIn').style.color = type === 'Inpatient' ? 'var(--accent)' : '';
+        $('defBtnEr').style.borderColor = type === 'ER' ? 'var(--accent)' : '';
+        $('defBtnEr').style.color = type === 'ER' ? 'var(--accent)' : '';
+
+        const filtered = DEFICITS_DATA.filter(r => r.type === type);
+        let tRec = 0, tScan = 0, tAudit = 0, dScan = 0, dAudit = 0;
+
+        const tbody = $('defBody');
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fa-solid fa-inbox"></i>لا توجد بيانات</div></td></tr>';
+        } else {
+            tbody.innerHTML = filtered.map(r => {
+                tRec += r.received; tScan += r.scan; tAudit += r.audit;
+                if (r.remScan > 0) dScan += r.remScan;
+                if (r.remAudit > 0) dAudit += r.remAudit;
+                return `
+                    <tr>
+                        <td>${fmtDate(r.date)}</td>
+                        <td><span class="tag ${tagFor(r.type)}">${r.type}</span></td>
+                        <td style="text-align:center;font-weight:900;">${money(r.received)}</td>
+                        <td style="text-align:center;color:#0ea5e9;font-weight:800;">${money(r.scan)}</td>
+                        <td style="text-align:center;color:#10b981;font-weight:800;">${money(r.audit)}</td>
+                        <td style="text-align:center;color:#ef4444;font-weight:900;">${r.remScan > 0 ? money(r.remScan) : '✓'}</td>
+                        <td style="text-align:center;color:#ef4444;font-weight:900;">${r.remAudit > 0 ? money(r.remAudit) : '✓'}</td>
+                        <td style="text-align:center;"><span class="tag ${r.status==='مكتمل'?'ok':'bad'}">${r.status}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        $('defReceived').textContent = money(tRec);
+        $('defScan').textContent = money(tScan);
+        $('defAudit').textContent = money(tAudit);
+        $('defScanDef').textContent = money(dScan);
+        $('defAuditDef').textContent = money(dAudit);
+    };
+
+    // ============================================================
+    // EVALUATION
+    // ============================================================
+    const EVAL_QUESTIONS = [
+        '1. الانضباط والمواعيد',
+        '2. إنجاز المهام في الوقت',
+        '3. جودة ودقة المخرجات',
+        '4. الالتزام بالسياسات',
+        '5. التواصل والتعاون',
+        '6. حل المشكلات',
+        '7. التطوير الذاتي',
+        '8. المظهر المهني',
+        '9. سرية البيانات',
+        '10. الاستجابة للتوجيهات',
+    ];
+
+    function buildEvalSliders() {
+        const wrap = $('evalSliders');
+        if (!wrap) return;
+        wrap.innerHTML = EVAL_QUESTIONS.map((q, i) => `
+            <div class="slider-row">
+                <div class="slider-head">
+                    <span>${q}</span>
+                    <span class="slider-val" id="val_q${i+1}">10</span>
+                </div>
+                <input type="range" name="q${i+1}" min="0" max="10" value="10" oninput="updateEvalTotal()">
+            </div>
+        `).join('');
+    }
+
+    window.updateEvalTotal = function () {
+        const form = $('evaluationForm');
+        let total = 0;
+        for (let i = 1; i <= 10; i++) {
+            const v = safeInt(form['q'+i].value);
+            $('val_q'+i).textContent = v;
+            total += v;
+        }
+        const el = $('evalTotal');
+        el.textContent = total;
+        el.parentElement.style.color = total >= 85 ? '#10b981' : total >= 60 ? '#f59e0b' : '#ef4444';
+    };
+
+    window.handleEvaluationSubmit = async function (e) {
+        e.preventDefault();
+        const form = e.target;
+        const fd = new FormData(form);
+
+        const row = {
+            employee_name: fd.get('employee_name'),
+            supervisor_name: fd.get('supervisor_name'),
+            eval_month: fd.get('eval_month'),
+            notes: fd.get('notes') || '',
+            created_by: CURRENT_USER.id,
+        };
+        for (let i = 1; i <= 10; i++) row['q'+i] = safeInt(fd.get('q'+i));
+
+        const btn = form.querySelector('button[type=submit]');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحفظ';
+
+        const { error } = await supabase.from('work_evaluations').insert(row);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check-double"></i> حفظ التقييم';
+
+        if (error) {
+            if (window.showNotification) showNotification('خطأ: ' + error.message, 'error');
+            return;
+        }
+        if (window.showNotification) showNotification('تم حفظ التقييم', 'success');
+        form.reset();
+        for (let i = 1; i <= 10; i++) { $('val_q'+i).textContent = '10'; }
+        $('evalTotal').textContent = '100';
+        await loadWelcomeStats();
+    };
+
+    // ============================================================
+    // EDIT RECORDS (admin only)
+    // ============================================================
+    window.loadEditRecords = async function () {
+        if (!isAdmin()) return;
+        const date = $('editFilterDate').value;
+        const tbody = $('editBody');
+        tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><i class="fa-solid fa-circle-notch fa-spin"></i>جاري التحميل</div></td></tr>';
+
+        let q = supabase.from('work_records')
+            .select('*').eq('movement_type', 'تسجيل شغل').order('created_at', { ascending: false }).limit(200);
+        if (date) q = q.eq('work_date', date);
+        const { data, error } = await q;
+
+        if (error) { tbody.innerHTML = `<tr><td colspan="4">${error.message}</td></tr>`; return; }
+        if (!data || !data.length) {
+            tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><i class="fa-solid fa-inbox"></i>لا توجد حركات</div></td></tr>';
+            return;
+        }
+
+        // group by batch
+        const batches = {};
+        data.forEach(r => {
+            if (!batches[r.batch_id]) batches[r.batch_id] = { batch_id: r.batch_id, emp: r.employee_name, date: r.work_date, created_at: r.created_at, ids: [] };
+            batches[r.batch_id].ids.push(r.id);
+        });
+
+        tbody.innerHTML = Object.values(batches).map(b => `
+            <tr>
+                <td>${new Date(b.created_at).toLocaleString('en-GB')}</td>
+                <td style="font-weight:900;color:var(--text-primary);">${b.emp}</td>
+                <td>${fmtDate(b.date)}</td>
+                <td style="text-align:center;">
+                    <button class="btn-ghost" style="border-color:#ef4444;color:#ef4444;" onclick="deleteBatch('${b.batch_id}')">
+                        <i class="fa-solid fa-trash"></i> حذف
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    };
+
+    window.deleteBatch = async function (batchId) {
+        if (!isAdmin()) return;
+        if (window.showConfirm) {
+            const ok = await window.showConfirm({
+                title: 'حذف الحركة', message: 'سيتم حذف الحركة بالكامل مع تفاصيل الملفات. متأكد؟',
+                confirmText: 'حذف', cancelText: 'إلغاء', type: 'danger'
+            });
+            if (!ok) return;
+        } else if (!confirm('تأكيد الحذف؟')) return;
+
+        const { error } = await supabase.from('work_records').delete().eq('batch_id', batchId);
+        if (error) { if (window.showNotification) showNotification(error.message, 'error'); return; }
+        if (window.showNotification) showNotification('تم الحذف', 'success');
+        loadEditRecords();
+    };
+
+    // ============================================================
+    // STAFF ADMIN
+    // ============================================================
+    async function renderStaffTable() {
+        if (!isAdmin()) return;
+        const { data } = await supabase.from('work_staff').select('*').order('name');
+        const tbody = $('staffBody');
+        if (!data?.length) {
+            tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">لا يوجد موظفون</div></td></tr>';
+            return;
+        }
+        tbody.innerHTML = data.map(s => `
+            <tr>
+                <td style="font-weight:900;color:var(--text-primary);">${s.name}</td>
+                <td><span class="tag ${tagFor(s.emp_type)}">${s.emp_type}</span></td>
+                <td style="text-align:center;">${s.daily_target}</td>
+                <td style="text-align:center;"><span class="tag ${s.is_active?'ok':'bad'}">${s.is_active?'نشط':'موقوف'}</span></td>
+                <td style="text-align:center;">
+                    <button class="btn-ghost" onclick="toggleStaff('${s.id}', ${!s.is_active})">
+                        <i class="fa-solid ${s.is_active?'fa-pause':'fa-play'}"></i>
+                    </button>
+                    <button class="btn-ghost" style="border-color:#ef4444;color:#ef4444;" onclick="deleteStaff('${s.id}')">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+    window.renderStaffTable = renderStaffTable;
+
+    window.handleAddStaff = async function (e) {
+        e.preventDefault();
+        if (!isAdmin()) return;
+        const fd = new FormData(e.target);
+        const row = {
+            name: fd.get('name'),
+            emp_type: fd.get('emp_type'),
+            daily_target: safeInt(fd.get('daily_target')),
+            is_active: true,
+        };
+        const { error } = await supabase.from('work_staff').insert(row);
+        if (error) { if (window.showNotification) showNotification(error.message, 'error'); return; }
+        if (window.showNotification) showNotification('تم إضافة الموظف', 'success');
+        e.target.reset();
+        await loadStaff();
+        renderStaffTable();
+    };
+
+    window.toggleStaff = async function (id, active) {
+        if (!isAdmin()) return;
+        await supabase.from('work_staff').update({ is_active: active }).eq('id', id);
+        await loadStaff();
+        renderStaffTable();
+    };
+
+    window.deleteStaff = async function (id) {
+        if (!isAdmin()) return;
+        if (!confirm('حذف الموظف؟')) return;
+        await supabase.from('work_staff').delete().eq('id', id);
+        await loadStaff();
+        renderStaffTable();
+    };
+
+    // ============================================================
+    // BOOT: add first task block
+    // ============================================================
+    addTaskBlock();
+    </script>
