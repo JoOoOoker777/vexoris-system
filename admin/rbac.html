@@ -418,7 +418,7 @@
             <div class="matrix-header">
                 <div>
                     <div class="matrix-title">مصفوفة الصلاحيات</div>
-                    <div class="matrix-subtitle">7 أدوار × 13 تطبيق</div>
+                    <div class="matrix-subtitle">7 أدوار × 16 تطبيق</div>
                 </div>
                 <div class="matrix-actions">
                     <button class="btn-reset" id="btnReset">
@@ -479,9 +479,11 @@
 
         const APPS = [
             { id: 'medical-audit',     name: 'مراجعة الملفات الطبية', icon: 'fa-folder-medical', color: '#0ea5e9', soft: 'rgba(14,165,233,0.12)', category: 'سريرية' },
+            { id: 'worcspacedown',     name: 'تطبيق تسجيل الشغل',     icon: 'fa-pen-ruler', color: '#10b981', soft: 'rgba(16,185,129,0.12)', category: 'سريرية' },
             { id: 'emergency-audit',   name: 'مراجعة الطوارئ',        icon: 'fa-truck-medical', color: '#f59e0b', soft: 'rgba(245,158,11,0.12)', category: 'سريرية' },
             { id: 'doctor-notes',      name: 'ملاحظات الأطباء',        icon: 'fa-kit-medical', color: '#10b981', soft: 'rgba(16,185,129,0.12)', category: 'سريرية' },
             { id: 'discharge',         name: 'مؤشر الخروج',            icon: 'fa-sitemap', color: '#8b5cf6', soft: 'rgba(139,92,246,0.12)', category: 'سريرية' },
+            { id: 'medical-analytics', name: 'إحصائيات الملفات الطبية', icon: 'fa-chart-line', color: '#06b6d4', soft: 'rgba(6,182,212,0.12)', category: 'تحليلات' },
             { id: 'stats-files',       name: 'إحصائيات الملفات',       icon: 'fa-chart-pie', color: '#06b6d4', soft: 'rgba(6,182,212,0.12)', category: 'تحليلات' },
             { id: 'stats-departments', name: 'إحصائيات الأقسام',       icon: 'fa-hospital-user', color: '#f43f5e', soft: 'rgba(244,63,94,0.12)', category: 'تحليلات' },
             { id: 'stats-quality',     name: 'إحصائيات الجودة',        icon: 'fa-award', color: '#eab308', soft: 'rgba(234,179,8,0.12)', category: 'تحليلات' },
@@ -490,7 +492,7 @@
             { id: 'courses',           name: 'الدورات التدريبية',      icon: 'fa-graduation-cap', color: '#0ea5e9', soft: 'rgba(14,165,233,0.12)', category: 'إدارة' },
             { id: 'admin-users',       name: 'إدارة المستخدمين',       icon: 'fa-users-gear', color: '#a855f7', soft: 'rgba(168,85,247,0.12)', category: 'إدارة' },
             { id: 'role-permissions',  name: 'التحكم في صلاحيات الأدوار', icon: 'fa-user-lock', color: '#ec4899', soft: 'rgba(236,72,153,0.12)', category: 'إدارة' },
-            { id: 'catalogs', name: 'إدارة ادارة الانظمة العامة', icon: 'fa-database', color: '#8b5cf6', soft: 'rgba(139,92,246,0.12)', category: 'إدارة' },
+            { id: 'catalogs',          name: 'ادارة الانظمة العامة',   icon: 'fa-database', color: '#8b5cf6', soft: 'rgba(139,92,246,0.12)', category: 'إدارة' },
             { id: 'admin-logs',        name: 'سجل التدقيق',            icon: 'fa-clipboard-list', color: '#64748b', soft: 'rgba(100,116,139,0.12)', category: 'إدارة' },
         ];
 
