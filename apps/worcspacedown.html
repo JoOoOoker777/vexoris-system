@@ -196,6 +196,153 @@
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             scrollbar-width: none;
         }
+        /* ============ MODERN KPI CARDS ============ */
+        .kpi-card-modern {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 22px 20px 18px;
+            position: relative;
+            transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+            overflow: hidden;
+        }
+        .kpi-card-modern::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--kpi-color, var(--accent)), transparent);
+            opacity: 0.9;
+        }
+        .kpi-card-modern:hover {
+            transform: translateY(-6px);
+            border-color: var(--kpi-color, var(--accent));
+            box-shadow: 0 20px 45px -15px var(--kpi-color, rgba(14,165,233,0.3));
+        }
+        .kpi-rank {
+            position: absolute;
+            top: -10px;
+            left: 18px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 0.85rem;
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+            border: 2px solid var(--card-bg);
+        }
+        .kpi-rank.gold { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+        .kpi-rank.silver { background: linear-gradient(135deg, #e2e8f0, #94a3b8); color: #1e293b; }
+        .kpi-rank.bronze { background: linear-gradient(135deg, #fb923c, #ea580c); }
+        .kpi-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 18px;
+            gap: 12px;
+        }
+        .kpi-name-modern {
+            font-size: 1.05rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+        .kpi-type-tag {
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 6px;
+            letter-spacing: 0.04em;
+        }
+        .kpi-ring {
+            width: 78px;
+            height: 78px;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .kpi-ring::after {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border-radius: 50%;
+            background: var(--card-bg);
+        }
+        .kpi-ring-value {
+            position: relative;
+            z-index: 1;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .kpi-ring-sub {
+            position: relative;
+            z-index: 1;
+            font-size: 0.48rem;
+            font-weight: 900;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            margin-top: 2px;
+        }
+        .kpi-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .kpi-metric {
+            background: rgba(148,163,184,0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            transition: all 0.2s;
+        }
+        html:not(.dark) .kpi-metric {
+            background: rgba(241,245,249,0.6);
+        }
+        .kpi-metric:hover {
+            border-color: var(--kpi-color, var(--accent));
+            transform: translateY(-1px);
+        }
+        .kpi-metric-lbl {
+            font-size: 0.56rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 0.03em;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .kpi-metric-val {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+        .kpi-mini-bar {
+            margin-top: 6px;
+            height: 4px;
+            background: rgba(148,163,184,0.15);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .kpi-mini-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 1s cubic-bezier(0.4,0,0.2,1);
+        }
         .tabs-bar::-webkit-scrollbar { display: none; }
         .side-btn {
             display: inline-flex; align-items: center; gap: 8px;
@@ -539,18 +686,43 @@
         </section>
 
         <!-- KPI -->
+        
         <section class="tab-pane" id="tab-kpi">
             <div class="page-title"><i class="fa-solid fa-chart-pie text-accent-2"></i> مؤشرات الأداء</div>
-            <p class="page-sub">الإنتاجية (70%) + التقييم الإداري (30%) لكل موظف.</p>
-            <div class="glass-card">
-                <div class="flex gap-3 items-center mb-6 flex-wrap">
+            <p class="page-sub">تحليل شامل للأداء: الإنتاجية (70%) + التقييم الإداري (30%) لكل موظف.</p>
+
+            <!-- Filters Card -->
+            <div class="glass-card mb-6" style="padding: 16px 20px;">
+                <div class="flex gap-3 items-center flex-wrap">
                     <input type="date" id="kpiStart" class="form-input max-w-[190px]" dir="ltr" title="من تاريخ">
                     <input type="date" id="kpiEnd" class="form-input max-w-[190px]" dir="ltr" title="إلى تاريخ">
                     <button onclick="loadKPI()" class="btn-ghost"><i class="fa-solid fa-filter"></i> تصفية</button>
                     <input type="text" oninput="filterCards(this.value)" placeholder="بحث بالاسم..." class="form-input max-w-[250px]">
                 </div>
-                <div id="kpiContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"></div>
             </div>
+
+            <!-- Summary Stats -->
+            <div id="kpiSummary" class="stat-grid mb-6" style="display:none;">
+                <div class="stat-card" style="--stat-color: #0ea5e9;">
+                    <div class="stat-label"><i class="fa-solid fa-users"></i> إجمالي الموظفين</div>
+                    <div class="stat-value" id="kpiTotalEmps">0</div>
+                </div>
+                <div class="stat-card" style="--stat-color: #10b981;">
+                    <div class="stat-label"><i class="fa-solid fa-gauge-high"></i> متوسط الإنتاجية</div>
+                    <div class="stat-value" id="kpiAvgPercent">0%</div>
+                </div>
+                <div class="stat-card" style="--stat-color: #8b5cf6;">
+                    <div class="stat-label"><i class="fa-solid fa-trophy"></i> أعلى تقييم</div>
+                    <div class="stat-value" id="kpiTopScore">0%</div>
+                </div>
+                <div class="stat-card" style="--stat-color: #f59e0b;">
+                    <div class="stat-label"><i class="fa-solid fa-file-medical"></i> إجمالي النماذج</div>
+                    <div class="stat-value" id="kpiTotalModels">0</div>
+                </div>
+            </div>
+
+            <!-- Cards Grid -->
+            <div id="kpiContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px;"></div>
         </section>
 
         <!-- DEFICITS -->
@@ -925,44 +1097,166 @@
 
     function tagFor(v) { if (v === 'Scan') return 'scan'; if (v === 'Audit') return 'audit'; if (v === 'Inpatient') return 'inpatient'; if (v === 'ER') return 'er'; return ''; }
 
-    window.loadKPI = async function () {
+   window.loadKPI = async function () {
         const start = $('kpiStart').value, end = $('kpiEnd').value, container = $('kpiContainer');
-        container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><i class="fa-solid fa-circle-notch fa-spin"></i>جاري التحليل...</div>';
+        container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><i class="fa-solid fa-circle-notch fa-spin"></i>جاري تحليل البيانات...</div>';
+        
         let q = supabase.from('work_records').select('*').eq('movement_type', 'تسجيل شغل');
-        if (start) q = q.gte('work_date', start); if (end) q = q.lte('work_date', end);
+        if (start) q = q.gte('work_date', start);
+        if (end) q = q.lte('work_date', end);
         const { data: recs } = await q;
         const { data: evals } = await supabase.from('work_evaluations').select('*');
-        const evalMap = {}; (evals||[]).forEach(e => { if (!evalMap[e.employee_name]) evalMap[e.employee_name] = { sum: 0, n: 0 }; evalMap[e.employee_name].sum += e.total_score || 0; evalMap[e.employee_name].n++; });
-        const staffMap = {}; STAFF.forEach(s => staffMap[s.name] = s);
+        
+        const evalMap = {};
+        (evals||[]).forEach(e => {
+            if (!evalMap[e.employee_name]) evalMap[e.employee_name] = { sum: 0, n: 0 };
+            evalMap[e.employee_name].sum += e.total_score || 0;
+            evalMap[e.employee_name].n++;
+        });
+        
+        const staffMap = {};
+        STAFF.forEach(s => staffMap[s.name] = s);
+        
         const summary = {};
         (recs||[]).forEach(r => {
-            if (!summary[r.employee_name]) summary[r.employee_name] = { name: r.employee_name, models: 0, files: 0, dates: new Set(), dailyLog: {}, paths: {}, empType: staffMap[r.employee_name]?.emp_type || 'Other', dailyTarget: staffMap[r.employee_name]?.daily_target || 0 };
-            const s = summary[r.employee_name]; s.models += r.models_count || 0; s.files += r.actual_count || 0;
-            if (r.work_date) { s.dates.add(r.work_date); s.dailyLog[r.work_date] = (s.dailyLog[r.work_date] || 0) + (r.models_count || 0); }
+            if (!summary[r.employee_name]) {
+                summary[r.employee_name] = {
+                    name: r.employee_name, models: 0, files: 0,
+                    dates: new Set(), dailyLog: {}, paths: {},
+                    empType: staffMap[r.employee_name]?.emp_type || 'Other',
+                    dailyTarget: staffMap[r.employee_name]?.daily_target || 0,
+                };
+            }
+            const s = summary[r.employee_name];
+            s.models += r.models_count || 0;
+            s.files += r.actual_count || 0;
+            if (r.work_date) {
+                s.dates.add(r.work_date);
+                s.dailyLog[r.work_date] = (s.dailyLog[r.work_date] || 0) + (r.models_count || 0);
+            }
             s.paths[r.work_path] = (s.paths[r.work_path] || 0) + 1;
         });
+        
         const result = [];
         for (const name in summary) {
-            const s = summary[name]; if (!['Inpatient','ER','Progressive'].includes(s.empType) || s.dailyTarget <= 0) continue;
-            s.daysWorked = s.dates.size; s.totalTarget = s.dailyTarget * Math.max(1, s.daysWorked);
+            const s = summary[name];
+            // التعديل الأساسي: عرض أي موظف عنده أي بيانات
+            if (s.models === 0 && s.files === 0) continue;
+            
+            s.daysWorked = s.dates.size;
+            s.totalTarget = s.dailyTarget * Math.max(1, s.daysWorked);
             s.percent = s.totalTarget > 0 ? Math.round((s.models / s.totalTarget) * 100) : 0;
             s.dailyAverage = s.daysWorked > 0 ? Math.round(s.models / s.daysWorked) : 0;
+            
             let maxM = -1, bestDate = '-', hits = 0;
-            for (const d in s.dailyLog) { if (s.dailyLog[d] > maxM) { maxM = s.dailyLog[d]; bestDate = d; } if (s.dailyLog[d] >= s.dailyTarget) hits++; }
-            s.bestDay = maxM > 0 ? `${fmtDate(bestDate)} (${maxM})` : '-'; s.hitRate = s.daysWorked > 0 ? Math.round((hits / s.daysWorked) * 100) : 0;
-            const ev = evalMap[s.name]; s.adminScore = ev ? Math.round(ev.sum / ev.n) : null;
-            s.combinedScore = s.adminScore !== null ? Math.round(Math.min(s.percent,100)*0.7 + s.adminScore*0.3) : s.percent;
+            for (const d in s.dailyLog) {
+                if (s.dailyLog[d] > maxM) { maxM = s.dailyLog[d]; bestDate = d; }
+                if (s.dailyTarget > 0 && s.dailyLog[d] >= s.dailyTarget) hits++;
+            }
+            s.bestDay = maxM > 0 ? `${fmtDate(bestDate)} (${maxM})` : '-';
+            s.hitRate = s.daysWorked > 0 && s.dailyTarget > 0 ? Math.round((hits / s.daysWorked) * 100) : 0;
+            
+            let topPath = '-', maxC = -1, totalP = 0;
+            for (const p in s.paths) {
+                totalP += s.paths[p];
+                if (s.paths[p] > maxC) { maxC = s.paths[p]; topPath = p; }
+            }
+            s.topPath = totalP > 0 ? `${topPath} (${Math.round((maxC/totalP)*100)}%)` : '-';
+            
+            const ev = evalMap[s.name];
+            s.adminScore = ev ? Math.round(ev.sum / ev.n) : null;
+            s.combinedScore = s.adminScore !== null
+                ? Math.round(Math.min(s.percent,100)*0.7 + s.adminScore*0.3)
+                : (s.percent > 0 ? s.percent : 0);
+            
             result.push(s);
         }
-        result.sort((a,b) => b.combinedScore - a.combinedScore); KPI_DATA = result; renderKPI();
+        
+        result.sort((a,b) => b.combinedScore - a.combinedScore);
+        KPI_DATA = result;
+        renderKPI();
     };
 
     function renderKPI() {
-        const container = $('kpiContainer'); if (!KPI_DATA.length) { container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><i class="fa-solid fa-inbox"></i>لا توجد بيانات</div>'; return; }
+        const container = $('kpiContainer');
+        const summaryEl = $('kpiSummary');
+        
+        if (!KPI_DATA.length) {
+            summaryEl.style.display = 'none';
+            container.innerHTML = `
+                <div class="empty-state" style="grid-column:1/-1; padding: 60px;">
+                    <i class="fa-solid fa-chart-pie" style="font-size: 3rem; color: var(--text-muted);"></i>
+                    <div style="font-weight: 900; font-size: 1.1rem; margin-top: 12px; color: var(--text-primary);">لا توجد بيانات أداء</div>
+                    <div style="font-size: 0.85rem; margin-top: 6px;">سجل حركات شغل أولاً أو وسّع نطاق التواريخ لتظهر المؤشرات هنا</div>
+                </div>`;
+            return;
+        }
+        
+        summaryEl.style.display = 'grid';
+        const totalEmps = KPI_DATA.length;
+        const avgPercent = Math.round(KPI_DATA.reduce((a,b) => a + b.percent, 0) / totalEmps);
+        const topScore = Math.max(...KPI_DATA.map(k => k.combinedScore));
+        const totalModels = KPI_DATA.reduce((a,b) => a + b.models, 0);
+        $('kpiTotalEmps').textContent = totalEmps;
+        $('kpiAvgPercent').textContent = avgPercent + '%';
+        $('kpiTopScore').textContent = topScore + '%';
+        $('kpiTotalModels').textContent = totalModels.toLocaleString();
+        
         container.innerHTML = KPI_DATA.map((emp, i) => {
-            const score = emp.combinedScore, color = score >= 100 ? '#10b981' : score >= 75 ? '#0ea5e9' : '#f59e0b';
-            const crown = i === 0 && score > 0 ? '<div class="absolute -top-4 -right-3 text-3xl text-yellow-400"><i class="fa-solid fa-crown"></i></div>' : '';
-            return `<div class="kpi-card relative" data-name="${emp.name.toLowerCase()}">${crown}<div class="flex justify-between items-start mb-2"><div><div class="font-black text-lg">${emp.name}</div><span class="tag ${tagFor(emp.empType)}">${emp.empType}</span></div><div class="font-sans text-2xl font-bold" style="color:${color};">${score}%</div></div><div class="kpi-bar"><div class="kpi-bar-fill" style="width:${Math.min(score,100)}%;background:${color};"></div></div><div class="grid grid-cols-2 gap-2 text-xs font-bold text-secondary"><div class="flex justify-between bg-black/5 dark:bg-white/5 p-2 rounded-lg"><span>الإنتاجية</span><span>${emp.percent}%</span></div><div class="flex justify-between bg-black/5 dark:bg-white/5 p-2 rounded-lg"><span>الإداري</span><span>${emp.adminScore !== null ? emp.adminScore : '—'}</span></div><div class="flex justify-between bg-black/5 dark:bg-white/5 p-2 rounded-lg"><span>المتوسط</span><span>${emp.dailyAverage}</span></div><div class="flex justify-between bg-black/5 dark:bg-white/5 p-2 rounded-lg"><span>التارجت</span><span>${emp.hitRate}%</span></div></div></div>`;
+            const score = emp.combinedScore;
+            const color = score >= 100 ? '#10b981' : score >= 75 ? '#0ea5e9' : score >= 50 ? '#f59e0b' : '#ef4444';
+            const pct = Math.min(score, 100);
+            
+            let rankBadge = '';
+            if (i === 0 && score > 0) rankBadge = '<div class="kpi-rank gold"><i class="fa-solid fa-crown"></i></div>';
+            else if (i === 1 && score > 0) rankBadge = '<div class="kpi-rank silver">2</div>';
+            else if (i === 2 && score > 0) rankBadge = '<div class="kpi-rank bronze">3</div>';
+            
+            const ringBg = `conic-gradient(${color} 0% ${pct}%, rgba(148,163,184,0.15) ${pct}% 100%)`;
+            
+            const typeColor = emp.empType === 'ER' ? '#f59e0b' : emp.empType === 'Inpatient' ? '#6366f1' : emp.empType === 'Progressive' ? '#8b5cf6' : '#94a3b8';
+            const typeBg = emp.empType === 'ER' ? 'rgba(245,158,11,0.15)' : emp.empType === 'Inpatient' ? 'rgba(99,102,241,0.15)' : emp.empType === 'Progressive' ? 'rgba(139,92,246,0.15)' : 'rgba(148,163,184,0.15)';
+            
+            return `
+                <div class="kpi-card-modern" style="--kpi-color: ${color};" data-name="${emp.name.toLowerCase()}">
+                    ${rankBadge}
+                    <div class="kpi-head">
+                        <div style="flex:1; min-width:0;">
+                            <div class="kpi-name-modern">${emp.name}</div>
+                            <span class="kpi-type-tag" style="background:${typeBg}; color:${typeColor};">${emp.empType}</span>
+                        </div>
+                        <div class="kpi-ring" style="background: ${ringBg};">
+                            <div class="kpi-ring-value" style="color:${color};">${score}%</div>
+                            <div class="kpi-ring-sub">SCORE</div>
+                        </div>
+                    </div>
+                    
+                    <div class="kpi-metrics">
+                        <div class="kpi-metric">
+                            <div class="kpi-metric-lbl"><i class="fa-solid fa-gears" style="color:#0ea5e9;"></i> الإنتاجية</div>
+                            <div class="kpi-metric-val" style="color:${emp.percent >= 100 ? '#10b981' : 'var(--text-primary)'};">${emp.percent}%</div>
+                            <div class="kpi-mini-bar"><div class="kpi-mini-bar-fill" style="width:${Math.min(emp.percent,100)}%; background:#0ea5e9;"></div></div>
+                        </div>
+                        <div class="kpi-metric">
+                            <div class="kpi-metric-lbl"><i class="fa-solid fa-star" style="color:#8b5cf6;"></i> الإداري</div>
+                            <div class="kpi-metric-val" style="color:${emp.adminScore !== null ? '#8b5cf6' : 'var(--text-muted)'};">${emp.adminScore !== null ? emp.adminScore : '—'}</div>
+                            <div class="kpi-mini-bar"><div class="kpi-mini-bar-fill" style="width:${emp.adminScore !== null ? emp.adminScore : 0}%; background:#8b5cf6;"></div></div>
+                        </div>
+                        <div class="kpi-metric">
+                            <div class="kpi-metric-lbl"><i class="fa-solid fa-calculator" style="color:#10b981;"></i> المتوسط اليومي</div>
+                            <div class="kpi-metric-val">${emp.dailyAverage}</div>
+                        </div>
+                        <div class="kpi-metric">
+                            <div class="kpi-metric-lbl"><i class="fa-solid fa-bullseye" style="color:#f59e0b;"></i> التارجت</div>
+                            <div class="kpi-metric-val" style="color:${emp.hitRate >= 75 ? '#10b981' : '#f59e0b'};">${emp.hitRate}%</div>
+                        </div>
+                        <div class="kpi-metric" style="grid-column: 1/-1;">
+                            <div class="kpi-metric-lbl"><i class="fa-solid fa-fire" style="color:#f97316;"></i> أفضل يوم</div>
+                            <div class="kpi-metric-val" style="font-size:0.82rem;" dir="ltr">${emp.bestDay}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }).join('');
     }
 
