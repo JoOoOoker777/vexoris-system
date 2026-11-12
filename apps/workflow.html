@@ -144,120 +144,7 @@ html:not(.dark) .nav-shell{background:linear-gradient(to bottom,var(--bg) 0%,var
 ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(14,165,233,.4),rgba(99,102,241,.4));border-radius:10px;border:2px solid var(--bg)}
 ::selection{background:rgba(14,165,233,.35);color:#fff}
 
-/* ============================================
-   MOBILE RESPONSIVE (Phase 1)
-   ============================================ */
-@media (max-width: 768px) {
-  /* Header */
-  .nav-inner{padding:8px 12px;gap:8px}
-  .user-info{display:none!important}
-  .user-chip{padding:5px 6px}
-  .user-chip .fa-chevron-down{display:none}
-  .user-avatar{width:30px;height:30px}
-  .nav-inner .flex.items-center.gap-2 > a:last-child{display:none}
-  .user-dropdown{right:0;left:auto;width:240px}
-  .user-dropdown.open{transform:translateY(0) scale(1)}
 
-  /* Container */
-  .app-container{width:95%;margin:12px auto 40px}
-
-  /* Global filter — stack */
-  .global-filter-bar{padding:10px 12px;gap:8px;flex-direction:column;align-items:stretch}
-  .global-filter-bar > div{min-width:0!important;width:100%}
-  .global-filter-bar > button{width:100%;justify-content:center}
-  #filterStatus{text-align:center!important}
-
-  /* Tabs bar */
-  .tabs-bar{padding:8px 10px;border-radius:12px;gap:4px;margin-bottom:16px}
-  .side-btn{padding:8px 12px;font-size:.75rem;gap:5px}
-  .side-btn i{font-size:.7rem}
-
-  /* Page title */
-  .page-title{font-size:1.25rem;gap:8px}
-  .page-sub{font-size:.78rem;margin-bottom:16px}
-
-  /* Glass cards */
-  .glass-card{padding:16px;border-radius:16px}
-  .local-filter-card{padding:12px}
-
-  /* Stats grid — 2 columns */
-  .stat-grid{grid-template-columns:repeat(2,1fr)!important;gap:10px;margin-bottom:16px}
-  .stat-card{padding:14px}
-  .stat-label{font-size:.65rem;margin-bottom:4px}
-  .stat-value{font-size:1.3rem}
-  #kpiTop{font-size:.85rem!important}
-
-  /* Charts */
-  .chart-box{padding:12px;min-height:240px;border-radius:14px}
-  .chart-title{font-size:.8rem;margin-bottom:10px}
-
-  /* Overview grids — collapse 3-col and 1fr-2fr */
-  [style*="repeat(auto-fit,minmax(320px,1fr))"]{
-    grid-template-columns:1fr!important;gap:12px!important
-  }
-  [style*="grid-template-columns:1fr 2fr"]{
-    grid-template-columns:1fr!important;gap:12px!important
-  }
-
-  /* Heatmap/errors list */
-  #errorsHeatmap > div > div:first-child{font-size:.72rem!important}
-
-  /* Reviewers table */
-  .data-table{font-size:.7rem}
-  .data-table th{padding:8px 6px;font-size:.6rem}
-  .data-table td{padding:8px 6px}
-  .data-table .badge{font-size:.6rem;padding:2px 6px}
-
-  /* Local filter row — stack */
-  .local-filter-card .flex.gap-3.items-end.flex-wrap{gap:8px}
-  .local-filter-card .flex > div{min-width:0!important;width:100%}
-  .local-filter-card input[type="text"]{max-width:100%!important}
-  .local-filter-card > .flex > button{flex:1;min-width:calc(50% - 4px);justify-content:center}
-
-  /* Modals */
-  .modal{padding:10px}
-  .modal-card{border-radius:18px;max-height:95vh}
-  .modal-head{padding:14px 16px}
-  .modal-body{padding:16px}
-
-  /* Reviewer modal — 3-col KPI collapse */
-  .modal-body [style*="grid-template-columns:repeat(3,1fr)"]{
-    grid-template-columns:1fr!important;gap:8px!important
-  }
-
-  /* Compare modal — top 2-col collapses + 3-col controls */
-  .modal-body [style*="grid-template-columns:1fr 1fr"]{
-    grid-template-columns:1fr!important;gap:10px!important
-  }
-  .modal-body [style*="grid-template-columns:1fr 1fr auto"]{
-    grid-template-columns:1fr!important;gap:8px!important
-  }
-
-  /* Reviewer modal internal table */
-  .modal-body .data-table{font-size:.7rem}
-  .modal-body .data-table th,
-  .modal-body .data-table td{padding:6px 4px!important}
-
-  /* Pagination row */
-  .modal-body [style*="display:flex;justify-content:space-between"]{
-    flex-direction:column!important;gap:10px!important;align-items:stretch!important
-  }
-  .modal-body [style*="display:flex;justify-content:space-between"] > div:last-child{
-    display:flex!important;gap:6px!important;justify-content:center!important;flex-wrap:wrap!important
-  }
-
-  /* Forms */
-  .form-label{font-size:.68rem}
-  .form-input{padding:9px 11px;font-size:.85rem}
-
-  /* Buttons */
-  .btn-primary,.btn-ghost{min-height:40px}
-  .modal-head button.icon-btn{width:32px;height:32px}
-
-  /* Empty state */
-  .empty-state{padding:40px 16px}
-  .empty-state i{font-size:2rem}
-}
 
 @media (max-width: 400px) {
   .stat-grid{grid-template-columns:1fr!important}
@@ -271,6 +158,9 @@ html:not(.dark) .nav-shell{background:linear-gradient(to bottom,var(--bg) 0%,var
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
 <script src="../loading-logo.js" defer></script>
 <script src="../loader-buttons.js" defer></script>
+<link rel="stylesheet" href="../mobile-app-shell.css">
+<script src="../mobile-app-shell.js" defer></script>
+
 </head>
 <body>
 

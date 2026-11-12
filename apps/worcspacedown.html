@@ -473,84 +473,7 @@
         ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4)); border-radius: 10px; border: 2px solid var(--bg); }
         ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
 
-        /* ============================================
-           MOBILE RESPONSIVE (Phase 1)
-           ============================================ */
-        @media (max-width: 768px) {
-            /* Header */
-            .nav-inner { padding: 8px 12px; gap: 8px; }
-            .user-info { display: none !important; }
-            .user-chip { padding: 5px 6px; }
-            .user-chip .fa-chevron-down { display: none; }
-            .user-avatar { width: 30px; height: 30px; }
-            .nav-inner .flex.items-center.gap-2 > a:last-child { display: none; }
-            .user-dropdown { right: 0; left: auto; width: 240px; }
-            .user-dropdown.open { transform: translateY(0) scale(1); }
-
-            /* Container */
-            .app-container { width: 95%; margin: 12px auto 40px; }
-
-            /* Tabs bar */
-            .tabs-bar { padding: 8px 10px; border-radius: 12px; gap: 4px; margin-bottom: 16px; }
-            .side-btn { padding: 8px 12px; font-size: 0.75rem; gap: 5px; }
-            .side-btn i { font-size: 0.7rem; }
-
-            /* Page title */
-            .page-title { font-size: 1.25rem; gap: 8px; }
-            .page-sub { font-size: 0.78rem; margin-bottom: 16px; }
-
-            /* Glass cards */
-            .glass-card { padding: 16px; border-radius: 16px; }
-
-            /* Stats grid — force 2 columns */
-            .stat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
-            .stat-card { padding: 14px; }
-            .stat-label { font-size: 0.65rem; margin-bottom: 4px; }
-            .stat-value { font-size: 1.4rem; }
-
-            /* Forms */
-            .form-grid.cols-2,
-            .form-grid.cols-3 { grid-template-columns: 1fr; }
-            .form-label { font-size: 0.75rem; }
-            .form-input { padding: 10px 12px; font-size: 0.88rem; }
-
-            /* Task blocks — collapse internal grids */
-            .task-block { padding: 12px; }
-            .task-block .grid-cols-3 { grid-template-columns: 1fr; gap: 6px; }
-            .task-block .grid-cols-4 { grid-template-columns: repeat(2, 1fr); gap: 6px; }
-            .task-block .md\:grid-cols-4 { grid-template-columns: 1fr; gap: 6px; }
-            .task-block .form-grid.cols-2 { grid-template-columns: 1fr; }
-
-            /* KPI cards — force 1 col */
-            #kpiContainer { grid-template-columns: 1fr !important; gap: 12px; }
-            .kpi-card-modern { padding: 16px 14px; border-radius: 16px; }
-            .kpi-name-modern { font-size: 0.95rem; }
-            .kpi-ring { width: 64px; height: 64px; }
-            .kpi-ring-value { font-size: 1rem; }
-            .kpi-ring-sub { font-size: 0.4rem; }
-            .kpi-metric { padding: 8px 10px; }
-            .kpi-metric-lbl { font-size: 0.52rem; }
-            .kpi-metric-val { font-size: 0.85rem; }
-
-            /* Tables */
-            .data-table { font-size: 0.72rem; }
-            .data-table th { padding: 8px 6px; font-size: 0.62rem; }
-            .data-table td { padding: 8px 6px; }
-            .table-wrap { border-radius: 10px; }
-
-            /* Deficit buttons row */
-            .flex.justify-center.gap-3.mb-6 { flex-wrap: wrap; gap: 8px; }
-
-            /* Evaluation total display */
-            .p-5.bg-accent-3\/10 { padding: 12px; }
-
-            /* Empty state */
-            .empty-state { padding: 30px 16px; }
-            .empty-state i { font-size: 2rem; }
-
-            /* Buttons */
-            .btn-primary, .btn-ghost { min-height: 40px; }
-        }
+        
 
         @media (max-width: 400px) {
             .stat-grid { grid-template-columns: 1fr !important; }
@@ -565,6 +488,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
     <script src="../loading-logo.js" defer></script>
     <script src="../loader-buttons.js" defer></script>
+    <link rel="stylesheet" href="../mobile-app-shell.css">
+    <script src="../mobile-app-shell.js" defer></script>
+
 </head>
 <body>
 
