@@ -664,17 +664,7 @@ html:not(.dark) .nav-shell{background:linear-gradient(to bottom,var(--bg) 0%,var
 <script type="module" src="../session-manager.js"></script>
 <script type="module">
 import { supabase } from '../supabase-client.js';
-
-const ROLE_META = {
-  super_admin:{name:'المطور',color:'#a855f7',icon:'fa-crown'},
-  admin:{name:'ادارة السجلات',color:'#0ea5e9',icon:'fa-user-shield'},
-  manager:{name:'المدير الطبي',color:'#6366f1',icon:'fa-user-tie'},
-  auditor:{name:'مراجع جودة',color:'#f59e0b',icon:'fa-clipboard-check'},
-  senior:{name:'رئيس قسم',color:'#10b981',icon:'fa-star'},
-  doctor:{name:'طبيب',color:'#14b8a6',icon:'fa-stethoscope'},
-  viewer:{name:'مراجع',color:'#94a3b8',icon:'fa-eye'}
-};
-
+import { initAuthGuard, mountUserChip } from '../session-manager.js';
 const ERROR_LABELS = {
   'noSign':'بدون توقيع', 'noStamp':'بدون ختم', 'unclearSign':'توقيع غير واضح',
   'noTime':'بدون وقت', 'noDate':'بدون تاريخ', 'noDiagnosis':'بدون تشخيص',
@@ -717,8 +707,7 @@ const state = {
 
 function $(id){return document.getElementById(id)}
 function translateError(code){return ERROR_LABELS[code] || code}
-function toggleTheme(){const h=document.documentElement;h.classList.toggle('dark');localStorage.setItem('theme',h.classList.contains('dark')?'dark':'light')}
-window.toggleTheme = toggleTheme;
+
 
 function pctColor(p){return p>=90?'#10b981':p>=75?'#0ea5e9':p>=60?'#f59e0b':'#ef4444'}
 function pctLabel(p){return p>=90?'ممتاز':p>=75?'جيد':p>=60?'مقبول':'ضعيف'}
@@ -736,52 +725,14 @@ function escapeHtml(s){if(!s)return '';return String(s).replace(/[&<>"]/g,c=>({'
 // INIT
 // ============================================================
 (async () => {
-  const {data:{session}} = await supabase.auth.getSession();
-  if(!session){window.location.href='../login.html';return}
-  state.user = session.user;
-
-  const {data:profile} = await supabase.from('profiles').select('role,username,email').eq('id',session.user.id).single();
-  state.role = profile?.role || 'viewer';
-  const meta = ROLE_META[state.role] || ROLE_META.viewer;
-  const name = session.user.user_metadata?.display_name || profile?.username || 'مستخدم';
-
-  $('userChip').style.display = 'inline-flex';
-  $('logoutBtn').style.display = 'inline-flex';
-  $('navUserName').textContent = name;
-  $('navUserRole').textContent = meta.name;
-  $('navUserRole').style.color = meta.color;
-  const avatarBg = `linear-gradient(135deg,${meta.color},${meta.color}cc)`;
-  ['userAvatar','dropdownAvatar'].forEach(id=>{const el=$(id);if(el){el.innerHTML=`<i class="fa-solid ${meta.icon}"></i>`;el.style.background=avatarBg}});
-  $('dropdownName').textContent = name;
-  $('dropdownEmail').textContent = session.user.email || profile?.email || '';
-  $('dropdownRoleBadge').innerHTML = `<i class="fa-solid ${meta.icon}"></i> ${meta.name}`;
-  $('dropdownRoleBadge').style.background = 'rgba(255,255,255,0.06)';
-  $('dropdownRoleBadge').style.color = meta.color;
-
-  const uc = $('userChip'), ud = $('userDropdown');
-  uc.addEventListener('click', e=>{e.stopPropagation();uc.classList.toggle('open');ud.classList.toggle('open')});
-  document.addEventListener('click', e=>{if(!ud.contains(e.target)&&!uc.contains(e.target)){uc.classList.remove('open');ud.classList.remove('open')}});
-
-  window.logout = async function(){
-    if(window.showConfirm){const ok=await window.showConfirm({title:'تسجيل الخروج',message:'هل تريد الخروج؟',confirmText:'خروج',cancelText:'إلغاء',type:'danger'});if(!ok)return}
-    await supabase.auth.signOut();sessionStorage.clear();window.location.href='../login.html';
-  };
-  window.showProfile = () => window.location.href='../profile.html';
-  window.showChangePassword = () => window.location.href='../change-password.html';
-
-  syncTabsBarTop();
-  window.addEventListener('resize', syncTabsBarTop);
+  const auth = await initAuthGuard();
+  state.user = auth.session.user;
+  state.role = auth.role;
+  mountUserChip(auth);
 
   await loadOverview();
   $('loadingScreen').classList.add('hide');
 })();
-
-function syncTabsBarTop(){
-  const navShell = document.querySelector('.nav-shell');
-  if(!navShell) return;
-  const h = navShell.offsetHeight;
-  document.documentElement.style.setProperty('--nav-height', h + 'px');
-}
 
 // ============================================================
 // GLOBAL FILTER

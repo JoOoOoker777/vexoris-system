@@ -71,14 +71,9 @@
         }
 
         /* UNIFIED NAV */
-        .nav-shell { position: sticky; top: 12px; z-index: 50; margin: 12px auto 0; width: 90%; max-width: 1800px; }
-        .nav-inner {
-            background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid var(--card-border);
-            border-radius: 18px; padding: 10px 20px;
-            display: flex; align-items: center; justify-content: space-between; gap: 16px;
-        }
+        .nav-shell{position:sticky;top:0;z-index:50;width:100%;padding:12px 0;background:linear-gradient(to bottom,var(--bg) 0%,var(--bg) 85%,rgba(4,7,15,.7) 100%);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:background .4s}
+        html:not(.dark) .nav-shell{background:linear-gradient(to bottom,var(--bg) 0%,var(--bg) 85%,rgba(232,238,245,.7) 100%)}
+        .nav-inner{background:var(--card-bg);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid var(--card-border);border-radius:18px;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;width:90%;max-width:1800px;margin:0 auto}
         .logo-dot {
             position: relative; width: 12px; height: 12px; border-radius: 50%;
             background: var(--accent);
@@ -506,11 +501,7 @@
                 <a href="../feedback.html" class="nav-link">رأيك يهمنا</a>
             </nav>
             <div class="flex items-center gap-2">
-                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-                    </svg>
-                </button>
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم"><i class="fa-solid fa-moon"></i></button>
 
                 <div style="position: relative;">
                     <button class="user-chip" id="userChip">
@@ -837,16 +828,7 @@
 
     <script type="module">
     import { supabase } from '../supabase-client.js';
-
-    const ROLE_META = {
-        super_admin: { name: 'المطور', color: '#a855f7', icon: 'fa-crown' },
-        admin:       { name: 'ادارة السجلات', color: '#0ea5e9', icon: 'fa-user-shield' },
-        manager:     { name: 'المدير الطبي', color: '#6366f1', icon: 'fa-user-tie' },
-        auditor:     { name: 'مراجع جودة', color: '#f59e0b', icon: 'fa-clipboard-check' },
-        senior:      { name: 'رئيس قسم', color: '#10b981', icon: 'fa-star' },
-        doctor:      { name: 'طبيب', color: '#14b8a6', icon: 'fa-stethoscope' },
-        viewer:      { name: 'مراجع', color: '#94a3b8', icon: 'fa-eye' },
-    };
+    import { initAuthGuard, mountUserChip } from '../session-manager.js';
     const ADMINS = ['super_admin', 'admin'];
 
     let CURRENT_USER = null, CURRENT_ROLE = 'viewer';
@@ -858,49 +840,14 @@
     function safeInt(v) { if (!v) return 0; const s = String(v).replace(/,/g, '').trim(); return parseInt(s) || 0; }
     function isAdmin() { return ADMINS.includes(CURRENT_ROLE); }
 
-    window.toggleTheme = function () {
-        const html = document.documentElement;
-        html.classList.toggle('dark');
-        localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
-    };
+   
 
-    const userChip = $('userChip'), userDropdown = $('userDropdown');
-    if(userChip) userChip.addEventListener('click', (e) => { e.stopPropagation(); userChip.classList.toggle('open'); userDropdown.classList.toggle('open'); });
-    document.addEventListener('click', (e) => { if (userChip && !userDropdown.contains(e.target) && !userChip.contains(e.target)) { userChip.classList.remove('open'); userDropdown.classList.remove('open'); } });
-
-    window.logout = async function () {
-        if (window.showConfirm) {
-            const ok = await window.showConfirm({ title: 'تسجيل الخروج', message: 'هل تريد الخروج؟', confirmText: 'خروج', cancelText: 'إلغاء', type: 'danger' });
-            if (!ok) return;
-        }
-        await supabase.auth.signOut(); sessionStorage.clear(); window.location.href = '../login.html';
-    };
-    window.showProfile = function () { window.location.href = '../profile.html'; };
-    window.showChangePassword = function () { window.location.href = '../change-password.html'; };
-
+ 
     (async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) { window.location.href = '../login.html'; return; }
-        CURRENT_USER = session.user;
-
-        const { data: profile } = await supabase.from('profiles').select('role, username, email').eq('id', session.user.id).single();
-        CURRENT_ROLE = profile?.role || 'viewer';
-        const meta = ROLE_META[CURRENT_ROLE] || ROLE_META.viewer;
-        const displayName = session.user.user_metadata?.display_name || profile?.username || 'مستخدم';
-
-        $('userChip').style.display = 'inline-flex';
-        $('logoutBtn').style.display = 'inline-flex';
-        
-        $('navUserName').textContent = displayName;
-        $('navUserRole').textContent = meta.name;
-        $('navUserRole').style.color = meta.color;
-
-        const avatarBg = `linear-gradient(135deg, ${meta.color}, ${meta.color}cc)`;
-        ['userAvatar', 'dropdownAvatar'].forEach(id => {
-            const el = $(id); if (el) { el.innerHTML = `<i class="fa-solid ${meta.icon}"></i>`; el.style.background = avatarBg; }
-        });
-        if($('dropdownName')) $('dropdownName').textContent = displayName;
-        if($('dropdownEmail')) $('dropdownEmail').textContent = session.user.email || profile?.email || '';
+        const auth = await initAuthGuard();
+        CURRENT_USER = auth.session.user;
+        CURRENT_ROLE = auth.role;
+        mountUserChip(auth);
 
         if (isAdmin()) {
             $('adminEditBtn').style.display = 'inline-flex';

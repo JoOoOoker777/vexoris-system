@@ -50,14 +50,9 @@
                 radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
                 radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.07) 0%, transparent 65%);
         }
-        .nav-shell { position: sticky; top: 12px; z-index: 50; margin: 12px auto 0; max-width: 1400px; padding: 0 16px; }
-        .nav-inner {
-            background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid var(--card-border);
-            border-radius: 18px; padding: 10px 20px;
-            display: flex; align-items: center; justify-content: space-between; gap: 16px;
-        }
+        .nav-shell{position:sticky;top:0;z-index:50;width:100%;padding:12px 0;background:linear-gradient(to bottom,var(--bg) 0%,var(--bg) 85%,rgba(4,7,15,.7) 100%);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:background .4s}
+        html:not(.dark) .nav-shell{background:linear-gradient(to bottom,var(--bg) 0%,var(--bg) 85%,rgba(232,238,245,.7) 100%)}
+        .nav-inner{background:var(--card-bg);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid var(--card-border);border-radius:18px;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;width:90%;max-width:1800px;margin:0 auto}
         .logo-dot {
             position: relative; width: 12px; height: 12px; border-radius: 50%;
             background: var(--accent);
@@ -305,13 +300,58 @@
             .overall-circle { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
 
+        /* USER CHIP + DROPDOWN */
+        .icon-btn.logout-btn{color:#f87171}
+        .icon-btn.logout-btn:hover{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.4);transform:scale(1.05)}
+        .user-chip{display:none;align-items:center;gap:10px;padding:6px 12px 6px 8px;background:rgba(148,163,184,.06);border:1px solid var(--card-border);border-radius:12px;cursor:pointer;transition:all .3s;font-family:inherit;color:inherit}
+        .user-chip:hover{border-color:var(--accent)}
+        .user-avatar{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.95rem;flex-shrink:0;position:relative;overflow:hidden}
+        .user-avatar i{position:relative;z-index:2}
+        .user-avatar::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.4) 50%,transparent 70%);background-size:200% 100%;animation:shine 4s infinite;z-index:1}
+        @keyframes shine{0%{background-position:-200% 0}50%,100%{background-position:200% 0}}
+        .user-info{display:flex;flex-direction:column;gap:1px;text-align:right}
+        .user-name{font-size:.78rem;font-weight:800;color:var(--text-primary);line-height:1.1}
+        .user-role{font-size:.65rem;font-weight:700;line-height:1.1}
+        .user-dropdown{position:absolute;top:55px;left:0;width:260px;background:var(--card-bg);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--card-border);border-radius:16px;padding:6px;z-index:60;box-shadow:0 24px 48px -12px rgba(0,0,0,.4);opacity:0;transform:translateY(-8px) scale(.96);pointer-events:none;transition:all .25s}
+        .user-dropdown.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+        .dropdown-item{width:100%;padding:10px 12px;background:transparent;border:none;color:var(--text-secondary);font-family:inherit;font-size:.8rem;font-weight:700;border-radius:8px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:right;transition:all .2s}
+        .dropdown-item:hover{background:rgba(14,165,233,.08);color:var(--accent)}
+        .dropdown-item i{width:16px;font-size:.8rem}
+        .dropdown-profile{padding:12px 12px;display:flex;align-items:center;gap:10px}
+        .dropdown-avatar-lg{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;color:#fff;position:relative;overflow:hidden}
+        .dropdown-avatar-lg i{position:relative;z-index:2}
+        .dropdown-avatar-lg::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.3) 50%,transparent 70%);background-size:200% 100%;animation:shine 4s infinite;z-index:1}
+        .dropdown-name{font-size:.88rem;font-weight:900;color:var(--text-primary);line-height:1.2}
+        .dropdown-email{font-size:.7rem;font-weight:600;color:var(--text-muted);line-height:1.3;margin-top:1px}
+        .dropdown-role-badge{display:inline-flex;align-items:center;gap:4px;font-size:.6rem;font-weight:800;padding:2px 8px;border-radius:5px;margin-top:4px}
+        .dropdown-divider{height:1px;background:var(--card-border);margin:6px 4px}
+
         ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(14, 165, 233, 0.4); border-radius: 10px; }
         /* ============================================
    DYNAMIC FONT SCALING + PRINT OPTIMIZATION
    ============================================ */
-        :root { --font-scale: 1; }
+        /* FOOTER */
+        .footer-shell {
+            max-width: 1400px; margin: 32px auto 24px; padding: 22px 20px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 20px; text-align: center;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        }
+        .footer-brand {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            letter-spacing: 0.35em; font-size: 0.75rem;
+            background: linear-gradient(135deg, #22d3ee, #6366f1);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .footer-text { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+        .credit-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-weight: 800; font-size: 0.7rem; }
+        .credit-indigo { color: #a5b4fc; background: rgba(99, 102, 241, 0.12); }
+        .credit-teal { color: #5eead4; background: rgba(20, 184, 166, 0.12); }
+        html:not(.dark) .credit-indigo { color: #4338ca; background: rgba(99, 102, 241, 0.16); }
+        html:not(.dark) .credit-teal { color: #0f766e; background: rgba(20, 184, 166, 0.16); }
         body.scale-xl { --font-scale: 1.15; }   /* ≤10 items */
         body.scale-lg { --font-scale: 1.08; }   /* ≤25 items */
         body.scale-md { --font-scale: 1.00; }   /* ≤50 items (default) */
@@ -446,7 +486,31 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <button onclick="toggleTheme()" class="icon-btn"><i class="fa-solid fa-moon"></i></button>
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم"><i class="fa-solid fa-moon"></i></button>
+                <div style="position: relative;">
+                    <button class="user-chip" id="userChip">
+                        <div class="user-avatar" id="userAvatar"></div>
+                        <div class="user-info">
+                            <span class="user-name" id="navUserName">...</span>
+                            <span class="user-role" id="navUserRole">...</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-xs" style="color: var(--text-muted);"></i>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-profile">
+                            <div class="dropdown-avatar-lg" id="dropdownAvatar"></div>
+                            <div>
+                                <div class="dropdown-name" id="dropdownName">...</div>
+                                <div class="dropdown-email" id="dropdownEmail">...</div>
+                                <div class="dropdown-role-badge" id="dropdownRoleBadge"></div>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" onclick="showProfile()"><i class="fa-solid fa-user-pen"></i> إدارة الملف الشخصي</button>
+                        <button class="dropdown-item" onclick="showChangePassword()"><i class="fa-solid fa-key"></i> تغيير كلمة المرور</button>
+                    </div>
+                </div>
+                <button onclick="logout()" class="icon-btn logout-btn" id="logoutBtn" title="تسجيل الخروج"><i class="fa-solid fa-power-off"></i></button>
                 <a href="../dashboard.html" class="rbtn rbtn-secondary"><i class="fa-solid fa-arrow-right"></i> رجوع</a>
             </div>
         </header>
@@ -604,21 +668,28 @@
         </div>
     </main>
 
+    <footer class="footer-shell no-print">
+        <div class="footer-brand">VEXORIS SYSTEM</div>
+        <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+        <div class="footer-text">
+            تم برمجة النظام وتنفيذه بواسطة
+            <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+            <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+            <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+        </div>
+    </footer>
+
     <script src="../notify.js"></script>
 
     <script type="module">
         import { supabase } from '../supabase-client.js';
         import { logAudit, AUDIT } from '../audit-log.js';
+        import { initAuthGuard } from '../session-manager.js';
         import { ERROR_TRANSLATIONS } from './js/medical-audit-config.js';
-
         let showErrorsOnly = false;
         let allStaffScores = {}; // لحساب نسبة كل طبيب
 
-        window.toggleTheme = function() {
-            const html = document.documentElement;
-            html.classList.toggle('dark');
-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
-        };
+       
 
         window.toggleErrorsOnly = function() {
             showErrorsOnly = !showErrorsOnly;
@@ -928,11 +999,7 @@
         // INIT
         (async () => {
             try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (!session) { window.location.href = '../login.html'; return; }
-
-                const { data: profile } = await supabase.from('profiles').select('role, is_active').eq('id', session.user.id).single();
-                if (!profile || profile.is_active === false) { window.location.href = '../login.html'; return; }
+                await initAuthGuard();
 
                 const urlParams = new URLSearchParams(window.location.search);
                 const reportId = urlParams.get('reportId');

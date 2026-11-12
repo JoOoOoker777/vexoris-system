@@ -1,12 +1,14 @@
 // session-manager.js
-// Shared authentication UI + smart session timeout + page zoom control
+// VEXORIS — Shared session + auth + UI layer (v2)
+// ✅ Based on original file — all existing functionality preserved
+// ✅ NEW: ROLE_META exported, getRoleMeta, initAuthGuard, mountUserChip, attachGlobalHandlers, resolvePath
 
 import { supabase } from './supabase-client.js';
 
 // ============================================
-// ROLE METADATA
+// ROLE METADATA (EXPORTED — single source of truth)
 // ============================================
-const ROLE_META = {
+export const ROLE_META = {
     super_admin: { name: 'المطور', color: '#a855f7', icon: 'fa-crown' },
     admin:       { name: 'ادارة السجلات الطبية', color: '#0ea5e9', icon: 'fa-user-shield' },
     manager:     { name: 'المدير الطبي', color: '#6366f1', icon: 'fa-user-tie' },
@@ -15,6 +17,10 @@ const ROLE_META = {
     doctor:      { name: 'طبيب', color: '#14b8a6', icon: 'fa-stethoscope' },
     viewer:      { name: 'مراجع', color: '#94a3b8', icon: 'fa-eye' },
 };
+
+export function getRoleMeta(role) {
+    return ROLE_META[role] || ROLE_META.viewer;
+}
 
 // ============================================
 // CONFIG
@@ -28,6 +34,15 @@ const ZOOM_LEVELS = [70, 80, 90, 100, 110, 120, 130, 150];
 const DEFAULT_ZOOM = 80;
 const MIN_ZOOM = ZOOM_LEVELS[0];
 const MAX_ZOOM = ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
+
+// ============================================
+// PATH RESOLVER (NEW — for apps/ vs admin/ vs root)
+// ============================================
+function resolvePath(file) {
+    const p = window.location.pathname;
+    if (p.includes('/apps/') || p.includes('/admin/')) return '../' + file;
+    return './' + file;
+}
 
 // ============================================
 // AVATAR HELPERS
@@ -45,7 +60,166 @@ function renderRoleAvatar(el, role) {
 }
 
 // ============================================
-// ZOOM
+// THEME TOGGLE (export + window)
+// ============================================
+export function toggleTheme() {
+    const html = document.documentElement;
+    html.classList.toggle('dark');
+    localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+}
+if (typeof window !== 'undefined') window.toggleTheme = toggleTheme;
+
+// ============================================
+// TABS BAR HEIGHT SYNC (export + window)
+// ============================================
+export function syncTabsBarTop() {
+    const navShell = document.querySelector('.nav-shell');
+    if (!navShell) return;
+    document.documentElement.style.setProperty('--nav-height', navShell.offsetHeight + 'px');
+}
+if (typeof window !== 'undefined') window.syncTabsBarTop = syncTabsBarTop;
+
+// ============================================
+// AUTH GUARD (NEW — unified)
+// ============================================
+export async function initAuthGuard(opts = {}) {
+    const loginPath = resolvePath('login.html');
+    const redirectIfDenied = opts.redirectIfDenied || resolvePath('dashboard.html');
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+        window.location.href = loginPath;
+        throw new Error('AUTH_GUARD_REDIRECT');
+    }
+
+    const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role, username, email, display_name, is_active, department')
+        .eq('id', session.user.id)
+        .single();
+
+    if (error || !profile || profile.is_active === false) {
+        await supabase.auth.signOut();
+        window.location.href = loginPath;
+        throw new Error('AUTH_GUARD_INACTIVE');
+    }
+
+    if (opts.allowedRoles && !opts.allowedRoles.includes(profile.role)) {
+        window.location.href = redirectIfDenied;
+        throw new Error('AUTH_GUARD_FORBIDDEN');
+    }
+
+    const meta = getRoleMeta(profile.role);
+    const displayName = session.user.user_metadata?.display_name
+        || profile.display_name
+        || profile.username
+        || 'مستخدم';
+
+    return {
+        session,
+        profile,
+        role: profile.role || 'viewer',
+        meta,
+        displayName,
+        email: session.user.email || profile.email || '',
+    };
+}
+
+// ============================================
+// MOUNT USER CHIP (NEW — wires existing markup)
+// ============================================
+export function mountUserChip({ session, profile, role, meta, displayName, email }) {
+    const chip = document.getElementById('userChip');
+    const dropdown = document.getElementById('userDropdown');
+
+    if (!chip || !dropdown) {
+        console.warn('[session-manager] mountUserChip: #userChip or #userDropdown not found');
+        return;
+    }
+
+    chip.style.display = 'inline-flex';
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+
+    const navName = document.getElementById('navUserName');
+    const navRole = document.getElementById('navUserRole');
+    if (navName) navName.textContent = displayName;
+    if (navRole) {
+        navRole.textContent = meta.name;
+        navRole.style.color = meta.color;
+    }
+
+    const bg = makeAvatarGradient(meta.color);
+    ['userAvatar', 'dropdownAvatar'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.innerHTML = `<i class="fa-solid ${meta.icon}"></i>`;
+            el.style.background = bg;
+        }
+    });
+
+    const dn = document.getElementById('dropdownName');
+    const de = document.getElementById('dropdownEmail');
+    const dr = document.getElementById('dropdownRoleBadge');
+    if (dn) dn.textContent = displayName;
+    if (de) de.textContent = email || '';
+    if (dr) {
+        dr.innerHTML = `<i class="fa-solid ${meta.icon}"></i> ${meta.name}`;
+        dr.style.background = 'rgba(255,255,255,0.06)';
+        dr.style.color = meta.color;
+    }
+
+    if (!chip.dataset.smWired) {
+        chip.dataset.smWired = '1';
+        chip.addEventListener('click', (e) => {
+            e.stopPropagation();
+            chip.classList.toggle('open');
+            dropdown.classList.toggle('open');
+        });
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target) && !chip.contains(e.target)) {
+                chip.classList.remove('open');
+                dropdown.classList.remove('open');
+            }
+        });
+    }
+}
+
+// ============================================
+// GLOBAL HANDLERS (NEW — showProfile / changePassword / logout)
+// ============================================
+function attachGlobalHandlers() {
+    if (!window.showProfile) {
+        window.showProfile = () => { window.location.href = resolvePath('profile.html'); };
+    }
+    if (!window.showChangePassword) {
+        window.showChangePassword = () => { window.location.href = resolvePath('change-password.html'); };
+    }
+
+    if (!window.logout) {
+        window.logout = async function () {
+            if (window.showConfirm) {
+                const ok = await window.showConfirm({
+                    title: 'تسجيل الخروج',
+                    message: 'هل أنت متأكد أنك تريد تسجيل الخروج من النظام؟',
+                    confirmText: 'تسجيل الخروج',
+                    cancelText: 'إلغاء',
+                    type: 'danger',
+                });
+                if (!ok) return;
+            }
+            await supabase.auth.signOut();
+            sessionStorage.clear();
+            localStorage.removeItem('vexoris_user_email');
+            window.location.href = resolvePath('login.html');
+        };
+    }
+
+    if (!window.vexorisLogout) window.vexorisLogout = window.logout;
+}
+
+// ============================================
+// ZOOM (unchanged from v1)
 // ============================================
 function getCurrentZoom() {
     const saved = sessionStorage.getItem('vexoris_zoom');
@@ -61,7 +235,7 @@ function applyZoom(level) {
 }
 
 // ============================================
-// INJECT STYLES
+// INJECT STYLES (unchanged from v1)
 // ============================================
 function injectStyles() {
     if (document.getElementById('vexoris-session-styles')) return;
@@ -89,11 +263,7 @@ function injectStyles() {
             flex-shrink: 0; position: relative; overflow: hidden;
             box-shadow: 0 2px 6px -1px rgba(0,0,0,0.25);
         }
-        .vexoris-user-avatar i {
-            position: relative;
-            z-index: 2;
-            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));
-        }
+        .vexoris-user-avatar i { position: relative; z-index: 2; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35)); }
         .vexoris-user-avatar::before {
             content: ''; position: absolute; inset: 0;
             background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%);
@@ -101,10 +271,7 @@ function injectStyles() {
             animation: vexoris-shine 4s infinite;
             z-index: 1;
         }
-        @keyframes vexoris-shine {
-            0% { background-position: -200% 0; }
-            50%, 100% { background-position: 200% 0; }
-        }
+        @keyframes vexoris-shine { 0% { background-position: -200% 0; } 50%, 100% { background-position: 200% 0; } }
         .vexoris-user-info { display: flex; flex-direction: column; gap: 1px; text-align: right; }
         .vexoris-user-name { font-size: 0.78rem; font-weight: 800; color: #f1f5f9; line-height: 1.1; }
         html:not(.dark) .vexoris-user-name { color: #0b1220; }
@@ -130,7 +297,6 @@ function injectStyles() {
             padding: 20px;
         }
         .vexoris-lock-overlay.active { display: flex; }
-
         #vexorisZoomWidget {
             display: inline-flex; align-items: center; gap: 1px;
             background: var(--card-bg, rgba(15,23,42,0.55));
@@ -146,10 +312,7 @@ function injectStyles() {
             display: flex; align-items: center; justify-content: center;
             font-size: 0.6rem; transition: all 0.2s ease;
         }
-        .vz-btn:hover {
-            background: rgba(14, 165, 233, 0.12);
-            color: var(--accent, #0ea5e9);
-        }
+        .vz-btn:hover { background: rgba(14, 165, 233, 0.12); color: var(--accent, #0ea5e9); }
         .vz-btn:active { transform: scale(0.9); }
         .vz-label {
             font-family: 'Space Grotesk', sans-serif;
@@ -158,15 +321,13 @@ function injectStyles() {
             min-width: 32px; text-align: center;
             user-select: none; letter-spacing: 0.02em;
         }
-        @media (max-width: 767px) {
-            #vexorisZoomWidget { display: none !important; }
-        }
+        @media (max-width: 767px) { #vexorisZoomWidget { display: none !important; } }
     `;
     document.head.appendChild(style);
 }
 
 // ============================================
-// INJECT ZOOM CONTROLS
+// INJECT ZOOM CONTROLS (unchanged from v1)
 // ============================================
 function injectZoomControls() {
     if (document.getElementById('vexorisZoomWidget')) return;
@@ -177,20 +338,14 @@ function injectZoomControls() {
 
     const widget = document.createElement('div');
     widget.id = 'vexorisZoomWidget';
-    
     const current = getCurrentZoom();
     widget.innerHTML = `
-        <button type="button" class="vz-btn" data-zoom="out" title="تصغير" aria-label="تصغير">
-            <i class="fa-solid fa-minus"></i>
-        </button>
+        <button type="button" class="vz-btn" data-zoom="out" title="تصغير" aria-label="تصغير"><i class="fa-solid fa-minus"></i></button>
         <span class="vz-label">${current}%</span>
-        <button type="button" class="vz-btn" data-zoom="in" title="تكبير" aria-label="تكبير">
-            <i class="fa-solid fa-plus"></i>
-        </button>
+        <button type="button" class="vz-btn" data-zoom="in" title="تكبير" aria-label="تكبير"><i class="fa-solid fa-plus"></i></button>
     `;
 
     themeBtn.parentNode.insertBefore(widget, themeBtn);
-
     const label = widget.querySelector('.vz-label');
 
     widget.querySelectorAll('.vz-btn').forEach(btn => {
@@ -198,13 +353,8 @@ function injectZoomControls() {
             const action = btn.dataset.zoom;
             const currentLevel = getCurrentZoom();
             let next;
-
-            if (action === 'in') {
-                next = ZOOM_LEVELS.find(l => l > currentLevel);
-            } else {
-                next = [...ZOOM_LEVELS].reverse().find(l => l < currentLevel);
-            }
-
+            if (action === 'in') next = ZOOM_LEVELS.find(l => l > currentLevel);
+            else next = [...ZOOM_LEVELS].reverse().find(l => l < currentLevel);
             if (next !== undefined && next !== currentLevel) {
                 applyZoom(next);
                 label.textContent = next + '%';
@@ -214,7 +364,7 @@ function injectZoomControls() {
 }
 
 // ============================================
-// REPLACE "الرئيسية" WITH "لوحة التحكم"
+// REPLACE "الرئيسية" WITH "لوحة التحكم" (unchanged from v1)
 // ============================================
 function replaceHomeWithDashboard() {
     const path = window.location.pathname.toLowerCase();
@@ -235,7 +385,7 @@ function replaceHomeWithDashboard() {
 }
 
 // ============================================
-// LOGOUT (global with confirmation)
+// LOGOUT (unchanged from v1 — kept for backward compat)
 // ============================================
 window.vexorisLogout = async function() {
     if (window.showConfirm) {
@@ -248,7 +398,6 @@ window.vexorisLogout = async function() {
         });
         if (!confirmed) return;
     }
-
     await supabase.auth.signOut();
     sessionStorage.clear();
     localStorage.removeItem('vexoris_user_email');
@@ -256,7 +405,7 @@ window.vexorisLogout = async function() {
 };
 
 // ============================================
-// HEADER AUTH
+// HEADER AUTH (unchanged from v1)
 // ============================================
 async function initHeaderAuth() {
     const { data: { session } } = await supabase.auth.getSession();
@@ -283,9 +432,7 @@ async function initHeaderAuth() {
     wrapper.style.cssText = 'display: inline-flex; align-items: center; gap: 8px;';
     wrapper.innerHTML = `
         <a href="dashboard.html" class="vexoris-user-chip">
-            <div class="vexoris-user-avatar">
-                <i class="fa-solid ${roleInfo.icon}"></i>
-            </div>
+            <div class="vexoris-user-avatar"><i class="fa-solid ${roleInfo.icon}"></i></div>
             <div class="vexoris-user-info">
                 <span class="vexoris-user-name">${displayName}</span>
                 <span class="vexoris-user-role" style="color: ${roleInfo.color};">${roleInfo.name}</span>
@@ -295,16 +442,12 @@ async function initHeaderAuth() {
             <i class="fa-solid fa-power-off"></i>
         </button>
     `;
-
-    // Set avatar gradient after inserting to DOM
-    const avatarEl = wrapper.querySelector('.vexoris-user-avatar');
-    avatarEl.style.background = makeAvatarGradient(roleInfo.color);
-
+    wrapper.querySelector('.vexoris-user-avatar').style.background = makeAvatarGradient(roleInfo.color);
     loginBtn.replaceWith(wrapper);
 }
 
 // ============================================
-// SESSION TIMEOUT
+// SESSION TIMEOUT — FULL IMPLEMENTATION (from v1, unchanged)
 // ============================================
 function initSessionTimeout() {
     let locked = false;
@@ -539,7 +682,7 @@ function initSessionTimeout() {
 }
 
 // ============================================
-// AUTO INIT
+// AUTO INIT (updated — adds attachGlobalHandlers + tabs sync)
 // ============================================
 (async () => {
     if (document.readyState === 'loading') {
@@ -547,6 +690,7 @@ function initSessionTimeout() {
     }
 
     injectStyles();
+    attachGlobalHandlers();
 
     const { data: { session } } = await supabase.auth.getSession();
 
@@ -556,6 +700,13 @@ function initSessionTimeout() {
             applyZoom(parseInt(savedZoom));
         }
 
+        // tabs sync — only if page has tabs bar
+        if (document.querySelector('.tabs-bar')) {
+            syncTabsBarTop();
+            window.addEventListener('resize', syncTabsBarTop);
+            window.addEventListener('orientationchange', () => setTimeout(syncTabsBarTop, 100));
+        }
+
         replaceHomeWithDashboard();
         await initHeaderAuth();
         injectZoomControls();
@@ -563,4 +714,7 @@ function initSessionTimeout() {
     }
 })();
 
+// ============================================
+// EXPORTS
+// ============================================
 export { initHeaderAuth, initSessionTimeout, replaceHomeWithDashboard, injectZoomControls };
