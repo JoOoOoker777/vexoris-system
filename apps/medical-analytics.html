@@ -354,6 +354,112 @@ html:not(.dark) .nav-shell{background:linear-gradient(to bottom,var(--bg) 0%,var
 .top5-name{flex:1;font-weight:800;font-size:.85rem;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .top5-count{font-size:.62rem;font-weight:700;color:var(--text-muted);min-width:45px;text-align:center}
 .top5-pct{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;min-width:52px;text-align:left}
+
+/* ============================================
+   MOBILE RESPONSIVE (Phase 1)
+   ============================================ */
+@media (max-width: 768px) {
+  /* Header */
+  .nav-inner{padding:8px 12px;gap:8px}
+  .user-info{display:none!important}
+  .user-chip{padding:5px 6px}
+  .user-chip .fa-chevron-down{display:none}
+  .user-avatar{width:30px;height:30px}
+  .nav-inner .flex.items-center.gap-2 > a:last-child{display:none}
+  .user-dropdown{right:0;left:auto;width:240px}
+  .user-dropdown.open{transform:translateY(0) scale(1)}
+
+  /* Container */
+  .app-container{width:95%;margin:12px auto 40px}
+
+  /* Global filter — stack vertically */
+  .global-filter-bar{padding:10px 12px;gap:8px;flex-direction:column;align-items:stretch}
+  .global-filter-bar > div{min-width:0!important;width:100%}
+  .global-filter-bar > button{width:100%;justify-content:center}
+  #filterStatus{text-align:center!important}
+
+  /* Tabs bar */
+  .tabs-bar{padding:8px 10px;border-radius:12px;gap:4px;margin-bottom:16px}
+  .side-btn{padding:8px 12px;font-size:.75rem;gap:5px}
+  .side-btn i{font-size:.7rem}
+
+  /* Page title */
+  .page-title{font-size:1.25rem;gap:8px}
+  .page-sub{font-size:.78rem;margin-bottom:16px}
+
+  /* Glass cards */
+  .glass-card{padding:16px;border-radius:16px}
+  .local-filter-card{padding:12px}
+
+  /* Stats grid — 2 columns */
+  .stat-grid{grid-template-columns:repeat(2,1fr)!important;gap:10px;margin-bottom:16px}
+  .stat-card{padding:14px}
+  .stat-label{font-size:.65rem;margin-bottom:4px}
+  .stat-value{font-size:1.4rem}
+
+  /* KPI grid — 1 column */
+  .kpi-grid{grid-template-columns:1fr!important;gap:12px}
+  .kpi-card{min-height:auto;padding:14px 16px 12px}
+  .kpi-name{font-size:.85rem}
+  .kpi-score-num{font-size:1.5rem}
+  .kpi-tag{font-size:.55rem;padding:2px 6px}
+  .kpi-footer{grid-template-columns:1fr 1fr 1fr;gap:4px;padding-top:10px}
+  .kpi-foot-lbl{font-size:.48rem}
+  .kpi-foot-val{font-size:.78rem}
+
+  /* Overview internal 3-col grids (charts, top 5) */
+  [style*="repeat(auto-fit,minmax(320px,1fr))"]{grid-template-columns:1fr!important;gap:12px!important}
+
+  /* Chart boxes */
+  .chart-box{padding:12px;min-height:240px;border-radius:14px}
+  .chart-title{font-size:.8rem;margin-bottom:10px}
+
+  /* Top 5 list */
+  .top5-item{padding:8px 10px;gap:8px}
+  .top5-rank{min-width:22px;height:22px;font-size:.62rem}
+  .top5-name{font-size:.75rem}
+  .top5-count{font-size:.58rem;min-width:36px}
+  .top5-pct{font-size:.82rem;min-width:44px}
+
+  /* Forms */
+  .form-label{font-size:.68rem}
+  .form-input{padding:9px 11px;font-size:.85rem}
+
+  /* Modals */
+  .modal{padding:10px}
+  .modal-card{border-radius:18px;max-height:95vh}
+  .modal-head{padding:14px 16px}
+  .modal-body{padding:16px}
+  .modal-head button.icon-btn{width:32px;height:32px}
+
+  /* Modal internal 3-col KPI cards */
+  .modal-body [style*="grid-template-columns:repeat(3,1fr)"]{
+    grid-template-columns:1fr!important;gap:8px!important
+  }
+
+  /* Trend table inline styles */
+  .glass-card table{font-size:.75rem}
+  .glass-card table th,
+  .glass-card table td{padding:8px 6px!important;font-size:.7rem}
+
+  /* Buttons */
+  .btn-primary,.btn-ghost{min-height:40px}
+  .load-more button{padding:10px 24px;font-size:.8rem}
+
+  /* Empty state */
+  .empty-state{padding:40px 16px}
+  .empty-state i{font-size:2rem}
+}
+
+@media (max-width: 400px) {
+  .stat-grid{grid-template-columns:1fr!important}
+  .app-container{width:100%;padding:0 10px}
+  .nav-inner{padding:6px 10px}
+  .side-btn{padding:7px 10px;font-size:.7rem}
+  .kpi-score-num{font-size:1.35rem}
+  .kpi-footer{grid-template-columns:1fr 1fr;gap:4px}
+  .kpi-foot-item:last-child{grid-column:1/-1}
+}
 </style>
 <link rel="stylesheet" href="../theme-overrides.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
