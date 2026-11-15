@@ -1,13 +1,15 @@
 /* ============================================
-   VEXORIS — Mobile App Shell JS
-   Auto-builds bottom nav, transforms tables, handles "More" sheet
+   VEXORIS — Mobile App Shell v3
+   Header Menu pattern · No bottom nav
    ============================================ */
 
 (function () {
   'use strict';
 
   const MOBILE_BP = 768;
-  const MAX_NAV_ITEMS = 4;
+  let initialized = false;
+  let sheetEl = null;
+  let cachedUser = null;
 
   function isMobile() { return window.innerWidth <= MOBILE_BP; }
 
@@ -18,189 +20,298 @@
   }
 
   /* ==========================================
-     BOTTOM NAVIGATION
+     WAIT FOR AUTH DATA
      ========================================== */
-  function buildBottomNav() {
-    if (document.getElementById('mobileBottomNav')) return;
-
-    const tabsBar = document.querySelector('.tabs-bar');
-    if (!tabsBar) return;
-
-    const tabs = Array.from(tabsBar.querySelectorAll('.side-btn'))
-      .filter(btn => btn.dataset.tab && btn.offsetParent !== null);
-
-    if (tabs.length === 0) return;
-
-    const nav = document.createElement('nav');
-    nav.id = 'mobileBottomNav';
-    nav.className = 'mobile-bottom-nav';
-    nav.setAttribute('aria-label', 'التنقل الرئيسي');
-
-    const hasMore = tabs.length > 5;
-    const primaryTabs = hasMore ? tabs.slice(0, MAX_NAV_ITEMS) : tabs;
-
-    primaryTabs.forEach(tab => {
-      const item = document.createElement('button');
-      item.className = 'mobile-nav-item';
-      item.dataset.tab = tab.dataset.tab;
-      const iconClass = tab.querySelector('i')?.className || 'fa-solid fa-circle';
-      const label = tab.textContent.trim() || tab.dataset.tab;
-      item.innerHTML = `<i class="${iconClass}"></i><span>${label}</span>`;
-      item.addEventListener('click', () => activateTab(tab.dataset.tab));
-      nav.appendChild(item);
-    });
-
-    if (hasMore) {
-      const moreBtn = document.createElement('button');
-      moreBtn.className = 'mobile-nav-item';
-      moreBtn.dataset.tab = '__more__';
-      moreBtn.innerHTML = '<i class="fa-solid fa-ellipsis"></i><span>المزيد</span>';
-      moreBtn.addEventListener('click', openMoreSheet);
-      nav.appendChild(moreBtn);
-    }
-
-    document.body.appendChild(nav);
-    document.body.classList.add('has-bottom-nav');
-
-    // Initial active state
-    const activeTab = tabs.find(t => t.classList.contains('active'));
-    if (activeTab) updateActiveNavItem(activeTab.dataset.tab);
-
-    // Watch for active changes
-    const observer = new MutationObserver(() => {
-      const current = tabsBar.querySelector('.side-btn.active');
-      if (current) updateActiveNavItem(current.dataset.tab);
-    });
-    observer.observe(tabsBar, { subtree: true, attributes: true, attributeFilter: ['class'] });
-  }
-
-  function activateTab(tabId) {
-    if (tabId === '__more__') return;
-    const original = document.querySelector(`.tabs-bar .side-btn[data-tab="${tabId}"]`);
-    if (original) original.click();
-    updateActiveNavItem(tabId);
-  }
-
-  function updateActiveNavItem(tabId) {
-    document.querySelectorAll('.mobile-nav-item').forEach(item => {
-      item.classList.toggle('active', item.dataset.tab === tabId);
+  function waitForAuthData(maxWait = 3000) {
+    return new Promise(resolve => {
+      const start = Date.now();
+      const check = () => {
+        const nameEl = document.getElementById('navUserName');
+        const emailEl = document.getElementById('dropdownEmail');
+        const hasName = nameEl && nameEl.textContent && nameEl.textContent.trim() !== '...';
+        const hasEmail = emailEl && emailEl.textContent && emailEl.textContent.trim() !== '';
+        if ((hasName || hasEmail) || Date.now() - start > maxWait) {
+          resolve();
+        } else {
+          setTimeout(check, 100);
+        }
+      };
+      check();
     });
   }
 
   /* ==========================================
-     MORE BOTTOM SHEET
+     READ USER FROM DOM
      ========================================== */
-  let moreSheetEl = null;
-
-  function openMoreSheet() {
-    if (!moreSheetEl) {
-      moreSheetEl = document.createElement('div');
-      moreSheetEl.className = 'mobile-more-sheet';
-      moreSheetEl.id = 'mobileMoreSheet';
-      document.body.appendChild(moreSheetEl);
-      moreSheetEl.addEventListener('click', (e) => {
-        if (e.target === moreSheetEl) closeMoreSheet();
-      });
-    }
-
-    const tabsBar = document.querySelector('.tabs-bar');
-    const allTabs = Array.from(tabsBar?.querySelectorAll('.side-btn') || [])
-      .filter(btn => btn.dataset.tab && btn.offsetParent !== null);
-
-    // Read user info from existing DOM
-    const userName = document.getElementById('navUserName')?.textContent || 'مستخدم';
-    const userEmail = document.getElementById('dropdownEmail')?.textContent || '';
-    const userRoleEl = document.getElementById('navUserRole');
-    const userRole = userRoleEl?.textContent || '';
-    const userRoleColor = userRoleEl?.style.color || 'var(--accent)';
+  function readUserFromDOM() {
+    const name = document.getElementById('navUserName')?.textContent?.trim();
+    const email = document.getElementById('dropdownEmail')?.textContent?.trim() || '';
+    const role = document.getElementById('navUserRole')?.textContent?.trim() || '';
+    const roleColor = document.getElementById('navUserRole')?.style.color || '';
     const avatarEl = document.getElementById('userAvatar');
     const avatarHTML = avatarEl?.innerHTML || '<i class="fa-solid fa-user"></i>';
     const avatarBg = avatarEl?.style.background || 'linear-gradient(135deg,#0ea5e9,#6366f1)';
 
-    const tabsListHTML = allTabs.map(t => {
+    return {
+      name: name && name !== '...' ? name : 'مستخدم',
+      email: email || '',
+      role: role || '',
+      roleColor: roleColor || 'var(--accent)',
+      avatarHTML,
+      avatarBg,
+    };
+  }
+
+  /* ==========================================
+     INJECT MENU BUTTON INTO HEADER
+     ========================================== */
+  function injectMenuButton() {
+    if (document.getElementById('vexMobMenuBtn')) return;
+
+    const actionsDiv = document.querySelector('.nav-inner > div:last-child');
+    if (!actionsDiv) {
+      console.warn('[VEX-MOB] Header actions container not found');
+      return;
+    }
+
+    const btn = document.createElement('button');
+    btn.id = 'vexMobMenuBtn';
+    btn.className = 'vex-mob-menu-btn';
+    btn.setAttribute('aria-label', 'القائمة');
+    btn.setAttribute('title', 'القائمة');
+    btn.innerHTML = '<i class="fa-solid fa-bars"></i>';
+    btn.addEventListener('click', openSheet);
+
+    actionsDiv.appendChild(btn);
+  }
+
+  /* ==========================================
+     BUILD MENU SHEET
+     ========================================== */
+  function buildSheet() {
+    if (sheetEl) return sheetEl;
+
+    sheetEl = document.createElement('div');
+    sheetEl.className = 'vex-mob-sheet';
+    sheetEl.id = 'vexMobSheet';
+    document.body.appendChild(sheetEl);
+
+    // Close on backdrop click
+    sheetEl.addEventListener('click', (e) => {
+      if (e.target === sheetEl) closeSheet();
+    });
+
+    return sheetEl;
+  }
+
+  function renderSheetContent() {
+    if (!sheetEl) return;
+
+    const user = cachedUser || readUserFromDOM();
+    const userName = user.name;
+    const userEmail = user.email;
+    const userRole = user.role;
+    const userRoleColor = user.roleColor;
+    const avatarHTML = user.avatarHTML;
+    const avatarBg = user.avatarBg;
+
+    // Read tabs from tabs-bar
+    const tabsBar = document.querySelector('.tabs-bar');
+    const tabs = tabsBar
+      ? Array.from(tabsBar.querySelectorAll('.side-btn')).filter(btn => btn.dataset.tab && btn.offsetParent !== null)
+      : [];
+
+    const tabsHTML = tabs.map(t => {
       const icon = t.querySelector('i')?.className || 'fa-solid fa-circle';
       const label = t.textContent.trim();
       const isActive = t.classList.contains('active');
       return `
-        <button class="mobile-more-item ${isActive ? 'active' : ''}" data-more-tab="${t.dataset.tab}">
+        <button class="vex-mob-item ${isActive ? 'active' : ''}" data-mob-tab="${t.dataset.tab}">
           <i class="${icon}"></i>
           <span>${label}</span>
+          ${isActive ? '<i class="fa-solid fa-check vex-mob-arrow" style="color:var(--accent);"></i>' : ''}
         </button>
       `;
     }).join('');
 
-    moreSheetEl.innerHTML = `
-      <div class="mobile-more-panel" role="dialog" aria-modal="true" aria-label="القائمة">
-        <div class="mobile-more-user">
-          <div class="mobile-more-avatar" style="background:${avatarBg};">${avatarHTML}</div>
-          <div style="flex:1;min-width:0;">
-            <div class="mobile-more-name">${userName}</div>
-            <div class="mobile-more-email">${userEmail}</div>
-            ${userRole ? `<span class="mobile-more-role" style="color:${userRoleColor};">${userRole}</span>` : ''}
+    sheetEl.innerHTML = `
+      <div class="vex-mob-panel" role="dialog" aria-modal="true" aria-label="القائمة">
+
+        <div class="vex-mob-user">
+          <div class="vex-mob-avatar" style="background:${avatarBg};">
+            ${avatarHTML}
+          </div>
+          <div class="vex-mob-user-info">
+            <div class="vex-mob-name">${userName}</div>
+            <div class="vex-mob-email">${userEmail}</div>
+            ${userRole ? `<span class="vex-mob-role" style="color:${userRoleColor};">${userRole}</span>` : ''}
           </div>
         </div>
 
-        <div class="mobile-more-section-title">التنقل</div>
-        <div class="mobile-more-tab-list">${tabsListHTML}</div>
+        ${tabs.length > 0 ? `
+          <div class="vex-mob-section-title">التنقل</div>
+          <div class="vex-mob-list">${tabsHTML}</div>
+          <div class="vex-mob-divider"></div>
+        ` : ''}
 
-        <div class="mobile-more-divider"></div>
-
-        <div class="mobile-more-section-title">الإعدادات</div>
-        <div class="mobile-more-action-list">
-          <button class="mobile-more-item" data-action="profile">
-            <i class="fa-solid fa-user-pen"></i><span>الملف الشخصي</span>
+        <div class="vex-mob-section-title">الحساب</div>
+        <div class="vex-mob-list">
+          <button class="vex-mob-item" data-mob-action="profile">
+            <i class="fa-solid fa-user-pen"></i>
+            <span>الملف الشخصي</span>
+            <i class="fa-solid fa-chevron-left vex-mob-arrow"></i>
           </button>
-          <button class="mobile-more-item" data-action="password">
-            <i class="fa-solid fa-key"></i><span>تغيير كلمة المرور</span>
+          <button class="vex-mob-item" data-mob-action="password">
+            <i class="fa-solid fa-key"></i>
+            <span>تغيير كلمة المرور</span>
+            <i class="fa-solid fa-chevron-left vex-mob-arrow"></i>
           </button>
-          <button class="mobile-more-item" data-action="dashboard">
-            <i class="fa-solid fa-house"></i><span>لوحة التحكم</span>
+          <button class="vex-mob-item" data-mob-action="theme">
+            <i class="fa-solid fa-moon"></i>
+            <span>تبديل الثيم</span>
+            <i class="fa-solid fa-chevron-left vex-mob-arrow"></i>
           </button>
         </div>
 
-        <div class="mobile-more-divider"></div>
+        <div class="vex-mob-divider"></div>
 
-        <button class="mobile-more-item danger" data-action="logout">
-          <i class="fa-solid fa-power-off"></i><span>تسجيل الخروج</span>
+        <div class="vex-mob-section-title">النظام</div>
+        <div class="vex-mob-list">
+          <button class="vex-mob-item" data-mob-action="dashboard">
+            <i class="fa-solid fa-house"></i>
+            <span>لوحة التحكم</span>
+            <i class="fa-solid fa-chevron-left vex-mob-arrow"></i>
+          </button>
+          <button class="vex-mob-item" data-mob-action="about">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>عن النظام</span>
+            <i class="fa-solid fa-chevron-left vex-mob-arrow"></i>
+          </button>
+          <button class="vex-mob-item" data-mob-action="security">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>درع VEXORIS</span>
+            <i class="fa-solid fa-chevron-left vex-mob-arrow"></i>
+          </button>
+          <button class="vex-mob-item" data-mob-action="courses">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>دورات تدريبية</span>
+            <i class="fa-solid fa-chevron-left vex-mob-arrow"></i>
+          </button>
+          <button class="vex-mob-item" data-mob-action="feedback">
+            <i class="fa-solid fa-comment-dots"></i>
+            <span>رأيك يهمنا</span>
+            <i class="fa-solid fa-chevron-left vex-mob-arrow"></i>
+          </button>
+        </div>
+
+        <div class="vex-mob-divider"></div>
+
+        <button class="vex-mob-item danger" data-mob-action="logout">
+          <i class="fa-solid fa-power-off"></i>
+          <span>تسجيل الخروج</span>
         </button>
+
       </div>
     `;
 
-    // Wire events
-    moreSheetEl.querySelectorAll('[data-more-tab]').forEach(btn => {
+    wireSheetEvents();
+  }
+
+  /* ==========================================
+     WIRE EVENTS
+     ========================================== */
+  function wireSheetEvents() {
+    if (!sheetEl) return;
+
+    // Tab clicks
+    sheetEl.querySelectorAll('[data-mob-tab]').forEach(btn => {
       btn.addEventListener('click', () => {
-        activateTab(btn.dataset.moreTab);
-        closeMoreSheet();
+        const tabId = btn.dataset.mobTab;
+        closeSheet();
+        // Try direct click first
+        const originalTab = document.querySelector(`.tabs-bar .side-btn[data-tab="${tabId}"]`);
+        if (originalTab) {
+          originalTab.click();
+        } else if (typeof window.switchTab === 'function') {
+          window.switchTab(tabId);
+        }
       });
     });
 
-    moreSheetEl.querySelector('[data-action="profile"]')?.addEventListener('click', () => {
-      closeMoreSheet();
-      if (typeof window.showProfile === 'function') window.showProfile();
-    });
-    moreSheetEl.querySelector('[data-action="password"]')?.addEventListener('click', () => {
-      closeMoreSheet();
-      if (typeof window.showChangePassword === 'function') window.showChangePassword();
-    });
-    moreSheetEl.querySelector('[data-action="dashboard"]')?.addEventListener('click', () => {
-      closeMoreSheet();
-      window.location.href = resolvePath('dashboard.html');
-    });
-    moreSheetEl.querySelector('[data-action="logout"]')?.addEventListener('click', () => {
-      closeMoreSheet();
-      if (typeof window.logout === 'function') window.logout();
-      else if (typeof window.vexorisLogout === 'function') window.vexorisLogout();
-    });
-
-    requestAnimationFrame(() => {
-      moreSheetEl.classList.add('open');
-      document.body.style.overflow = 'hidden';
+    // Action clicks
+    sheetEl.querySelectorAll('[data-mob-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.dataset.mobAction;
+        handleAction(action);
+      });
     });
   }
 
-  function closeMoreSheet() {
-    if (!moreSheetEl) return;
-    moreSheetEl.classList.remove('open');
+  function handleAction(action) {
+    switch (action) {
+      case 'profile':
+        closeSheet();
+        setTimeout(() => {
+          if (typeof window.showProfile === 'function') window.showProfile();
+          else window.location.href = resolvePath('profile.html');
+        }, 200);
+        break;
+      case 'password':
+        closeSheet();
+        setTimeout(() => {
+          if (typeof window.showChangePassword === 'function') window.showChangePassword();
+          else window.location.href = resolvePath('change-password.html');
+        }, 200);
+        break;
+      case 'theme':
+        if (typeof window.toggleTheme === 'function') window.toggleTheme();
+        // Keep sheet open so user sees the change
+        break;
+      case 'dashboard':
+        closeSheet();
+        setTimeout(() => { window.location.href = resolvePath('dashboard.html'); }, 200);
+        break;
+      case 'about':
+        closeSheet();
+        setTimeout(() => { window.location.href = resolvePath('about.html'); }, 200);
+        break;
+      case 'security':
+        closeSheet();
+        setTimeout(() => { window.location.href = resolvePath('security.html'); }, 200);
+        break;
+      case 'courses':
+        closeSheet();
+        setTimeout(() => { window.location.href = resolvePath('courses.html'); }, 200);
+        break;
+      case 'feedback':
+        closeSheet();
+        setTimeout(() => { window.location.href = resolvePath('feedback.html'); }, 200);
+        break;
+      case 'logout':
+        closeSheet();
+        setTimeout(() => {
+          if (typeof window.logout === 'function') window.logout();
+          else if (typeof window.vexorisLogout === 'function') window.vexorisLogout();
+        }, 200);
+        break;
+    }
+  }
+
+  /* ==========================================
+     OPEN / CLOSE SHEET
+     ========================================== */
+  function openSheet() {
+    buildSheet();
+    renderSheetContent();
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => {
+      sheetEl.classList.add('open');
+    });
+  }
+
+  function closeSheet() {
+    if (!sheetEl) return;
+    sheetEl.classList.remove('open');
     document.body.style.overflow = '';
   }
 
@@ -231,27 +342,45 @@
   /* ==========================================
      INIT
      ========================================== */
-  function init() {
-    if (!isMobile()) return;
-    buildBottomNav();
+  async function init() {
+    if (!isMobile() || initialized) return;
+    initialized = true;
+
+    await waitForAuthData();
+    cachedUser = readUserFromDOM();
+
+    injectMenuButton();
+    buildSheet();
     enhanceTables();
 
-    // Re-enhance tables when new tabs activate
+    // Watch for new tables (tab switching)
     const observer = new MutationObserver(() => enhanceTables());
     observer.observe(document.body, { childList: true, subtree: true });
   }
 
+  // Re-init on resize back to mobile
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-      if (isMobile() && !document.getElementById('mobileBottomNav')) init();
-    }, 250);
+      if (isMobile() && !initialized) {
+        init();
+      } else if (isMobile() && !document.getElementById('vexMobMenuBtn')) {
+        initialized = false;
+        init();
+      }
+    }, 300);
   });
 
+  // Escape key closes sheet
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSheet();
+  });
+
+  // Start
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => setTimeout(init, 150));
+    document.addEventListener('DOMContentLoaded', () => setTimeout(init, 200));
   } else {
-    setTimeout(init, 150);
+    setTimeout(init, 200);
   }
 })();
