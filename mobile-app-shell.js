@@ -22,21 +22,33 @@
   /* ==========================================
      WAIT FOR AUTH DATA
      ========================================== */
-  function waitForAuthData(maxWait = 3000) {
+  function waitForAuthData(maxWait = 6000) {
     return new Promise(resolve => {
-      const start = Date.now();
-      const check = () => {
-        const nameEl = document.getElementById('navUserName');
-        const emailEl = document.getElementById('dropdownEmail');
-        const hasName = nameEl && nameEl.textContent && nameEl.textContent.trim() !== '...';
-        const hasEmail = emailEl && emailEl.textContent && emailEl.textContent.trim() !== '';
-        if ((hasName || hasEmail) || Date.now() - start > maxWait) {
-          resolve();
-        } else {
-          setTimeout(check, 100);
-        }
+      const nameEl = document.getElementById('navUserName');
+      if (!nameEl) { resolve(); return; }
+
+      const isReady = () => {
+        const v = nameEl.textContent?.trim();
+        return v && v !== '...';
       };
-      check();
+
+      if (isReady()) { resolve(); return; }
+
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        observer.disconnect();
+        clearTimeout(timer);
+        resolve();
+      };
+
+      const observer = new MutationObserver(() => {
+        if (isReady()) finish();
+      });
+      observer.observe(nameEl, { childList: true, characterData: true, subtree: true });
+
+      const timer = setTimeout(finish, maxWait);
     });
   }
 
@@ -44,21 +56,25 @@
      READ USER FROM DOM
      ========================================== */
   function readUserFromDOM() {
-    const name = document.getElementById('navUserName')?.textContent?.trim();
-    const email = document.getElementById('dropdownEmail')?.textContent?.trim() || '';
-    const role = document.getElementById('navUserRole')?.textContent?.trim() || '';
+    const nameRaw = document.getElementById('navUserName')?.textContent?.trim() || '';
+    const emailRaw = document.getElementById('dropdownEmail')?.textContent?.trim() || '';
+    const roleRaw = document.getElementById('navUserRole')?.textContent?.trim() || '';
     const roleColor = document.getElementById('navUserRole')?.style.color || '';
     const avatarEl = document.getElementById('userAvatar');
     const avatarHTML = avatarEl?.innerHTML || '<i class="fa-solid fa-user"></i>';
     const avatarBg = avatarEl?.style.background || 'linear-gradient(135deg,#0ea5e9,#6366f1)';
 
+    const isLoading = !nameRaw || nameRaw === '...';
+    const displayName = nameRaw && nameRaw !== '...' ? nameRaw : (isLoading ? 'جاري التحميل...' : 'مستخدم');
+
     return {
-      name: name && name !== '...' ? name : 'مستخدم',
-      email: email || '',
-      role: role || '',
+      name: displayName,
+      email: emailRaw || '',
+      role: roleRaw || '',
       roleColor: roleColor || 'var(--accent)',
       avatarHTML,
       avatarBg,
+      isLoading,
     };
   }
 
@@ -302,11 +318,23 @@
      ========================================== */
   function openSheet() {
     buildSheet();
+    cachedUser = readUserFromDOM(); // fresh read every open
     renderSheetContent();
     document.body.style.overflow = 'hidden';
     requestAnimationFrame(() => {
       sheetEl.classList.add('open');
     });
+
+    // If auth data still loading, retry once after it arrives
+    if (cachedUser.isLoading) {
+      setTimeout(() => {
+        const fresh = readUserFromDOM();
+        if (!fresh.isLoading && sheetEl?.classList.contains('open')) {
+          cachedUser = fresh;
+          renderSheetContent();
+        }
+      }, 800);
+    }
   }
 
   function closeSheet() {
@@ -340,18 +368,35 @@
   }
 
   /* ==========================================
+     WIRE USER CHIP TO MENU
+     ========================================== */
+  function wireUserChipToMenu() {
+    const chip = document.getElementById('userChip');
+    if (!chip || chip.dataset.mobMenuWired) return;
+    chip.dataset.mobMenuWired = '1';
+
+    // Use capture phase to fire before session-manager's bubble listener
+    chip.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openSheet();
+    }, true);
+  }
+
+  /* ==========================================
      INIT
      ========================================== */
   async function init() {
     if (!isMobile() || initialized) return;
     initialized = true;
 
-    await waitForAuthData();
-    cachedUser = readUserFromDOM();
-
     injectMenuButton();
+    wireUserChipToMenu();
     buildSheet();
     enhanceTables();
+
+    await waitForAuthData();
+    cachedUser = readUserFromDOM();
 
     // Watch for new tables (tab switching)
     const observer = new MutationObserver(() => enhanceTables());

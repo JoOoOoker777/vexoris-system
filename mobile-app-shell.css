@@ -122,11 +122,67 @@
     flex-shrink: 0 !important;
   }
 
-  /* Hide user chip wrapper, logout, back link on mobile */
-  .nav-inner > div:last-child > div { display: none !important; }
+  /* Hide logout & back (moved to menu), KEEP user chip visible */
   .nav-inner > div:last-child > .icon-btn.logout-btn { display: none !important; }
   .nav-inner > div:last-child > a { display: none !important; }
   #vexorisZoomWidget { display: none !important; }
+
+  /* User chip on mobile — compact, part of header */
+  .nav-inner > div:last-child > div {
+    display: inline-flex !important;
+    position: static !important;
+    flex-shrink: 0 !important;
+  }
+
+  .user-chip {
+    display: inline-flex !important;
+    padding: 4px 8px 4px 6px !important;
+    gap: 6px !important;
+    border-radius: 10px !important;
+    background: rgba(148, 163, 184, 0.08) !important;
+    border-color: rgba(148, 163, 184, 0.2) !important;
+    pointer-events: auto !important;
+    max-width: 110px !important;
+    cursor: pointer !important;
+  }
+  .user-chip:hover { border-color: var(--accent) !important; }
+
+  .user-avatar {
+    width: 26px !important;
+    height: 26px !important;
+    border-radius: 7px !important;
+    font-size: 0.72rem !important;
+  }
+
+  .user-info {
+    display: flex !important;
+    gap: 0 !important;
+    text-align: right !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+  .user-name {
+    font-size: 0.65rem !important;
+    font-weight: 800 !important;
+    line-height: 1.1 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 65px !important;
+  }
+  .user-role {
+    font-size: 0.52rem !important;
+    line-height: 1.1 !important;
+    margin-top: 1px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 65px !important;
+  }
+  .user-chip .fa-chevron-down { display: none !important; }
+
+  /* Hide the dropdown — chip opens the menu instead */
+  .user-dropdown { display: none !important; }
 
   /* Icon buttons in header */
   .nav-inner .icon-btn {
@@ -884,5 +940,9 @@
     .kpi-foot-lbl { font-size: 0.5rem !important; }
     .vex-mob-avatar { width: 48px !important; height: 48px !important; font-size: 1.2rem !important; }
     .vex-mob-item { font-size: 0.88rem !important; padding: 12px 14px !important; }
+
+    /* On tiny screens — avatar only, no name */
+    .user-info { display: none !important; }
+    .user-chip { max-width: 36px !important; padding: 4px !important; }
   }
 }
