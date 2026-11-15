@@ -9,13 +9,13 @@ import { supabase } from './supabase-client.js';
 // ROLE METADATA (EXPORTED — single source of truth)
 // ============================================
 export const ROLE_META = {
-    super_admin: { name: 'المطور', color: '#a855f7', icon: 'fa-crown' },
-    admin:       { name: 'ادارة السجلات الطبية', color: '#0ea5e9', icon: 'fa-user-shield' },
-    manager:     { name: 'المدير الطبي', color: '#6366f1', icon: 'fa-user-tie' },
-    auditor:     { name: 'مراجع جودة', color: '#f59e0b', icon: 'fa-clipboard-check' },
-    senior:      { name: 'رئيس قسم', color: '#10b981', icon: 'fa-star' },
-    doctor:      { name: 'طبيب', color: '#14b8a6', icon: 'fa-stethoscope' },
-    viewer:      { name: 'مراجع', color: '#94a3b8', icon: 'fa-eye' },
+    super_admin: { name: 'المطور', color: '#a855f7', bg: 'rgba(168,85,247,0.15)', icon: 'fa-crown' },
+    admin:       { name: 'ادارة السجلات الطبية', color: '#0ea5e9', bg: 'rgba(14,165,233,0.15)', icon: 'fa-user-shield' },
+    manager:     { name: 'المدير الطبي', color: '#6366f1', bg: 'rgba(99,102,241,0.15)', icon: 'fa-user-tie' },
+    auditor:     { name: 'مراجع جودة', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', icon: 'fa-clipboard-check' },
+    senior:      { name: 'رئيس قسم', color: '#10b981', bg: 'rgba(16,185,129,0.15)', icon: 'fa-star' },
+    doctor:      { name: 'طبيب', color: '#14b8a6', bg: 'rgba(20,184,166,0.15)', icon: 'fa-stethoscope' },
+    viewer:      { name: 'مراجع', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)', icon: 'fa-eye' },
 };
 
 export function getRoleMeta(role) {

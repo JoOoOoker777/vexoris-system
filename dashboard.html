@@ -508,6 +508,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
     <script src="loading-logo.js" defer></script>
     <script src="loader-buttons.js" defer></script>
+    <link rel="stylesheet" href="mobile-app-shell.css" />
+    <script src="mobile-app-shell.js" defer></script>
 </head>
 <body>
 
@@ -537,11 +539,7 @@
                 <a href="feedback.html" class="nav-link">رأيك يهمنا</a>
             </nav>
             <div class="flex items-center gap-2">
-                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم" aria-label="تبديل الثيم">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-                    </svg>
-                </button>
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم" aria-label="تبديل الثيم"><i class="fa-solid fa-moon"></i></button>
                 <button class="user-chip" id="userChip" aria-label="قائمة المستخدم">
                     <div class="user-avatar" id="userAvatar"></div>
                     <div class="user-info">
@@ -645,6 +643,7 @@
 
     <script type="module">
         import { supabase } from './supabase-client.js';
+        import { initAuthGuard, mountUserChip } from './session-manager.js';
 
         const CATEGORIES = {
             clinical: { title: 'أنظمة المراجعة', sub: 'Review Systems', icon: 'fa-stethoscope' },
@@ -670,55 +669,19 @@
             { id: 'admin-logs', name: 'سجل التدقيق', desc: 'مراقبة جميع حركات النظام للأغراض الأمنية.', icon: 'fa-clipboard-list', color: '#64748b', soft: 'rgba(100,116,139,0.12)', category: 'admin', tag: 'AUDIT', url: 'admin/audit-log.html' },
         ];
 
-        const ROLE_META = {
-            super_admin: { name: 'المطور', color: '#a855f7', bg: 'rgba(168,85,247,0.15)', icon: 'fa-crown' },
-            admin:       { name: 'ادارة السجلات الطبية', color: '#0ea5e9', bg: 'rgba(14,165,233,0.15)', icon: 'fa-user-shield' },
-            manager:     { name: 'المدير الطبي', color: '#6366f1', bg: 'rgba(99,102,241,0.15)', icon: 'fa-user-tie' },
-            auditor:     { name: 'مراجع جودة', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', icon: 'fa-clipboard-check' },
-            senior:      { name: 'رئيس قسم', color: '#10b981', bg: 'rgba(16,185,129,0.15)', icon: 'fa-star' },
-            doctor:      { name: 'طبيب', color: '#14b8a6', bg: 'rgba(20,184,166,0.15)', icon: 'fa-stethoscope' },
-            viewer:      { name: 'مراجع', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)', icon: 'fa-eye' },
-        };
 
-        window.toggleTheme = function() {
-            const html = document.documentElement;
-            html.classList.toggle('dark');
-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
-        };
 
-        window.logout = async function() {
-            if (window.showConfirm) {
-                const confirmed = await window.showConfirm({
-                    title: 'تسجيل الخروج',
-                    message: 'هل أنت متأكد أنك تريد تسجيل الخروج من النظام؟',
-                    confirmText: 'تسجيل الخروج',
-                    cancelText: 'إلغاء',
-                    type: 'danger'
-                });
-                if (!confirmed) return;
-            }
-            await supabase.auth.signOut();
-            sessionStorage.clear();
-            localStorage.removeItem('vexoris_user_email');
-            window.location.href = './login.html';
-        };
 
-        window.showProfile = function() {
-            closeDropdown();
-             window.location.href = './profile.html'; 
-        };
+
+
+
+
 
         window.showChangePassword = function() {
             closeDropdown();
             window.location.href = './change-password.html';
         };
 
-        const userChip = document.getElementById('userChip');
-        const userDropdown = document.getElementById('userDropdown');
-        function openDropdown() { userDropdown.classList.add('open'); userChip.classList.add('open'); }
-        function closeDropdown() { userDropdown.classList.remove('open'); userChip.classList.remove('open'); }
-        function toggleDropdown() { if (userDropdown.classList.contains('open')) closeDropdown(); else openDropdown(); }
-        userChip.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(); });
         document.addEventListener('click', (e) => {
             if (!userDropdown.contains(e.target) && !userChip.contains(e.target)) closeDropdown();
         });
@@ -806,32 +769,9 @@
         }
 
         (async () => {
-            const { data: { session }, error: sessionErr } = await supabase.auth.getSession();
-            if (sessionErr || !session) {
-                window.location.href = './login.html';
-                return;
-            }
-
-            const { data: profile, error: profileErr } = await supabase
-                .from('profiles')
-                .select('role, username, email, is_active')
-                .eq('id', session.user.id)
-                .single();
-
-            if (profileErr || !profile) {
-                alert('حدث خطأ في جلب بيانات الحساب. يرجى تسجيل الدخول مجدداً.');
-                await supabase.auth.signOut();
-                window.location.href = './login.html';
-                return;
-            }
-
-            if (profile.is_active === false) {
-                await supabase.auth.signOut();
-                sessionStorage.clear();
-                alert('حسابك موقوف حالياً. يرجى التواصل مع مسؤول النظام لتفعيله.');
-                window.location.href = './login.html';
-                return;
-            }
+            const auth = await initAuthGuard();
+            const profile = auth.profile;
+            mountUserChip(auth);
 
             const userRole = profile.role || 'viewer';
             const displayName = session.user.user_metadata?.display_name || profile.username || 'مستخدم';
