@@ -770,6 +770,7 @@
 
         (async () => {
             const auth = await initAuthGuard();
+            const session = auth.session;
             const profile = auth.profile;
             mountUserChip(auth);
 

@@ -725,11 +725,11 @@
                 allowedRoles: ['super_admin', 'admin'],
                 redirectIfDenied: '../dashboard.html',
             });
+            const session = auth.session;
             mountUserChip(auth);
 
             currentUserRole = auth.role;
             isSuperAdmin = auth.role === 'super_admin';
-
             // 3. Load perms
             const ok = await loadPermissions();
             if (!ok) {
