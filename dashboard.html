@@ -647,7 +647,7 @@
 
     <script type="module">
         import { supabase } from './supabase-client.js';
-        import { initAuthGuard, mountUserChip } from './session-manager.js';
+        import { ROLE_META, initAuthGuard, mountUserChip } from './session-manager.js';
 
         const CATEGORIES = {
             clinical: { title: 'أنظمة المراجعة', sub: 'Review Systems', icon: 'fa-stethoscope' },
@@ -680,15 +680,6 @@
 
 
 
-
-        window.showChangePassword = function() {
-            closeDropdown();
-            window.location.href = './change-password.html';
-        };
-
-        document.addEventListener('click', (e) => {
-            if (!userDropdown.contains(e.target) && !userChip.contains(e.target)) closeDropdown();
-        });
 
         const progress = document.getElementById('scrollProgress');
         window.addEventListener('scroll', () => {
@@ -783,19 +774,8 @@
             const userEmail = session.user.email || profile.email || '';
             const roleInfo = ROLE_META[userRole] || ROLE_META.viewer;
 
-            document.getElementById('navUserName').textContent = displayName;
-            document.getElementById('navUserRole').textContent = roleInfo.name;
-            document.getElementById('navUserRole').style.color = roleInfo.color;
-
-            // 🔥 Avatar rendering with role icon
-            renderAvatar(document.getElementById('userAvatar'), userRole);
-            renderAvatar(document.getElementById('dropdownAvatar'), userRole);
-
-            document.getElementById('dropdownName').textContent = displayName;
-            document.getElementById('dropdownEmail').textContent = userEmail;
-            document.getElementById('dropdownRoleBadge').innerHTML = `<i class="fa-solid ${roleInfo.icon}"></i> ${roleInfo.name}`;
-            document.getElementById('dropdownRoleBadge').style.background = roleInfo.bg;
-            document.getElementById('dropdownRoleBadge').style.color = roleInfo.color;
+            // ✅ ملاحظة: mountUserChip(auth) بالفعل بيظبط الـ chip + الـ avatar + الـ dropdown
+            // مفيش داعي لإعادة تعيينها — بس نحتاج userRole/displayName/roleInfo للسطور الجاية
 
             document.getElementById('welcomeName').textContent = displayName;
             document.getElementById('statRoleName').textContent = roleInfo.name;
