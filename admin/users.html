@@ -520,11 +520,40 @@
             border-radius: 10px; border: 2px solid var(--bg);
         }
         ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
+        /* USER CHIP + DROPDOWN (unified) */
+        .icon-btn.logout-btn{color:#f87171}
+        .icon-btn.logout-btn:hover{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.4);transform:scale(1.05)}
+        .user-chip{display:none;align-items:center;gap:10px;padding:6px 12px 6px 8px;background:rgba(148,163,184,.06);border:1px solid var(--card-border);border-radius:12px;cursor:pointer;transition:all .3s;font-family:inherit;color:inherit}
+        .user-chip:hover{border-color:var(--accent)}
+        .user-avatar{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.95rem;flex-shrink:0;position:relative;overflow:hidden}
+        .user-avatar i{position:relative;z-index:2}
+        .user-avatar::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.4) 50%,transparent 70%);background-size:200% 100%;animation:shine 4s infinite;z-index:1}
+        @keyframes shine{0%{background-position:-200% 0}50%,100%{background-position:200% 0}}
+        .user-info{display:flex;flex-direction:column;gap:1px;text-align:right}
+        .user-name{font-size:.78rem;font-weight:800;color:var(--text-primary);line-height:1.1}
+        .user-role{font-size:.65rem;font-weight:700;line-height:1.1}
+        .user-chip-arrow{color:var(--text-muted);font-size:.65rem;transition:transform .3s ease}
+        .user-chip.open .user-chip-arrow{transform:rotate(180deg)}
+        .user-dropdown{position:absolute;top:55px;left:0;width:260px;background:var(--card-bg);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--card-border);border-radius:16px;padding:6px;z-index:60;box-shadow:0 24px 48px -12px rgba(0,0,0,.4);opacity:0;transform:translateY(-8px) scale(.96);pointer-events:none;transition:all .25s}
+        .user-dropdown.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+        .dropdown-item{width:100%;padding:10px 12px;background:transparent;border:none;color:var(--text-secondary);font-family:inherit;font-size:.8rem;font-weight:700;border-radius:8px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:right;transition:all .2s}
+        .dropdown-item:hover{background:rgba(14,165,233,.08);color:var(--accent)}
+        .dropdown-item i{width:16px;font-size:.8rem}
+        .dropdown-profile{padding:12px;display:flex;align-items:center;gap:10px}
+        .dropdown-avatar-lg{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;color:#fff;position:relative;overflow:hidden}
+        .dropdown-avatar-lg i{position:relative;z-index:2}
+        .dropdown-avatar-lg::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.3) 50%,transparent 70%);background-size:200% 100%;animation:shine 4s infinite;z-index:1}
+        .dropdown-name{font-size:.88rem;font-weight:900;color:var(--text-primary);line-height:1.2}
+        .dropdown-email{font-size:.7rem;font-weight:600;color:var(--text-muted);line-height:1.3;margin-top:1px}
+        .dropdown-role-badge{display:inline-flex;align-items:center;gap:4px;font-size:.6rem;font-weight:800;padding:2px 8px;border-radius:5px;margin-top:4px}
+        .dropdown-divider{height:1px;background:var(--card-border);margin:6px 4px}
     </style>
     <link rel="stylesheet" href="../theme-overrides.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
     <script src="../loading-logo.js" defer></script>       <!-- ✅ تصحيح المسار -->
     <script src="../loader-buttons.js" defer></script>
+    <link rel="stylesheet" href="../mobile-app-shell.css" />
+    <script src="../mobile-app-shell.js" defer></script>
 </head>
 <body>
 
@@ -554,12 +583,33 @@
                 <a href="../feedback.html" class="nav-link">رأيك يهمنا</a>
             </nav>
             <div class="flex items-center gap-2">
-                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-                    </svg>
-                </button>
-                <a href="../dashboard.html" style="padding: 8px 16px; border-radius: 10px; background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم"><i class="fa-solid fa-moon"></i></button>
+                <div style="position: relative;">
+                    <button class="user-chip" id="userChip" aria-label="قائمة المستخدم">
+                        <div class="user-avatar" id="userAvatar"></div>
+                        <div class="user-info">
+                            <span class="user-name" id="navUserName">...</span>
+                            <span class="user-role" id="navUserRole">...</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down user-chip-arrow"></i>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-profile">
+                            <div class="dropdown-avatar-lg" id="dropdownAvatar"></div>
+                            <div>
+                                <div class="dropdown-name" id="dropdownName">...</div>
+                                <div class="dropdown-email" id="dropdownEmail">...</div>
+                                <div class="dropdown-role-badge" id="dropdownRoleBadge"></div>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" onclick="showProfile()"><i class="fa-solid fa-user-pen"></i> إدارة الملف الشخصي</button>
+                        <button class="dropdown-item" onclick="showChangePassword()"><i class="fa-solid fa-key"></i> تغيير كلمة المرور</button>
+                        <button class="dropdown-item" onclick="window.location.href='../sessions.html'"><i class="fa-solid fa-desktop"></i> الجلسات النشطة</button>
+                    </div>
+                </div>
+                <button onclick="logout()" class="icon-btn logout-btn" id="logoutBtn" title="تسجيل الخروج"><i class="fa-solid fa-power-off"></i></button>
+                <a href="../dashboard.html" class="btn-back" style="padding: 8px 16px; border-radius: 10px; background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                     <i class="fa-solid fa-arrow-right"></i>
                     رجوع
                 </a>
@@ -753,28 +803,17 @@
 
     <script type="module">
         import { supabase, SUPABASE_ANON_KEY } from '../supabase-client.js';
+        import { ROLE_META, initAuthGuard, mountUserChip } from '../session-manager.js';
 
         // ✅ ROLE_META مع icon لكل دور
-        const ROLE_META = {
-            super_admin: { name: 'المطور',                color: '#a855f7', soft: 'rgba(168,85,247,0.12)', icon: 'fa-crown' },
-            admin:       { name: 'ادارة السجلات الطبية',  color: '#0ea5e9', soft: 'rgba(14,165,233,0.12)',  icon: 'fa-user-shield' },
-            manager:     { name: 'المدير الطبي',          color: '#6366f1', soft: 'rgba(99,102,241,0.12)',  icon: 'fa-user-tie' },
-            auditor:     { name: 'مراجع جودة',            color: '#f59e0b', soft: 'rgba(245,158,11,0.12)',  icon: 'fa-clipboard-check' },
-            senior:      { name: 'رئيس قسم',              color: '#10b981', soft: 'rgba(16,185,129,0.12)',  icon: 'fa-star' },
-            doctor:      { name: 'طبيب',                 color: '#14b8a6', soft: 'rgba(20,184,166,0.12)',  icon: 'fa-stethoscope' },
-            viewer:      { name: 'مراجع',               color: '#94a3b8', soft: 'rgba(148,163,184,0.12)', icon: 'fa-eye' },
-        };
+
 
         let allUsers = [];
         let currentUserRole = null;
         let currentUserId = null;
         let editingUser = null;
 
-        window.toggleTheme = function() {
-            const html = document.documentElement;
-            html.classList.toggle('dark');
-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
-        };
+
 
         // ✅ Avatar helpers
         function makeAvatarGradient(color) {
@@ -1026,26 +1065,15 @@
         }
 
         (async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                window.location.href = '../login.html';
-                return;
-            }
+            const auth = await initAuthGuard({
+                allowedRoles: ['super_admin', 'admin'],
+                redirectIfDenied: '../dashboard.html',
+            });
+            const session = auth.session;
+            const profile = auth.profile;
+            mountUserChip(auth);
 
             currentUserId = session.user.id;
-
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', session.user.id)
-                .single();
-
-            if (!profile || !['super_admin', 'admin'].includes(profile.role)) {
-                alert('ليس لديك صلاحية الوصول لهذه الصفحة.');
-                window.location.href = '../dashboard.html';
-                return;
-            }
-
             currentUserRole = profile.role;
 
             const roleFilter = document.getElementById('roleFilter');
@@ -1073,5 +1101,7 @@
             document.getElementById('loadingScreen').classList.add('hide');
         })();
     </script>
+
+    <script type="module" src="../session-manager.js"></script>
 </body>
 </html>
