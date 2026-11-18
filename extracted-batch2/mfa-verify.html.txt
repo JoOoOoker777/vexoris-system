@@ -1,0 +1,92 @@
+═══ FILE: mfa-verify.html — 437 lines ═══
+
+─── [HEAD: <link theme-overrides> area ───
+139-    </style>
+140:    <link rel="stylesheet" href="./theme-overrides.css" />
+141-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+142-    <script src="loading-logo.js" defer></script>
+143-    <script src="loader-buttons.js" defer></script>
+144-<body>
+145-    <div class="aurora-bg"></div>
+146-    <div class="loading-screen" id="loadingScreen">
+147-        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+148-        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري التحميل...</p>
+
+─── [IMPORTS inside <script type=module> ───
+208:        import { supabase } from './supabase-client.js';
+209:        import { isDeviceTrusted, trustCurrentDevice } from './device-trust.js';
+
+─── [ROLE_META if exists ───
+
+─── [toggleTheme local ───
+
+─── [window.logout / showProfile / showChangePassword ───
+
+─── [AUTH GUARD: getSession / initAuthGuard ───
+226-        // ============================================
+227-        (async () => {
+228:            const { data: { session } } = await supabase.auth.getSession();
+229-            if (!session) {
+230-                window.location.href = './login.html';
+231-                return;
+232-            }
+233-
+234-            currentUser = session.user;
+235-            mfaMethod = currentUser.user_metadata?.mfa_method;
+236-
+237-            // لو مش مفعل، رجعه للصفحة الصح
+238-            if (!mfaMethod) {
+239-                window.location.href = './mfa-setup.html';
+240-                return;
+241-            }
+242-
+243-            document.getElementById('loadingView').style.display = 'none';
+244-            document.getElementById('loadingScreen').classList.add('hide');
+245-
+246-            // 🔥 إظهار تنبيه الجهاز الجديد إذا لزم
+247-            if (isNewDevice) {
+248-                const alertEl = document.getElementById('newDeviceAlert');
+
+─── [AUTH FLOW: signIn / signOut / password_changed / mfa_method / navigate ───
+230:                window.location.href = './login.html';
+235:            mfaMethod = currentUser.user_metadata?.mfa_method;
+239:                window.location.href = './mfa-setup.html';
+256:                    window.location.href = './dashboard.html';
+270:                if (sessionStorage.getItem('email_mfa_verified') === 'true') {
+271:                    window.location.href = './dashboard.html';
+344:                window.location.href = './dashboard.html';
+417:            sessionStorage.setItem('email_mfa_verified', 'true');
+433:                window.location.href = './dashboard.html';
+
+─── [HEADER: nav-shell area ───
+
+─── [USER CHIP markup ───
+
+─── [FOOTER ───
+
+─── [END OF BODY scripts ───
+            }
+
+            // علامة الجلسة للداشبورد
+            sessionStorage.setItem('email_mfa_verified', 'true');
+
+            // ============================================
+            // 🔥 نجاح - تسجيل الجهاز كموثوق
+            // ============================================
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري تسجيل الجهاز...';
+            const trusted = await trustCurrentDevice(currentUser.id);
+            if (!trusted) {
+                console.warn('Device trust failed, but verification succeeded');
+            }
+
+            // تم التحقق بنجاح
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> تم التحقق بنجاح';
+            btn.style.background = '#10b981';
+
+            setTimeout(() => {
+                window.location.href = './dashboard.html';
+            }, 800);
+        };
+    </script>
+</body>
+</html>

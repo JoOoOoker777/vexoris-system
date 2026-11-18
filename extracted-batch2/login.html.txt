@@ -1,0 +1,132 @@
+═══ FILE: login.html — 705 lines ═══
+
+─── [HEAD: <link theme-overrides> area ───
+328-    </style>
+329:    <link rel="stylesheet" href="./theme-overrides.css" />
+330-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+331-    <script src="loading-logo.js" defer></script>
+332-    <script src="loader-buttons.js" defer></script>
+333-    
+334-</head>
+335-<body>
+336-    <div class="loading-screen" id="loadingScreen">
+337-        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+
+─── [IMPORTS inside <script type=module> ───
+487:        import { supabase, resolveLoginEmail, translateAuthError } from './supabase-client.js';
+488:        import { isDeviceTrusted } from './device-trust.js';
+
+─── [ROLE_META if exists ───
+
+─── [toggleTheme local ───
+489-
+490:        window.toggleTheme = function() {
+491-            const html = document.documentElement;
+492-            html.classList.toggle('dark');
+493-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+494-        };
+495-
+496-        window.togglePassword = function() {
+
+─── [window.logout / showProfile / showChangePassword ───
+
+─── [AUTH GUARD: getSession / initAuthGuard ───
+688-        // ============================================
+689-        (async () => {
+690:            const { data: { session } } = await supabase.auth.getSession();
+691-            if (session) {
+692-                const meta = session.user.user_metadata || {};
+693-                if (!meta.password_changed) { window.location.href = './change-password.html'; return; }
+694-                if (!meta.mfa_method)       { window.location.href = './mfa-setup.html'; return; }
+695-                window.location.href = './dashboard.html';
+696-                return;
+697-            }
+698-            // ✅ مفيش session → أخفي اللودر وأظهر الصفحة
+699-            document.getElementById('loadingScreen').classList.add('hide');
+700-        })();
+701-     </script>
+702-    <script src="./notify.js"></script>
+703-
+704-</body>
+705-</html>
+
+─── [AUTH FLOW: signIn / signOut / password_changed / mfa_method / navigate ───
+551:            sessionStorage.removeItem('email_mfa_verified');
+571:                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+586:                    await supabase.auth.signOut();
+595:                if (!meta.password_changed) {
+597:                    window.location.href = './change-password.html';
+600:                if (!meta.mfa_method) {
+602:                    window.location.href = './mfa-setup.html';
+619:                // - إذا المستخدم عنده MFA + اختار إيميل (mfa_method = 'email') ومش محتاج تحقق متكرر → ادخل
+622:                const mfaMethod = meta.mfa_method;
+629:                        sessionStorage.setItem('email_mfa_verified', 'false');
+630:                        window.location.href = './mfa-verify.html?reason=new_device';
+637:                    setTimeout(() => window.location.href = './dashboard.html', 600);
+645:                        window.location.href = './mfa-verify.html?reason=' + (trusted ? 'aal' : 'new_device');
+652:                    setTimeout(() => window.location.href = './dashboard.html', 600);
+657:                window.location.href = './mfa-verify.html';
+693:                if (!meta.password_changed) { window.location.href = './change-password.html'; return; }
+694:                if (!meta.mfa_method)       { window.location.href = './mfa-setup.html'; return; }
+695:                window.location.href = './dashboard.html';
+
+─── [HEADER: nav-shell area ───
+344:    <div class="nav-shell">
+345-        <header class="nav-inner">
+346-            <div class="flex items-center gap-3">
+347-                <div class="logo-dot"></div>
+348-                <div>
+349-                    <a href="index.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+350-                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
+351-                </div>
+352-            </div>
+353-            <nav class="hidden md:flex items-center gap-7">
+354-                <a href="index.html" class="nav-link">الرئيسية</a>
+355-                <a href="about.html" class="nav-link">عن النظام</a>
+356-                <a href="security.html" class="nav-link">درع VEXORIS</a>
+357-                <a href="courses.html" class="nav-link">دورات تدريبية</a>
+358-                <a href="feedback.html" class="nav-link">رأيك يهمنا</a>
+359-            </nav>
+
+─── [USER CHIP markup ───
+
+─── [FOOTER ───
+475:    <footer class="footer-shell">
+476-        <div class="footer-brand">VEXORIS SYSTEM</div>
+477-        <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+478-        <div class="footer-text">
+479-            تم برمجة النظام وتنفيذه بواسطة
+480-            <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+481-            <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+482-            <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+483-        </div>
+484-    </footer>
+485-
+
+─── [END OF BODY scripts ───
+                    showError('فشل الاتصال بـ Google. حاول مرة أخرى.');
+                    console.error(error);
+                }
+            });
+
+        // ============================================
+        // AUTO-REDIRECT IF LOGGED IN
+        // ============================================
+        (async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                const meta = session.user.user_metadata || {};
+                if (!meta.password_changed) { window.location.href = './change-password.html'; return; }
+                if (!meta.mfa_method)       { window.location.href = './mfa-setup.html'; return; }
+                window.location.href = './dashboard.html';
+                return;
+            }
+            // ✅ مفيش session → أخفي اللودر وأظهر الصفحة
+            document.getElementById('loadingScreen').classList.add('hide');
+        })();
+     </script>
+    <script src="./notify.js"></script>
+
+</body>
+</html>
+

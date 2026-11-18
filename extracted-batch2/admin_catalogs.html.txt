@@ -1,0 +1,120 @@
+═══ FILE: admin/catalogs.html — 2284 lines ═══
+
+─── [HEAD: <link theme-overrides> area ───
+623-    </style>
+624:    <link rel="stylesheet" href="../theme-overrides.css" />
+625-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+626-    <script src="../loading-logo.js" defer></script>
+627-    <script src="../loader-buttons.js" defer></script>
+628-</head>
+629-<body>
+630-
+631-    <div class="loading-screen" id="loadingScreen">
+632-        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+
+─── [IMPORTS inside <script type=module> ───
+852:        import { supabase } from '../supabase-client.js';
+853:        import { logAudit } from '../audit-log.js';
+
+─── [ROLE_META if exists ───
+
+─── [toggleTheme local ───
+868-        }
+869:        window.toggleTheme = () => {
+870-            const html = document.documentElement;
+871-            html.classList.toggle('dark');
+872-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+873-        };
+874-
+875-        // ============================================
+
+─── [window.logout / showProfile / showChangePassword ───
+
+─── [AUTH GUARD: getSession / initAuthGuard ───
+1256-        (async () => {
+1257-            try {
+1258:                const { data: { session } } = await supabase.auth.getSession();
+1259-                if (!session) {
+1260-                    window.location.href = '../login.html';
+1261-                    return;
+1262-                }
+1263-                currentUser = session.user;
+1264-
+1265-                const { data: profile } = await supabase
+1266-                    .from('profiles').select('role, is_active').eq('id', currentUser.id).single();
+1267-
+1268-                if (!profile || !['super_admin', 'admin'].includes(profile.role)) {
+1269-                    alert('ليس لديك صلاحية الوصول');
+1270-                    window.location.href = '../dashboard.html';
+1271-                    return;
+1272-                }
+1273-
+1274-                // ✅ جديد: currentUserRole مهم لإدارة التطبيقات
+1275-                window.currentUserRole = profile.role;
+1276-
+1277-                // 1) حمّل التطبيقات أولاً
+1278-                await loadApps();
+
+─── [AUTH FLOW: signIn / signOut / password_changed / mfa_method / navigate ───
+1260:                    window.location.href = '../login.html';
+1270:                    window.location.href = '../dashboard.html';
+
+─── [HEADER: nav-shell area ───
+639:    <div class="nav-shell">
+640-        <header class="nav-inner">
+641-            <div class="flex items-center gap-3">
+642-                <div class="logo-dot"></div>
+643-                <div>
+644-                    <a href="../dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+645-                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
+646-                </div>
+647-            </div>
+648-            <nav class="hidden md:flex items-center gap-6">
+649-                <a href="../dashboard.html" class="nav-link">لوحة التحكم</a>
+650-                <a href="../about.html" class="nav-link">عن النظام</a>
+651-                <a href="../security.html" class="nav-link">درع VEXORIS</a>
+652-                <a href="../courses.html" class="nav-link">دورات تدريبية</a>
+653-                <a href="../feedback.html" class="nav-link">رأيك يهمنا</a>
+654-            </nav>
+
+─── [USER CHIP markup ───
+
+─── [FOOTER ───
+843:    <footer class="footer-shell">
+844-        <div class="footer-brand">VEXORIS SYSTEM</div>
+845-        <div class="footer-text">جميع حقوق النشر والطباعة محفوظة لإدارة السجلات الطبية 2025 ©</div>
+846-    </footer>
+847-
+848-    <script src="../notify.js"></script>
+849-
+850-    <script type="module">
+851-        
+852-        import { supabase } from '../supabase-client.js';
+853-        import { logAudit } from '../audit-log.js';
+
+─── [END OF BODY scripts ───
+                const exclStatus = excl.filter(e => e.exclusion_kind === 'case_status').map(e => statusNm[e.exclusion_id]).filter(Boolean);
+
+                return {
+                    text: f.text,
+                    specialties: specs.join(', '),
+                    services: servs.join(', '),
+                    daycases: days.join(', '),
+                    exclusion_admission_types: exclAdm.join(', '),
+                    exclusion_case_statuses: exclStatus.join(', '),
+                    requires_date: f.requires_date ? 'TRUE' : 'FALSE',
+                    order_index: f.order_index ?? 0
+                };
+            });
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Forms');
+            XLSX.writeFile(wb, `forms_${new Date().toISOString().split('T')[0]}.xlsx`);
+            showNotification('تم التصدير', 'success');
+        }
+    </script>
+
+    <script type="module" src="../session-manager.js"></script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تأمين الحساب | VEXORIS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+      if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.remove('dark');
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg: #04070f; --card-bg: rgba(15, 23, 42, 0.55);
+            --card-border: rgba(148, 163, 184, 0.12);
+            --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+            --accent: #0ea5e9; --accent-2: #6366f1; --accent-3: #8b5cf6;
+            --danger: #ef4444; --warning: #f59e0b; --success: #10b981;
+            --input-bg: rgba(15, 23, 42, 0.5);
+        }
+        html:not(.dark) {
+            --bg: #e8eef5; --card-bg: rgba(255, 255, 255, 0.92);
+            --card-border: rgba(100, 116, 139, 0.28);
+            --text-primary: #0b1220; --text-secondary: #1e293b; --text-muted: #475569;
+            --input-bg: rgba(255, 255, 255, 0.9);
+        }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', system-ui, sans-serif;
+            background: var(--bg); color: var(--text-primary);
+            min-height: 100vh; overflow-x: hidden;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -2; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.16) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.14) 0%, transparent 65%);
+        }
+        html:not(.dark) .aurora-bg {
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(14, 165, 233, 0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 85% 25%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 50% 95%, rgba(139, 92, 246, 0.07) 0%, transparent 65%);
+        }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 40%, transparent 100%);
+        }
+        .nav-shell { position: sticky; top: 12px; z-index: 50; margin: 12px auto 0; max-width: 800px; padding: 0 16px; }
+        .nav-inner {
+            background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 18px; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .logo-dot {
+            position: relative; width: 12px; height: 12px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18), 0 0 20px rgba(14, 165, 233, 0.7);
+            flex-shrink: 0;
+        }
+        .logo-dot::before {
+            content: ''; position: absolute; inset: -3px; border-radius: 50%;
+            border: 1px solid rgba(14, 165, 233, 0.5);
+            animation: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes ping { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(2.4); opacity: 0; } }
+        .brand-text {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: 0.18em;
+            background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 40%, #6366f1 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .icon-btn {
+            width: 36px; height: 36px; border-radius: 10px;
+            border: 1px solid var(--card-border); background: transparent; color: var(--accent);
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .icon-btn:hover { background: rgba(14, 165, 233, 0.1); border-color: rgba(14, 165, 233, 0.4); transform: rotate(15deg); }
+        .app-container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+        .setup-card {
+            margin-top: 32px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 32px 28px;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);
+        }
+        .setup-icon {
+            width: 64px; height: 64px; border-radius: 18px;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(99, 102, 241, 0.15));
+            border: 1px solid rgba(14, 165, 233, 0.35);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); font-size: 1.6rem;
+            margin: 0 auto 20px;
+        }
+        .setup-title { font-size: 1.5rem; font-weight: 900; text-align: center; margin-bottom: 8px; }
+        .setup-desc { font-size: 0.85rem; color: var(--text-secondary); text-align: center; margin-bottom: 28px; line-height: 1.7; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 0.78rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 8px; }
+        .form-input {
+            width: 100%; padding: 13px 16px;
+            background: var(--input-bg); border: 1px solid var(--card-border);
+            border-radius: 12px; color: var(--text-primary);
+            font-size: 0.95rem; font-weight: 600; font-family: inherit;
+            transition: all 0.25s ease;
+        }
+        .form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1); }
+        .password-strength { margin-top: 8px; }
+        .strength-bar { height: 4px; border-radius: 2px; background: var(--card-border); overflow: hidden; }
+        .strength-fill { height: 100%; width: 0%; transition: width 0.3s ease, background 0.3s ease; }
+        .strength-text { font-size: 0.65rem; font-weight: 700; margin-top: 4px; color: var(--text-muted); }
+        .btn-primary {
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white; font-weight: 800; font-size: 0.92rem;
+            border: none; border-radius: 12px; cursor: pointer;
+            transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 6px 18px -6px rgba(14, 165, 233, 0.5);
+        }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 24px -6px rgba(99, 102, 241, 0.6); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        .error-box {
+            display: none; padding: 12px 16px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px; color: #f87171;
+            font-size: 0.8rem; font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .loading-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .loading-screen.hide { opacity: 0; pointer-events: none; }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(14, 165, 233, 0.4), rgba(99, 102, 241, 0.4)); border-radius: 10px; border: 2px solid var(--bg); }
+        ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
+        @media (max-width: 600px) {
+            .nav-shell { max-width: 100%; }
+            .setup-card { padding: 24px 18px; }
+            .setup-title { font-size: 1.25rem; }
+        }
+    </style>
+    <link rel="stylesheet" href="./theme-overrides.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+    <script src="loading-logo.js" defer></script>
+    <script src="loader-buttons.js" defer></script>
+</head>
+<body>
+
+    <div class="loading-screen" id="loadingScreen">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري التحميل...</p>
+    </div>
+
+    <div class="aurora-bg"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="nav-shell">
+        <header class="nav-inner">
+            <div class="flex items-center gap-3">
+                <div class="logo-dot"></div>
+                <div>
+                    <a href="dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم"><i class="fa-solid fa-moon"></i></button>
+            </div>
+        </header>
+    </div>
+
+    <main class="app-container">
+        <div class="setup-card">
+            <div class="setup-icon">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h1 class="setup-title">تأمين حسابك</h1>
+            <p class="setup-desc">
+                مرحباً بك في VEXORIS. لأسباب أمنية، يرجى تعيين كلمة مرور جديدة لحسابك قبل المتابعة. <br>
+                هذه الكلمة ستكون كلمة المرور الدائمة التي ستستخدمها لتسجيل الدخول مستقبلاً.
+            </p>
+
+            <div id="errorBox" class="error-box"></div>
+
+            <form id="setupForm">
+                <div class="form-group">
+                    <label class="form-label">كلمة المرور الجديدة <span style="color: var(--danger);">*</span></label>
+                    <input type="password" id="newPassword" class="form-input" placeholder="أدخل كلمة المرور" autocomplete="new-password" required>
+                    <div class="password-strength">
+                        <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                        <div class="strength-text" id="strengthText">يجب أن تكون 8 أحرف على الأقل</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">تأكيد كلمة المرور <span style="color: var(--danger);">*</span></label>
+                    <input type="password" id="confirmPassword" class="form-input" placeholder="أعد إدخال كلمة المرور" autocomplete="new-password" required>
+                </div>
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    <i class="fa-solid fa-check"></i> حفظ ومتابعة
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <script src="./notify.js"></script>
+
+    <script type="module">
+        import { supabase } from './supabase-client.js';
+
+        const newPassword = document.getElementById('newPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const strengthFill = document.getElementById('strengthFill');
+        const strengthText = document.getElementById('strengthText');
+        const errorBox = document.getElementById('errorBox');
+        const submitBtn = document.getElementById('submitBtn');
+
+        window.toggleTheme = function() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        };
+
+        // 1. التحقق من وجود جلسة
+        (async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = './login.html';
+                return;
+            }
+            // إذا كان المستخدم قد أكمل الإعداد بالفعل، وجهه للخطوة التالية
+            const meta = session.user.user_metadata || {};
+            if (meta.password_changed) {
+                if (!meta.mfa_method) {
+                    window.location.href = './mfa-setup.html';
+                } else {
+                    window.location.href = './dashboard.html';
+                }
+                return;
+            }
+            document.getElementById('loadingScreen').classList.add('hide');
+        })();
+
+        // 2. مؤشر قوة كلمة المرور
+        newPassword.addEventListener('input', () => {
+            const val = newPassword.value;
+            let score = 0;
+            if (val.length >= 8) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            const colors = ['#ef4444', '#f59e0b', '#0ea5e9', '#10b981'];
+            const texts = ['ضعيفة جداً', 'ضعيفة', 'متوسطة', 'قوية'];
+
+            strengthFill.style.width = (score / 4 * 100) + '%';
+            strengthFill.style.background = colors[Math.min(score - 1, 3)] || colors[0];
+            strengthText.textContent = texts[Math.min(score - 1, 3)] || 'يجب أن تكون 8 أحرف على الأقل';
+            strengthText.style.color = colors[Math.min(score - 1, 3)] || 'var(--text-muted)';
+        });
+
+        // 3. معالجة الحفظ
+        document.getElementById('setupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorBox.style.display = 'none';
+
+            const pass = newPassword.value;
+            const confirm = confirmPassword.value;
+
+            if (pass.length < 8) {
+                showError('كلمة المرور يجب أن تكون 8 أحرف على الأقل.');
+                return;
+            }
+            if (pass !== confirm) {
+                showError('كلمتا المرور غير متطابقتين.');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحفظ...';
+
+            try {
+                // تحديث كلمة المرور
+                const { error: updateError } = await supabase.auth.updateUser({ password: pass });
+                if (updateError) throw updateError;
+
+                // تحديث metadata
+                const { error: metaError } = await supabase.auth.updateUser({
+                    data: { password_changed: true }
+                });
+                if (metaError) throw metaError;
+
+                submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> تم الحفظ بنجاح';
+                submitBtn.style.background = '#10b981';
+
+                setTimeout(() => {
+                    window.location.href = './mfa-setup.html';
+                }, 1000);
+            } catch (err) {
+                console.error(err);
+                showError(err.message || 'حدث خطأ غير متوقع. حاول مرة أخرى.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> حفظ ومتابعة';
+            }
+        });
+
+        function showError(msg) {
+            errorBox.textContent = msg;
+            errorBox.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

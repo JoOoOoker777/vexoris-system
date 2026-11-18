@@ -1,0 +1,87 @@
+═══ FILE: mfa-setup.html — 515 lines ═══
+
+─── [HEAD: <link theme-overrides> area ───
+156-    </style>
+157:    <link rel="stylesheet" href="./theme-overrides.css" />
+158-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+159-    <script src="loading-logo.js" defer></script>
+160-    <script src="loader-buttons.js" defer></script>
+161-</head>
+162-<body>
+163-    <div class="aurora-bg"></div>
+164-    <div class="loading-screen" id="loadingScreen">
+165-        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+
+─── [IMPORTS inside <script type=module> ───
+273:        import { supabase } from './supabase-client.js';
+
+─── [ROLE_META if exists ───
+
+─── [toggleTheme local ───
+
+─── [window.logout / showProfile / showChangePassword ───
+
+─── [AUTH GUARD: getSession / initAuthGuard ───
+280-        // 1. التأكد من تسجيل الدخول وحالة المستخدم
+281-        (async () => {
+282:            const { data: { session } } = await supabase.auth.getSession();
+283-            if (!session) {
+284-                window.location.href = './login.html';
+285-                return;
+286-            }
+287-            
+288-            currentUser = session.user;
+289-            const meta = currentUser.user_metadata || {};
+290-            document.getElementById('loadingScreen').classList.add('hide');
+291-            // لو المستخدم مفعل MFA بالفعل، يروح للداشبورد
+292-            if (meta.mfa_method) {
+293-                window.location.href = './dashboard.html';
+294-                return;
+295-            }
+296-        })();
+297-
+298-        // 2. اختيار الطريقة
+299-        window.selectMethod = function(method) {
+300-            chosenMethod = method;
+301-            
+302-            document.getElementById('card-totp').classList.remove('active');
+
+─── [AUTH FLOW: signIn / signOut / password_changed / mfa_method / navigate ───
+284:                window.location.href = './login.html';
+292:            if (meta.mfa_method) {
+293:                window.location.href = './dashboard.html';
+479:            const updateData = { mfa_method: method };
+511:                window.location.href = './dashboard.html';
+
+─── [HEADER: nav-shell area ───
+
+─── [USER CHIP markup ───
+
+─── [FOOTER ───
+
+─── [END OF BODY scripts ───
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> تأكيد وتفعيل';
+                console.error(error);
+                alert('حدث خطأ في الحفظ. يرجى المحاولة مرة أخرى.');
+                return;
+            }
+
+            // 2. تحديث جدول profiles بالإيميل الجديد (المهم جداً)
+            if (method === 'email' && personalEmail) {
+                await supabase
+                    .from('profiles')
+                    .update({ email: personalEmail })
+                    .eq('id', currentUser.id);
+            }
+
+            // نجاح
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> تم التفعيل بنجاح!';
+            btn.style.background = '#10b981';
+            
+            setTimeout(() => {
+                window.location.href = './dashboard.html';
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

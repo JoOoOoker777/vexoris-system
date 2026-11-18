@@ -1,0 +1,120 @@
+═══ FILE: admin/audit-log.html — 1254 lines ═══
+
+─── [HEAD: <link theme-overrides> area ───
+459-    </style>
+460:    <link rel="stylesheet" href="../theme-overrides.css" />
+461-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+462-    <script src="../loading-logo.js" defer></script>
+463-    <script src="../loader-buttons.js" defer></script>
+464-</head>
+465-<body>
+466-
+467-    <div class="loading-screen" id="loadingScreen">
+468-        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+
+─── [IMPORTS inside <script type=module> ───
+671:        import { supabase } from '../supabase-client.js';
+672:        import { logAudit, AUDIT, AUDIT_LABELS, SEVERITY_LABELS } from '../audit-log.js';
+
+─── [ROLE_META if exists ───
+
+─── [toggleTheme local ───
+683-
+684:        window.toggleTheme = function() {
+685-            const html = document.documentElement;
+686-            html.classList.toggle('dark');
+687-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+688-        };
+689-
+690-        function timeAgo(dateStr) {
+
+─── [window.logout / showProfile / showChangePassword ───
+
+─── [AUTH GUARD: getSession / initAuthGuard ───
+1198-        (async () => {
+1199-            // 1. Check auth & role
+1200:            const { data: { session } } = await supabase.auth.getSession();
+1201-            if (!session) {
+1202-                window.location.href = '../login.html';
+1203-                return;
+1204-            }
+1205-
+1206-            const { data: profile } = await supabase
+1207-                .from('profiles').select('role').eq('id', session.user.id).single();
+1208-
+1209-            if (!profile || !['super_admin', 'admin'].includes(profile.role)) {
+1210-                alert('ليس لديك صلاحية الوصول لهذه الصفحة.');
+1211-                window.location.href = '../dashboard.html';
+1212-                return;
+1213-            }
+1214-
+1215-            currentUserRole = profile.role;
+1216-            if (currentUserRole === 'super_admin') {
+1217-                const btnAll = document.getElementById('btnDeleteAll');
+1218-                if (btnAll) btnAll.style.display = 'inline-flex';
+1219-            }
+1220-
+
+─── [AUTH FLOW: signIn / signOut / password_changed / mfa_method / navigate ───
+1202:                window.location.href = '../login.html';
+1211:                window.location.href = '../dashboard.html';
+
+─── [HEADER: nav-shell area ───
+475:    <div class="nav-shell">
+476-        <header class="nav-inner">
+477-            <div class="flex items-center gap-3">
+478-                <div class="logo-dot"></div>
+479-                <div>
+480-                    <a href="../dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+481-                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
+482-                </div>
+483-            </div>
+484-            <nav class="hidden md:flex items-center gap-7">
+485-                <a href="../dashboard.html" class="nav-link">لوحة التحكم</a>
+486-                <a href="../about.html" class="nav-link">عن النظام</a>
+487-                <a href="../security.html" class="nav-link">درع VEXORIS</a>
+488-                <a href="../courses.html" class="nav-link">دورات تدريبية</a>
+489-                <a href="../feedback.html" class="nav-link">رأيك يهمنا</a>
+490-            </nav>
+
+─── [USER CHIP markup ───
+
+─── [FOOTER ───
+657:    <footer class="footer-shell">
+658-        <div class="footer-brand">VEXORIS SYSTEM</div>
+659-        <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+660-        <div class="footer-text">
+661-            تم برمجة النظام وتنفيذه بواسطة
+662-            <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+663-            <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+664-            <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+665-        </div>
+666-    </footer>
+667-
+
+─── [END OF BODY scripts ───
+                }, 400); // Debounce search
+            });
+
+            document.getElementById('actionFilter').addEventListener('change', () => {
+                currentPage = 1;
+                loadLogs();
+            });
+
+            document.getElementById('severityFilter').addEventListener('change', () => {
+                currentPage = 1;
+                loadLogs();
+            });
+
+            // 4. Load data
+            await Promise.all([
+                loadStats(),
+                loadLogs()
+            ]);
+
+            // 5. Hide loading
+            document.getElementById('loadingScreen').classList.add('hide');
+        })();
+    </script>
+</body>
+</html>

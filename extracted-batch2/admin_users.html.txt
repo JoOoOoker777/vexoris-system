@@ -1,0 +1,154 @@
+═══ FILE: admin/users.html — 1076 lines ═══
+
+─── [HEAD: <link theme-overrides> area ───
+523-    </style>
+524:    <link rel="stylesheet" href="../theme-overrides.css" />
+525-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+526-    <script src="../loading-logo.js" defer></script>       <!-- ✅ تصحيح المسار -->
+527-    <script src="../loader-buttons.js" defer></script>
+528-</head>
+529-<body>
+530-
+531-    <div class="loading-screen" id="loadingScreen">
+532-        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+
+─── [IMPORTS inside <script type=module> ───
+755:        import { supabase, SUPABASE_ANON_KEY } from '../supabase-client.js';
+
+─── [ROLE_META if exists ───
+758:        const ROLE_META = {
+759-            super_admin: { name: 'المطور',                color: '#a855f7', soft: 'rgba(168,85,247,0.12)', icon: 'fa-crown' },
+760-            admin:       { name: 'ادارة السجلات الطبية',  color: '#0ea5e9', soft: 'rgba(14,165,233,0.12)',  icon: 'fa-user-shield' },
+761-            manager:     { name: 'المدير الطبي',          color: '#6366f1', soft: 'rgba(99,102,241,0.12)',  icon: 'fa-user-tie' },
+762-            auditor:     { name: 'مراجع جودة',            color: '#f59e0b', soft: 'rgba(245,158,11,0.12)',  icon: 'fa-clipboard-check' },
+763-            senior:      { name: 'رئيس قسم',              color: '#10b981', soft: 'rgba(16,185,129,0.12)',  icon: 'fa-star' },
+764-            doctor:      { name: 'طبيب',                 color: '#14b8a6', soft: 'rgba(20,184,166,0.12)',  icon: 'fa-stethoscope' },
+765-            viewer:      { name: 'مراجع',               color: '#94a3b8', soft: 'rgba(148,163,184,0.12)', icon: 'fa-eye' },
+766-        };
+767-
+768-        let allUsers = [];
+
+─── [toggleTheme local ───
+772-
+773:        window.toggleTheme = function() {
+774-            const html = document.documentElement;
+775-            html.classList.toggle('dark');
+776-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+777-        };
+778-
+779-        // ✅ Avatar helpers
+
+─── [window.logout / showProfile / showChangePassword ───
+
+─── [AUTH GUARD: getSession / initAuthGuard ───
+989-
+990-            try {
+991:                const { data: { session } } = await supabase.auth.getSession();
+992-                if (!session) throw new Error('انتهت الجلسة');
+993-
+994-                const EDGE_FUNCTION_URL = 'https://omezrsyjsxdeaautmsad.supabase.co/functions/v1/admin-update-user';
+995-
+996-                const response = await fetch(EDGE_FUNCTION_URL, {
+997-                    method: 'POST',
+998-                    headers: {
+999-                        'Content-Type': 'application/json',
+1000-                        'Authorization': `Bearer ${session.access_token}`,
+1001-                        'apikey': SUPABASE_ANON_KEY,
+1002-                    },
+1003-                    body: JSON.stringify({ userId: editingUser.id, updates }),
+1004-                });
+1005-
+1006-                const result = await response.json();
+1007-                if (!response.ok) throw new Error(result.message || result.error || 'فشل الحفظ');
+1008-
+1009-                showNotification('تم حفظ التغييرات بنجاح', 'success');
+1010-                closeModal();
+1011-                await loadUsers();
+--
+1027-
+1028-        (async () => {
+1029:            const { data: { session } } = await supabase.auth.getSession();
+1030-            if (!session) {
+1031-                window.location.href = '../login.html';
+1032-                return;
+1033-            }
+1034-
+1035-            currentUserId = session.user.id;
+1036-
+1037-            const { data: profile } = await supabase
+1038-                .from('profiles')
+1039-                .select('role')
+1040-                .eq('id', session.user.id)
+1041-                .single();
+1042-
+1043-            if (!profile || !['super_admin', 'admin'].includes(profile.role)) {
+1044-                alert('ليس لديك صلاحية الوصول لهذه الصفحة.');
+1045-                window.location.href = '../dashboard.html';
+1046-                return;
+1047-            }
+1048-
+1049-            currentUserRole = profile.role;
+
+─── [AUTH FLOW: signIn / signOut / password_changed / mfa_method / navigate ───
+1031:                window.location.href = '../login.html';
+1045:                window.location.href = '../dashboard.html';
+
+─── [HEADER: nav-shell area ───
+540:    <div class="nav-shell">
+541-        <header class="nav-inner">
+542-            <div class="flex items-center gap-3">
+543-                <div class="logo-dot"></div>
+544-                <div>
+545-                    <a href="../dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+546-                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
+547-                </div>
+548-            </div>
+549-            <nav class="hidden md:flex items-center gap-7">
+550-                <a href="../dashboard.html" class="nav-link">لوحة التحكم</a>
+551-                <a href="../about.html" class="nav-link">عن النظام</a>
+552-                <a href="../security.html" class="nav-link">درع VEXORIS</a>
+553-                <a href="../courses.html" class="nav-link">دورات تدريبية</a>
+554-                <a href="../feedback.html" class="nav-link">رأيك يهمنا</a>
+555-            </nav>
+
+─── [USER CHIP markup ───
+
+─── [FOOTER ───
+741:    <footer class="footer-shell">
+742-        <div class="footer-brand">VEXORIS SYSTEM</div>
+743-        <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+744-        <div class="footer-text">
+745-            تم برمجة النظام وتنفيذه بواسطة
+746-            <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+747-            <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+748-            <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+749-        </div>
+750-    </footer>
+751-
+
+─── [END OF BODY scripts ───
+                const opt = document.createElement('option');
+                opt.value = k;
+                opt.textContent = v.name;
+                roleFilter.appendChild(opt);
+            });
+
+            const roleSelect = document.getElementById('fieldRole');
+            Object.entries(ROLE_META).forEach(([k, v]) => {
+                const opt = document.createElement('option');
+                opt.value = k;
+                opt.textContent = v.name;
+                roleSelect.appendChild(opt);
+            });
+
+            await loadUsers();
+
+            document.getElementById('searchInput').addEventListener('input', renderTable);
+            document.getElementById('roleFilter').addEventListener('change', renderTable);
+            document.getElementById('statusFilter').addEventListener('change', renderTable);
+
+            document.getElementById('loadingScreen').classList.add('hide');
+        })();
+    </script>
+</body>
+</html>
