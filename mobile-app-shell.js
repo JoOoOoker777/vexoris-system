@@ -182,6 +182,11 @@
             <span>تغيير كلمة المرور</span>
             <i class="fa-solid fa-chevron-left vex-mob-arrow"></i>
           </button>
+          <button class="vex-mob-item" data-mob-action="sessions">
+            <i class="fa-solid fa-desktop"></i>
+            <span>الجلسات النشطة</span>
+            <i class="fa-solid fa-chevron-left vex-mob-arrow"></i>
+          </button>
           <button class="vex-mob-item" data-mob-action="theme">
             <i class="fa-solid fa-moon"></i>
             <span>تبديل الثيم</span>
@@ -278,6 +283,10 @@
           if (typeof window.showChangePassword === 'function') window.showChangePassword();
           else window.location.href = resolvePath('change-password.html');
         }, 200);
+        break;
+      case 'sessions':
+        closeSheet();
+        setTimeout(() => { window.location.href = resolvePath('sessions.html'); }, 200);
         break;
       case 'theme':
         if (typeof window.toggleTheme === 'function') window.toggleTheme();

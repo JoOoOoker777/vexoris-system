@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الجلسات النشطة | VEXORIS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+  if (localStorage.getItem('theme') === 'light') document.documentElement.classList.remove('dark');
+</script>
+<style>
+:root{--bg:#04070f;--card-bg:rgba(15,23,42,.55);--card-border:rgba(148,163,184,.12);--text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;--accent:#0ea5e9;--accent-2:#6366f1;--danger:#ef4444;--success:#10b981;--warning:#f59e0b;--input-bg:rgba(15,23,42,.5);--nav-height:75px}
+html:not(.dark){--bg:#e8eef5;--card-bg:rgba(255,255,255,.92);--card-border:rgba(100,116,139,.28);--text-primary:#0b1220;--text-secondary:#1e293b;--text-muted:#475569;--input-bg:rgba(255,255,255,.9)}
+*{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;overflow-x:hidden;transition:background .4s,color .4s}
+.aurora-bg{position:fixed;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 15% 10%,rgba(14,165,233,.18) 0%,transparent 60%),radial-gradient(ellipse 50% 45% at 85% 25%,rgba(99,102,241,.16) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 50% 95%,rgba(139,92,246,.14) 0%,transparent 65%)}
+html:not(.dark) .aurora-bg{background:radial-gradient(ellipse 60% 50% at 15% 10%,rgba(14,165,233,.10) 0%,transparent 60%),radial-gradient(ellipse 50% 45% at 85% 25%,rgba(99,102,241,.08) 0%,transparent 60%)}
+.grid-overlay{position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(to right,rgba(148,163,184,.045) 1px,transparent 1px),linear-gradient(to bottom,rgba(148,163,184,.045) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 80% 70% at 50% 20%,#000 40%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 80% 70% at 50% 20%,#000 40%,transparent 100%)}
+.nav-shell{position:sticky;top:0;z-index:50;width:100%;padding:12px 0;background:linear-gradient(to bottom,var(--bg) 0%,var(--bg) 85%,rgba(4,7,15,.7) 100%);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:background .4s}
+html:not(.dark) .nav-shell{background:linear-gradient(to bottom,var(--bg) 0%,var(--bg) 85%,rgba(232,238,245,.7) 100%)}
+.nav-inner{background:var(--card-bg);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid var(--card-border);border-radius:18px;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;width:90%;max-width:1800px;margin:0 auto}
+.logo-dot{position:relative;width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(14,165,233,.18),0 0 20px rgba(14,165,233,.7);flex-shrink:0}
+.logo-dot::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(14,165,233,.5);animation:ping 2.4s cubic-bezier(0,0,.2,1) infinite}
+@keyframes ping{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.4);opacity:0}}
+.brand-text{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:.18em;background:linear-gradient(135deg,#22d3ee 0%,#0ea5e9 40%,#6366f1 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--card-border);background:transparent;color:var(--accent);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .25s}
+.icon-btn:hover{background:rgba(14,165,233,.1);border-color:rgba(14,165,233,.4);transform:rotate(15deg)}
+.icon-btn.logout-btn{color:#f87171}
+.user-chip{display:none;align-items:center;gap:10px;padding:6px 12px 6px 8px;background:rgba(148,163,184,.06);border:1px solid var(--card-border);border-radius:12px;cursor:pointer;transition:all .3s;font-family:inherit;color:inherit}
+.user-chip:hover{border-color:var(--accent)}
+.user-avatar{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.95rem;flex-shrink:0;position:relative;overflow:hidden}
+.user-avatar i{position:relative;z-index:2}
+.user-avatar::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.4) 50%,transparent 70%);background-size:200% 100%;animation:shine 4s infinite;z-index:1}
+@keyframes shine{0%{background-position:-200% 0}50%,100%{background-position:200% 0}}
+.user-info{display:flex;flex-direction:column;gap:1px;text-align:right}
+.user-name{font-size:.78rem;font-weight:800;color:var(--text-primary);line-height:1.1}
+.user-role{font-size:.65rem;font-weight:700;line-height:1.1}
+.user-dropdown{position:absolute;top:55px;left:0;width:260px;background:var(--card-bg);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--card-border);border-radius:16px;padding:6px;z-index:60;box-shadow:0 24px 48px -12px rgba(0,0,0,.4);opacity:0;transform:translateY(-8px) scale(.96);pointer-events:none;transition:all .25s}
+.user-dropdown.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.dropdown-item{width:100%;padding:10px 12px;background:transparent;border:none;color:var(--text-secondary);font-family:inherit;font-size:.8rem;font-weight:700;border-radius:8px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:right;transition:all .2s}
+.dropdown-item:hover{background:rgba(14,165,233,.08);color:var(--accent)}
+.dropdown-item i{width:16px;font-size:.8rem}
+.dropdown-profile{padding:12px;display:flex;align-items:center;gap:10px}
+.dropdown-avatar-lg{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;color:#fff;position:relative;overflow:hidden}
+.dropdown-avatar-lg i{position:relative;z-index:2}
+.dropdown-avatar-lg::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.3) 50%,transparent 70%);background-size:200% 100%;animation:shine 4s infinite;z-index:1}
+.dropdown-name{font-size:.88rem;font-weight:900;color:var(--text-primary);line-height:1.2}
+.dropdown-email{font-size:.7rem;font-weight:600;color:var(--text-muted);line-height:1.3;margin-top:1px}
+.dropdown-role-badge{display:inline-flex;align-items:center;gap:4px;font-size:.6rem;font-weight:800;padding:2px 8px;border-radius:5px;margin-top:4px}
+.dropdown-divider{height:1px;background:var(--card-border);margin:6px 4px}
+.app-container{width:90%;max-width:1100px;margin:24px auto 60px}
+.page-title{font-size:1.7rem;font-weight:900;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+.page-sub{color:var(--text-secondary);font-size:.9rem;font-weight:600;margin-bottom:22px}
+.sess-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:18px;margin-bottom:12px;position:relative;overflow:hidden;transition:border-color .25s}
+.sess-card:hover{border-color:rgba(14,165,233,.3)}
+.sess-card.current{border-color:rgba(16,185,129,.4);background:linear-gradient(135deg,var(--card-bg),rgba(16,185,129,.04))}
+.sess-card.current::before{content:'';position:absolute;top:0;right:0;left:0;height:3px;background:linear-gradient(90deg,transparent,#10b981,transparent)}
+.sess-card.ended{opacity:.55}
+.sess-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.sess-device{flex:1;min-width:0}
+.sess-name{font-size:.95rem;font-weight:900;margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sess-name i{color:var(--accent)}
+.sess-badge{font-size:.6rem;font-weight:800;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.badge-current{background:rgba(16,185,129,.15);color:#10b981}
+.badge-ended{background:rgba(148,163,184,.15);color:#94a3b8}
+.sess-ua{font-size:.7rem;color:var(--text-muted);font-weight:600;margin-bottom:10px;line-height:1.5;word-break:break-word}
+.sess-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;padding:12px;background:rgba(148,163,184,.04);border-radius:10px}
+.sess-meta-item{display:flex;flex-direction:column;gap:3px}
+.sess-meta-lbl{font-size:.6rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;gap:4px}
+.sess-meta-val{font-size:.8rem;font-weight:700;color:var(--text-primary);font-family:'Space Grotesk',sans-serif}
+.sess-actions{margin-top:12px;display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.btn-kill{padding:8px 16px;border-radius:9px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;font-weight:800;font-size:.78rem;cursor:pointer;transition:all .2s;font-family:inherit;display:inline-flex;align-items:center;gap:6px}
+.btn-kill:hover{background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.5)}
+.btn-kill:disabled{opacity:.5;cursor:not-allowed}
+.btn-kill-all{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:800;font-size:.82rem;cursor:pointer;transition:all .2s;font-family:inherit;display:inline-flex;align-items:center;gap:8px;box-shadow:0 6px 18px -6px rgba(239,68,68,.5)}
+.btn-kill-all:hover{transform:translateY(-1px);box-shadow:0 10px 24px -6px rgba(239,68,68,.6)}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
+.empty-state i{font-size:3rem;margin-bottom:14px;opacity:.4;display:block}
+.loading-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s}
+.loading-screen.hide{opacity:0;pointer-events:none}
+@media(max-width:768px){.nav-inner{padding:8px 12px}.user-info{display:none!important}.user-avatar{width:30px;height:30px}.app-container{width:95%;margin:12px auto 40px}.page-title{font-size:1.3rem}.sess-card{padding:14px}.sess-meta{grid-template-columns:1fr 1fr}}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(14,165,233,.4),rgba(99,102,241,.4));border-radius:10px;border:2px solid var(--bg)}
+::selection{background:rgba(14,165,233,.35);color:#fff}
+</style>
+<link rel="stylesheet" href="theme-overrides.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+<script src="loading-logo.js" defer></script>
+<script src="loader-buttons.js" defer></script>
+<link rel="stylesheet" href="mobile-app-shell.css" />
+<script src="mobile-app-shell.js" defer></script>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color:var(--accent);"></i>
+  <p class="text-sm font-bold" style="color:var(--text-secondary);">جاري تحميل الجلسات...</p>
+</div>
+
+<div class="aurora-bg"></div>
+<div class="grid-overlay"></div>
+
+<div class="nav-shell">
+  <header class="nav-inner">
+    <div class="flex items-center gap-3">
+      <div class="logo-dot"></div>
+      <div>
+        <a href="dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+        <p class="text-[10px] font-bold mt-1" style="color:var(--text-muted);">الجلسات النشطة</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم"><i class="fa-solid fa-moon"></i></button>
+      <div style="position:relative">
+        <button class="user-chip" id="userChip">
+          <div class="user-avatar" id="userAvatar"></div>
+          <div class="user-info">
+            <span class="user-name" id="navUserName">...</span>
+            <span class="user-role" id="navUserRole">...</span>
+          </div>
+        </button>
+        <div class="user-dropdown" id="userDropdown">
+          <div class="dropdown-profile">
+            <div class="dropdown-avatar-lg" id="dropdownAvatar"></div>
+            <div>
+              <div class="dropdown-name" id="dropdownName">...</div>
+              <div class="dropdown-email" id="dropdownEmail">...</div>
+              <div class="dropdown-role-badge" id="dropdownRoleBadge"></div>
+            </div>
+          </div>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" onclick="showProfile()"><i class="fa-solid fa-user-pen"></i> إدارة الملف الشخصي</button>
+          <button class="dropdown-item" onclick="showChangePassword()"><i class="fa-solid fa-key"></i> تغيير كلمة المرور</button>
+          <button class="dropdown-item" onclick="window.location.href='sessions.html'"><i class="fa-solid fa-desktop"></i> الجلسات النشطة</button>
+        </div>
+      </div>
+      <button onclick="logout()" class="icon-btn logout-btn" id="logoutBtn" title="تسجيل الخروج"><i class="fa-solid fa-power-off"></i></button>
+      <a href="dashboard.html" style="padding:8px 16px;border-radius:10px;background:transparent;border:1px solid var(--card-border);color:var(--text-secondary);font-weight:700;font-size:.78rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+        <i class="fa-solid fa-arrow-right"></i> رجوع
+      </a>
+    </div>
+  </header>
+</div>
+
+<main class="app-container">
+  <div class="page-title"><i class="fa-solid fa-desktop text-accent"></i> الجلسات النشطة</div>
+  <p class="page-sub">تحكم في الأجهزة المسجل عليها حسابك. يمكنك إنهاء أي جلسة فوراً.</p>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap">
+    <div style="font-size:.78rem;color:var(--text-muted);font-weight:700" id="sessCount">— جلسة نشطة</div>
+    <button class="btn-kill-all" id="btnKillAll" onclick="killAllOthers()">
+      <i class="fa-solid fa-power-off"></i> إنهاء كل الجلسات الأخرى
+    </button>
+  </div>
+
+  <div id="sessionsContainer"></div>
+</main>
+
+<script src="notify.js"></script>
+<script type="module">
+  import { supabase } from './supabase-client.js';
+  import { initAuthGuard, mountUserChip, syncTabsBarTop } from './session-manager.js';
+
+  let CURRENT_DEVICE_ID = localStorage.getItem('vexoris_device_id') || null;
+  let CURRENT_TOKEN = localStorage.getItem('vexoris_session_token') || null;
+  let ALL_SESSIONS = [];
+
+  function fmtDate(d) {
+    if (!d) return '—';
+    const dt = new Date(d);
+    return isNaN(dt) ? d : dt.toLocaleString('ar-EG', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+  }
+  function fmtUA(ua) {
+    if (!ua) return 'جهاز غير معروف';
+    if (/iPhone|iPad|iPod/i.test(ua)) return '📱 iPhone / iPad';
+    if (/Android/i.test(ua)) return '📱 Android';
+    if (/Macintosh/i.test(ua)) return '💻 Mac';
+    if (/Windows/i.test(ua)) return '💻 Windows';
+    if (/Linux/i.test(ua)) return '💻 Linux';
+    return '🖥️ جهاز';
+  }
+  function escapeHtml(s){if(!s)return '';return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+  async function loadSessions() {
+    const container = document.getElementById('sessionsContainer');
+    container.innerHTML = '<div style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+    const { data, error } = await supabase.rpc('get_my_sessions');
+    if (error || !Array.isArray(data)) {
+      container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i>تعذر تحميل الجلسات</div>';
+      return;
+    }
+
+    ALL_SESSIONS = data;
+    const actives = data.filter(s => s.is_active && new Date(s.expires_at) > new Date());
+
+    document.getElementById('sessCount').textContent = actives.length + ' جلسة نشطة';
+    document.getElementById('btnKillAll').style.display = actives.filter(s => s.session_token !== CURRENT_TOKEN).length > 0 ? 'inline-flex' : 'none';
+
+    if (!data.length) {
+      container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-desktop"></i>لا توجد جلسات</div>';
+      return;
+    }
+
+    container.innerHTML = data.map(s => {
+      const isCurrent = s.session_token === CURRENT_TOKEN;
+      const isActive = s.is_active && new Date(s.expires_at) > new Date();
+      const expired = new Date(s.expires_at) <= new Date();
+      const cssClass = isCurrent ? 'current' : (!isActive ? 'ended' : '');
+      let badge = '';
+      if (isCurrent && isActive) badge = '<span class="sess-badge badge-current">هذا الجهاز</span>';
+      else if (!isActive) badge = `<span class="sess-badge badge-ended">${s.ended_reason === 'new_login_elsewhere' ? 'مُقصاة' : s.ended_reason === 'manual' ? 'أُنهيت يدوياً' : s.ended_reason === 'logout' ? 'خروج' : expired ? 'منتهية' : 'منتهية'}</span>`;
+      else badge = '<span class="sess-badge badge-current" style="background:rgba(14,165,233,.15);color:#0ea5e9">نشطة</span>';
+
+      const deviceName = escapeHtml(s.device_info?.platform || 'جهاز');
+      const remaining = isActive && !isCurrent ? Math.max(0, Math.ceil((new Date(s.expires_at) - new Date()) / 60000)) : null;
+
+      return `
+        <div class="sess-card ${cssClass}">
+          <div class="sess-head">
+            <div class="sess-device">
+              <div class="sess-name">
+                <i class="fa-solid fa-desktop"></i>
+                ${fmtUA(s.user_agent)} ${badge}
+              </div>
+            </div>
+            <div style="font-size:.7rem;color:var(--text-muted);font-weight:700">
+              ${isActive && !isCurrent && remaining !== null ? `⏳ ${remaining} دقيقة متبقية` : ''}
+            </div>
+          </div>
+          <div class="sess-ua">${escapeHtml(s.user_agent || '—')}</div>
+          <div class="sess-meta">
+            <div class="sess-meta-item">
+              <span class="sess-meta-lbl"><i class="fa-solid fa-clock"></i> بدأت</span>
+              <span class="sess-meta-val">${fmtDate(s.started_at)}</span>
+            </div>
+            <div class="sess-meta-item">
+              <span class="sess-meta-lbl"><i class="fa-solid fa-hourglass-end"></i> تنتهي</span>
+              <span class="sess-meta-val">${fmtDate(s.expires_at)}</span>
+            </div>
+            <div class="sess-meta-item">
+              <span class="sess-meta-lbl"><i class="fa-solid fa-satellite-dish"></i> آخر نشاط</span>
+              <span class="sess-meta-val">${fmtDate(s.last_seen_at)}</span>
+            </div>
+          </div>
+          ${isActive && !isCurrent ? `
+            <div class="sess-actions">
+              <button class="btn-kill" onclick="killSession('${s.session_token}')">
+                <i class="fa-solid fa-power-off"></i> إنهاء الجلسة
+              </button>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.killSession = async function(token) {
+    if (!window.showConfirm) {
+      if (!confirm('هل تريد إنهاء هذه الجلسة؟')) return;
+    } else {
+      const ok = await window.showConfirm({
+        title: 'إنهاء الجلسة',
+        message: 'سيتم تسجيل الخروج من هذا الجهاز فوراً. متأكد؟',
+        confirmText: 'إنهاء', cancelText: 'إلغاء', type: 'danger'
+      });
+      if (!ok) return;
+    }
+    const { error } = await supabase.rpc('kill_session', { p_session_token: token, p_reason: 'manual' });
+    if (error) {
+      if (window.showNotification) showNotification('فشل: ' + error.message, 'error');
+      return;
+    }
+    if (window.showNotification) showNotification('تم إنهاء الجلسة', 'success');
+    await loadSessions();
+  };
+
+  window.killAllOthers = async function() {
+    const others = ALL_SESSIONS.filter(s => s.is_active && s.session_token !== CURRENT_TOKEN);
+    if (others.length === 0) return;
+    if (!window.showConfirm) {
+      if (!confirm(`سيتم إنهاء ${others.length} جلسة. متأكد؟`)) return;
+    } else {
+      const ok = await window.showConfirm({
+        title: 'إنهاء كل الجلسات الأخرى',
+        message: `سيتم تسجيل الخروج من ${others.length} جهاز آخر. متأكد؟`,
+        confirmText: 'إنهاء الكل', cancelText: 'إلغاء', type: 'danger'
+      });
+      if (!ok) return;
+    }
+    let count = 0;
+    for (const s of others) {
+      const { error } = await supabase.rpc('kill_session', { p_session_token: s.session_token, p_reason: 'manual' });
+      if (!error) count++;
+    }
+    if (window.showNotification) showNotification(`تم إنهاء ${count} جلسة`, 'success');
+    await loadSessions();
+  };
+
+  (async () => {
+    const auth = await initAuthGuard();
+    mountUserChip(auth);
+    syncTabsBarTop();
+    window.addEventListener('resize', syncTabsBarTop);
+
+    // Realtime: refresh when sessions change
+    const channel = supabase.channel('sessions_page_watch')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_sessions' }, () => {
+        loadSessions();
+      })
+      .subscribe();
+
+    await loadSessions();
+    document.getElementById('loadingScreen').classList.add('hide');
+  })();
+</script>
+<script type="module" src="./session-manager.js"></script>
+</body>
+</html>

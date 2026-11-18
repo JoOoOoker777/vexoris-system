@@ -4,6 +4,7 @@
 // ✅ NEW: ROLE_META exported, getRoleMeta, initAuthGuard, mountUserChip, attachGlobalHandlers, resolvePath
 
 import { supabase } from './supabase-client.js';
+import { ensureSession, endCurrentSession } from './session-guard.js';
 
 // ============================================
 // ROLE METADATA (EXPORTED — single source of truth)
@@ -115,6 +116,24 @@ export async function initAuthGuard(opts = {}) {
         || profile.username
         || 'مستخدم';
 
+    // 🔐 Session validation + single-device + grace flow
+    const sessionCheck = await ensureSession({
+        session, profile, role: profile.role, meta, displayName,
+    });
+    if (!sessionCheck.ok) {
+        if (sessionCheck.reason === 'declined_single_device') {
+            window.location.href = loginPath;
+            throw new Error('AUTH_GUARD_SESSION_DECLINED');
+        }
+        if (sessionCheck.reason === 'session_missing' || sessionCheck.reason === 'create_failed') {
+            await supabase.auth.signOut();
+            window.location.href = loginPath;
+            throw new Error('AUTH_GUARD_SESSION_MISSING');
+        }
+        window.location.href = loginPath;
+        throw new Error('AUTH_GUARD_SESSION_FAILED');
+    }
+
     return {
         session,
         profile,
@@ -122,6 +141,7 @@ export async function initAuthGuard(opts = {}) {
         meta,
         displayName,
         email: session.user.email || profile.email || '',
+        sessionToken: sessionCheck.token,
     };
 }
 
@@ -208,6 +228,7 @@ function attachGlobalHandlers() {
                 });
                 if (!ok) return;
             }
+            try { await endCurrentSession('logout'); } catch (e) {}
             await supabase.auth.signOut();
             sessionStorage.clear();
             localStorage.removeItem('vexoris_user_email');
