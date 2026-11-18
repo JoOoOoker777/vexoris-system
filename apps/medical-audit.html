@@ -664,10 +664,108 @@
             margin-top: 6px;
             border-radius: 6px;
         }
+
+        /* ============================================
+           MOBILE — Medical Audit adjustments
+           ============================================ */
+        @media (max-width: 768px) {
+            .app-container { padding: 0 12px !important; }
+            .content-narrow { max-width: 100% !important; }
+
+            .page-hero { padding: 16px 18px !important; margin-top: 12px !important; }
+            .hero-title { font-size: 1.25rem !important; }
+            .hero-desc { font-size: 0.78rem !important; }
+
+            .search-bar { padding: 12px !important; gap: 8px !important; flex-direction: column !important; align-items: stretch !important; }
+            .search-bar .f-group { width: 100% !important; }
+            .search-bar > button { width: 100% !important; justify-content: center !important; }
+
+            /* Override cards-compact in favor of readable mobile sizing */
+            .cards-compact { max-width: 100% !important; }
+            .cards-compact .form-card { border-radius: 14px !important; margin-top: 12px !important; }
+            .cards-compact .form-card-header { padding: 10px 14px !important; }
+            .cards-compact .form-card-header h2 { font-size: 0.82rem !important; }
+            .cards-compact .form-card-body { padding: 14px !important; }
+
+            .cards-compact .question-card { border-radius: 12px !important; margin-bottom: 10px !important; }
+            .cards-compact .question-header { padding: 9px 12px !important; }
+            .cards-compact .question-body { padding: 12px !important; }
+            .cards-compact .question-title { font-size: 0.78rem !important; }
+            .cards-compact .question-num { width: 22px !important; height: 22px !important; font-size: 0.58rem !important; }
+
+            .cards-compact .assess-unit { padding: 12px !important; margin-bottom: 10px !important; border-radius: 11px !important; }
+            .cards-compact .assess-unit-head { padding-bottom: 8px !important; margin-bottom: 10px !important; }
+            .cards-compact .assess-unit-num { font-size: 0.6rem !important; }
+            .cards-compact .assess-unit-actions { gap: 6px !important; }
+            .cards-compact .assess-row { grid-template-columns: 1fr !important; gap: 10px !important; margin-bottom: 10px !important; }
+
+            .cards-compact .f-input,
+            .cards-compact .f-select,
+            .cards-compact .f-textarea { padding: 10px 12px !important; font-size: 0.88rem !important; border-radius: 9px !important; min-height: 44px !important; }
+            .cards-compact .f-label { font-size: 0.66rem !important; margin-bottom: 5px !important; }
+            .cards-compact .f-textarea { min-height: 70px !important; }
+
+            .cards-compact .pill { padding: 9px 12px !important; font-size: 0.75rem !important; border-radius: 8px !important; }
+            .cards-compact .pill-group { gap: 6px !important; }
+
+            .cards-compact .cb-grid { padding: 10px !important; gap: 5px !important; max-height: 220px !important; }
+            .cards-compact .cb-item { padding: 6px 8px !important; font-size: 0.78rem !important; gap: 6px !important; border-radius: 6px !important; }
+            .cards-compact .cb-item input[type="checkbox"] { width: 16px !important; height: 16px !important; }
+
+            .cards-compact .serv-grid { padding: 10px !important; gap: 5px !important; grid-template-columns: 1fr 1fr !important; }
+
+            .cards-compact .mini-btn { padding: 6px 10px !important; font-size: 0.7rem !important; min-height: 34px !important; border-radius: 7px !important; }
+
+            .cards-compact .issues-container { padding: 10px !important; border-radius: 9px !important; }
+            .cards-compact .issue-category-title { font-size: 0.75rem !important; padding: 9px 0 7px !important; }
+            .cards-compact .issue-items-grid { grid-template-columns: 1fr !important; gap: 4px 8px !important; padding: 6px 0 6px !important; }
+
+            .cards-compact .divider-line { margin: 12px 0 !important; }
+
+            /* Floating save becomes a fixed bottom bar */
+            .floating-save {
+                display: flex !important;
+                position: fixed !important;
+                bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+                right: 16px !important;
+                left: 16px !important;
+                top: auto !important;
+                transform: none !important;
+                width: auto !important;
+                max-width: none !important;
+                padding: 14px 20px !important;
+                border-radius: 14px !important;
+                flex-direction: row !important;
+                gap: 10px !important;
+                border: none !important;
+                z-index: 998 !important;
+            }
+            .floating-save i { font-size: 1.1rem !important; }
+            .floating-save span {
+                writing-mode: horizontal-tb !important;
+                transform: none !important;
+                font-size: 0.85rem !important;
+                letter-spacing: 0.05em !important;
+            }
+
+            /* Main form action buttons stick above floating-save */
+            body { padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important; }
+
+            /* Quick Add modal — ensure full-width bottom sheet */
+            .modal-overlay { padding: 0 !important; align-items: flex-end !important; }
+            .modal-card {
+                max-width: 100% !important;
+                width: 100% !important;
+                border-radius: 24px 24px 0 0 !important;
+                max-height: 92vh !important;
+            }
+        }
     </style>
     <link rel="stylesheet" href="../theme-overrides.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
     <script src="../loading-logo.js" defer></script>
+    <link rel="stylesheet" href="../mobile-app-shell.css" />
+    <script src="../mobile-app-shell.js" defer></script>
     <script src="../loader-buttons.js" defer></script>
 </head>
 <body>

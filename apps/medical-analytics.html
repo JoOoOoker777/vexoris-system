@@ -363,6 +363,9 @@ html:not(.dark) .nav-shell{background:linear-gradient(to bottom,var(--bg) 0%,var
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
 <script src="../loading-logo.js" defer></script>
 <script src="../loader-buttons.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <link rel="stylesheet" href="../mobile-app-shell.css">
 <script src="../mobile-app-shell.js" defer></script>
 
@@ -456,6 +459,7 @@ html:not(.dark) .nav-shell{background:linear-gradient(to bottom,var(--bg) 0%,var
     <button class="side-btn" data-tab="nurses" onclick="switchTab('nurses')"><i class="fa-solid fa-user-nurse"></i> التمريض</button>
     <button class="side-btn" data-tab="clerks" onclick="switchTab('clerks')"><i class="fa-solid fa-keyboard"></i> الإداريين</button>
     <button class="side-btn" data-tab="forms" onclick="switchTab('forms')"><i class="fa-solid fa-file-signature"></i> النماذج</button>
+    <button class="side-btn" data-tab="comparison" onclick="switchTab('comparison')"><i class="fa-solid fa-code-compare"></i> المقارنة الشهرية</button>
   </div>
 
   <!-- OVERVIEW -->
@@ -549,6 +553,8 @@ html:not(.dark) .nav-shell{background:linear-gradient(to bottom,var(--bg) 0%,var
           </select>
         </div>
         <input type="text" id="depSearch" oninput="filterCards('departments')" placeholder="بحث..." class="form-input" style="max-width:220px">
+        <button onclick="exportTabExcel('departments')" class="btn-ghost" style="color:#10b981;border-color:#10b981"><i class="fa-solid fa-file-excel"></i> Excel</button>
+        <button onclick="exportTabPDF('departments')" class="btn-ghost" style="color:#ef4444;border-color:#ef4444"><i class="fa-solid fa-file-pdf"></i> PDF</button>
       </div>
     </div>
     <div class="kpi-grid" id="depContainer"></div>
@@ -651,6 +657,46 @@ html:not(.dark) .nav-shell{background:linear-gradient(to bottom,var(--bg) 0%,var
     <div class="kpi-grid" id="frmContainer"></div>
   </section>
 
+  <!-- COMPARISON -->
+  <section class="tab-pane" id="tab-comparison">
+    <div class="page-title"><i class="fa-solid fa-code-compare text-accent-3"></i> المقارنة الشهرية</div>
+    <p class="page-sub">قارن أداء أي عنصر (طبيب، قسم، نموذج...) عبر 3 أشهر</p>
+
+    <div class="glass-card local-filter-card mb-5">
+      <div class="flex gap-3 items-end flex-wrap">
+        <div style="min-width:150px">
+          <label class="form-label">النوع</label>
+          <select id="cmpType" class="form-input" onchange="loadComparison()">
+            <option value="doctor">طبيب</option>
+            <option value="nurse">تمريض</option>
+            <option value="clerk">إداري</option>
+            <option value="department">قسم</option>
+            <option value="form">نموذج</option>
+          </select>
+        </div>
+        <div style="min-width:220px">
+          <label class="form-label">الاسم</label>
+          <select id="cmpName" class="form-input" onchange="loadComparison()"></select>
+        </div>
+        <div style="min-width:130px">
+          <label class="form-label">شهر 1</label>
+          <input type="month" id="cmpM1" class="form-input" onchange="loadComparison()">
+        </div>
+        <div style="min-width:130px">
+          <label class="form-label">شهر 2</label>
+          <input type="month" id="cmpM2" class="form-input" onchange="loadComparison()">
+        </div>
+        <div style="min-width:130px">
+          <label class="form-label">شهر 3</label>
+          <input type="month" id="cmpM3" class="form-input" onchange="loadComparison()">
+        </div>
+        <button onclick="loadComparison()" class="btn-primary"><i class="fa-solid fa-code-compare"></i> قارن</button>
+      </div>
+    </div>
+
+    <div id="comparisonResult"></div>
+  </section>
+
 </main>
 
 <!-- Modal -->
@@ -672,6 +718,7 @@ html:not(.dark) .nav-shell{background:linear-gradient(to bottom,var(--bg) 0%,var
 <script type="module">
 import { supabase } from '../supabase-client.js';
 import { initAuthGuard, mountUserChip } from '../session-manager.js';
+import { createArabicPDF, arabicAutoTable, drawRTLText } from '../assets/js/pdf-arabic.js';
 const ERROR_LABELS = {
   'noSign':'بدون توقيع', 'noStamp':'بدون ختم', 'unclearSign':'توقيع غير واضح',
   'noTime':'بدون وقت', 'noDate':'بدون تاريخ', 'noDiagnosis':'بدون تشخيص',
@@ -786,6 +833,7 @@ async function refreshCurrentTab(){
   else if(t==='nurses') await loadNurses();
   else if(t==='clerks') await loadClerks();
   else if(t==='forms') await loadForms();
+  else if(t==='comparison') await loadComparison();
 }
 window.refreshCurrentTab = refreshCurrentTab;
 
@@ -1217,6 +1265,3534 @@ window.closeDrill = function(){
 
 function destroyChart(key){
   if(state.charts[key]){try{state.charts[key].destroy()}catch(e){}delete state.charts[key]}
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
+}
+
+// ============================================================
+// MONTHLY COMPARISON
+// ============================================================
+async function loadComparisonNames() {
+  const type = $('cmpType').value;
+  const nameSelect = $('cmpName');
+  nameSelect.innerHTML = '<option value="">— جاري التحميل —</option>';
+
+  const f = state.filter;
+  try {
+    let rpc = '';
+    if (type === 'doctor') rpc = 'get_doctors_stats';
+    else if (type === 'nurse') rpc = 'get_nurses_stats';
+    else if (type === 'clerk') rpc = 'get_clerks_stats';
+    else if (type === 'department') rpc = 'get_departments_stats';
+    else if (type === 'form') rpc = 'get_forms_stats';
+
+    const { data } = await supabase.rpc(rpc, {
+      p_start: f.start, p_end: f.end, p_date_type: f.dateType,
+      ...(type === 'department' || type === 'form' ? { p_sort_by: 'count' } : { p_sort_by: 'count', p_min_count: 1 })
+    });
+
+    const items = data || [];
+    nameSelect.innerHTML = '<option value="">— اختر —</option>' +
+      items.slice(0, 200).map(i => `<option value="${escapeHtml(i.name)}">${escapeHtml(i.name)}</option>`).join('');
+  } catch (err) {
+    console.error(err);
+    nameSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+  }
+}
+
+window.loadComparison = async function() {
+  const type = $('cmpType').value;
+  const name = $('cmpName').value;
+  const m1 = $('cmpM1').value;
+  const m2 = $('cmpM2').value;
+  const m3 = $('cmpM3').value;
+
+  if (!name) { await loadComparisonNames(); return; }
+  if (!m1 || !m2 || !m3) {
+    $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-calendar"></i>اختر 3 أشهر للمقارنة</div></div>';
+    return;
+  }
+
+  $('comparisonResult').innerHTML = '<div class="glass-card" style="text-align:center;padding:40px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent);font-size:1.5rem"></i></div>';
+
+  try {
+    const { data } = await supabase.rpc('get_comparison', {
+      p_type: type, p_name: name,
+      p_month1: m1, p_month2: m2, p_month3: m3,
+      p_date_type: state.filter.dateType
+    });
+
+    const arr = Array.isArray(data) ? data : [];
+    if (!arr.length) {
+      $('comparisonResult').innerHTML = '<div class="glass-card"><div class="empty-state"><i class="fa-solid fa-chart-line"></i>لا توجد بيانات لهذه الفترة</div></div>';
+      return;
+    }
+
+    let html = `<div class="glass-card"><div class="chart-title mb-4"><i class="fa-solid fa-code-compare text-accent-3"></i> ${escapeHtml(name)} — مقارنة 3 أشهر</div><div id="chartComparison" style="min-height:320px"></div></div>`;
+    html += `<div class="glass-card mt-4"><div class="chart-title mb-4"><i class="fa-solid fa-table"></i> التفاصيل</div>
+      <div style="overflow-x:auto;border:1px solid var(--card-border);border-radius:14px">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead style="background:rgba(148,163,184,.05)">
+            <tr>
+              <th style="text-align:right;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">الشهر</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">العدد</th>
+              <th style="text-align:center;padding:12px;font-size:.7rem;color:var(--text-muted);font-weight:800">النسبة</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    arr.forEach(r => {
+      const c = pctColor(r.percentage);
+      html += `<tr style="border-bottom:1px solid var(--card-border)">
+        <td style="padding:10px 12px;font-weight:800">${fmtMonth(r.month)}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:'Space Grotesk';font-weight:700">${num(r.count)}</td>
+        <td style="padding:10px 12px;text-align:center"><span style="background:${c}20;color:${c};padding:3px 10px;border-radius:6px;font-weight:900;font-size:.75rem">${r.percentage}%</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    $('comparisonResult').innerHTML = html;
+
+    destroyChart('comparison');
+    state.charts.comparison = new ApexCharts($('chartComparison'), {
+      chart: { type: 'bar', height: 320, toolbar: { show: false }, background: 'transparent', fontFamily: 'Tajawal' },
+      series: [
+        { name: 'النسبة %', data: arr.map(r => r.percentage) },
+        { name: 'العدد', data: arr.map(r => r.count) }
+      ],
+      colors: ['#8b5cf6', '#0ea5e9'],
+      plotOptions: { bar: { borderRadius: 5, columnWidth: '50%' } },
+      xaxis: { categories: arr.map(r => fmtMonth(r.month)), labels: { style: { fontSize: '11px', fontWeight: 700 } } },
+      yaxis: [
+        { title: { text: 'النسبة %' }, max: 100, labels: { formatter: v => v + '%' } },
+        { opposite: true, title: { text: 'العدد' } }
+      ],
+      dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 800 } },
+      grid: { borderColor: 'rgba(148,163,184,.1)' },
+      legend: { position: 'top', fontSize: '11px', fontWeight: 700 },
+      theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+    });
+    state.charts.comparison.render();
+
+  } catch (err) {
+    console.error(err);
+    $('comparisonResult').innerHTML = `<div class="glass-card" style="color:#ef4444;text-align:center;padding:30px">${escapeHtml(err.message)}</div>`;
+  }
+};
+
+// Initialize comparison tab defaults
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const m = (offset) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const m1 = document.getElementById('cmpM1');
+  const m2 = document.getElementById('cmpM2');
+  const m3 = document.getElementById('cmpM3');
+  if (m1) m1.value = m(2);
+  if (m2) m2.value = m(1);
+  if (m3) m3.value = m(0);
+});
+
+// ============================================================
+// EXPORTS — Excel + PDF for each tab
+// ============================================================
+window.exportTabExcel = function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tab);
+  XLSX.writeFile(wb, `analytics_${tab}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  if(window.showNotification) showNotification('تم التصدير', 'success');
+};
+
+window.exportTabPDF = async function(tab) {
+  const data = getTabExportData(tab);
+  if (!data || !data.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+  try {
+    const headers = Object.keys(data[0]);
+    const rows = data.map(obj => headers.map(h => String(obj[h] || '')));
+    const doc = await createArabicPDF({ orientation: 'landscape' });
+    drawRTLText(doc, `تقرير ${tabLabel(tab)}`, 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+    drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+    arabicAutoTable(doc, { head: [headers], body: rows, startY: 28, margin: { left: 10, right: 10 }, styles: { fontSize: 8 } });
+    doc.save(`analytics_${tab}_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (e) {
+    console.error(e);
+    if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+  }
+};
+
+function tabLabel(tab) {
+  const map = { overview: 'النظرة العامة', trend: 'الاتجاه الشهري', departments: 'الأقسام', doctors: 'الأطباء', nurses: 'التمريض', clerks: 'الإداريين', forms: 'النماذج', comparison: 'المقارنة' };
+  return map[tab] || tab;
+}
+
+function getTabExportData(tab) {
+  if (tab === 'departments') return (state.cache.departments || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  if (tab === 'doctors') return (state.cache.doctors || []).map(i => ({ 'الاسم': i.name, 'التخصص': i.specialty || '', 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'nurses') return (state.cache.nurses || []).map(i => ({ 'الاسم': i.name, 'القسم': i.department || '', 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'clerks') return (state.cache.clerks || []).map(i => ({ 'الاسم': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'Wilson': i.wilson_lb, 'العدد': i.count }));
+  if (tab === 'forms') return (state.cache.forms || []).map(i => ({ 'النموذج': i.name, 'النسبة': i.percentage, 'Bayesian': i.bayesian_pct, 'العدد': i.count }));
+  return [];
 }
 
 // ============================================================

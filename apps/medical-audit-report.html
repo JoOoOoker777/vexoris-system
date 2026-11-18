@@ -401,13 +401,98 @@
         }
         .section-incomplete { counter-reset: c-incomplete; }
         .section-incomplete .form-row { counter-increment: c-incomplete; }
-        .section-incomplete .form-row .form-row-title::before {
-            content: "#" counter(c-incomplete);
-            display: inline-block;
-            background: rgba(245,158,11,0.15);
-            color: var(--warning);
-            padding: 1px 8px; border-radius: 6px;
-            font-size: 0.85em; margin-left: 6px; font-weight: 900;
+
+        /* ============================================
+           MOBILE — Report adjustments (on-screen only, not print)
+           ============================================ */
+        @media screen and (max-width: 768px) {
+            .app-container { padding: 0 10px !important; }
+
+            .report-actions {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+                margin: 16px 0 12px !important;
+            }
+            .report-actions-title { gap: 10px !important; }
+            .report-actions-title h2 { font-size: 1rem !important; }
+            .report-actions-title p { font-size: 0.58rem !important; }
+            .report-actions-icon { width: 36px !important; height: 36px !important; font-size: 0.85rem !important; }
+            .report-btns { width: 100% !important; }
+            .rbtn { flex: 1 !important; min-width: calc(50% - 4px) !important; justify-content: center !important; padding: 10px 12px !important; }
+
+            .report-glass {
+                padding: 16px 12px !important;
+                border-radius: 16px !important;
+                margin-bottom: 20px !important;
+            }
+
+            .cover-page { padding-bottom: 18px !important; margin-bottom: 18px !important; }
+            .cover-header { flex-wrap: wrap !important; gap: 10px !important; padding: 0 !important; }
+            .cover-header .logo-box { height: 50px !important; }
+            .cover-header .logo-box img { max-width: 160px !important; }
+
+            .cover-title h1 { font-size: 1.3rem !important; }
+            .cover-title p { font-size: 0.75rem !important; }
+
+            .cover-data-grid {
+                grid-template-columns: 1fr !important;
+                gap: 8px !important;
+                padding: 14px !important;
+                border-radius: 12px !important;
+            }
+            .cover-data-item .lbl { font-size: 0.66rem !important; }
+            .cover-data-item .val { font-size: 0.86rem !important; }
+
+            .overall-circle { width: 56px !important; height: 56px !important; font-size: 1.1rem !important; }
+
+            .summary-circles {
+                gap: 10px !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                margin-bottom: 18px !important;
+            }
+            .summary-circle {
+                width: 100% !important;
+                height: auto !important;
+                border-radius: 14px !important;
+                padding: 14px 18px !important;
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                border-width: 2px !important;
+            }
+            .summary-circle .num { font-size: 1.8rem !important; margin-bottom: 0 !important; }
+            .summary-circle .lbl { font-size: 0.78rem !important; }
+
+            .top-errors-box { padding: 14px !important; border-radius: 12px !important; }
+            .top-errors-box h4 { font-size: 0.82rem !important; }
+            .top-errors-box li { font-size: 0.76rem !important; }
+
+            .report-section { margin-bottom: 22px !important; }
+            .report-section-title { gap: 8px !important; padding-bottom: 8px !important; margin-bottom: 12px !important; }
+            .report-section-title h2 { font-size: 1rem !important; }
+            .report-section-title i { font-size: 1rem !important; }
+
+            .staff-card { padding: 12px !important; border-radius: 12px !important; margin-bottom: 10px !important; }
+            .staff-head { flex-wrap: wrap !important; gap: 6px !important; }
+            .staff-head .name { font-size: 0.88rem !important; }
+            .staff-head .role { font-size: 0.66rem !important; }
+
+            .form-row { padding: 10px !important; border-radius: 10px !important; margin-bottom: 8px !important; }
+            .form-row-head { flex-wrap: wrap !important; gap: 6px !important; }
+            .form-row-title { font-size: 0.82rem !important; }
+            .score-chip { font-size: 0.7rem !important; padding: 3px 9px !important; }
+
+            .notes-box { padding: 8px 10px !important; font-size: 0.74rem !important; margin-bottom: 6px !important; }
+            .issues-list li { font-size: 0.74rem !important; margin-bottom: 4px !important; }
+
+            .perfect-item { font-size: 0.72rem !important; padding: 4px 10px !important; }
+
+            .signature-area { margin-top: 22px !important; justify-content: center !important; }
+            .signature-box { width: 100% !important; }
+            .signature-box .title { font-size: 0.78rem !important; margin-bottom: 24px !important; }
+            .signature-box .line { font-size: 0.72rem !important; }
         }
 
         /* --- Print-specific --- */
@@ -466,6 +551,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
     <script src="../loading-logo.js" defer></script>
     <script src="../loader-buttons.js" defer></script>
+    <link rel="stylesheet" href="../mobile-app-shell.css" />
+    <script src="../mobile-app-shell.js" defer></script>
 </head>
 <body>
 

@@ -488,7 +488,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
     <script src="../loading-logo.js" defer></script>
     <script src="../loader-buttons.js" defer></script>
-    <link rel="stylesheet" href="../mobile-app-shell.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>    <link rel="stylesheet" href="../mobile-app-shell.css" />
     <script src="../mobile-app-shell.js" defer></script>
 </head>
 <body>
@@ -624,8 +626,14 @@
             <button class="btn-danger" onclick="handleDeleteBySeverity()">
                 <i class="fa-solid fa-broom"></i> تنفيذ الحذف
             </button>
-            <button class="btn-danger" id="btnDeleteAll" onclick="openDeleteAllModal()" style="display: none; margin-inline-start: auto;">
-                <i class="fa-solid fa-fire"></i> حذف كل السجلات
+            <button id="btnDeleteAll" class="btn-ghost" style="display:none; color:#ef4444; border-color:#ef4444;">
+                <i class="fa-solid fa-trash"></i> حذف الكل
+            </button>
+            <button onclick="exportAuditLogExcel()" class="btn-ghost" style="color:#10b981; border-color:#10b981;">
+                <i class="fa-solid fa-file-excel"></i> Excel
+            </button>
+            <button onclick="exportAuditLogPDF()" class="btn-ghost" style="color:#ef4444; border-color:#ef4444;">
+                <i class="fa-solid fa-file-pdf"></i> PDF
             </button>
         </div>
 
@@ -720,6 +728,7 @@
     <script type="module">
         import { supabase } from '../supabase-client.js';
         import { initAuthGuard, mountUserChip } from '../session-manager.js';
+        import { createArabicPDF, arabicAutoTable, drawRTLText } from '../assets/js/pdf-arabic.js';
         import { logAudit, AUDIT, AUDIT_LABELS, SEVERITY_LABELS } from '../audit-log.js';
 
         // ============================================
@@ -1176,6 +1185,8 @@
             if (severity) query = query.eq('severity', severity);
 
             const { data, error } = await query;
+            window.__currentLogs = data || [];
+     
 
             if (error) {
                 showNotification('فشل التصدير: ' + error.message, 'error');
@@ -1290,6 +1301,55 @@
             // 5. Hide loading
             document.getElementById('loadingScreen').classList.add('hide');
         })();
+
+        // ============================================
+        // EXPORTS
+        // ============================================
+        window.exportAuditLogExcel = function() {
+            const logs = window.__currentLogs || [];
+            if (!logs.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+            const data = logs.map(l => ({
+                'الوقت': l.created_at ? new Date(l.created_at).toLocaleString('ar-EG') : '',
+                'المستخدم': l.user_name || l.user_id || '—',
+                'الإجراء': l.action || '',
+                'الوصف': l.description || '',
+                'الخطورة': l.severity || '',
+                'الكيان': l.entity_type || '',
+                'المعرف': l.entity_id || '',
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Audit Log');
+            XLSX.writeFile(wb, `audit_log_${new Date().toISOString().slice(0,10)}.xlsx`);
+            if(window.showNotification) showNotification('تم التصدير', 'success');
+        };
+
+        window.exportAuditLogPDF = async function() {
+            const logs = window.__currentLogs || [];
+            if (!logs.length) { if(window.showNotification) showNotification('لا توجد بيانات', 'error'); return; }
+            try {
+                const doc = await createArabicPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+                drawRTLText(doc, 'سجل التدقيق — VEXORIS', 280, 15, { align: 'right', fontSize: 14, fontStyle: 'bold' });
+                drawRTLText(doc, `التاريخ: ${new Date().toLocaleDateString('ar-EG')}`, 280, 22, { align: 'right', fontSize: 9 });
+                arabicAutoTable(doc, {
+                    head: [['الوقت', 'المستخدم', 'الإجراء', 'الوصف', 'الخطورة']],
+                    body: logs.slice(0, 100).map(l => [
+                        l.created_at ? new Date(l.created_at).toLocaleString('ar-EG') : '',
+                        l.user_name || '—',
+                        l.action || '',
+                        (l.description || '').substring(0, 60),
+                        l.severity || '',
+                    ]),
+                    startY: 28,
+                    margin: { left: 10, right: 10 },
+                    styles: { fontSize: 7 },
+                });
+                doc.save(`audit_log_${new Date().toISOString().slice(0,10)}.pdf`);
+            } catch (e) {
+                console.error(e);
+                if(window.showNotification) showNotification('فشل التصدير: ' + e.message, 'error');
+            }
+        };
     </script>
 
     <script type="module" src="../session-manager.js"></script>
