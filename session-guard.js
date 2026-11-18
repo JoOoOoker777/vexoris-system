@@ -309,7 +309,7 @@ async function rpcCreateSession() {
   const { data, error } = await supabase.rpc('create_session', {
     p_device_id: getDeviceId(),
     p_device_info: getDeviceInfo(),
-    p_duration_hours: 0.01,
+    p_duration_hours: 15,
     p_user_agent: navigator.userAgent,
     p_ip: null,
   });

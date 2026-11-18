@@ -1,0 +1,285 @@
+═══════════════════════════════════════════════════════════
+  FILE: dashboard.html
+  LINES: 917
+═══════════════════════════════════════════════════════════
+
+═══ [1] IMPORT AREA (first 30 lines of <script type="module">) ═══
+
+
+═══ [2] ROLE_META (exact lines) ═══
+
+673:        const ROLE_META = {
+674-            super_admin: { name: 'المطور', color: '#a855f7', bg: 'rgba(168,85,247,0.15)', icon: 'fa-crown' },
+675-            admin:       { name: 'ادارة السجلات الطبية', color: '#0ea5e9', bg: 'rgba(14,165,233,0.15)', icon: 'fa-user-shield' },
+676-            manager:     { name: 'المدير الطبي', color: '#6366f1', bg: 'rgba(99,102,241,0.15)', icon: 'fa-user-tie' },
+677-            auditor:     { name: 'مراجع جودة', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', icon: 'fa-clipboard-check' },
+678-            senior:      { name: 'رئيس قسم', color: '#10b981', bg: 'rgba(16,185,129,0.15)', icon: 'fa-star' },
+679-            doctor:      { name: 'طبيب', color: '#14b8a6', bg: 'rgba(20,184,166,0.15)', icon: 'fa-stethoscope' },
+680-            viewer:      { name: 'مراجع', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)', icon: 'fa-eye' },
+681-        };
+682-
+683-        window.toggleTheme = function() {
+684-            const html = document.documentElement;
+685-            html.classList.toggle('dark');
+
+═══ [3] toggleTheme (exact lines) ═══
+
+538-            </nav>
+539-            <div class="flex items-center gap-2">
+540:                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم" aria-label="تبديل الثيم">
+541-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+542-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+543-                    </svg>
+544-                </button>
+545-                <button class="user-chip" id="userChip" aria-label="قائمة المستخدم">
+546-                    <div class="user-avatar" id="userAvatar"></div>
+547-                    <div class="user-info">
+548-                        <span class="user-name" id="navUserName">...</span>
+--
+681-        };
+682-
+683:        window.toggleTheme = function() {
+684-            const html = document.documentElement;
+685-            html.classList.toggle('dark');
+686-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+687-        };
+688-
+689-        window.logout = async function() {
+690-            if (window.showConfirm) {
+691-                const confirmed = await window.showConfirm({
+
+═══ [4] AUTH GUARD — supabase.auth.getSession block ═══
+
+809:            const { data: { session }, error: sessionErr } = await supabase.auth.getSession();
+810-            if (sessionErr || !session) {
+811-                window.location.href = './login.html';
+812-                return;
+813-            }
+814-
+815-            const { data: profile, error: profileErr } = await supabase
+816-                .from('profiles')
+817-                .select('role, username, email, is_active')
+818-                .eq('id', session.user.id)
+819-                .single();
+820-
+821-            if (profileErr || !profile) {
+822-                alert('حدث خطأ في جلب بيانات الحساب. يرجى تسجيل الدخول مجدداً.');
+823-                await supabase.auth.signOut();
+824-                window.location.href = './login.html';
+825-                return;
+826-            }
+827-
+828-            if (profile.is_active === false) {
+829-                await supabase.auth.signOut();
+830-                sessionStorage.clear();
+831-                alert('حسابك موقوف حالياً. يرجى التواصل مع مسؤول النظام لتفعيله.');
+832-                window.location.href = './login.html';
+833-                return;
+834-            }
+
+═══ [5] GLOBAL HANDLERS ═══
+
+689:        window.logout = async function() {
+690-            if (window.showConfirm) {
+691-                const confirmed = await window.showConfirm({
+692-                    title: 'تسجيل الخروج',
+693-                    message: 'هل أنت متأكد أنك تريد تسجيل الخروج من النظام؟',
+694-                    confirmText: 'تسجيل الخروج',
+695-                    cancelText: 'إلغاء',
+696-                    type: 'danger'
+697-                });
+698-                if (!confirmed) return;
+699-            }
+--
+706:        window.showProfile = function() {
+707-            closeDropdown();
+708-             window.location.href = './profile.html'; 
+709-        };
+710-
+711:        window.showChangePassword = function() {
+712-            closeDropdown();
+713-            window.location.href = './change-password.html';
+714-        };
+715-
+716-        const userChip = document.getElementById('userChip');
+717-        const userDropdown = document.getElementById('userDropdown');
+718-        function openDropdown() { userDropdown.classList.add('open'); userChip.classList.add('open'); }
+719-        function closeDropdown() { userDropdown.classList.remove('open'); userChip.classList.remove('open'); }
+720-        function toggleDropdown() { if (userDropdown.classList.contains('open')) closeDropdown(); else openDropdown(); }
+721-        userChip.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(); });
+
+═══ [6] HEAD — theme-overrides, loading-logo, loader-buttons (last 20 lines before </head>) ═══
+
+505-        ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
+506-    </style>
+507:    <link rel="stylesheet" href="theme-overrides.css" />
+508-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+509-    <script src="loading-logo.js" defer></script>
+510-    <script src="loader-buttons.js" defer></script>
+511-</head>
+512-<body>
+513-
+514-    <div class="loading-screen" id="loadingScreen">
+515-        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+516-        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري تحميل لوحة التحكم...</p>
+517-    </div>
+518-
+519-    <div class="scroll-progress" id="scrollProgress"></div>
+520-    <div class="aurora-bg"></div>
+521-    <div class="grid-overlay"></div>
+522-
+523-    <div class="nav-shell">
+524-        <header class="nav-inner">
+525-            <div class="flex items-center gap-3">
+526-                <div class="logo-dot"></div>
+527-                <div>
+
+═══ [7] HEADER HTML (nav-shell area) ═══
+
+522-
+523:    <div class="nav-shell">
+524-        <header class="nav-inner">
+525-            <div class="flex items-center gap-3">
+526-                <div class="logo-dot"></div>
+527-                <div>
+528-                    <a href="dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+529-                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
+530-                </div>
+531-            </div>
+532-            <nav class="hidden md:flex items-center gap-7">
+533-                <a href="dashboard.html" class="nav-link active">لوحة التحكم</a>
+534-                <a href="about.html" class="nav-link">عن النظام</a>
+535-                <a href="security.html" class="nav-link">درع VEXORIS</a>
+536-                <a href="courses.html" class="nav-link">دورات تدريبية</a>
+537-                <a href="feedback.html" class="nav-link">رأيك يهمنا</a>
+538-            </nav>
+539-            <div class="flex items-center gap-2">
+540-                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم" aria-label="تبديل الثيم">
+541-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+542-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+543-                    </svg>
+544-                </button>
+545-                <button class="user-chip" id="userChip" aria-label="قائمة المستخدم">
+546-                    <div class="user-avatar" id="userAvatar"></div>
+547-                    <div class="user-info">
+548-                        <span class="user-name" id="navUserName">...</span>
+549-                        <span class="user-role" id="navUserRole" style="color: var(--accent);">...</span>
+550-                    </div>
+551-                    <i class="fa-solid fa-chevron-down user-chip-arrow"></i>
+552-                </button>
+553-                <button onclick="logout()" class="icon-btn logout-btn" title="تسجيل الخروج" aria-label="تسجيل الخروج">
+554-                    <i class="fa-solid fa-power-off"></i>
+555-                </button>
+556-            </div>
+557-        </header>
+558-    </div>
+559-
+560-    <div class="user-dropdown" id="userDropdown">
+561-        <div class="dropdown-profile">
+562-            <div class="dropdown-avatar-lg" id="dropdownAvatar"></div>
+563-            <div>
+564-                <div class="dropdown-name" id="dropdownName">...</div>
+565-                <div class="dropdown-email" id="dropdownEmail">...</div>
+566-                <div class="dropdown-role-badge" id="dropdownRoleBadge"></div>
+567-            </div>
+568-        </div>
+569-        <div class="dropdown-divider"></div>
+570-        <button class="dropdown-item" onclick="showProfile()">
+571-            <i class="fa-solid fa-user-pen"></i>
+572-            إدارة الملف الشخصي
+573-        </button>
+574-        <button class="dropdown-item" onclick="showChangePassword()">
+575-            <i class="fa-solid fa-key"></i>
+576-            تغيير كلمة المرور
+577-        </button>
+578-    </div>
+579-
+580-    <main class="app-container">
+581-        <section class="welcome-hero" data-animate>
+582-            <div>
+583-                <div class="hero-badge">
+
+═══ [8] USER CHIP + DROPDOWN markup (if exists) ═══
+
+543-                    </svg>
+544-                </button>
+545:                <button class="user-chip" id="userChip" aria-label="قائمة المستخدم">
+546-                    <div class="user-avatar" id="userAvatar"></div>
+547-                    <div class="user-info">
+548-                        <span class="user-name" id="navUserName">...</span>
+549-                        <span class="user-role" id="navUserRole" style="color: var(--accent);">...</span>
+550-                    </div>
+551-                    <i class="fa-solid fa-chevron-down user-chip-arrow"></i>
+552-                </button>
+553-                <button onclick="logout()" class="icon-btn logout-btn" title="تسجيل الخروج" aria-label="تسجيل الخروج">
+554-                    <i class="fa-solid fa-power-off"></i>
+555-                </button>
+556-            </div>
+557-        </header>
+558-    </div>
+559-
+560-    <div class="user-dropdown" id="userDropdown">
+561-        <div class="dropdown-profile">
+562-            <div class="dropdown-avatar-lg" id="dropdownAvatar"></div>
+563-            <div>
+564-                <div class="dropdown-name" id="dropdownName">...</div>
+565-                <div class="dropdown-email" id="dropdownEmail">...</div>
+566-                <div class="dropdown-role-badge" id="dropdownRoleBadge"></div>
+567-            </div>
+568-        </div>
+569-        <div class="dropdown-divider"></div>
+570-        <button class="dropdown-item" onclick="showProfile()">
+
+═══ [9] FOOTER markup ═══
+
+633-    </main>
+634-
+635:    <footer class="footer-shell">
+636-        <div class="footer-brand">VEXORIS SYSTEM</div>
+637-        <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+638-        <div class="footer-text">
+639-            تم برمجة النظام وتنفيذه بواسطة
+640-            <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+641-            <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+642-            <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+643-        </div>
+644-    </footer>
+645-
+646-    <script type="module">
+647-        import { supabase } from './supabase-client.js';
+648-
+649-        const CATEGORIES = {
+650-            clinical: { title: 'أنظمة المراجعة', sub: 'Review Systems', icon: 'fa-stethoscope' },
+
+═══ [10] END OF BODY — scripts before </body> ═══
+
+            };
+
+            let delay = 150;
+            let hasAnySection = false;
+            for (const [key, apps] of Object.entries(grouped)) {
+                if (apps.length > 0) {
+                    renderCategory(key, apps, delay);
+                    delay += 100;
+                    hasAnySection = true;
+                }
+            }
+
+            if (!hasAnySection) {
+                document.getElementById('categoriesContainer').innerHTML = `
+                    <div class="empty-state" style="margin-top: 40px;">
+                        <i class="fa-solid fa-lock"></i>
+                        <h3>لا توجد تطبيقات متاحة لحسابك</h3>
+                        <p>يرجى التواصل مع مسؤول النظام لمنحك الصلاحيات المناسبة.</p>
+                    </div>
+                `;
+            }
+
+            document.getElementById('loadingScreen').classList.add('hide');
+        })();
+    </script>
+
+    <script src="./notify.js"></script>
+    <script type="module" src="./session-manager.js"></script>
+</body>
+</html>

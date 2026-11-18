@@ -1,0 +1,216 @@
+═══════════════════════════════════════════════════════════
+  FILE: admin/rbac.html
+  LINES: 734
+═══════════════════════════════════════════════════════════
+
+═══ [1] IMPORT AREA (first 30 lines of <script type="module">) ═══
+
+
+═══ [2] ROLE_META (exact lines) ═══
+
+
+═══ [3] toggleTheme (exact lines) ═══
+
+390-            </nav>
+391-            <div class="flex items-center gap-2">
+392:                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم">
+393-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+394-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+395-                    </svg>
+396-                </button>
+397-                <a href="../dashboard.html" class="btn-back" style="padding: 8px 16px; border-radius: 10px; background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+398-                    <i class="fa-solid fa-arrow-right"></i>
+399-                    رجوع
+400-                </a>
+--
+510-        function key(role, appId) { return `${role}::${appId}`; }
+511-
+512:        window.toggleTheme = function() {
+513-            const html = document.documentElement;
+514-            html.classList.toggle('dark');
+515-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+516-        };
+517-
+518-        function getChangesCount() {
+519-            let n = 0;
+520-            for (const k in currentPerms) {
+
+═══ [4] AUTH GUARD — supabase.auth.getSession block ═══
+
+677:            const { data: { session } } = await supabase.auth.getSession();
+678-            if (!session) {
+679-                window.location.href = '../login.html';
+680-                return;
+681-            }
+682-
+683-            // 2. Role guard
+684-            const { data: profile } = await supabase
+685-                .from('profiles')
+686-                .select('role')
+687-                .eq('id', session.user.id)
+688-                .single();
+689-
+690-            if (!profile || !['super_admin', 'admin'].includes(profile.role)) {
+691-                alert('ليس لديك صلاحية الوصول لهذه الصفحة.');
+692-                window.location.href = '../dashboard.html';
+693-                return;
+694-            }
+695-
+696-            currentUserRole = profile.role;
+697-            isSuperAdmin = profile.role === 'super_admin';
+698-
+699-            // 3. Load perms
+700-            const ok = await loadPermissions();
+701-            if (!ok) {
+702-                document.getElementById('loadingScreen').classList.add('hide');
+
+═══ [5] GLOBAL HANDLERS ═══
+
+
+═══ [6] HEAD — theme-overrides, loading-logo, loader-buttons (last 20 lines before </head>) ═══
+
+357-        ::selection { background: rgba(14, 165, 233, 0.35); color: #fff; }
+358-    </style>
+359:    <link rel="stylesheet" href="../theme-overrides.css" />
+360-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+361-    <script src="../loading-logo.js" defer></script>
+362-    <script src="../loader-buttons.js" defer></script>
+363-</head>
+364-<body>
+365-
+366-    <div class="loading-screen" id="loadingScreen">
+367-        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+368-        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري التحميل...</p>
+369-    </div>
+370-
+371-    <div class="scroll-progress" id="scrollProgress"></div>
+372-    <div class="aurora-bg"></div>
+373-    <div class="grid-overlay"></div>
+374-
+375-    <div class="nav-shell">
+376-        <header class="nav-inner">
+377-            <div class="flex items-center gap-3">
+378-                <div class="logo-dot"></div>
+379-                <div>
+
+═══ [7] HEADER HTML (nav-shell area) ═══
+
+374-
+375:    <div class="nav-shell">
+376-        <header class="nav-inner">
+377-            <div class="flex items-center gap-3">
+378-                <div class="logo-dot"></div>
+379-                <div>
+380-                    <a href="../dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+381-                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
+382-                </div>
+383-            </div>
+384-            <nav class="hidden md:flex items-center gap-7">
+385-                <a href="../dashboard.html" class="nav-link">لوحة التحكم</a>
+386-                <a href="../about.html" class="nav-link">عن النظام</a>
+387-                <a href="../security.html" class="nav-link">درع VEXORIS</a>
+388-                <a href="../courses.html" class="nav-link">دورات تدريبية</a>
+389-                <a href="../feedback.html" class="nav-link">رأيك يهمنا</a>
+390-            </nav>
+391-            <div class="flex items-center gap-2">
+392-                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم">
+393-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+394-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+395-                    </svg>
+396-                </button>
+397-                <a href="../dashboard.html" class="btn-back" style="padding: 8px 16px; border-radius: 10px; background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+398-                    <i class="fa-solid fa-arrow-right"></i>
+399-                    رجوع
+400-                </a>
+401-            </div>
+402-        </header>
+403-    </div>
+404-
+405-    <main class="app-container">
+406-        <section class="page-hero">
+407-            <div class="hero-badge">
+408-                <span class="pulse-dot"></span>
+409-                Access Control
+410-            </div>
+411-            <h1 class="hero-title">التحكم في <span class="grad">صلاحيات الأدوار</span></h1>
+412-            <p class="hero-desc">
+413-                حدّد بدقة أي تطبيق يظهر لأي دور. التغييرات التي تحفظها هنا تُطبَّق فوراً على لوحة تحكم كل المستخدمين المرتبطين بذلك الدور. للتغيير: اضغط على المربع لتفعيله أو إلغاء تفعيله.
+414-            </p>
+415-        </section>
+416-
+417-        <section class="matrix-wrap">
+418-            <div class="matrix-header">
+419-                <div>
+420-                    <div class="matrix-title">مصفوفة الصلاحيات</div>
+421-                    <div class="matrix-subtitle">7 أدوار × 16 تطبيق</div>
+422-                </div>
+423-                <div class="matrix-actions">
+424-                    <button class="btn-reset" id="btnReset">
+425-                        <i class="fa-solid fa-rotate-left"></i>
+426-                        إعادة تعيين
+427-                    </button>
+428-                </div>
+429-            </div>
+430-            <div class="matrix-scroll">
+431-                <table class="matrix" id="permMatrix">
+432-                    <thead id="matrixHead"></thead>
+433-                    <tbody id="matrixBody"></tbody>
+434-                </table>
+435-            </div>
+
+═══ [8] USER CHIP + DROPDOWN markup (if exists) ═══
+
+
+═══ [9] FOOTER markup ═══
+
+448-    </main>
+449-
+450:    <footer class="footer-shell">
+451-        <div class="footer-brand">VEXORIS SYSTEM</div>
+452-        <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+453-        <div class="footer-text">
+454-            تم برمجة النظام وتنفيذه بواسطة
+455-            <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+456-            <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+457-            <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+458-        </div>
+459-    </footer>
+460-
+461-    <!-- استدعاء نظام الإشعارات -->
+462-    <script src="../notify.js"></script>
+463-
+464-    <script type="module">
+465-        import { supabase } from '../supabase-client.js';
+
+═══ [10] END OF BODY — scripts before </body> ═══
+
+            // 4. Render
+            renderMatrix();
+            updateSaveBar();
+
+            // 5. Wire buttons
+            document.getElementById('btnSave').addEventListener('click', savePermissions);
+
+            document.getElementById('btnReset').addEventListener('click', () => {
+                if (getChangesCount() === 0) return;
+                if (!confirm('هل تريد إلغاء جميع التغييرات غير المحفوظة؟')) return;
+                currentPerms = { ...originalPerms };
+                renderMatrix();
+                updateSaveBar();
+                showNotification('تم استعادة الحالة الأصلية', 'warning');
+            });
+
+            // 6. Hide loading
+            document.getElementById('loadingScreen').classList.add('hide');
+
+            // 7. Warn on navigate away with unsaved changes
+            window.addEventListener('beforeunload', (e) => {
+                if (getChangesCount() > 0) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

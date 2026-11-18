@@ -1,0 +1,229 @@
+═══════════════════════════════════════════════════════════
+  FILE: profile.html
+  LINES: 1025
+═══════════════════════════════════════════════════════════
+
+═══ [1] IMPORT AREA (first 30 lines of <script type="module">) ═══
+
+
+═══ [2] ROLE_META (exact lines) ═══
+
+563:        const ROLE_META = {
+564-            super_admin: { name: 'المطور', color: '#a855f7', bg: 'rgba(168,85,247,0.15)', icon: 'fa-crown' },
+565-            admin:       { name: 'ادارة السجلات الطبية', color: '#0ea5e9', bg: 'rgba(14,165,233,0.15)', icon: 'fa-user-shield' },
+566-            manager:     { name: 'المدير الطبي', color: '#6366f1', bg: 'rgba(99,102,241,0.15)', icon: 'fa-user-tie' },
+567-            auditor:     { name: 'مراجع جودة', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', icon: 'fa-clipboard-check' },
+568-            senior:      { name: 'رئيس قسم', color: '#10b981', bg: 'rgba(16,185,129,0.15)', icon: 'fa-star' },
+569-            doctor:      { name: 'طبيب', color: '#14b8a6', bg: 'rgba(20,184,166,0.15)', icon: 'fa-stethoscope' },
+570-            viewer:      { name: 'مراجع', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)', icon: 'fa-eye' },
+571-        };
+572-
+573-        let currentUser = null;
+574-        let currentProfile = null;
+575-
+
+═══ [3] toggleTheme (exact lines) ═══
+
+357-            </div>
+358-            <div class="flex items-center gap-2">
+359:                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم">
+360-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+361-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+362-                    </svg>
+363-                </button>
+364-                <a href="dashboard.html" style="padding: 8px 16px; border-radius: 10px; background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+365-                    <i class="fa-solid fa-arrow-right"></i>
+366-                    رجوع
+367-                </a>
+--
+574-        let currentProfile = null;
+575-
+576:        window.toggleTheme = function() {
+577-            const html = document.documentElement;
+578-            html.classList.toggle('dark');
+579-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+580-        };
+581-
+582-        function makeAvatarGradient(color) {
+583-            return `radial-gradient(circle at 30% 25%, rgba(255,255,255,0.35) 0%, transparent 55%), linear-gradient(135deg, ${color}, ${color}cc)`;
+584-        }
+
+═══ [4] AUTH GUARD — supabase.auth.getSession block ═══
+
+622:            const { data: { session } } = await supabase.auth.getSession();
+623-            if (!session) {
+624-                window.location.href = './login.html';
+625-                return;
+626-            }
+627-
+628-            currentUser = session.user;
+629-
+630-            const { data: profile } = await supabase
+631-                .from('profiles')
+632-                .select('*')
+633-                .eq('id', session.user.id)
+634-                .single();
+635-
+636-            if (!profile) {
+637-                showNotification('تعذّر تحميل بيانات الملف الشخصي', 'error');
+638-                return;
+639-            }
+640-
+641-            currentProfile = profile;
+642-
+643-            // Hero
+644-            const roleInfo = ROLE_META[profile.role] || ROLE_META.viewer;
+645-            const avatar = document.getElementById('heroAvatar');
+646-            avatar.innerHTML = `<i class="fa-solid ${roleInfo.icon}"></i>`;
+647-            avatar.style.background = makeAvatarGradient(roleInfo.color);
+
+═══ [5] GLOBAL HANDLERS ═══
+
+
+═══ [6] HEAD — theme-overrides, loading-logo, loader-buttons (last 20 lines before </head>) ═══
+
+330-        }
+331-    </style>
+332:    <link rel="stylesheet" href="theme-overrides.css" />
+333-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+334-    <script src="loading-logo.js" defer></script>
+335-    <script src="loader-buttons.js" defer></script>
+336-
+337-
+338-</head>
+339-<body>
+340-
+341-    <div class="loading-screen" id="loadingScreen">
+342-        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+343-        <p class="text-sm font-bold" style="color: var(--text-secondary);">جاري التحميل...</p>
+344-    </div>
+345-
+346-    <div class="aurora-bg"></div>
+347-    <div class="grid-overlay"></div>
+348-
+349-    <div class="nav-shell">
+350-        <header class="nav-inner">
+351-            <div class="flex items-center gap-3">
+352-                <div class="logo-dot"></div>
+
+═══ [7] HEADER HTML (nav-shell area) ═══
+
+348-
+349:    <div class="nav-shell">
+350-        <header class="nav-inner">
+351-            <div class="flex items-center gap-3">
+352-                <div class="logo-dot"></div>
+353-                <div>
+354-                    <a href="dashboard.html" class="brand-text text-lg block leading-none">VEXORIS</a>
+355-                    <p class="text-[10px] font-bold mt-1" style="color: var(--text-muted);">Medical Record &amp; Auditing System</p>
+356-                </div>
+357-            </div>
+358-            <div class="flex items-center gap-2">
+359-                <button onclick="toggleTheme()" class="icon-btn" title="تبديل الثيم">
+360-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+361-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+362-                    </svg>
+363-                </button>
+364-                <a href="dashboard.html" style="padding: 8px 16px; border-radius: 10px; background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+365-                    <i class="fa-solid fa-arrow-right"></i>
+366-                    رجوع
+367-                </a>
+368-            </div>
+369-        </header>
+370-    </div>
+371-
+372-    <main class="app-container">
+373-
+374-        <!-- HERO -->
+375-        <section class="profile-hero">
+376-            <div class="hero-avatar" id="heroAvatar"></div>
+377-            <div class="hero-info">
+378-                <h1 class="hero-name" id="heroName">...</h1>
+379-                <div class="hero-username" id="heroUsername">@...</div>
+380-                <div id="heroRoleBadge"></div>
+381-            </div>
+382-        </section>
+383-
+384-        <!-- PERSONAL INFO -->
+385-        <section class="profile-section">
+386-            <div class="section-header">
+387-                <div class="section-icon"><i class="fa-solid fa-user"></i></div>
+388-                <div>
+389-                    <div class="section-title">المعلومات الشخصية</div>
+390-                    <div class="section-desc">حدّث بياناتك الشخصية</div>
+391-                </div>
+392-            </div>
+393-            <div class="section-body">
+394-                <form id="personalInfoForm">
+395-                    <div class="form-grid">
+396-                        <div class="form-field">
+397-                            <label>الاسم المعروض</label>
+398-                            <input type="text" id="fieldDisplayName" placeholder="اسمك الكامل" />
+399-                        </div>
+400-                        <div class="form-field">
+401-                            <label>القسم / الإدارة</label>
+402-                            <input type="text" id="fieldDepartment" placeholder="القسم الذي تعمل به" />
+403-                        </div>
+404-                        <div class="form-field full">
+405-                            <label>رقم الهاتف</label>
+406-                            <input type="tel" id="fieldPhone" placeholder="01xxxxxxxxx" />
+407-                        </div>
+408-                    </div>
+409-                    <div class="form-actions">
+
+═══ [8] USER CHIP + DROPDOWN markup (if exists) ═══
+
+
+═══ [9] FOOTER markup ═══
+
+544-    </main>
+545-
+546:    <footer class="footer-shell">
+547-        <div class="footer-brand">VEXORIS SYSTEM</div>
+548-        <div class="footer-text" style="margin-bottom: 10px;">جميع حقوق النشر والطبع محفوظة لإدارة السجلات الطبية 2025 ©</div>
+549-        <div class="footer-text">
+550-            تم برمجة النظام وتنفيذه بواسطة
+551-            <span class="credit-badge credit-indigo">أ/ نادية عادل</span>
+552-            <span style="margin: 0 6px; color: var(--text-muted);">—</span>
+553-            <span class="credit-badge credit-teal">أ/ خالد شوقي</span>
+554-        </div>
+555-    </footer>
+556-
+557-    <script src="./notify.js"></script>
+558-
+559-    <script type="module">
+560-        import { supabase } from './supabase-client.js';
+561-        import { logAudit, AUDIT, AUDIT_LABELS } from './audit-log.js';
+
+═══ [10] END OF BODY — scripts before </body> ═══
+
+
+            // Clear metadata
+            await supabase.auth.updateUser({ data: { mfa_method: null, mfa_email: null } });
+
+            await logAudit(AUDIT.MFA_DISABLED, {
+                entityType: 'user',
+                entityId: currentUser.id,
+                description: 'تم إلغاء تفعيل MFA',
+                severity: 'critical',
+            });
+
+            showNotification('تم إلغاء MFA. سيُطلب منك إعادة التفعيل عند الدخول التالي.', 'warning', '', 6000);
+            await renderMFA();
+        });
+
+        // ============================================
+        // INIT
+        // ============================================
+        (async () => {
+            await loadProfile();
+            await loadDevices();
+            await loadActivity();
+            document.getElementById('loadingScreen').classList.add('hide');
+        })();
+    </script>
+
+    <script type="module" src="./session-manager.js"></script>
+   
+</body>
+</html>
