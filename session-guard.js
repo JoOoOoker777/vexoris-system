@@ -306,15 +306,27 @@ function startGraceBanner() {
 // RPC: create / validate / kill / grace / end
 // ============================================
 async function rpcCreateSession() {
-  const { data, error } = await supabase.rpc('create_session', {
-    p_device_id: getDeviceId(),
-    p_device_info: getDeviceInfo(),
-    p_duration_hours: 15,
-    p_user_agent: navigator.userAgent,
-    p_ip: null,
-  });
-  if (error || !data?.success) return null;
-  return data;
+  try {
+    const { data, error } = await supabase.rpc('create_session', {
+      p_device_id: getDeviceId(),
+      p_device_info: getDeviceInfo(),
+      p_duration_hours: 15,
+      p_user_agent: navigator.userAgent,
+      p_ip: null,
+    });
+    if (error) {
+      console.error('[session-guard] create_session RPC error:', error.message, error);
+      return null;
+    }
+    if (!data || data.success !== true) {
+      console.error('[session-guard] create_session returned unexpected:', data);
+      return null;
+    }
+    return data;
+  } catch (e) {
+    console.error('[session-guard] create_session exception:', e);
+    return null;
+  }
 }
 
 async function rpcValidate(token) {
@@ -328,6 +340,14 @@ async function rpcValidate(token) {
 }
 
 async function useGrace() {
+  // Fallback mode: extend locally
+  if (!currentToken) {
+    if (!currentExpiresAt) return false;
+    currentExpiresAt = new Date(currentExpiresAt.getTime() + 5 * 60 * 1000);
+    graceUsed = true;
+    return true;
+  }
+  
   const { data, error } = await supabase.rpc('use_grace', { p_session_token: currentToken });
   if (error || !data?.success) return false;
   graceUsed = true;
@@ -461,8 +481,9 @@ function stopAll() {
 // ============================================
 export async function ensureSession(auth) {
   injectStyles();
+  
+  // 1. Existing token — validate
   const existing = getToken();
-
   if (existing) {
     const r = await rpcValidate(existing);
     if (r.valid) {
@@ -472,40 +493,59 @@ export async function ensureSession(auth) {
       startHeartbeat();
       return { ok: true, token: existing };
     }
+    console.warn('[session-guard] existing token invalid:', r.reason);
     clearToken();
   }
 
-  // No valid token — check if fresh login
-  const lastSignIn = auth?.session?.user?.last_sign_in_at;
-  const fresh = lastSignIn && (Date.now() - new Date(lastSignIn).getTime()) < 5 * 60 * 1000;
-
-  if (!fresh) {
-    return { ok: false, reason: 'session_missing' };
-  }
-
-  // Single-device check
+  // 2. Single-device check (best-effort)
   const deviceId = getDeviceId();
-  const actives = await rpcGetActiveSessions();
-  const others = actives.filter(s => s.device_id !== deviceId);
-
-  if (others.length > 0) {
-    const agreed = await showConflictModal(others);
-    if (!agreed) {
-      await supabase.auth.signOut();
-      return { ok: false, reason: 'declined_single_device' };
+  try {
+    const actives = await rpcGetActiveSessions();
+    const others = (actives || []).filter(s => s.device_id !== deviceId);
+    
+    if (others.length > 0) {
+      const agreed = await showConflictModal(others);
+      if (!agreed) {
+        await supabase.auth.signOut();
+        return { ok: false, reason: 'declined_single_device' };
+      }
+      for (const s of others) {
+        try { await rpcKillSession(s.session_token); } catch (e) {}
+      }
     }
-    for (const s of others) await rpcKillSession(s.session_token);
+  } catch (e) {
+    console.warn('[session-guard] get_active_sessions failed:', e);
+    // Continue anyway — this is best-effort
   }
 
-  const created = await rpcCreateSession();
-  if (!created) return { ok: false, reason: 'create_failed' };
+  // 3. Create session (with 1 retry)
+  let created = await rpcCreateSession();
+  if (!created) {
+    console.warn('[session-guard] create_session failed, retrying in 800ms...');
+    await new Promise(r => setTimeout(r, 800));
+    created = await rpcCreateSession();
+  }
+  
+  // 4. Fallback if create failed twice
+  if (!created) {
+    console.error('[session-guard] create_session failed twice — FALLBACK to client-side tracking');
+    currentToken = null;
+    currentExpiresAt = new Date(Date.now() + 15 * 60 * 60 * 1000);
+    graceUsed = false;
+    // Local-only expiry timer
+    stopHeartbeat();
+    expiryTimer = setInterval(checkExpiry, 30 * 1000);
+    checkExpiry();
+    return { ok: true, token: null, fallback: true };
+  }
 
+  // 5. Success
   currentToken = created.session_token;
   currentExpiresAt = new Date(created.expires_at);
   graceUsed = false;
   setToken(currentToken);
   startHeartbeat();
-  return { ok: true, token: currentToken, killed: others.length };
+  return { ok: true, token: currentToken };
 }
 
 // ============================================

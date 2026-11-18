@@ -125,13 +125,17 @@ export async function initAuthGuard(opts = {}) {
             window.location.href = loginPath;
             throw new Error('AUTH_GUARD_SESSION_DECLINED');
         }
-        if (sessionCheck.reason === 'session_missing' || sessionCheck.reason === 'create_failed') {
-            await supabase.auth.signOut();
-            window.location.href = loginPath;
-            throw new Error('AUTH_GUARD_SESSION_MISSING');
+        // For all other failures — DON'T signOut, degrade gracefully
+        console.warn('[auth-guard] session tracking degraded:', sessionCheck.reason);
+        if (window.showNotification) {
+            try {
+                window.showNotification(
+                    'تعذر تفعيل تتبع الجلسات. بعض الميزات الأمنية قد لا تعمل.',
+                    'warning', '', 5000
+                );
+            } catch(e) {}
         }
-        window.location.href = loginPath;
-        throw new Error('AUTH_GUARD_SESSION_FAILED');
+        // Continue without full session tracking — user stays authenticated
     }
 
     return {
