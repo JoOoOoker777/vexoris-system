@@ -33,7 +33,7 @@ const CONFIG = {
 };
 
 const ZOOM_LEVELS = [70, 80, 90, 100, 110, 120, 130, 150];
-const DEFAULT_ZOOM = 80;
+const DEFAULT_ZOOM = 100;
 const MIN_ZOOM = ZOOM_LEVELS[0];
 const MAX_ZOOM = ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
 

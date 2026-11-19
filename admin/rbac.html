@@ -145,179 +145,82 @@
         }
         .hero-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); line-height: 1.75; max-width: 720px; }
 
-        /* Matrix */
-        .matrix-wrap {
-            margin-top: 24px;
+        
+        /* ====== MODAL UI (الجديد) ====== */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(4, 7, 15, 0.7);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal-card {
             background: var(--card-bg);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
             border: 1px solid var(--card-border);
-            border-radius: 20px;
-            overflow: hidden;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            border-radius: 22px; width: 100%; max-width: 700px; max-height: 90vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
+            transform: scale(0.92); transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
         }
-        .matrix-header {
+        .modal-overlay.open .modal-card { transform: scale(1); }
+        .modal-card::before { content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px; background: var(--role-color); z-index: 1; }
+        .modal-head { padding: 20px 24px; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between; }
+        .modal-title { font-size: 1.1rem; font-weight: 900; display: flex; align-items: center; gap: 10px; }
+        .modal-title .icon-wrapper {
+            width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; border: 1px solid;
+        }
+        .modal-body { padding: 24px; overflow-y: auto; flex: 1; }
+        .app-list { display: flex; flex-direction: column; gap: 10px; }
+        .app-item {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--card-border);
-            gap: 16px; flex-wrap: wrap;
+            padding: 12px 16px; border-radius: 12px; border: 1px solid var(--card-border);
+            background: rgba(15, 23, 42, 0.3); cursor: pointer; transition: all 0.2s;
         }
-        .matrix-title { font-size: 1rem; font-weight: 900; }
-        .matrix-subtitle { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
-        .matrix-actions { display: flex; gap: 8px; align-items: center; }
-        .btn-reset {
-            padding: 9px 16px; border-radius: 9px;
-            background: transparent; border: 1px solid var(--card-border);
-            color: var(--text-secondary); font-family: inherit;
-            font-weight: 700; font-size: 0.78rem; cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex; align-items: center; gap: 6px;
+        html:not(.dark) .app-item { background: rgba(248, 250, 252, 0.6); }
+        .app-item:hover { border-color: var(--app-color); background: var(--app-soft); }
+        .app-item-left { display: flex; align-items: center; gap: 12px; }
+        .app-item-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: var(--app-soft); border: 1px solid var(--app-color);
+            color: var(--app-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
         }
-        .btn-reset:hover { border-color: #f87171; color: #f87171; }
+        .app-item-name { font-size: 0.85rem; font-weight: 800; color: var(--text-primary); }
+        .app-item-cat { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); margin-top: 2px; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--card-border); display: flex; justify-content: flex-end; gap: 10px; }
+        .btn-cancel {
+            padding: 10px 22px; border-radius: 10px; font-family: inherit; font-weight: 800; font-size: 0.82rem;
+            cursor: pointer; transition: all 0.25s ease; background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary);
+        }
+        .btn-cancel:hover { border-color: var(--text-secondary); background: rgba(148, 163, 184, 0.08); }
         .btn-save {
-            padding: 10px 22px; border-radius: 9px;
-            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
-            color: #fff; border: none; font-family: inherit;
-            font-weight: 800; font-size: 0.82rem; cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 22px; border-radius: 10px; background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+            color: #fff; border: none; font-family: inherit; font-weight: 800; font-size: 0.82rem; cursor: pointer;
+            transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px;
             box-shadow: 0 6px 18px -6px rgba(14, 165, 233, 0.5);
         }
         .btn-save:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 24px -6px rgba(99, 102, 241, 0.6); }
         .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-save .changes-badge {
-            background: rgba(255,255,255,0.25);
-            padding: 1px 7px; border-radius: 5px;
-            font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem;
-        }
 
-        .matrix-scroll { overflow-x: auto; }
-
-        table.matrix {
-            width: 100%; border-collapse: separate; border-spacing: 0;
-            min-width: 1000px;
-        }
-        table.matrix thead th {
-            position: sticky; top: 0;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--card-border);
-            padding: 14px 8px;
-            font-size: 0.7rem; font-weight: 800;
-            text-align: center;
-            color: var(--text-secondary);
-            text-transform: uppercase; letter-spacing: 0.03em;
-            z-index: 2;
-        }
-        table.matrix thead th:first-child {
-            text-align: right; padding-right: 24px;
-            min-width: 240px;
-            position: sticky; right: 0;
-            background: var(--card-bg); backdrop-filter: blur(20px);
-            z-index: 3;
-        }
-        .role-header {
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-        }
-        .role-header .role-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-        }
-        .role-header .role-name {
-            font-size: 0.68rem; font-weight: 800;
-        }
-
-        table.matrix tbody tr {
-            transition: background 0.15s ease;
-        }
-        table.matrix tbody tr:hover {
-            background: rgba(14, 165, 233, 0.03);
-        }
-        table.matrix tbody td {
-            padding: 10px 8px;
-            border-bottom: 1px solid var(--card-border);
-            text-align: center;
-            vertical-align: middle;
-        }
-        table.matrix tbody td:first-child {
-            text-align: right; padding-right: 24px;
-            position: sticky; right: 0;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            z-index: 1;
-            border-left: 1px solid var(--card-border);
-        }
-
-        .app-cell {
-            display: flex; align-items: center; gap: 10px;
-        }
-        .app-icon-sm {
-            width: 32px; height: 32px; border-radius: 8px;
-            background: var(--app-soft); border: 1px solid var(--app-color);
-            display: flex; align-items: center; justify-content: center;
-            color: var(--app-color); font-size: 0.75rem; flex-shrink: 0;
-        }
-        .app-info-sm { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-        .app-name-sm { font-size: 0.78rem; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
-        .app-cat-sm {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em;
-            color: var(--text-muted); text-transform: uppercase;
-        }
-
-        /* Checkbox */
+        /* Reuse Original Checkbox */
         .perm-checkbox {
             display: inline-flex; align-items: center; justify-content: center;
             width: 26px; height: 26px; border-radius: 7px;
             background: rgba(148, 163, 184, 0.08);
             border: 1.5px solid var(--card-border);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-        .perm-checkbox:hover {
-            border-color: var(--accent);
-            transform: scale(1.08);
+            cursor: pointer; transition: all 0.2s ease; position: relative; flex-shrink: 0;
         }
         .perm-checkbox.checked {
             background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
             border-color: transparent;
         }
         .perm-checkbox.checked::after {
-            content: '\f00c';
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900;
-            color: #fff;
-            font-size: 0.65rem;
+            content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: #fff; font-size: 0.65rem;
         }
-        .perm-checkbox.changed {
-            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
-            border-color: #f59e0b;
-        }
-        .perm-checkbox.changed.checked {
-            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
-        }
-        .perm-checkbox.locked {
-            cursor: not-allowed;
-            opacity: 0.4;
-        }
-
-        /* Sticky save bar */
-        .save-bar {
-            position: fixed; bottom: 24px; left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--card-bg);
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            padding: 12px 20px;
-            display: flex; align-items: center; gap: 16px;
-            box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.4);
-            z-index: 90;
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .save-bar.show { transform: translateX(-50%) translateY(0); }
-        .save-bar-info { font-size: 0.82rem; font-weight: 700; }
-        .save-bar-info strong { color: var(--accent); }
 
         /* Loading */
         .loading-screen {
@@ -375,33 +278,6 @@
         .dropdown-item{width:100%;padding:10px 12px;background:transparent;border:none;color:var(--text-secondary);font-family:inherit;font-size:.8rem;font-weight:700;border-radius:8px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:right;transition:all .2s}
         .dropdown-item:hover{background:rgba(14,165,233,.08);color:var(--accent)}
         .dropdown-item i{width:16px;font-size:.8rem}
-        .dropdown-profile{padding:12px 12px;display:flex;align-items:center;gap:10px}
-        .dropdown-avatar-lg{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;color:#fff;position:relative;overflow:hidden}
-        .dropdown-avatar-lg i{position:relative;z-index:2}
-        .dropdown-avatar-lg::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.3) 50%,transparent 70%);background-size:200% 100%;animation:shine 4s infinite;z-index:1}
-        .dropdown-name{font-size:.88rem;font-weight:900;color:var(--text-primary);line-height:1.2}
-        .dropdown-email{font-size:.7rem;font-weight:600;color:var(--text-muted);line-height:1.3;margin-top:1px}
-        .dropdown-role-badge{display:inline-flex;align-items:center;gap:4px;font-size:.6rem;font-weight:800;padding:2px 8px;border-radius:5px;margin-top:4px}
-        .dropdown-divider{height:1px;background:var(--card-border);margin:6px 4px}
-        /* USER CHIP + DROPDOWN (unified) */
-        .icon-btn.logout-btn{color:#f87171}
-        .icon-btn.logout-btn:hover{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.4);transform:scale(1.05)}
-        .user-chip{display:none;align-items:center;gap:10px;padding:6px 12px 6px 8px;background:rgba(148,163,184,.06);border:1px solid var(--card-border);border-radius:12px;cursor:pointer;transition:all .3s;font-family:inherit;color:inherit}
-        .user-chip:hover{border-color:var(--accent)}
-        .user-avatar{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.95rem;flex-shrink:0;position:relative;overflow:hidden}
-        .user-avatar i{position:relative;z-index:2}
-        .user-avatar::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.4) 50%,transparent 70%);background-size:200% 100%;animation:shine 4s infinite;z-index:1}
-        @keyframes shine{0%{background-position:-200% 0}50%,100%{background-position:200% 0}}
-        .user-info{display:flex;flex-direction:column;gap:1px;text-align:right}
-        .user-name{font-size:.78rem;font-weight:800;color:var(--text-primary);line-height:1.1}
-        .user-role{font-size:.65rem;font-weight:700;line-height:1.1}
-        .user-chip-arrow{color:var(--text-muted);font-size:.65rem;transition:transform .3s ease}
-        .user-chip.open .user-chip-arrow{transform:rotate(180deg)}
-        .user-dropdown{position:absolute;top:55px;left:0;width:260px;background:var(--card-bg);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--card-border);border-radius:16px;padding:6px;z-index:60;box-shadow:0 24px 48px -12px rgba(0,0,0,.4);opacity:0;transform:translateY(-8px) scale(.96);pointer-events:none;transition:all .25s}
-        .user-dropdown.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
-        .dropdown-item{width:100%;padding:10px 12px;background:transparent;border:none;color:var(--text-secondary);font-family:inherit;font-size:.8rem;font-weight:700;border-radius:8px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:right;transition:all .2s}
-        .dropdown-item:hover{background:rgba(14,165,233,.08);color:var(--accent)}
-        .dropdown-item i{width:16px;font-size:.8rem}
         .dropdown-profile{padding:12px;display:flex;align-items:center;gap:10px}
         .dropdown-avatar-lg{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;color:#fff;position:relative;overflow:hidden}
         .dropdown-avatar-lg i{position:relative;z-index:2}
@@ -410,6 +286,83 @@
         .dropdown-email{font-size:.7rem;font-weight:600;color:var(--text-muted);line-height:1.3;margin-top:1px}
         .dropdown-role-badge{display:inline-flex;align-items:center;gap:4px;font-size:.6rem;font-weight:800;padding:2px 8px;border-radius:5px;margin-top:4px}
         .dropdown-divider{height:1px;background:var(--card-border);margin:6px 4px}
+            /* ====== CARDS UI (الجديد) ====== */
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
+            margin-bottom: 40px;
+        }
+        .role-card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 16px; padding: 24px 20px; display: flex; flex-direction: column;
+            align-items: center; text-align: center; gap: 12px; cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative;
+            overflow: hidden; backdrop-filter: blur(20px);
+        }
+        .role-card::before {
+            content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px;
+            background: var(--role-color); opacity: 0.6;
+        }
+        .role-card:hover {
+            transform: translateY(-5px); border-color: var(--role-color);
+            box-shadow: 0 12px 24px -10px var(--role-color);
+        }
+        .role-card-icon {
+            width: 60px; height: 60px; border-radius: 16px; background: var(--role-bg);
+            border: 1px solid var(--role-color); color: var(--role-color); font-size: 1.5rem;
+            display: flex; align-items: center; justify-content: center; position: relative; z-index: 1;
+        }
+        .role-card-name { font-size: 1.1rem; font-weight: 900; color: var(--text-primary); z-index: 1; }
+        .role-card-count {
+            font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
+            background: rgba(148, 163, 184, 0.1); padding: 4px 12px; border-radius: 20px;
+            z-index: 1; transition: all 0.3s;
+        }
+        .role-card:hover .role-card-count { background: var(--role-bg); color: var(--role-color); }
+
+        /* ====== MODAL UI (الجديد) ====== */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 9999; background: rgba(4, 7, 15, 0.7);
+            backdrop-filter: blur(12px) saturate(180%); -webkit-backdrop-filter: blur(12px) saturate(180%);
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal-card {
+            background: var(--card-bg); backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid var(--card-border);
+            border-radius: 22px; width: 100%; max-width: 700px; max-height: 90vh;
+            display: flex; flex-direction: column; box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
+            transform: scale(0.92); transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative;
+        }
+        .modal-overlay.open .modal-card { transform: scale(1); }
+        .modal-card::before { content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px; background: var(--role-color); z-index: 1; }
+        .modal-head { padding: 20px 24px; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between; }
+        .modal-title { font-size: 1.1rem; font-weight: 900; display: flex; align-items: center; gap: 10px; }
+        .modal-title .icon-wrapper { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; border: 1px solid; }
+        .modal-body { padding: 24px; overflow-y: auto; flex: 1; }
+        .app-list { display: flex; flex-direction: column; gap: 10px; }
+        .app-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; border-radius: 12px; border: 1px solid var(--card-border);
+            background: rgba(15, 23, 42, 0.3); cursor: pointer; transition: all 0.2s;
+        }
+        html:not(.dark) .app-item { background: rgba(248, 250, 252, 0.6); }
+        .app-item:hover { border-color: var(--app-color); background: var(--app-soft); }
+        .app-item-left { display: flex; align-items: center; gap: 12px; }
+        .app-item-icon {
+            width: 32px; height: 32px; border-radius: 8px; background: var(--app-soft);
+            border: 1px solid var(--app-color); color: var(--app-color);
+            display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
+        }
+        .app-item-name { font-size: 0.85rem; font-weight: 800; color: var(--text-primary); }
+        .app-item-cat { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); margin-top: 2px; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--card-border); display: flex; justify-content: flex-end; gap: 10px; }
+        .btn-cancel { padding: 10px 22px; border-radius: 10px; font-family: inherit; font-weight: 800; font-size: 0.82rem; cursor: pointer; transition: all 0.25s ease; background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); }
+        .btn-cancel:hover { border-color: var(--text-secondary); background: rgba(148, 163, 184, 0.08); }
+            
     </style>
     <link rel="stylesheet" href="../theme-overrides.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
@@ -488,42 +441,30 @@
             </div>
             <h1 class="hero-title">التحكم في <span class="grad">صلاحيات الأدوار</span></h1>
             <p class="hero-desc">
-                حدّد بدقة أي تطبيق يظهر لأي دور. التغييرات التي تحفظها هنا تُطبَّق فوراً على لوحة تحكم كل المستخدمين المرتبطين بذلك الدور. للتغيير: اضغط على المربع لتفعيله أو إلغاء تفعيله.
+                حدّد بدقة أي تطبيق يظهر لأي دور. اختر الدور من الكروت أدناه لتفتح نافذة التعديل، ثم فعّل أو ألغِ تفعيل التطبيقات واضغط حفظ لتطبيق التغييرات فوراً.
             </p>
         </section>
 
-        <section class="matrix-wrap">
-            <div class="matrix-header">
-                <div>
-                    <div class="matrix-title">مصفوفة الصلاحيات</div>
-                    <div class="matrix-subtitle">7 أدوار × 16 تطبيق</div>
-                </div>
-                <div class="matrix-actions">
-                    <button class="btn-reset" id="btnReset">
-                        <i class="fa-solid fa-rotate-left"></i>
-                        إعادة تعيين
-                    </button>
-                </div>
-            </div>
-            <div class="matrix-scroll">
-                <table class="matrix" id="permMatrix">
-                    <thead id="matrixHead"></thead>
-                    <tbody id="matrixBody"></tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Floating Save Bar -->
-        <div class="save-bar" id="saveBar">
-            <div class="save-bar-info">
-                لديك <strong id="changesCount">0</strong> تغيير لم يُحفظ
-            </div>
-            <button class="btn-save" id="btnSave">
-                <i class="fa-solid fa-check"></i>
-                حفظ التغييرات
-            </button>
-        </div>
+        <!-- منطقة كروت الأدوار -->
+        <div class="roles-grid" id="rolesGrid"></div>
     </main>
+
+    <!-- ============ MODAL ============ -->
+    <div class="modal-overlay" id="roleModal">
+        <div class="modal-card" id="roleModalCard">
+            <div class="modal-head">
+                <div class="modal-title" id="modalRoleTitle"></div>
+                <button class="icon-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="app-list" id="modalAppList"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
+                <button class="btn-save" id="btnSaveModal" onclick="saveModalChanges()"><i class="fa-solid fa-check"></i> حفظ التغييرات</button>
+            </div>
+        </div>
+    </div>
 
     <footer class="footer-shell">
         <div class="footer-brand">VEXORIS SYSTEM</div>
@@ -536,26 +477,15 @@
         </div>
     </footer>
 
-    <!-- استدعاء نظام الإشعارات -->
     <script src="../notify.js"></script>
 
     <script type="module">
         import { supabase } from '../supabase-client.js';
-        import { initAuthGuard, mountUserChip } from '../session-manager.js';
+        import { initAuthGuard, mountUserChip, ROLE_META } from '../session-manager.js';
 
-        // ============================================
-        // CONFIG
-        // ============================================
-        const ROLES = [
-            { key: 'super_admin', name: 'المطور', color: '#a855f7' },
-            { key: 'admin',       name: 'ادارة السجلات الطبية', color: '#0ea5e9' },
-            { key: 'manager',     name: 'المدير الطبي', color: '#6366f1' },
-            { key: 'reviewer_doctor', name: 'طبيب مراجع', color: '#0d9488' },
-            { key: 'auditor',     name: 'مراجع جودة', color: '#f59e0b' },
-            { key: 'senior',      name: 'رئيس قسم', color: '#10b981' },
-            { key: 'doctor',      name: 'طبيب', color: '#14b8a6' },
-            { key: 'viewer',      name: 'مراجع', color: '#94a3b8' },
-        ];
+        const ROLES = Object.entries(ROLE_META).map(([key, meta]) => ({
+            key, name: meta.name, color: meta.color, bg: meta.bg, icon: meta.icon
+        }));
 
         const APPS = [
             { id: 'medical-audit',     name: 'مراجعة الملفات الطبية', icon: 'fa-folder-medical', color: '#0ea5e9', soft: 'rgba(14,165,233,0.12)', category: 'سريرية' },
@@ -576,222 +506,143 @@
             { id: 'admin-logs',        name: 'سجل التدقيق',            icon: 'fa-clipboard-list', color: '#64748b', soft: 'rgba(100,116,139,0.12)', category: 'إدارة' },
         ];
 
-        // ============================================
-        // STATE
-        // ============================================
-        let originalPerms = {}; // { "role::app_id": boolean }
-        let currentPerms = {};  // { "role::app_id": boolean }
+        let permissions = {}; 
         let currentUserRole = null;
         let isSuperAdmin = false;
+        let activeRole = null; 
+        let modalPerms = {}; 
 
-        // ============================================
-        // HELPERS
-        // ============================================
         function key(role, appId) { return `${role}::${appId}`; }
 
-
-
-        function getChangesCount() {
-            let n = 0;
-            for (const k in currentPerms) {
-                if (originalPerms[k] !== currentPerms[k]) n++;
-            }
-            return n;
-        }
-
-        function updateSaveBar() {
-            const n = getChangesCount();
-            document.getElementById('changesCount').textContent = n;
-            const bar = document.getElementById('saveBar');
-            if (n > 0) bar.classList.add('show');
-            else bar.classList.remove('show');
-        }
-
-        // ============================================
-        // RENDER MATRIX
-        // ============================================
-        function renderMatrix() {
-            // Head
-            const head = document.getElementById('matrixHead');
-            head.innerHTML = '<tr>' +
-                '<th><i class="fa-solid fa-layer-group" style="margin-inline-end: 8px;"></i>التطبيق</th>' +
-                ROLES.map(r => `
-                    <th>
-                        <div class="role-header">
-                            <div class="role-dot" style="background: ${r.color}; box-shadow: 0 0 8px ${r.color}80;"></div>
-                            <div class="role-name" style="color: ${r.color};">${r.name}</div>
-                        </div>
-                    </th>
-                `).join('') +
-                '</tr>';
-
-            // Body
-            const body = document.getElementById('matrixBody');
-            body.innerHTML = APPS.map(app => {
-                const cells = ROLES.map(role => {
-                    const k = key(role.key, app.id);
-                    const checked = currentPerms[k] ? 'checked' : '';
-                    // منع تعديل صف super_admin إذا أنت مش super_admin
-                    const locked = (role.key === 'super_admin' && !isSuperAdmin) ? 'locked' : '';
-                    return `
-                        <td>
-                            <div class="perm-checkbox ${checked} ${locked}" data-role="${role.key}" data-app="${app.id}"></div>
-                        </td>
-                    `;
-                }).join('');
-
+        function renderCards() {
+            const grid = document.getElementById('rolesGrid');
+            grid.innerHTML = ROLES.map(role => {
+                const count = APPS.filter(app => permissions[key(role.key, app.id)]).length;
                 return `
-                    <tr>
-                        <td>
-                            <div class="app-cell" style="--app-color: ${app.color}; --app-soft: ${app.soft};">
-                                <div class="app-icon-sm"><i class="fa-solid ${app.icon}"></i></div>
-                                <div class="app-info-sm">
-                                    <div class="app-name-sm">${app.name}</div>
-                                    <div class="app-cat-sm">${app.category}</div>
-                                </div>
-                            </div>
-                        </td>
-                        ${cells}
-                    </tr>
+                    <div class="role-card" data-role="${role.key}" style="--role-color: ${role.color}; --role-bg: ${role.bg};">
+                        <div class="role-card-icon"><i class="fa-solid ${role.icon}"></i></div>
+                        <div class="role-card-name">${role.name}</div>
+                        <div class="role-card-count">${count} تطبيق متاح</div>
+                    </div>
                 `;
             }).join('');
 
-            // Wire up checkboxes
-            body.querySelectorAll('.perm-checkbox:not(.locked)').forEach(el => {
-                el.addEventListener('click', () => {
-                    const role = el.dataset.role;
-                    const appId = el.dataset.app;
-                    const k = key(role, appId);
-                    currentPerms[k] = !currentPerms[k];
+            grid.querySelectorAll('.role-card').forEach(card => {
+                card.addEventListener('click', () => openModal(card.dataset.role));
+            });
+        }
 
-                    el.classList.toggle('checked', currentPerms[k]);
-                    el.classList.toggle('changed', currentPerms[k] !== originalPerms[k]);
-                    updateSaveBar();
+        function openModal(roleKey) {
+            if (roleKey === 'super_admin' && !isSuperAdmin) {
+                showNotification('لا يمكن تعديل صلاحيات المطور إلا بواسطة مطور آخر.', 'error');
+                return;
+            }
+
+            activeRole = roleKey;
+            const roleMeta = ROLES.find(r => r.key === roleKey);
+
+            const card = document.getElementById('roleModalCard');
+            card.style.setProperty('--role-color', roleMeta.color);
+            document.getElementById('modalRoleTitle').innerHTML = `
+                <div class="icon-wrapper" style="background:${roleMeta.bg}; border-color:${roleMeta.color}; color:${roleMeta.color};">
+                    <i class="fa-solid ${roleMeta.icon}"></i>
+                </div>
+                صلاحيات: ${roleMeta.name}
+            `;
+
+            modalPerms = {};
+            APPS.forEach(app => { modalPerms[app.id] = !!permissions[key(roleKey, app.id)]; });
+            renderModalApps();
+            document.getElementById('roleModal').classList.add('open');
+        }
+
+        window.closeModal = function() {
+            document.getElementById('roleModal').classList.remove('open');
+            activeRole = null;
+        };
+
+        document.getElementById('roleModal').addEventListener('click', (e) => {
+            if (e.target.id === 'roleModal') closeModal();
+        });
+
+        function renderModalApps() {
+            const list = document.getElementById('modalAppList');
+            list.innerHTML = APPS.map(app => {
+                const checked = modalPerms[app.id] ? 'checked' : '';
+                return `
+                    <div class="app-item" data-app="${app.id}" style="--app-color:${app.color}; --app-soft:${app.soft};">
+                        <div class="app-item-left">
+                            <div class="app-item-icon"><i class="fa-solid ${app.icon}"></i></div>
+                            <div>
+                                <div class="app-item-name">${app.name}</div>
+                                <div class="app-item-cat">${app.category}</div>
+                            </div>
+                        </div>
+                        <div class="perm-checkbox ${checked}"></div>
+                    </div>
+                `;
+            }).join('');
+
+            list.querySelectorAll('.app-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const appId = item.dataset.app;
+                    modalPerms[appId] = !modalPerms[appId];
+                    const cb = item.querySelector('.perm-checkbox');
+                    cb.classList.toggle('checked', modalPerms[appId]);
                 });
             });
         }
 
-        // ============================================
-        // LOAD & SAVE
-        // ============================================
-        async function loadPermissions() {
-            const { data, error } = await supabase
-                .from('role_permissions')
-                .select('role, app_id, allowed');
-
-            if (error) {
-                console.error('Load error:', error);
-                showNotification('فشل تحميل الصلاحيات: ' + error.message, 'error');
-                return false;
-            }
-
-            originalPerms = {};
-            currentPerms = {};
-            data.forEach(row => {
-                const k = key(row.role, row.app_id);
-                originalPerms[k] = row.allowed;
-                currentPerms[k] = row.allowed;
-            });
-            return true;
-        }
-
-        async function savePermissions() {
-            const btn = document.getElementById('btnSave');
-            const n = getChangesCount();
-            if (n === 0) return;
-
+        window.saveModalChanges = async function() {
+            if (!activeRole) return;
+            const btn = document.getElementById('btnSaveModal');
             btn.disabled = true;
             const orig = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الحفظ...';
 
-            // Collect changes
             const updates = [];
-            for (const k in currentPerms) {
-                if (originalPerms[k] !== currentPerms[k]) {
-                    const [role, appId] = k.split('::');
-                    updates.push({
-                        role,
-                        app_id: appId,
-                        allowed: currentPerms[k],
-                        updated_at: new Date().toISOString(),
-                    });
+            APPS.forEach(app => {
+                const k = key(activeRole, app.id);
+                const oldVal = !!permissions[k];
+                const newVal = modalPerms[app.id];
+                if (oldVal !== newVal) {
+                    updates.push({ role: activeRole, app_id: app.id, allowed: newVal, updated_at: new Date().toISOString() });
                 }
-            }
+            });
 
-            // Save each
-            const { error } = await supabase
-                .from('role_permissions')
-                .upsert(updates, { onConflict: 'role,app_id' });
+            if (updates.length === 0) { btn.disabled = false; btn.innerHTML = orig; closeModal(); return; }
 
+            const { error } = await supabase.from('role_permissions').upsert(updates, { onConflict: 'role,app_id' });
             btn.disabled = false;
             btn.innerHTML = orig;
 
             if (error) {
-                console.error('Save error:', error);
                 showNotification('فشل الحفظ: ' + error.message, 'error');
                 return;
             }
 
-            // Update originals
-            for (const k in currentPerms) {
-                originalPerms[k] = currentPerms[k];
-            }
+            updates.forEach(u => { permissions[key(u.role, u.app_id)] = u.allowed; });
+            renderCards();
+            closeModal();
+            showNotification('تم حفظ صلاحيات الدور بنجاح', 'success');
+        };
 
-            // Clear "changed" styling
-            document.querySelectorAll('.perm-checkbox.changed').forEach(el => {
-                el.classList.remove('changed');
-            });
-            updateSaveBar();
-            showNotification(`تم حفظ ${n} تغيير بنجاح`, 'success');
-        }
-
-        // ============================================
-        // INIT
-        // ============================================
         (async () => {
-            // 1. Auth guard
-            const auth = await initAuthGuard({
-                allowedRoles: ['super_admin', 'admin'],
-                redirectIfDenied: '../dashboard.html',
-            });
-            const session = auth.session;
+            const auth = await initAuthGuard({ allowedRoles: ['super_admin', 'admin'], redirectIfDenied: '../dashboard.html' });
             mountUserChip(auth);
-
             currentUserRole = auth.role;
             isSuperAdmin = auth.role === 'super_admin';
-            // 3. Load perms
-            const ok = await loadPermissions();
-            if (!ok) {
+
+            const { data, error } = await supabase.from('role_permissions').select('role, app_id, allowed');
+            if (error) {
+                showNotification('فشل تحميل الصلاحيات: ' + error.message, 'error');
                 document.getElementById('loadingScreen').classList.add('hide');
                 return;
             }
 
-            // 4. Render
-            renderMatrix();
-            updateSaveBar();
-
-            // 5. Wire buttons
-            document.getElementById('btnSave').addEventListener('click', savePermissions);
-
-            document.getElementById('btnReset').addEventListener('click', () => {
-                if (getChangesCount() === 0) return;
-                if (!confirm('هل تريد إلغاء جميع التغييرات غير المحفوظة؟')) return;
-                currentPerms = { ...originalPerms };
-                renderMatrix();
-                updateSaveBar();
-                showNotification('تم استعادة الحالة الأصلية', 'warning');
-            });
-
-            // 6. Hide loading
+            data.forEach(row => { permissions[key(row.role, row.app_id)] = row.allowed; });
+            renderCards();
             document.getElementById('loadingScreen').classList.add('hide');
-
-            // 7. Warn on navigate away with unsaved changes
-            window.addEventListener('beforeunload', (e) => {
-                if (getChangesCount() > 0) {
-                    e.preventDefault();
-                    e.returnValue = '';
-                }
-            });
         })();
     </script>
 

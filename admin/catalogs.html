@@ -883,6 +883,13 @@
                 <div class="f-group">
                     <label class="f-label">الترتيب</label>
                     <input type="number" class="f-input" id="app-order_index" value="0" />
+                    <div class="f-group">
+                        <label class="ms-item" style="max-width:fit-content; margin-top: 10px;">
+                            <input type="checkbox" id="app-show_in_bar" checked />
+                            <span>إظهار في شريط التطبيقات العلوي (التاب بار)</span>
+                        </label>
+                    </div>
+
                 </div>
             </div>
             <div class="modal-foot">
@@ -1212,6 +1219,8 @@
             document.getElementById('app-description').value = app?.description || '';
             document.getElementById('app-icon').value = app?.icon || 'fa-cube';
             document.getElementById('app-order_index').value = app?.order_index ?? 0;
+            document.getElementById('app-show_in_bar').checked = app ? (app.show_in_bar !== false) : true;
+
 
             document.getElementById('appEditModal').classList.add('open');
         };
@@ -1228,6 +1237,8 @@
                 const description = document.getElementById('app-description').value.trim();
                 const icon = document.getElementById('app-icon').value.trim() || 'fa-cube';
                 const order_index = parseInt(document.getElementById('app-order_index').value) || 0;
+                const show_in_bar = document.getElementById('app-show_in_bar').checked;
+
 
                 if (!id || !name) {
                     showNotification('ID والاسم مطلوبان', 'warning');
@@ -1243,7 +1254,7 @@
                     return;
                 }
 
-                const payload = { id, name, description: description || null, icon, order_index };
+                const payload = { id, name, description: description || null, icon, order_index, show_in_bar };
 
                 let error;
                 if (editingAppId) {
@@ -1464,7 +1475,7 @@
             const bar = document.getElementById('appsBar');
             if (!bar) return;
 
-            const appTabs = APPS.filter(a => a.is_active).map(a => `
+            const appTabs = APPS.filter(a => a.is_active && a.show_in_bar !== false).map(a => `
                 <div class="app-tab ${currentAppId === a.id ? 'active' : ''}" onclick="switchApp('${a.id}')">
                     <i class="fa-solid ${a.icon || 'fa-cube'}"></i>
                     <span>${escapeHtml(a.name)}</span>
