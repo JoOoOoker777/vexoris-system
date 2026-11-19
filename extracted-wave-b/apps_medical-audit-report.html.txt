@@ -1,0 +1,46 @@
+═══ FILE: apps/medical-audit-report.html (1045 lines) ═══
+
+─── [PDF EXPORT sections: jsPDF / autoTable / .save() ───
+
+─── [EXPORT Excel sections: XLSX / .writeFile ───
+
+─── [Compare section: runCompare / renderCompare / get_quality_compare ───
+
+─── [TABS BAR in analytics/workflow ───
+
+─── [CARD COMPACT / content-narrow in medical-audit ───
+
+─── [REPORT sections in medical-audit-report ───
+125:        .report-glass {
+136:        .cover-page {
+182:        .summary-circles {
+185:        .summary-circle {
+190:        .summary-circle .num { font-size: 2.2rem; font-weight: 900; line-height: 1; margin-bottom: 4px; }
+191:        .summary-circle .lbl { font-size: 0.8rem; font-weight: 800; color: var(--text-secondary); }
+208:        .report-section { margin-bottom: 30px; page-break-inside: avoid; }
+209:        .report-section-title {
+214:        .report-section-title h2 { font-size: 1.2rem; font-weight: 900; }
+215:        .report-section-title.missing h2 { color: var(--danger); }
+216:        .report-section-title.incomplete h2 { color: var(--warning); }
+217:        .report-section-title.perfect h2 { color: var(--success); }
+280:        @media print {
+291:            .cover-page { border-bottom: none; padding-bottom: 0; }
+292:            .report-section { page-break-before: always; }
+294:            .staff-card, .form-row, .summary-circle, .top-errors-box {
+370:        .report-section-title h2 { font-size: clamp(17px, calc(19px * var(--font-scale)), 22px); }
+389:        .section-thead .report-section-title { margin-bottom: 0 !important; }
+414:        @media print {
+446:            .report-section { page-break-before: always; }
+448:            .cover-page { page-break-after: auto !important; }
+537:        <div id="report-print-area" class="report-glass">
+539:            <div class="cover-page">
+597:                <div class="summary-circles">
+598:                    <div class="summary-circle circle-missing">
+602:                    <div class="summary-circle circle-incomplete">
+606:                    <div class="summary-circle circle-perfect">
+619:            <div class="report-section section-missing" id="section_missing" style="display:none;">
+623:                            <div class="report-section-title missing">
+636:            <div class="report-section section-incomplete" id="section_incomplete" style="display:none;">
+
+─── [HEAD: mobile-app-shell refs ───
+

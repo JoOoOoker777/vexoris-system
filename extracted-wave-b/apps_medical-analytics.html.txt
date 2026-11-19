@@ -1,0 +1,51 @@
+═══ FILE: apps/medical-analytics.html (1233 lines) ═══
+
+─── [PDF EXPORT sections: jsPDF / autoTable / .save() ───
+
+─── [EXPORT Excel sections: XLSX / .writeFile ───
+
+─── [Compare section: runCompare / renderCompare / get_quality_compare ───
+
+─── [TABS BAR in analytics/workflow ───
+450-  <!-- STICKY TABS -->
+451:  <div class="tabs-bar" id="tabsBar">
+452-    <button class="side-btn active" data-tab="overview" onclick="switchTab('overview')"><i class="fa-solid fa-gauge-high"></i> النظرة العامة</button>
+453-    <button class="side-btn" data-tab="trend" onclick="switchTab('trend')"><i class="fa-solid fa-chart-line"></i> الاتجاه الشهري</button>
+454-    <button class="side-btn" data-tab="departments" onclick="switchTab('departments')"><i class="fa-solid fa-building-user"></i> الأقسام</button>
+455-    <button class="side-btn" data-tab="doctors" onclick="switchTab('doctors')"><i class="fa-solid fa-user-doctor"></i> الأطباء</button>
+456-    <button class="side-btn" data-tab="nurses" onclick="switchTab('nurses')"><i class="fa-solid fa-user-nurse"></i> التمريض</button>
+457-    <button class="side-btn" data-tab="clerks" onclick="switchTab('clerks')"><i class="fa-solid fa-keyboard"></i> الإداريين</button>
+458-    <button class="side-btn" data-tab="forms" onclick="switchTab('forms')"><i class="fa-solid fa-file-signature"></i> النماذج</button>
+459-  </div>
+460-
+461-  <!-- OVERVIEW -->
+462-  <section class="tab-pane active" id="tab-overview">
+463-    <div class="page-title"><i class="fa-solid fa-gauge-high text-accent"></i> النظرة العامة</div>
+464-    <p class="page-sub">لوحة القيادة الشاملة لأداء النظام</p>
+465-
+466-    <div class="stat-grid">
+467-      <div class="stat-card" style="--stat-color:#0ea5e9"><div class="stat-label"><i class="fa-solid fa-clipboard-check"></i> إجمالي التقييمات</div><div class="stat-value" id="ovUnits">—</div></div>
+468-      <div class="stat-card" style="--stat-color:#6366f1"><div class="stat-label"><i class="fa-solid fa-folder-medical"></i> إجمالي الملفات</div><div class="stat-value" id="ovReviews">—</div></div>
+469-      <div class="stat-card" style="--stat-color:#8b5cf6"><div class="stat-label"><i class="fa-solid fa-percent"></i> المطابقة العامة</div><div class="stat-value" id="ovPercent">—</div></div>
+470-      <div class="stat-card" style="--stat-color:#10b981"><div class="stat-label"><i class="fa-solid fa-user-doctor"></i> أطباء</div><div class="stat-value" id="ovDoctors">—</div></div>
+471-      <div class="stat-card" style="--stat-color:#f59e0b"><div class="stat-label"><i class="fa-solid fa-user-nurse"></i> تمريض</div><div class="stat-value" id="ovNurses">—</div></div>
+472-      <div class="stat-card" style="--stat-color:#ef4444"><div class="stat-label"><i class="fa-solid fa-file-signature"></i> نماذج</div><div class="stat-value" id="ovForms">—</div></div>
+473-    </div>
+474-
+475-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;margin-bottom:22px">
+476-      <div class="chart-box"><div class="chart-title"><i class="fa-solid fa-chart-line text-accent"></i> الاتجاه الشهري</div><div id="chartOvTrend" style="min-height:240px"></div></div>
+
+─── [CARD COMPACT / content-narrow in medical-audit ───
+
+─── [REPORT sections in medical-audit-report ───
+
+─── [HEAD: mobile-app-shell refs ───
+365-<script src="../loader-buttons.js" defer></script>
+366:<link rel="stylesheet" href="../mobile-app-shell.css">
+367:<script src="../mobile-app-shell.js" defer></script>
+368-
+369-</head>
+370-<body>
+371-
+372-<div class="loading-screen" id="loadingScreen">
+

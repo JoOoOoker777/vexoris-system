@@ -1,0 +1,24 @@
+═══ FILE: admin/audit-log.html (1296 lines) ═══
+
+─── [PDF EXPORT sections: jsPDF / autoTable / .save() ───
+
+─── [EXPORT Excel sections: XLSX / .writeFile ───
+
+─── [Compare section: runCompare / renderCompare / get_quality_compare ───
+
+─── [TABS BAR in analytics/workflow ───
+
+─── [CARD COMPACT / content-narrow in medical-audit ───
+
+─── [REPORT sections in medical-audit-report ───
+
+─── [HEAD: mobile-app-shell refs ───
+490-    <script src="../loader-buttons.js" defer></script>
+491:    <link rel="stylesheet" href="../mobile-app-shell.css" />
+492:    <script src="../mobile-app-shell.js" defer></script>
+493-</head>
+494-<body>
+495-
+496-    <div class="loading-screen" id="loadingScreen">
+497-        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4" style="color: var(--accent);"></i>
+

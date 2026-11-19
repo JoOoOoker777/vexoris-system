@@ -773,6 +773,13 @@
         import { logAudit, AUDIT } from '../audit-log.js';
         import { initAuthGuard } from '../session-manager.js';
         import { ERROR_TRANSLATIONS } from './js/medical-audit-config.js';
+        (async () => {
+            try {
+                const { data: dbLabels } = await supabase.rpc('get_all_issue_labels');
+                if (dbLabels) Object.assign(ERROR_TRANSLATIONS, dbLabels);
+            } catch (e) { console.warn('Dynamic labels failed:', e); }
+        })();
+
         let showErrorsOnly = false;
         let allStaffScores = {}; // لحساب نسبة كل طبيب
 

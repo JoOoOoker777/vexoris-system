@@ -1,0 +1,37 @@
+═══ FILE: apps/medical-audit.html (2420 lines) ═══
+
+─── [PDF EXPORT sections: jsPDF / autoTable / .save() ───
+
+─── [EXPORT Excel sections: XLSX / .writeFile ───
+
+─── [Compare section: runCompare / renderCompare / get_quality_compare ───
+
+─── [TABS BAR in analytics/workflow ───
+
+─── [CARD COMPACT / content-narrow in medical-audit ───
+107:        .content-narrow { max-width: 80%; margin-left: auto; margin-right: auto; }
+108:        @media (max-width: 1200px) { .content-narrow { max-width: 95%; } }
+109:        @media (max-width: 768px)  { .content-narrow { max-width: 100%; } }
+265:        .floating-save {
+278:        .floating-save::before {
+284:        .floating-save:hover::before { transform: translateX(100%); }
+285:        .floating-save:hover {
+289:        .floating-save i {
+293:        .floating-save span {
+299:        html:not(.dark) .floating-save {
+304:        html:not(.dark) .floating-save:hover {
+307:        @media (max-width: 767px) { .floating-save { display: none; } }
+338:        .question-card {
+346:        .question-card.visible { display: block; }
+347:        .question-card:hover { border-color: rgba(14, 165, 233, 0.25); border-top-color: var(--accent); }
+535:        .cards-compact {
+542:        .cards-compact .form-card {
+546:        .cards-compact .form-card-header { padding: 8px 14px; gap: 6px; }
+547:        .cards-compact .form-card-header h2 { font-size: 0.66rem; }
+548:        .cards-compact .form-card-icon {
+
+─── [REPORT sections in medical-audit-report ───
+531:        @media print { .no-print { display: none !important; } }
+
+─── [HEAD: mobile-app-shell refs ───
+

@@ -2486,6 +2486,14 @@
         // ============================================
         (async () => {
             try {
+                const { data: labels } = await supabase.rpc('get_all_issue_labels');
+                if (labels) {
+                    ERROR_LABELS = { ...ERROR_LABELS, ...labels };
+                }
+            } catch (e) {
+                console.warn('Could not load error labels dynamically:', e);
+            }
+            try {
                 const auth = await initAuthGuard({
                     allowedRoles: ['super_admin', 'admin', 'manager', 'auditor', 'senior', 'doctor'],
                     redirectIfDenied: '../dashboard.html',

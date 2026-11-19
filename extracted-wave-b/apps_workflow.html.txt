@@ -1,0 +1,143 @@
+═══ FILE: apps/workflow.html (935 lines) ═══
+
+─── [PDF EXPORT sections: jsPDF / autoTable / .save() ───
+307:        <button onclick="exportReviewersPDF()" class="btn-ghost" style="color:#ef4444;border-color:#ef4444"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+909:window.exportReviewersPDF = function(){
+911:  const {jsPDF} = window.jspdf;
+912:  const doc = new jsPDF('landscape');
+915:  doc.autoTable({
+921:  doc.save(`Quality_Report_${new Date().toISOString().slice(0,10)}.pdf`);
+
+─── [EXPORT Excel sections: XLSX / .writeFile ───
+306:        <button onclick="exportReviewersExcel()" class="btn-ghost" style="color:#10b981;border-color:#10b981"><i class="fa-solid fa-file-excel"></i> Excel</button>
+895:window.exportReviewersExcel = function(){
+897:  const ws = XLSX.utils.json_to_sheet(state.cache.reviewers.map(r=>({
+904:  const wb = XLSX.utils.book_new();
+905:  XLSX.utils.book_append_sheet(wb, ws, 'Quality');
+906:  XLSX.writeFile(wb, `Quality_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
+
+─── [Compare section: runCompare / renderCompare / get_quality_compare ───
+356-        <div><label class="form-label">المراجع الأول</label><select id="cmpR1" class="form-input"></select></div>
+357-        <div><label class="form-label">المراجع الثاني</label><select id="cmpR2" class="form-input"></select></div>
+358:        <button onclick="runCompare()" class="btn-primary"><i class="fa-solid fa-play"></i> مقارنة</button>
+359-      </div>
+360-      <div id="cmpResult"></div>
+361-    </div>
+362-  </div>
+363-</div>
+364-
+365-<!-- Daily Modal -->
+366-<div class="modal" id="dailyModal">
+367-  <div class="modal-card">
+368-    <div class="modal-head">
+369-      <div>
+370-        <div style="font-size:1.1rem;font-weight:900" id="dmTitle">الإحصائيات اليومية</div>
+371-        <div style="font-size:.72rem;color:var(--text-muted);font-weight:700;margin-top:2px" id="dmSubtitle"></div>
+372-      </div>
+373-      <button onclick="closeDailyModal()" class="icon-btn"><i class="fa-solid fa-times"></i></button>
+374-    </div>
+375-    <div class="modal-body">
+376-      <div id="dailyChart" style="min-height:350px"></div>
+377-    </div>
+378-  </div>
+379-</div>
+380-
+381-<script src="../notify.js"></script>
+382-<script type="module" src="../session-manager.js"></script>
+383-<script type="module">
+384-import { supabase } from '../supabase-client.js';
+385-import { initAuthGuard, mountUserChip } from '../session-manager.js';
+386-
+387-// ============================================================
+388-// CONSTANTS
+--
+798-window.closeCompareModal = function(){ $('compareModal').classList.remove('open'); };
+799-
+800:window.runCompare = async function(){
+801-  const r1 = $('cmpR1').value, r2 = $('cmpR2').value;
+802-  if(!r1 || !r2 || r1 === r2){ if(window.showNotification) showNotification('اختر مراجعين مختلفين', 'error'); return; }
+803-  $('cmpResult').innerHTML = '<div style="text-align:center;padding:30px"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent)"></i></div>';
+804-  try{
+805-    const f = state.filter;
+806:    const {data} = await supabase.rpc('get_quality_compare',{
+807-      p_reviewer1: r1, p_reviewer2: r2,
+808-      p_start:f.start, p_end:f.end, p_date_type:f.dateType
+809-    });
+810:    renderCompare(data, r1, r2);
+811-  }catch(err){
+812-    $('cmpResult').innerHTML = `<div style="text-align:center;color:#ef4444">${escapeHtml(err.message)}</div>`;
+813-  }
+814-};
+815-
+816:function renderCompare(data, r1, r2){
+817-  const a = data.reviewer1, b = data.reviewer2;
+818-  let html = `
+819-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+820-      <div style="padding:16px;background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.2);border-radius:12px;text-align:center">
+821-        <div style="font-weight:900;font-size:.95rem;color:#0ea5e9">${escapeHtml(a.name)}</div>
+822-        <div style="margin-top:8px;font-size:1.5rem;font-family:'Space Grotesk';font-weight:700;color:#0ea5e9">${num(a.total_files)}</div>
+823-        <div style="font-size:.7rem;color:var(--text-muted);font-weight:700">ملفات · جودة ${a.avg_quality}%</div>
+824-      </div>
+825-      <div style="padding:16px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);border-radius:12px;text-align:center">
+826-        <div style="font-weight:900;font-size:.95rem;color:#8b5cf6">${escapeHtml(b.name)}</div>
+827-        <div style="margin-top:8px;font-size:1.5rem;font-family:'Space Grotesk';font-weight:700;color:#8b5cf6">${num(b.total_files)}</div>
+828-        <div style="font-size:.7rem;color:var(--text-muted);font-weight:700">ملفات · جودة ${b.avg_quality}%</div>
+829-      </div>
+830-    </div>
+831-    <div id="cmpChart" style="min-height:280px"></div>
+832-  `;
+833-  $('cmpResult').innerHTML = html;
+834-
+835-  if(data.daily && data.daily.length){
+836-    if(state.charts.cmp) try{state.charts.cmp.destroy()}catch(e){}
+837-    state.charts.cmp = new ApexCharts($('cmpChart'),{
+838-      chart:{type:'line',height:280,toolbar:{show:false},background:'transparent',fontFamily:'Tajawal'},
+839-      series:[
+840-        {name:r1,data:data.daily.map(d=>d.r1)},
+841-        {name:r2,data:data.daily.map(d=>d.r2)}
+842-      ],
+843-      colors:['#0ea5e9','#8b5cf6'],
+
+─── [TABS BAR in analytics/workflow ───
+239-  <!-- TABS -->
+240:  <div class="tabs-bar">
+241-    <button class="side-btn active" data-tab="overview" onclick="switchTab('overview')"><i class="fa-solid fa-gauge-high"></i> النظرة العامة</button>
+242-    <button class="side-btn" data-tab="reviewers" onclick="switchTab('reviewers')"><i class="fa-solid fa-users"></i> المراجعون</button>
+243-  </div>
+244-
+245-  <!-- OVERVIEW -->
+246-  <section class="tab-pane active" id="tab-overview">
+247-    <div class="page-title"><i class="fa-solid fa-award text-warning"></i> نظرة عامة على الجودة</div>
+248-    <p class="page-sub">أداء المراجعين وجودة المراجعة في الفترة المحددة</p>
+249-
+250-    <div class="stat-grid">
+251-      <div class="stat-card" style="--stat-color:#0ea5e9"><div class="stat-label"><i class="fa-solid fa-users"></i> إجمالي المراجعين</div><div class="stat-value" id="kpiReviewers">—</div></div>
+252-      <div class="stat-card" style="--stat-color:#6366f1"><div class="stat-label"><i class="fa-solid fa-folder"></i> إجمالي الملفات</div><div class="stat-value" id="kpiFiles">—</div></div>
+253-      <div class="stat-card" style="--stat-color:#8b5cf6"><div class="stat-label"><i class="fa-solid fa-calendar"></i> أيام العمل</div><div class="stat-value" id="kpiDays">—</div></div>
+254-      <div class="stat-card" style="--stat-color:#10b981"><div class="stat-label"><i class="fa-solid fa-chart-line"></i> متوسط الإنجاز</div><div class="stat-value" id="kpiAvgPer">—</div></div>
+255-      <div class="stat-card" style="--stat-color:#f59e0b"><div class="stat-label"><i class="fa-solid fa-star"></i> متوسط الجودة</div><div class="stat-value" id="kpiQuality">—</div></div>
+256-      <div class="stat-card" style="--stat-color:#ef4444"><div class="stat-label"><i class="fa-solid fa-trophy"></i> الأعلى إنتاجية</div><div class="stat-value" id="kpiTop" style="font-size:1.1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">—</div></div>
+257-    </div>
+258-
+259-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;margin-bottom:22px">
+260-      <div class="chart-box"><div class="chart-title"><i class="fa-solid fa-chart-area text-accent"></i> الاتجاه الزمني للإنتاجية</div><div id="chartTrend" style="min-height:240px"></div></div>
+261-      <div class="chart-box"><div class="chart-title"><i class="fa-solid fa-chart-line text-accent-3"></i> اتجاه جودة المراجعة</div><div id="chartQuality" style="min-height:240px"></div></div>
+262-      <div class="chart-box"><div class="chart-title"><i class="fa-solid fa-pie-chart text-accent-2"></i> توزيع التخصصات</div><div id="chartSpecialties" style="min-height:240px"></div></div>
+263-    </div>
+264-
+265-    <div style="display:grid;grid-template-columns:1fr 2fr;gap:18px">
+
+─── [CARD COMPACT / content-narrow in medical-audit ───
+
+─── [REPORT sections in medical-audit-report ───
+
+─── [HEAD: mobile-app-shell refs ───
+154-<script src="../loader-buttons.js" defer></script>
+155:<link rel="stylesheet" href="../mobile-app-shell.css">
+156:<script src="../mobile-app-shell.js" defer></script>
+157-
+158-</head>
+159-<body>
+160-
+161-<div class="loading-screen" id="loadingScreen">
+

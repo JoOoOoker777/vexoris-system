@@ -419,7 +419,13 @@ const ERROR_LABELS = {
   'consultationStatus':'الموقف من طلب الاستشارة', 'consentStatus':'الموقف من كتابة الموافقة',
   'خطأ عام':'خطأ عام'
 };
-
+// 🔥 سحب الأخطاء الجديدة من الداتابيز
+(async () => {
+    try {
+        const { data: dbLabels } = await supabase.rpc('get_all_issue_labels');
+        if (dbLabels) Object.assign(ERROR_LABELS, dbLabels);
+    } catch (e) { console.warn('Dynamic labels failed:', e); }
+})();
 // ============================================================
 // STATE
 // ============================================================
