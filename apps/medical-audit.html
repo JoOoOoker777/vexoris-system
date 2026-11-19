@@ -2495,7 +2495,7 @@
             }
             try {
                 const auth = await initAuthGuard({
-                    allowedRoles: ['super_admin', 'admin', 'manager', 'auditor', 'senior', 'doctor'],
+                    allowedRoles: ['super_admin', 'admin', 'manager', 'auditor', 'senior', 'doctor', 'reviewer_doctor'],
                     redirectIfDenied: '../dashboard.html',
                 });
                 currentUser = auth.session.user;

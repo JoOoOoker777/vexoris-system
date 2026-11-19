@@ -16,6 +16,7 @@ export const ROLE_META = {
     auditor:     { name: 'مراجع جودة', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', soft: 'rgba(245,158,11,0.12)', icon: 'fa-clipboard-check' },
     senior:      { name: 'رئيس قسم', color: '#10b981', bg: 'rgba(16,185,129,0.15)', soft: 'rgba(16,185,129,0.12)', icon: 'fa-star' },
     doctor:      { name: 'طبيب', color: '#14b8a6', bg: 'rgba(20,184,166,0.15)', soft: 'rgba(20,184,166,0.12)', icon: 'fa-stethoscope' },
+  reviewer_doctor: { name: 'طبيب مراجع', color: '#0d9488', bg: 'rgba(13,148,136,0.15)', soft: 'rgba(13,148,136,0.12)', icon: 'fa-user-md' },
     viewer:      { name: 'مراجع', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)', soft: 'rgba(148,163,184,0.12)', icon: 'fa-eye' },
 };
 
