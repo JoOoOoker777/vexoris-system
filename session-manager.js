@@ -256,6 +256,13 @@ function applyZoom(level) {
     if (window.innerWidth < 768) return level;
     const clamped = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, level));
     document.body.style.zoom = clamped / 100;
+    
+    // ✅ تثبيت حجم الهيدر عشان ميتأثرش بالزوم
+    const navShell = document.querySelector('.nav-shell');
+    if (navShell) {
+        navShell.style.zoom = 100 / clamped;
+    }
+
     sessionStorage.setItem('vexoris_zoom', clamped);
     return clamped;
 }
