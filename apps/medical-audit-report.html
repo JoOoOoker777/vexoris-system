@@ -962,6 +962,7 @@
             }
 
             // --- جمع البيانات ---
+            // --- جمع البيانات ---
             const savedWard = safeParse(data.ward_questions);
             savedWard.forEach(w => {
                 const _wAll = [];
@@ -975,9 +976,26 @@
                 _pushW(w.notes2);
                 _pushW(w.noteS2);
                 let noteStr = _wAll.filter(Boolean).join(' / ');
-                ...
-            });
 
+                // الحصول على القسم والدور لمدخل البيانات
+                const wardInfo = getDoctorDepartmentAndRole(
+                    { person: w.clerk, role: 'Ward Clerk' }, 
+                    { text: w.qText || 'نظافة الملف' }, 
+                    data.specialties, 
+                    doctorsMapping
+                );
+                
+                // إضافة التقييم للتقرير
+                addRecord(
+                    wardInfo.deptName, 
+                    wardInfo.roleType, 
+                    w.clerk || 'غير محدد', 
+                    w.qText || 'مدخل بيانات', 
+                    w.score, 
+                    [], 
+                    noteStr
+                );
+            });
             const savedAudit = safeParse(data.audit_questions);
             savedAudit.forEach(card => {
                 const formName = (card.text || card.question || '').trim();
