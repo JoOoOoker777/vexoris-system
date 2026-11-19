@@ -759,86 +759,84 @@
                 max-height: 92vh !important;
             }
         }
-                /* ============================================
-           التعديلات الشاملة: خط Cairo + زيادة 2px + Bold + مساحات
+               /* ============================================
+           تعديلات محددة: Cairo + +1px + Bold + مساحات
+           تُطبق فقط على الكروت، لا تشمل الهيدر
            ============================================ */
 
-        /* 1. تغيير الخط وتكبيره */
-        html {
-            font-size: 18px !important; /* يزيد حجم كل الـ rem تلقائياً بمقدار 2px */
-        }
-        body, button, input, select, textarea, .f-label, .pill, .cb-item, .mini-btn {
+        /* 1. خط Cairo للعناصر المحددة فقط */
+        .form-card, .question-card, .assess-unit, .search-bar, .issues-container,
+        .form-card input, .form-card select, .form-card textarea, .form-card label, .form-card button,
+        .question-card input, .question-card select, .question-card textarea, .question-card label, .question-card button,
+        .assess-unit input, .assess-unit select, .assess-unit textarea, .assess-unit label, .assess-unit button,
+        .search-bar input, .search-bar select, .search-bar button,
+        .issues-container .issue-category-title {
             font-family: 'Cairo', 'Tajawal', sans-serif !important;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 2. زيادة حجم الخط 2px صريحة للعناصر الأساسية */
-        .hero-title { font-size: calc(clamp(1.2rem, 2.4vw, 1.6rem) + 2px) !important; }
-        .hero-desc { font-size: calc(0.78rem + 2px) !important; }
-        .form-card-header h2 { font-size: calc(0.88rem + 2px) !important; }
-        .f-label { font-size: calc(0.64rem + 2px) !important; }
-        .f-input, .f-select, .f-textarea { font-size: calc(0.8rem + 2px) !important; }
-        .pill { font-size: calc(0.72rem + 2px) !important; }
-        .cb-item { font-size: calc(0.72rem + 2px) !important; }
-        .question-title { font-size: calc(0.85rem + 2px) !important; }
-        .issue-category-title { font-size: calc(0.78rem + 2px) !important; }
-        .mini-btn { font-size: calc(0.65rem + 2px) !important; }
-        .btn { font-size: calc(0.8rem + 2px) !important; }
+        /* 2. زيادة الخط 1px فقط */
+        .form-card-header h2 { font-size: calc(0.88rem + 1px) !important; }
+        .f-label { font-size: calc(0.64rem + 1px) !important; }
+        .f-input, .f-select, .f-textarea { font-size: calc(0.8rem + 1px) !important; }
+        .pill { font-size: calc(0.72rem + 1px) !important; }
+        .cb-item { font-size: calc(0.72rem + 1px) !important; }
+        .question-title { font-size: calc(0.85rem + 1px) !important; }
+        .issue-category-title { font-size: calc(0.78rem + 1px) !important; }
+        .mini-btn { font-size: calc(0.65rem + 1px) !important; }
+        .assess-unit-num { font-size: calc(0.66rem + 1px) !important; }
+        .btn { font-size: calc(0.8rem + 1px) !important; }
 
-        /* 3. جعل الخطوط Bold وواضحة */
-        body, p, span, div, h1, h2, h3, h4, h5, h6, label, input, select, textarea, button, a {
-            font-weight: 700 !important;
-        }
-        h1, h2, h3, .hero-title, .question-title, .issue-category-title, .f-label {
-            font-weight: 900 !important;
-        }
+        /* 3. Bold */
+        .f-input, .f-select, .f-textarea, .cb-item, .pill, .mini-btn, .btn { font-weight: 700 !important; }
+        .f-label, .form-card-header h2, .question-title, .issue-category-title { font-weight: 900 !important; }
 
-        /* 4. زيادة المساحات (Margins, Paddings, Gaps) بمقدار 2px */
-        .form-card { margin-top: 18px !important; }
-        .form-card-header { padding: 14px 22px !important; gap: 12px !important; }
-        .form-card-body { padding: 20px 22px !important; }
-        
-        .question-card { margin-bottom: 16px !important; }
-        .question-header { padding: 14px 20px !important; gap: 12px !important; }
-        .question-body { padding: 18px 20px !important; }
-        
-        .assess-unit { padding: 18px !important; margin-bottom: 14px !important; }
-        .assess-unit-head { padding-bottom: 12px !important; margin-bottom: 16px !important; }
-        .assess-row { gap: 12px !important; margin-bottom: 14px !important; }
-        
-        .f-input, .f-select, .f-textarea { padding: 11px 14px !important; }
-        
-        .pill { padding: 9px 14px !important; gap: 8px !important; }
-        .pill-group { gap: 8px !important; }
-        
-        .cb-grid { padding: 14px !important; gap: 10px !important; }
-        .cb-item { padding: 7px 10px !important; gap: 9px !important; }
-        
-        .serv-grid { padding: 16px !important; gap: 10px !important; }
-        
-        .search-bar { padding: 16px !important; gap: 12px !important; }
-        
-        .btn { padding: 11px 22px !important; gap: 9px !important; }
-        .mini-btn { padding: 6px 12px !important; gap: 6px !important; }
-        
-        .issues-container { padding: 14px 16px !important; gap: 4px !important; }
-        .divider-line { margin: 16px 0 !important; }
+        /* 4. المساحات +1px */
+        .form-card { margin-top: 17px !important; }
+        .form-card-header { padding: 13px 21px !important; gap: 11px !important; }
+        .form-card-body { padding: 19px 21px !important; }
 
-        /* 5. تعديل المساحات في وضع الـ Compact Mode عشان ميبوظش */
-        .cards-compact .form-card-header { padding: 10px 16px !important; gap: 8px !important; }
-        .cards-compact .form-card-body { padding: 14px 16px !important; }
-        .cards-compact .question-header { padding: 9px 14px !important; gap: 8px !important; }
-        .cards-compact .question-body { padding: 12px 14px !important; }
-        .cards-compact .assess-unit { padding: 11px !important; margin-bottom: 8px !important; }
-        .cards-compact .assess-row { gap: 8px !important; margin-bottom: 8px !important; }
-        .cards-compact .f-input, .cards-compact .f-select, .cards-compact .f-textarea { padding: 7px 10px !important; }
-        .cards-compact .pill { padding: 6px 9px !important; gap: 5px !important; }
-        .cards-compact .cb-grid { padding: 9px !important; gap: 5px !important; }
-        .cards-compact .cb-item { padding: 4px 6px !important; gap: 5px !important; }
-        .cards-compact .serv-grid { padding: 10px !important; gap: 5px !important; }
-        .cards-compact .mini-btn { padding: 4px 8px !important; gap: 4px !important; }
-        .cards-compact .issues-container { padding: 8px 10px !important; gap: 3px !important; }
-        .cards-compact .divider-line { margin: 10px 0 !important; }
+        .question-card { margin-bottom: 15px !important; }
+        .question-header { padding: 13px 19px !important; gap: 11px !important; }
+        .question-body { padding: 17px 19px !important; }
+
+        .assess-unit { padding: 17px !important; margin-bottom: 13px !important; }
+        .assess-unit-head { padding-bottom: 11px !important; margin-bottom: 15px !important; }
+        .assess-row { gap: 11px !important; margin-bottom: 13px !important; }
+
+        .f-input, .f-select, .f-textarea { padding: 10px 13px !important; }
+
+        .pill { padding: 8px 13px !important; gap: 7px !important; }
+        .pill-group { gap: 7px !important; }
+
+        .cb-grid { padding: 13px !important; gap: 9px !important; }
+        .cb-item { padding: 6px 9px !important; gap: 8px !important; }
+
+        .serv-grid { padding: 15px !important; gap: 9px !important; }
+
+        .search-bar { padding: 15px !important; gap: 11px !important; }
+
+        .btn { padding: 10px 21px !important; gap: 8px !important; }
+        .mini-btn { padding: 5px 11px !important; gap: 5px !important; }
+
+        .issues-container { padding: 13px 15px !important; gap: 3px !important; }
+        .divider-line { margin: 15px 0 !important; }
+
+        /* 5. تعديل المساحات في وضع الـ Compact (بنفس النسبة) */
+        .cards-compact .form-card-header { padding: 9px 15px !important; gap: 7px !important; }
+        .cards-compact .form-card-body { padding: 13px 15px !important; }
+        .cards-compact .question-header { padding: 8px 13px !important; gap: 7px !important; }
+        .cards-compact .question-body { padding: 11px 13px !important; }
+        .cards-compact .assess-unit { padding: 10px !important; margin-bottom: 7px !important; }
+        .cards-compact .assess-row { gap: 7px !important; margin-bottom: 7px !important; }
+        .cards-compact .f-input, .cards-compact .f-select, .cards-compact .f-textarea { padding: 6px 9px !important; }
+        .cards-compact .pill { padding: 5px 8px !important; gap: 4px !important; }
+        .cards-compact .cb-grid { padding: 8px !important; gap: 4px !important; }
+        .cards-compact .cb-item { padding: 3px 5px !important; gap: 4px !important; }
+        .cards-compact .serv-grid { padding: 9px !important; gap: 4px !important; }
+        .cards-compact .mini-btn { padding: 3px 7px !important; gap: 3px !important; }
+        .cards-compact .issues-container { padding: 7px 9px !important; gap: 2px !important; }
+        .cards-compact .divider-line { margin: 9px 0 !important; }
     </style>
     <link rel="stylesheet" href="../theme-overrides.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
